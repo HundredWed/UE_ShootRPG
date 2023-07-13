@@ -21,6 +21,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetMover(class UMover* NewMover);
 
+	/*UPROPERTY(EditAnywhere)
+	class AActor* ConnectMesh;*/
+
 private:
 	UPROPERTY(EditAnyWhere)
 	FName ActorTag;

@@ -40,6 +40,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* EquipAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+		class UInputAction* JumppAction;
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -64,7 +67,7 @@ public:
 	bool PressKey(const FInputActionValue& Value);
 	void GetViewPointVector(FVector& Location, FRotator& Rotation);
 
-
+	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
 
 private:
 

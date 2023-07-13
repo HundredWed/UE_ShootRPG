@@ -1,5 +1,7 @@
 #include "Object/MyBoxComponent.h"
 #include "Object/Mover.h"
+#include "Engine/StaticMesh.h"
+
 
 UMyBoxComponent::UMyBoxComponent()
 {
@@ -9,6 +11,7 @@ UMyBoxComponent::UMyBoxComponent()
 void UMyBoxComponent::BeginPlay()
 {
     Super::BeginPlay();
+    //ConnectMesh->FindComponentByClass<UMover>();
 }
 
 void UMyBoxComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

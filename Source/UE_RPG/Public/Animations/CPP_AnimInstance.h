@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "CharacterStates.h"
 #include "CPP_AnimInstance.generated.h"
 
 /**
@@ -27,6 +28,17 @@ public:
 		float GroundSpeed;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		float Angle;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		FVector Velocity;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
 		bool isFalling;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Movement | CharacterState")
+		ECharacterStateTypes CharacterState;
+
+
+	double GetAngle();
 };
