@@ -14,7 +14,11 @@ public:
 	void Equip(USceneComponent* Inparent, const FName& SocketName);
 	void AttachFunc(USceneComponent* Inparent, const FName& SocketName);
 
+	UPROPERTY(VisibleAnywhere)
+		USkeletalMeshComponent* WeaponMesh;
+
 protected:
 	virtual void BeginPlay() override;
+
 
 };

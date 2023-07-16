@@ -22,8 +22,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* ItemMesh;
+	
 
 	virtual void BeginPlay() override;
 	EItemState ItemState = EItemState::EIS_UnEquipped;

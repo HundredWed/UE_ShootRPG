@@ -2,6 +2,8 @@
 
 AWeapon::AWeapon()
 {
+	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMeshComponent"));
+	RootComponent = WeaponMesh;
 }
 
 
@@ -18,5 +20,5 @@ void AWeapon::Equip(USceneComponent* Inparent, const FName& SocketName)
 void AWeapon::AttachFunc(USceneComponent* Inparent, const FName& SocketName)
 {
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-	ItemMesh->AttachToComponent(Inparent, TransformRules, SocketName);
+	WeaponMesh->AttachToComponent(Inparent, TransformRules, SocketName);
 }

@@ -19,7 +19,7 @@ public:
 		class UCameraComponent* FollowCamera;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-		class USpringArmComponent* SpringArm;
+		class UCharacterSpringArm* SpringArm;
 
 	//Input
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -43,6 +43,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* JumppAction;
 
+	UPROPERTY(EditAnywhere, Category = "EditValue")
+		float SpringArmSocketOffsetYValue = 100.f;
 
 protected:
 	virtual void BeginPlay() override;
@@ -64,10 +66,17 @@ public:
 
 	void Equip(const FInputActionValue& Value);
 
-	bool PressKey(const FInputActionValue& Value);
 	void GetViewPointVector(FVector& Location, FRotator& Rotation);
 
+	void SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement);
+
+	bool PressKey(const FInputActionValue& Value);
+	class AWeapon* isWeapon(AActor* hitobject) const;
+
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
+	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
+	FORCEINLINE void RemoveHitResultObject();
+
 
 private:
 
@@ -77,6 +86,9 @@ private:
 		float ShowItemDistance = 100.f;
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
 		float ShowItemRadius = 100.f;
+
+	AActor* HitResultObject;
+	FCollisionQueryParams Params;
 
 	class UGrabber* GraberComponent; 
 };

@@ -39,12 +39,12 @@ double UCPP_AnimInstance::GetAngle()
 	AController* Controller = TryGetPawnOwner()->GetController();
 	if (Controller == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Controller is null!!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Controller is null!!"));
 		return 0;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Controller is found!!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Controller is found!!"));
 	}
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0); 

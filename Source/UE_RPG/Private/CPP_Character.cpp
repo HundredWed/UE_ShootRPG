@@ -5,8 +5,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
-#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CharacterSpringArm.h"
 #include "Grabber.h"
+#include "Item/Weapon.h"
 
 
 ACPP_Character::ACPP_Character()
@@ -22,7 +23,7 @@ ACPP_Character::ACPP_Character()
 	GetCharacterMovement()->MaxAcceleration = 1500.f;*/
 
 
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	SpringArm = CreateDefaultSubobject<UCharacterSpringArm>(TEXT("CameraBoom"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->bUsePawnControlRotation = true;
 
@@ -53,6 +54,8 @@ void ACPP_Character::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Graver components found!!"));
 	}
+
+	Params.AddIgnoredActor(this);
 }
 
 void ACPP_Character::Tick(float DeltaTime)
@@ -88,15 +91,13 @@ void ACPP_Character::ObjectSearchTrace()
 
 	if (OnHit)
 	{
-		AActor* actor = HitResult.GetActor();
-		if (actor == nullptr)
-		{
-			UE_LOG(LogTemp, Display, TEXT("null!!"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Display, TEXT("%s"), *actor->GetActorNameOrLabel());
-		}
+		AActor* hitresult = HitResult.GetActor();
+		UE_LOG(LogTemp, Display, TEXT("%s"), *hitresult->GetActorNameOrLabel());
+		SetHitResultObject(hitresult);	
+	}
+	else
+	{
+		RemoveHitResultObject();
 	}
 }
 
@@ -108,9 +109,7 @@ bool ACPP_Character::SetShpereTrace(FHitResult& HitResult)
 	FVector End = Location + Rotation.Vector() * ShowItemDistance;
 
 	FCollisionShape Sphere = FCollisionShape::MakeSphere(ShowItemRadius);
-
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
+	
 
 	return GetWorld()->SweepSingleByChannel(
 		HitResult,
@@ -182,7 +181,25 @@ void ACPP_Character::GrabItem(const FInputActionValue& Value)
 
 void ACPP_Character::PickUp(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PickUp!!"));
+	if (HitResultObject == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("no item!!"));
+		return;
+	}
+	else
+	{
+		AWeapon* weapan = isWeapon(HitResultObject);
+		if (weapan)
+		{
+			weapan->Equip(GetMesh(),"weapon_socket_r");
+			Params.AddIgnoredActor(weapan);
+			return;
+		}
+
+		//else item
+		UE_LOG(LogTemp, Warning, TEXT("PickUp!!"));
+	}
+	
 }
 
 void ACPP_Character::Equip(const FInputActionValue& Value)
@@ -190,18 +207,15 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 	if (CharacterState == ECharacterStateTypes::UnEquiped)
 	{
 		CharacterState = ECharacterStateTypes::Equiped;
+		SmoothSpringArmOffset(SpringArmSocketOffsetYValue, false);
 		UE_LOG(LogTemp, Warning, TEXT("Equiped"));
 	}
 	else if(CharacterState == ECharacterStateTypes::Equiped)
 	{
 		CharacterState = ECharacterStateTypes::UnEquiped;
+		SmoothSpringArmOffset(0, true);
 		UE_LOG(LogTemp, Warning, TEXT("UnEquiped"));
 	}
-}
-
-bool ACPP_Character::PressKey(const FInputActionValue& Value)
-{
-	return Value.Get<bool>();
 }
 
 
@@ -213,4 +227,42 @@ void ACPP_Character::GetViewPointVector(FVector& Location, FRotator& Rotation)
 		return;
 	}
 	MyController->GetPlayerViewPoint(Location, Rotation);
+}
+
+void ACPP_Character::SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement)
+{
+	GetCharacterMovement()->bOrientRotationToMovement = bOrientRotationToMovement;
+	SpringArm->NewValue = NewYoffset;
+}
+
+
+bool ACPP_Character::PressKey(const FInputActionValue& Value)
+{
+	return Value.Get<bool>();
+}
+
+AWeapon* ACPP_Character::isWeapon(AActor* hitobject) const
+{
+	AWeapon* weapon = Cast<AWeapon>(hitobject);
+	if (weapon == nullptr)
+	{
+		return nullptr;
+	}
+
+	return weapon;
+}
+
+void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
+{
+	if (HitResultObject != nullptr)
+	{
+		return;
+	}
+
+	HitResultObject = hitresultobject;
+}
+
+void ACPP_Character::RemoveHitResultObject()
+{
+	HitResultObject = nullptr;
 }
