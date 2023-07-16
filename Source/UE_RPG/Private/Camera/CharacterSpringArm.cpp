@@ -7,6 +7,7 @@ UCharacterSpringArm::UCharacterSpringArm()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	NewValue = 0;
+	InterpSpeed = 15.f;
 }
 
 void UCharacterSpringArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -18,5 +19,5 @@ void UCharacterSpringArm::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UCharacterSpringArm::UpdateSpringArmOffset(float NewYoffset, float DeltaTime)
 {
-	SocketOffset.Y = FMath::FInterpTo(SocketOffset.Y, NewYoffset, DeltaTime, 15.0f);
+	SocketOffset.Y = FMath::FInterpTo(SocketOffset.Y, NewYoffset, DeltaTime, InterpSpeed);
 }

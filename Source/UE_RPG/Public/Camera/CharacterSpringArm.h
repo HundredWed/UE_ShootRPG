@@ -22,6 +22,9 @@ public:
 	UFUNCTION()
 	void UpdateSpringArmOffset(float NewYoffset, float DeltaTime);
 
+	UPROPERTY(EditAnywhere)
+		float InterpSpeed;
+
 	float NewValue;
 
 };

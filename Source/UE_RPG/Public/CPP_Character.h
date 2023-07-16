@@ -43,6 +43,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* JumppAction;
 
+	//Montage
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+		class UAnimMontage* EquipMontage;
+
+
 	UPROPERTY(EditAnywhere, Category = "EditValue")
 		float SpringArmSocketOffsetYValue = 100.f;
 
@@ -56,6 +61,7 @@ public:
 
 	void ObjectSearchTrace();
 	bool SetShpereTrace(FHitResult& HitResult);
+
 	//Input
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -73,10 +79,23 @@ public:
 	bool PressKey(const FInputActionValue& Value);
 	class AWeapon* isWeapon(AActor* hitobject) const;
 
+	//CharacterState
+    void SetStateEquiped();
+	void SetStateUnEquiped();
+
+	//Montage
+	void PlayEquipMontage(FName NotifyName);
+
+	UFUNCTION(BlueprintCallable)
+		void HoldWeapon();
+
+	UFUNCTION(BlueprintCallable)
+		void UnHoldWeapon();
+
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
 	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
 	FORCEINLINE void RemoveHitResultObject();
-
+	
 
 private:
 
@@ -90,5 +109,6 @@ private:
 	AActor* HitResultObject;
 	FCollisionQueryParams Params;
 
-	class UGrabber* GraberComponent; 
+	class UGrabber* GraberComponent;
+	class AWeapon* EquipedWeapin;
 };

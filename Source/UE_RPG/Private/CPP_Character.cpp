@@ -19,8 +19,16 @@ ACPP_Character::ACPP_Character()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	/*GetCharacterMovement()->GravityScale = 1.75f;
-	GetCharacterMovement()->MaxAcceleration = 1500.f;*/
+	//CharacterMovement Settting Base 
+	GetCharacterMovement()->GravityScale = 1.75f; 
+	GetCharacterMovement()->MaxAcceleration = 1500.f;
+	GetCharacterMovement()->BrakingFrictionFactor = 1.f;
+	GetCharacterMovement()->MaxWalkSpeed = 400.f;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	//jump
+	GetCharacterMovement()->JumpZVelocity = 700.f;
+	GetCharacterMovement()->AirControl = 0.35f;
 
 
 	SpringArm = CreateDefaultSubobject<UCharacterSpringArm>(TEXT("CameraBoom"));
@@ -191,7 +199,8 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 		AWeapon* weapan = isWeapon(HitResultObject);
 		if (weapan)
 		{
-			weapan->Equip(GetMesh(),"weapon_socket_r");
+			weapan->Equip(GetMesh(),"weapon_socket_back");
+			EquipedWeapin = weapan;
 			Params.AddIgnoredActor(weapan);
 			return;
 		}
@@ -204,17 +213,13 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 
 void ACPP_Character::Equip(const FInputActionValue& Value)
 {
-	if (CharacterState == ECharacterStateTypes::UnEquiped)
+	if (CharacterState == ECharacterStateTypes::UnEquiped && EquipedWeapin)
 	{
-		CharacterState = ECharacterStateTypes::Equiped;
-		SmoothSpringArmOffset(SpringArmSocketOffsetYValue, false);
-		UE_LOG(LogTemp, Warning, TEXT("Equiped"));
+		SetStateEquiped();
 	}
 	else if(CharacterState == ECharacterStateTypes::Equiped)
 	{
-		CharacterState = ECharacterStateTypes::UnEquiped;
-		SmoothSpringArmOffset(0, true);
-		UE_LOG(LogTemp, Warning, TEXT("UnEquiped"));
+		SetStateUnEquiped();
 	}
 }
 
@@ -250,6 +255,48 @@ AWeapon* ACPP_Character::isWeapon(AActor* hitobject) const
 	}
 
 	return weapon;
+}
+
+void ACPP_Character::SetStateEquiped()
+{
+	CharacterState = ECharacterStateTypes::Equiped;
+	PlayEquipMontage("Equip");
+	SmoothSpringArmOffset(SpringArmSocketOffsetYValue, false);
+	UE_LOG(LogTemp, Warning, TEXT("Equiped"));
+}
+
+void ACPP_Character::SetStateUnEquiped()
+{
+	CharacterState = ECharacterStateTypes::UnEquiped;
+	PlayEquipMontage("UnEquip");
+	SmoothSpringArmOffset(0, true);
+	UE_LOG(LogTemp, Warning, TEXT("UnEquiped"));
+}
+
+void ACPP_Character::PlayEquipMontage(FName NotifyName)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && EquipMontage)
+	{
+		AnimInstance->Montage_Play(EquipMontage);
+		AnimInstance->Montage_JumpToSection(NotifyName, EquipMontage);
+	}
+}
+
+void ACPP_Character::HoldWeapon()
+{
+	if (EquipedWeapin)
+	{
+		EquipedWeapin->Equip(GetMesh(), "weapon_socket_r");
+	}
+}
+
+void ACPP_Character::UnHoldWeapon()
+{
+	if (EquipedWeapin)
+	{
+		EquipedWeapin->Equip(GetMesh(), "weapon_socket_back");
+	}
 }
 
 void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
