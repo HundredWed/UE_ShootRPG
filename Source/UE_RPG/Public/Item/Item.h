@@ -19,12 +19,9 @@ class UE_RPG_API AItem : public AActor
 public:	
 	
 	AItem();
-	virtual void Tick(float DeltaTime) override;
-
 protected:
-	
-
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	EItemState ItemState = EItemState::EIS_UnEquipped;
 private:
 	

@@ -11,6 +11,11 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 }
+void AWeapon::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
 void AWeapon::Equip(USceneComponent* Inparent, const FName& SocketName)
 {
 	AttachFunc(Inparent, SocketName);

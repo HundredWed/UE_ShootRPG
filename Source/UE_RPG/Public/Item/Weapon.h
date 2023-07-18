@@ -17,8 +17,8 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		USkeletalMeshComponent* WeaponMesh;
 
+
 protected:
 	virtual void BeginPlay() override;
-
-
+	virtual void Tick(float DeltaTime) override;
 };

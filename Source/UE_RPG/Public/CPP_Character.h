@@ -43,6 +43,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* JumppAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+		class UInputAction* AttackAction;
+
 	//Montage
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* EquipMontage;
@@ -66,11 +69,10 @@ public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void SetSpeed(const FInputActionValue& Value);
-
 	void GrabItem(const FInputActionValue& Value);
 	void PickUp(const FInputActionValue& Value);
-
 	void Equip(const FInputActionValue& Value);
+	void Attack(const FInputActionValue& Value);
 
 	void GetViewPointVector(FVector& Location, FRotator& Rotation);
 
@@ -82,6 +84,7 @@ public:
 	//CharacterState
     void SetStateEquiped();
 	void SetStateUnEquiped();
+	bool CanAttackState();
 
 	//Montage
 	void PlayEquipMontage(FName NotifyName);
@@ -92,6 +95,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void UnHoldWeapon();
 
+	UFUNCTION(BlueprintCallable)
+		void EquippingEnd();
+
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
 	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
 	FORCEINLINE void RemoveHitResultObject();
@@ -100,6 +106,7 @@ public:
 private:
 
 	ECharacterStateTypes CharacterState = ECharacterStateTypes::UnEquiped;
+	ECharacterActionState ActionState = ECharacterActionState::Normal;
 
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
 		float ShowItemDistance = 100.f;
@@ -110,5 +117,5 @@ private:
 	FCollisionQueryParams Params;
 
 	class UGrabber* GraberComponent;
-	class AWeapon* EquipedWeapin;
+	class AWeapon* EquipedWeapon;
 };

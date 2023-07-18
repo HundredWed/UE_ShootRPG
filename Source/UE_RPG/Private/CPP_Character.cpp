@@ -8,6 +8,7 @@
 #include "Camera/CharacterSpringArm.h"
 #include "Grabber.h"
 #include "Item/Weapon.h"
+#include "Item/Gun/ShootGun.h"
 
 
 ACPP_Character::ACPP_Character()
@@ -60,7 +61,7 @@ void ACPP_Character::BeginPlay()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No Graver components found!!"));
+		UE_LOG(LogTemp, Warning, TEXT("Graver component not found!!"));
 	}
 
 	Params.AddIgnoredActor(this);
@@ -88,6 +89,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(GrabAndPickupAction, ETriggerEvent::Triggered, this, &ACPP_Character::GrabItem);
 		
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ACPP_Character::Equip);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ACPP_Character::Attack);
 	}
 
 }
@@ -200,7 +202,8 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 		if (weapan)
 		{
 			weapan->Equip(GetMesh(),"weapon_socket_back");
-			EquipedWeapin = weapan;
+			weapan->SetOwner(this);
+			EquipedWeapon = weapan;
 			Params.AddIgnoredActor(weapan);
 			return;
 		}
@@ -213,13 +216,22 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 
 void ACPP_Character::Equip(const FInputActionValue& Value)
 {
-	if (CharacterState == ECharacterStateTypes::UnEquiped && EquipedWeapin)
+	if (CharacterState == ECharacterStateTypes::UnEquiped && EquipedWeapon)
 	{
 		SetStateEquiped();
 	}
 	else if(CharacterState == ECharacterStateTypes::Equiped)
 	{
 		SetStateUnEquiped();
+	}
+}
+
+void ACPP_Character::Attack(const FInputActionValue& Value)
+{
+	AShootGun* shootgun = Cast<AShootGun>(EquipedWeapon);
+	if (CanAttackState() && shootgun)
+	{
+		shootgun->PullTrigger();
 	}
 }
 
@@ -259,7 +271,9 @@ AWeapon* ACPP_Character::isWeapon(AActor* hitobject) const
 
 void ACPP_Character::SetStateEquiped()
 {
+	ActionState = ECharacterActionState::Action;
 	CharacterState = ECharacterStateTypes::Equiped;
+
 	PlayEquipMontage("Equip");
 	SmoothSpringArmOffset(SpringArmSocketOffsetYValue, false);
 	UE_LOG(LogTemp, Warning, TEXT("Equiped"));
@@ -267,10 +281,17 @@ void ACPP_Character::SetStateEquiped()
 
 void ACPP_Character::SetStateUnEquiped()
 {
+	ActionState = ECharacterActionState::Action;
 	CharacterState = ECharacterStateTypes::UnEquiped;
+
 	PlayEquipMontage("UnEquip");
 	SmoothSpringArmOffset(0, true);
 	UE_LOG(LogTemp, Warning, TEXT("UnEquiped"));
+}
+
+bool ACPP_Character::CanAttackState()
+{
+	return CharacterState == ECharacterStateTypes::Equiped && ActionState == ECharacterActionState::Normal;
 }
 
 void ACPP_Character::PlayEquipMontage(FName NotifyName)
@@ -285,18 +306,24 @@ void ACPP_Character::PlayEquipMontage(FName NotifyName)
 
 void ACPP_Character::HoldWeapon()
 {
-	if (EquipedWeapin)
+	if (EquipedWeapon)
 	{
-		EquipedWeapin->Equip(GetMesh(), "weapon_socket_r");
+		EquipedWeapon->Equip(GetMesh(), "weapon_socket_r");
 	}
 }
 
 void ACPP_Character::UnHoldWeapon()
 {
-	if (EquipedWeapin)
+	if (EquipedWeapon)
 	{
-		EquipedWeapin->Equip(GetMesh(), "weapon_socket_back");
+		EquipedWeapon->Equip(GetMesh(), "weapon_socket_back");
 	}
+}
+
+void ACPP_Character::EquippingEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("EquippingEnd!"));
+	ActionState = ECharacterActionState::Normal;
 }
 
 void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
