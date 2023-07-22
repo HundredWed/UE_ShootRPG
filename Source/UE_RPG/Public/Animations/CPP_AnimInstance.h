@@ -14,6 +14,7 @@ UCLASS()
 class UE_RPG_API UCPP_AnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
+
 public:
 	virtual void NativeInitializeAnimation() override;//== beginplay
 	virtual void NativeUpdateAnimation(float DeltaTime) override;//==tick
@@ -25,20 +26,50 @@ public:
 		class UCharacterMovementComponent* MyCharacterMovement;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
-		float GroundSpeed;
+		float GroundSpeed = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
-		float Angle;
+		float Angle = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
-		FVector Velocity;
+		float MovementYawOffset = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
-		bool isFalling;
+		float MovementPrevYawOffset = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		float RootYawOffset = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		float Pich = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		float SmoothturnValue = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		FVector Velocity{0,0,0,};
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		bool isFalling = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement | CharacterState")
 		ECharacterStateTypes CharacterState;
 
+	void TurnInplace();
+	void Turning();
 
 	double GetAngle();
+	double GetAngle2();
+
+	void SetCurrentRotate();
+
+private:
+
+	float Right = 90.f;
+	float Left = -90.f;
+	float InterpSpeedTurn = 20.f;
+
+	float RotationCurve = 0;
+	float RotationCurvePrevFrame = 0;
+
 };

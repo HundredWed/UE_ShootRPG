@@ -16,19 +16,67 @@ void UCPP_AnimInstance::NativeInitializeAnimation()
 		MyCharacterMovement = MyCharacter->GetCharacterMovement();
 	}
 
+	CharacterState = MyCharacter->GetCharacterState();
 	
 }
 
 void UCPP_AnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
+
 	if (MyCharacterMovement)
 	{
 		Velocity = MyCharacterMovement->Velocity;
 		GroundSpeed = UKismetMathLibrary::VSizeXY(MyCharacterMovement->Velocity);
-		Angle = GetAngle(); 
+		Angle = GetAngle2(); 
 		isFalling = MyCharacterMovement->IsFalling();
 		CharacterState = MyCharacter->GetCharacterState();
+		Pich = MyCharacter->GetBaseAimRotation().Pitch;
+
+		TurnInplace();
+	}
+	
+}
+
+void UCPP_AnimInstance::TurnInplace()
+{
+	if (GroundSpeed > 0 || CharacterState == ECharacterStateTypes::UnEquiped)
+	{
+		SetCurrentRotate();
+	}
+	else
+	{
+		
+		MovementPrevYawOffset = MovementYawOffset;
+		MovementYawOffset = MyCharacter->GetActorRotation().Yaw;
+		const float subValueYaw = MovementYawOffset - MovementPrevYawOffset;
+
+		RootYawOffset = UKismetMathLibrary::NormalizeAxis(RootYawOffset - subValueYaw);
+
+		//by GetBaseAimRotation
+		Turning();
+
+	}
+}
+
+void UCPP_AnimInstance::Turning()
+{
+	const float Turning{ GetCurveValue(TEXT("Turning")) };
+	if (Turning > 0)
+	{
+		RotationCurvePrevFrame = RotationCurve;
+		RotationCurve = GetCurveValue(TEXT("Rotation"));
+		const float DeltaRotation{ RotationCurve - RotationCurvePrevFrame };
+
+		// RootYawOffset > 0, -> Turning Left. RootYawOffset < 0, -> Turning Right.
+		RootYawOffset > 0 ? RootYawOffset -= DeltaRotation : RootYawOffset += DeltaRotation;
+
+		const float ABSRootYawOffset{ FMath::Abs(RootYawOffset) };
+		if (ABSRootYawOffset > 90.f)
+		{
+			const float YawExcess{ ABSRootYawOffset - 90.f };
+			RootYawOffset > 0 ? RootYawOffset -= YawExcess : RootYawOffset += YawExcess;
+		}
 	}
 }
 
@@ -69,3 +117,31 @@ double UCPP_AnimInstance::GetAngle()
 
 	return Theta;
 }
+
+double UCPP_AnimInstance::GetAngle2()
+{
+	FRotator AimRotation = MyCharacter->GetBaseAimRotation();
+	FRotator MovementRotation =	UKismetMathLibrary::MakeRotFromX(Velocity);
+
+	return UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation,	AimRotation).Yaw; 
+}
+
+void UCPP_AnimInstance::SetCurrentRotate()
+{
+	FRotator newRotate = FRotator(MyCharacter->GetActorRotation().Pitch, 
+		MyCharacter->GetActorRotation().Yaw + RootYawOffset, 
+		MyCharacter->GetActorRotation().Roll); 
+	MyCharacter->SetActorRotation(newRotate); 
+
+	RootYawOffset = 0;
+	MovementYawOffset = MyCharacter->GetActorRotation().Yaw;
+	MovementPrevYawOffset = MovementYawOffset;
+	RotationCurvePrevFrame = 0.f;
+	RotationCurve = 0.f;
+}
+
+
+
+
+
+

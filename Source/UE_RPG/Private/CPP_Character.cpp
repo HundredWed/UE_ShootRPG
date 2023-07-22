@@ -246,12 +246,6 @@ void ACPP_Character::GetViewPointVector(FVector& Location, FRotator& Rotation)
 	MyController->GetPlayerViewPoint(Location, Rotation);
 }
 
-void ACPP_Character::SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement)
-{
-	GetCharacterMovement()->bOrientRotationToMovement = bOrientRotationToMovement;
-	SpringArm->NewValue = NewYoffset;
-}
-
 
 bool ACPP_Character::PressKey(const FInputActionValue& Value)
 {
@@ -339,4 +333,10 @@ void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
 void ACPP_Character::RemoveHitResultObject()
 {
 	HitResultObject = nullptr;
+}
+
+void ACPP_Character::SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement)
+{
+	GetCharacterMovement()->bOrientRotationToMovement = bOrientRotationToMovement;
+	SpringArm->NewValue = NewYoffset;
 }

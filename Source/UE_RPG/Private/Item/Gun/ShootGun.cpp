@@ -21,8 +21,7 @@ void AShootGun::Tick(float DeltaTime)
 void AShootGun::PullTrigger()
 {
 	UGameplayStatics::PlaySoundAtLocation(this, ShootSound,GetActorLocation());
-	UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, SpawnPoint->GetComponentLocation(), 
-		SpawnPoint->GetComponentRotation(), ParticleSize);
+	
 
 	FHitResult HitResult;
 
@@ -30,6 +29,7 @@ void AShootGun::PullTrigger()
 
 	if (OnHit)
 	{
+		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, HitResult.ImpactPoint,FRotator::ZeroRotator, ParticleSize);
 		UE_LOG(LogTemp, Warning, TEXT("Hit!!"));
 	}
 
