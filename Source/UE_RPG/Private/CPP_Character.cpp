@@ -55,13 +55,19 @@ void ACPP_Character::BeginPlay()
 	}
 
 	GraberComponent = FindComponentByClass<UGrabber>();
-	if (GraberComponent)
+	if (IsValid(GraberComponent))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found GraberComponent! "));
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Graver component not found!!"));
+	}
+
+	if (IsValid(FollowCamera))
+	{
+		CameraDefaultFOV = FollowCamera->FieldOfView;
+		CameraCurrentFOV = CameraDefaultFOV;
 	}
 
 	Params.AddIgnoredActor(this);
@@ -71,6 +77,7 @@ void ACPP_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	ObjectSearchTrace();
+	SmoothCameraFOV(DeltaTime);
 }
 
 void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -90,6 +97,8 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ACPP_Character::Equip);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ACPP_Character::Attack);
+
+		EnhancedInputComponent->BindAction(AimingAction, ETriggerEvent::Triggered, this, &ACPP_Character::Aiming);
 	}
 
 }
@@ -102,8 +111,12 @@ void ACPP_Character::ObjectSearchTrace()
 	if (OnHit)
 	{
 		AActor* hitresult = HitResult.GetActor();
-		UE_LOG(LogTemp, Display, TEXT("%s"), *hitresult->GetActorNameOrLabel());
-		SetHitResultObject(hitresult);	
+		if (IsValid(hitresult))
+		{
+			UE_LOG(LogTemp, Display, TEXT("%s"), *hitresult->GetActorNameOrLabel());
+			SetHitResultObject(hitresult);
+		}
+		
 	}
 	else
 	{
@@ -135,7 +148,7 @@ bool ACPP_Character::SetShpereTrace(FHitResult& HitResult)
 void ACPP_Character::Move(const FInputActionValue& Value)
 {
 	const FVector MovementVector =  Value.Get<FVector>();
-	if (Controller)
+	if (IsValid(Controller))
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -154,7 +167,7 @@ void ACPP_Character::Move(const FInputActionValue& Value)
 void ACPP_Character::Look(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
-	if (Controller)
+	if (IsValid(Controller))
 	{
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
@@ -191,20 +204,21 @@ void ACPP_Character::GrabItem(const FInputActionValue& Value)
 
 void ACPP_Character::PickUp(const FInputActionValue& Value)
 {
-	if (HitResultObject == nullptr)
+	if (IsValid(HitResultObject) == false)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("no item!!"));
 		return;
 	}
 	else
 	{
-		AWeapon* weapan = isWeapon(HitResultObject);
-		if (weapan)
+		AWeapon* weapon = isWeapon(HitResultObject);
+		bool bweapon = IsValid(weapon);
+		if (weapon)
 		{
-			weapan->Equip(GetMesh(),"weapon_socket_back");
-			weapan->SetOwner(this);
-			EquipedWeapon = weapan;
-			Params.AddIgnoredActor(weapan);
+			weapon->Equip(GetMesh(),"weapon_socket_back");
+			weapon->SetOwner(this);
+			EquipedWeapon = weapon;
+			Params.AddIgnoredActor(weapon);
 			return;
 		}
 
@@ -216,7 +230,8 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 
 void ACPP_Character::Equip(const FInputActionValue& Value)
 {
-	if (CharacterState == ECharacterStateTypes::UnEquiped && EquipedWeapon)
+	bool bEquipedWeapon = IsValid(EquipedWeapon);
+	if (CharacterState == ECharacterStateTypes::UnEquiped && bEquipedWeapon)
 	{
 		SetStateEquiped();
 	}
@@ -229,9 +244,24 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 void ACPP_Character::Attack(const FInputActionValue& Value)
 {
 	AShootGun* shootgun = Cast<AShootGun>(EquipedWeapon);
-	if (CanAttackState() && shootgun)
+	bool bshootgun = IsValid(shootgun);
+
+	if (CanAttackState() && bshootgun)
 	{
+		PlayFireMontage();
 		shootgun->PullTrigger();
+	}
+}
+
+void ACPP_Character::Aiming(const FInputActionValue& Value)
+{
+	if (PressKey(Value) && CharacterState == ECharacterStateTypes::Equiped)
+	{
+		bAiming = true;
+	}
+	else
+	{
+		bAiming = false;
 	}
 }
 
@@ -239,7 +269,7 @@ void ACPP_Character::Attack(const FInputActionValue& Value)
 void ACPP_Character::GetViewPointVector(FVector& Location, FRotator& Rotation)
 {
 	AController* MyController = GetController();
-	if (MyController == nullptr)
+	if (IsValid(MyController) == false)
 	{
 		return;
 	}
@@ -291,16 +321,27 @@ bool ACPP_Character::CanAttackState()
 void ACPP_Character::PlayEquipMontage(FName NotifyName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && EquipMontage)
+	bool bEquipMontage = IsValid(EquipMontage);
+	if (AnimInstance && bEquipMontage)
 	{
 		AnimInstance->Montage_Play(EquipMontage);
 		AnimInstance->Montage_JumpToSection(NotifyName, EquipMontage);
 	}
 }
 
+void ACPP_Character::PlayFireMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	bool bFireMontage = IsValid(FireMontage);
+	if (AnimInstance && bFireMontage)
+	{
+		AnimInstance->Montage_Play(FireMontage);
+	}
+}
+
 void ACPP_Character::HoldWeapon()
 {
-	if (EquipedWeapon)
+	if (IsValid(EquipedWeapon))
 	{
 		EquipedWeapon->Equip(GetMesh(), "weapon_socket_r");
 	}
@@ -308,7 +349,7 @@ void ACPP_Character::HoldWeapon()
 
 void ACPP_Character::UnHoldWeapon()
 {
-	if (EquipedWeapon)
+	if (IsValid(EquipedWeapon))
 	{
 		EquipedWeapon->Equip(GetMesh(), "weapon_socket_back");
 	}
@@ -339,4 +380,25 @@ void ACPP_Character::SmoothSpringArmOffset(float NewYoffset, bool bOrientRotatio
 {
 	GetCharacterMovement()->bOrientRotationToMovement = bOrientRotationToMovement;
 	SpringArm->NewValue = NewYoffset;
+}
+
+void ACPP_Character::SmoothCameraFOV(float DeltaTime)
+{
+	if (bAiming)
+	{
+		CameraCurrentFOV = FMath::FInterpTo(
+			CameraCurrentFOV,
+			CameraZoomedFOV,
+			DeltaTime,
+			ZoomInterpSpeed);
+	}
+	else
+	{
+		CameraCurrentFOV = FMath::FInterpTo(
+			CameraCurrentFOV,
+			CameraDefaultFOV,
+			DeltaTime,
+			ZoomInterpSpeed);
+	}
+	FollowCamera->SetFieldOfView(CameraCurrentFOV);
 }

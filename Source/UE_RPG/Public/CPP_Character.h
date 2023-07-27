@@ -46,9 +46,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* AttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+		class UInputAction* AimingAction;
+
 	//Montage
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* EquipMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+		class UAnimMontage* FireMontage;
 
 
 	UPROPERTY(EditAnywhere, Category = "EditValue")
@@ -73,10 +79,12 @@ public:
 	void PickUp(const FInputActionValue& Value);
 	void Equip(const FInputActionValue& Value);
 	void Attack(const FInputActionValue& Value);
+	void Aiming(const FInputActionValue& Value);
 
 	void GetViewPointVector(FVector& Location, FRotator& Rotation);
 
 	void SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement);
+	void SmoothCameraFOV(float DeltaTime);
 
 	bool PressKey(const FInputActionValue& Value);
 	class AWeapon* isWeapon(AActor* hitobject) const;
@@ -88,6 +96,7 @@ public:
 
 	//Montage
 	void PlayEquipMontage(FName NotifyName);
+	void PlayFireMontage();
 
 	UFUNCTION(BlueprintCallable)
 		void HoldWeapon();
@@ -113,9 +122,23 @@ private:
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
 		float ShowItemRadius = 100.f;
 
+	bool bAiming = false;
+	float CameraDefaultFOV = 0;
+	float CameraCurrentFOV = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
+		float CameraZoomedFOV = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
+		float ZoomInterpSpeed = 0;
+
+	UPROPERTY()
 	AActor* HitResultObject;
+
 	FCollisionQueryParams Params;
 
+	UPROPERTY()
 	class UGrabber* GraberComponent;
+
+	UPROPERTY()
 	class AWeapon* EquipedWeapon;
 };

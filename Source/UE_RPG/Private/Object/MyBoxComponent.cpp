@@ -17,14 +17,18 @@ void UMyBoxComponent::BeginPlay()
 void UMyBoxComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-    if (Mover == nullptr)
+
+    if (IsValid(Mover) == false)
+    {
         return;
+    }
+        
 
     AActor* Actor = GetAcceptableActor();
-    if (Actor != nullptr)
+    if (IsValid(Actor))
     {
         UPrimitiveComponent* Component = Cast<UPrimitiveComponent>(Actor->GetRootComponent());
-        if (Component != nullptr)
+        if (IsValid(Component))
         {
             Component->SetSimulatePhysics(false);//트리거 박스에 놓았을 때 그 지점에 고정.
         }

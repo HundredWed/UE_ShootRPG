@@ -4,8 +4,6 @@
 UGrabber::UGrabber()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
-
 }
 
 void UGrabber::BeginPlay()
@@ -18,7 +16,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
-	if (PhysicsHandle == nullptr)
+	if (IsValid(PhysicsHandle) == false)
 		return;
 
 	if (PhysicsHandle->GetGrabbedComponent() != nullptr)
@@ -35,7 +33,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 void UGrabber::Grab()
 {
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
-	if (PhysicsHandle == nullptr)
+	if (IsValid(PhysicsHandle) == false)
 	{
 		return;
 	}
@@ -47,6 +45,12 @@ void UGrabber::Grab()
 	if (OnHit)
 	{
 		UPrimitiveComponent* HitComponent = Hitresult.GetComponent();
+
+		if (IsValid(HitComponent) == false)
+		{
+			return;
+		}
+
 		WakeUp(HitComponent);
 		AActor* HitActor = Hitresult.GetActor();
 		HitActor->Tags.Add("Grabbed");
@@ -62,7 +66,7 @@ void UGrabber::Grab()
 void UGrabber::Release()
 {
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
-	if (PhysicsHandle == nullptr)
+	if (IsValid(PhysicsHandle) == false)
 	{
 		return;
 	}
@@ -92,7 +96,7 @@ UPhysicsHandleComponent* UGrabber::GetPhysicsHandle() const
 {
 
 	UPhysicsHandleComponent* PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle == nullptr)
+	if (IsValid(PhysicsHandle) == false)
 	{
 		UE_LOG(LogTemp, Error, TEXT("PhysicsHandle is Not!!"));
 	}

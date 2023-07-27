@@ -15,8 +15,6 @@ void UCPP_AnimInstance::NativeInitializeAnimation()
 	{
 		MyCharacterMovement = MyCharacter->GetCharacterMovement();
 	}
-
-	CharacterState = MyCharacter->GetCharacterState();
 	
 }
 
@@ -85,7 +83,7 @@ double UCPP_AnimInstance::GetAngle()
 	//In the first cycle, it is nullptr.
 	//From the second cycle onwards, check the controller...???????????????????
 	AController* Controller = TryGetPawnOwner()->GetController();
-	if (Controller == nullptr)
+	if (IsValid(Controller) == false)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Controller is null!!"));
 		return 0;
@@ -128,10 +126,10 @@ double UCPP_AnimInstance::GetAngle2()
 
 void UCPP_AnimInstance::SetCurrentRotate()
 {
-	FRotator newRotate = FRotator(MyCharacter->GetActorRotation().Pitch, 
+	/*FRotator newRotate = FRotator(MyCharacter->GetActorRotation().Pitch, 
 		MyCharacter->GetActorRotation().Yaw + RootYawOffset, 
 		MyCharacter->GetActorRotation().Roll); 
-	MyCharacter->SetActorRotation(newRotate); 
+	MyCharacter->SetActorRotation(newRotate);*/ 
 
 	RootYawOffset = 0;
 	MovementYawOffset = MyCharacter->GetActorRotation().Yaw;

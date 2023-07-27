@@ -52,6 +52,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 		bool isFalling = false;
 
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		bool isMoving = false;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Movement | CharacterState")
 		ECharacterStateTypes CharacterState;
 

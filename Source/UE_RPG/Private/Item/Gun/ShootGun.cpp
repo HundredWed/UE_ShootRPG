@@ -38,7 +38,7 @@ void AShootGun::PullTrigger()
 bool AShootGun::GunTrace(FHitResult& hitresult)
 {
 	AController* OwnerController = GetOwnerController();
-	if (OwnerController == nullptr)
+	if (IsValid(OwnerController) == false)
 	{
 		return false;
 	}
@@ -62,7 +62,7 @@ bool AShootGun::GunTrace(FHitResult& hitresult)
 AController* AShootGun::GetOwnerController()
 {
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (OwnerPawn == nullptr)
+	if (IsValid(OwnerPawn) == false)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OwnerPawn null!!"));
 		return nullptr;
