@@ -219,6 +219,7 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 			weapon->SetOwner(this);
 			EquipedWeapon = weapon;
 			Params.AddIgnoredActor(weapon);
+			weapon->SetIsGrabbable(false);
 			return;
 		}
 

@@ -1,6 +1,7 @@
 #include "Grabber.h"
 #include "Engine/World.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Item/Item.h"
 UGrabber::UGrabber()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -38,13 +39,30 @@ void UGrabber::Grab()
 		return;
 	}
 
-	FHitResult Hitresult;
+	FHitResult hitresult;
 
-	bool OnHit = GetGrabbableInReach(Hitresult);
+	bool OnHit = GetGrabbableInReach(hitresult);
+
+	//weapon is grabbable?(current)
+	//else item
+	AItem* item = Cast<AItem>(hitresult.GetActor());
+	if (IsValid(item))
+	{
+		bool isgrabbable = item->GetIsGrabbable();
+		if (isgrabbable == false)
+		{
+			return;
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("item is not"));
+	}
+	
 
 	if (OnHit)
 	{
-		UPrimitiveComponent* HitComponent = Hitresult.GetComponent();
+		UPrimitiveComponent* HitComponent = hitresult.GetComponent();
 
 		if (IsValid(HitComponent) == false)
 		{
@@ -52,12 +70,12 @@ void UGrabber::Grab()
 		}
 
 		WakeUp(HitComponent);
-		AActor* HitActor = Hitresult.GetActor();
+		AActor* HitActor = hitresult.GetActor();
 		HitActor->Tags.Add("Grabbed");
 		PhysicsHandle->GrabComponentAtLocationWithRotation(
 			HitComponent,
 			NAME_None,
-			Hitresult.ImpactPoint,
+			hitresult.ImpactPoint,
 			GetOwner()->GetActorRotation()
 		);
 	}

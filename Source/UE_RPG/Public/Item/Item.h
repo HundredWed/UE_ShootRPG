@@ -19,12 +19,18 @@ class UE_RPG_API AItem : public AActor
 public:	
 	
 	AItem();
+
+	FORCEINLINE void SetIsGrabbable(bool grabbable) { isGrabbalble = grabbable; }
+	FORCEINLINE bool GetIsGrabbable() { return isGrabbalble; }
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	EItemState ItemState = EItemState::EIS_UnEquipped;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
+		bool isGrabbalble = true;
 private:
 	
-
+	
 
 };
