@@ -56,6 +56,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* FireMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+		class UAnimMontage* AimingFireMontage;
+
 
 	UPROPERTY(EditAnywhere, Category = "EditValue")
 		float SpringArmSocketOffsetYValue = 100.f;
@@ -88,6 +91,7 @@ public:
 
 	bool PressKey(const FInputActionValue& Value);
 	class AWeapon* isWeapon(AActor* hitobject) const;
+	void PickUpWeapon(AWeapon* weapon);
 
 	//CharacterState
     void SetStateEquiped();
@@ -96,7 +100,7 @@ public:
 
 	//Montage
 	void PlayEquipMontage(FName NotifyName);
-	void PlayFireMontage();
+	void PlayFireMontage(UAnimMontage* montage);
 
 	UFUNCTION(BlueprintCallable)
 		void HoldWeapon();
@@ -110,6 +114,7 @@ public:
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
 	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
 	FORCEINLINE void RemoveHitResultObject();
+	FORCEINLINE bool GetIsAiming() { return bAiming; }
 	
 
 private:
@@ -136,9 +141,11 @@ private:
 
 	FCollisionQueryParams Params;
 
+	//For get Grab & Release Func 
 	UPROPERTY()
 	class UGrabber* GraberComponent;
 
+	//check 'is EquipedWeapon?' for  HoldWeapon & UnHoldWeapon Func
 	UPROPERTY()
 	class AWeapon* EquipedWeapon;
 };

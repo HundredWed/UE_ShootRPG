@@ -213,18 +213,9 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 	{
 		AWeapon* weapon = isWeapon(HitResultObject);
 		bool bweapon = IsValid(weapon);
-		if (weapon)
+		if (bweapon)
 		{
-			weapon->Equip(GetMesh(),"weapon_socket_back");
-			weapon->SetOwner(this);
-			EquipedWeapon = weapon;
-			Params.AddIgnoredActor(weapon);
-
-			USkeletalMeshComponent* setcollision = weapon->FindComponentByClass<USkeletalMeshComponent>();
-			setcollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
-
-
-			//weapon->SetIsGrabbable(false);
+			PickUpWeapon(weapon);
 			return;
 		}
 
@@ -252,16 +243,21 @@ void ACPP_Character::Attack(const FInputActionValue& Value)
 	AShootGun* shootgun = Cast<AShootGun>(EquipedWeapon);
 	bool bshootgun = IsValid(shootgun);
 
-	if (CanAttackState() && bshootgun)
+	if (CanAttackState() && bshootgun && bAiming == false)
 	{
-		PlayFireMontage();
+		PlayFireMontage(FireMontage);
+		shootgun->PullTrigger();
+	}
+	else if (CanAttackState() && bshootgun && bAiming)
+	{
+		PlayFireMontage(AimingFireMontage);
 		shootgun->PullTrigger();
 	}
 }
 
 void ACPP_Character::Aiming(const FInputActionValue& Value)
 {
-	if (PressKey(Value) && CharacterState == ECharacterStateTypes::Equiped)
+	if (PressKey(Value) && CharacterState == ECharacterStateTypes::Equiped && ActionState == ECharacterActionState::Normal)
 	{
 		bAiming = true;
 	}
@@ -297,6 +293,20 @@ AWeapon* ACPP_Character::isWeapon(AActor* hitobject) const
 	}
 
 	return weapon;
+}
+
+void ACPP_Character::PickUpWeapon(AWeapon* weapon)
+{
+	weapon->Equip(GetMesh(), "weapon_socket_back");
+	weapon->SetOwner(this);
+	EquipedWeapon = weapon;
+	Params.AddIgnoredActor(weapon);
+
+	USkeletalMeshComponent* setcollision = weapon->FindComponentByClass<USkeletalMeshComponent>();
+	if (IsValid(setcollision))
+	{
+		setcollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
+	}
 }
 
 void ACPP_Character::SetStateEquiped()
@@ -335,15 +345,20 @@ void ACPP_Character::PlayEquipMontage(FName NotifyName)
 	}
 }
 
-void ACPP_Character::PlayFireMontage()
+void ACPP_Character::PlayFireMontage(UAnimMontage* montage)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	bool bFireMontage = IsValid(FireMontage);
+	bool bFireMontage = IsValid(montage);
 	if (AnimInstance && bFireMontage)
 	{
-		AnimInstance->Montage_Play(FireMontage);
+		AnimInstance->Montage_Play(montage);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't montage play!"));
 	}
 }
+
 
 void ACPP_Character::HoldWeapon()
 {

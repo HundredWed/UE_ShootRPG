@@ -31,6 +31,8 @@ void UCPP_AnimInstance::NativeUpdateAnimation(float DeltaTime)
 		CharacterState = MyCharacter->GetCharacterState();
 		Pich = MyCharacter->GetBaseAimRotation().Pitch;
 
+		isAiming = MyCharacter->GetIsAiming();
+
 		TurnInplace();
 	}
 	

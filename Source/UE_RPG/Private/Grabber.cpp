@@ -42,22 +42,6 @@ void UGrabber::Grab()
 	FHitResult hitresult;
 
 	bool OnHit = GetGrabbableInReach(hitresult);
-
-	//weapon is grabbable?(current)
-	//else item
-	AItem* item = Cast<AItem>(hitresult.GetActor());
-	/*if (IsValid(item))
-	{
-		bool isgrabbable = item->GetIsGrabbable();
-		if (isgrabbable == false)
-		{
-			return;
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("item is not"));
-	}*/
 	
 
 	if (OnHit)
