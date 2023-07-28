@@ -219,7 +219,12 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 			weapon->SetOwner(this);
 			EquipedWeapon = weapon;
 			Params.AddIgnoredActor(weapon);
-			weapon->SetIsGrabbable(false);
+
+			USkeletalMeshComponent* setcollision = weapon->FindComponentByClass<USkeletalMeshComponent>();
+			setcollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
+
+
+			//weapon->SetIsGrabbable(false);
 			return;
 		}
 

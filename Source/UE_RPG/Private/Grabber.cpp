@@ -46,7 +46,7 @@ void UGrabber::Grab()
 	//weapon is grabbable?(current)
 	//else item
 	AItem* item = Cast<AItem>(hitresult.GetActor());
-	if (IsValid(item))
+	/*if (IsValid(item))
 	{
 		bool isgrabbable = item->GetIsGrabbable();
 		if (isgrabbable == false)
@@ -57,7 +57,7 @@ void UGrabber::Grab()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("item is not"));
-	}
+	}*/
 	
 
 	if (OnHit)
