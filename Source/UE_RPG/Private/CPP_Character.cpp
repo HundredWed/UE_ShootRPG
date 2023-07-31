@@ -78,6 +78,7 @@ void ACPP_Character::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	ObjectSearchTrace();
 	SmoothCameraFOV(DeltaTime);
+	SetMouseRate();
 }
 
 void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -169,8 +170,8 @@ void ACPP_Character::Look(const FInputActionValue& Value)
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 	if (IsValid(Controller))
 	{
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		AddControllerYawInput(LookAxisVector.X * MouseRate);
+		AddControllerPitchInput(LookAxisVector.Y * MouseRate);
 	}
 }
 
@@ -382,6 +383,18 @@ void ACPP_Character::EquippingEnd()
 	ActionState = ECharacterActionState::Normal;
 }
 
+void ACPP_Character::SetMouseRate()
+{
+	if (bAiming)
+	{
+		MouseRate = ClampRnage(AimingMouseRate);
+	}
+	else
+	{
+		MouseRate = ClampRnage(HipMouseRate);
+	}
+}
+
 void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
 {
 	if (HitResultObject != nullptr)
@@ -395,6 +408,14 @@ void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
 void ACPP_Character::RemoveHitResultObject()
 {
 	HitResultObject = nullptr;
+}
+
+float ACPP_Character::ClampRnage(float value)
+{
+	FVector2D Input(0.f, 100.f);
+	FVector2D Output(0.f, 4.f);
+
+	return  FMath::GetMappedRangeValueClamped(Input, Output, value);
 }
 
 void ACPP_Character::SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement)

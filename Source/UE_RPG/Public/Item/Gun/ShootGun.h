@@ -26,6 +26,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "FireEffect")
 		class UParticleSystem* FireParticle;
 	UPROPERTY(EditAnywhere, Category = "FireEffect")
+		class UParticleSystem* BeamParticle;
+
+	UPROPERTY(EditAnywhere, Category = "FireEffect")
 		FVector ParticleSize;
 
 

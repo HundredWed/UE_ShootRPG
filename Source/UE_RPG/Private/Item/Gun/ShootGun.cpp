@@ -1,5 +1,6 @@
 #include "Item/Gun/ShootGun.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 
 AShootGun::AShootGun()
@@ -33,6 +34,12 @@ void AShootGun::PullTrigger()
 		UE_LOG(LogTemp, Warning, TEXT("Hit!!"));
 	}
 
+	FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
+	UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
+	if (IsValid(Beam))
+	{
+		Beam->SetVectorParameter(FName("Target"), HitResult.ImpactPoint);
+	}
 }
 
 bool AShootGun::GunTrace(FHitResult& hitresult)

@@ -111,6 +111,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void EquippingEnd();
 
+	void SetMouseRate();
+
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
 	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
 	FORCEINLINE void RemoveHitResultObject();
@@ -119,33 +121,44 @@ public:
 
 private:
 
+	float ClampRnage(float value);
+
 	ECharacterStateTypes CharacterState = ECharacterStateTypes::UnEquiped;
 	ECharacterActionState ActionState = ECharacterActionState::Normal;
+
+	UPROPERTY()
+		AActor* HitResultObject;
+
+	//For get Grab & Release Func 
+	UPROPERTY()
+		class UGrabber* GraberComponent;
+
+	//check 'is EquipedWeapon?' for  HoldWeapon & UnHoldWeapon Func
+	UPROPERTY()
+		class AWeapon* EquipedWeapon;
 
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
 		float ShowItemDistance = 100.f;
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
 		float ShowItemRadius = 100.f;
 
-	bool bAiming = false;
-	float CameraDefaultFOV = 0;
-	float CameraCurrentFOV = 0;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
 		float CameraZoomedFOV = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
 		float ZoomInterpSpeed = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
+		float MouseRate = 50;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
+		float AimingMouseRate = 50;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
+		float HipMouseRate = 50;
 
-	UPROPERTY()
-	AActor* HitResultObject;
+	
+	bool bAiming = false;
+	float CameraDefaultFOV = 0;
+	float CameraCurrentFOV = 0;
 
 	FCollisionQueryParams Params;
-
-	//For get Grab & Release Func 
-	UPROPERTY()
-	class UGrabber* GraberComponent;
-
-	//check 'is EquipedWeapon?' for  HoldWeapon & UnHoldWeapon Func
-	UPROPERTY()
-	class AWeapon* EquipedWeapon;
+	
+	
 };
