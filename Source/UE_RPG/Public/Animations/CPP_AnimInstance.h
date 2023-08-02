@@ -44,9 +44,6 @@ public:
 		float Pich = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
-		float SmoothturnValue = 0;
-
-	UPROPERTY(BlueprintReadOnly, Category = Movement)
 		FVector Velocity{0,0,0,};
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
@@ -57,6 +54,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 		bool isAiming = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		bool isCrouching = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement | CharacterState")
 		ECharacterStateTypes CharacterState;

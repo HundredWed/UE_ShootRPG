@@ -13,5 +13,13 @@ UCLASS()
 class UE_RPG_API ACPP_Controller : public APlayerController
 {
 	GENERATED_BODY()
-	
+
+public:
+
+	virtual void BeginPlay() override;
+
+	class AHUD* CrosshairHUD;
+
+	UFUNCTION()
+		void SetHUDVisibility(bool bshowHUD);
 };

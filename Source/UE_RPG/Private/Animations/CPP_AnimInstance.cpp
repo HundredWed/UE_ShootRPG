@@ -32,6 +32,7 @@ void UCPP_AnimInstance::NativeUpdateAnimation(float DeltaTime)
 		Pich = MyCharacter->GetBaseAimRotation().Pitch;
 
 		isAiming = MyCharacter->GetIsAiming();
+		isCrouching = MyCharacterMovement->IsCrouching();
 
 		TurnInplace();
 	}
@@ -53,7 +54,13 @@ void UCPP_AnimInstance::TurnInplace()
 
 		RootYawOffset = UKismetMathLibrary::NormalizeAxis(RootYawOffset - subValueYaw);
 
-		//by GetBaseAimRotation
+		if (GEngine) GEngine->AddOnScreenDebugMessage(
+			2,
+			-1,
+			FColor::Red,
+			FString::Printf(TEXT("RootYawOffset: %f"), RootYawOffset));
+
+		//Base GetBaseAimRotation
 		Turning();
 
 	}

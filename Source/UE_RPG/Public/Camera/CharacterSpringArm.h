@@ -19,6 +19,7 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	//spring arm
 	UFUNCTION()
 	void UpdateSpringArmOffset(float NewYoffset, float DeltaTime);
 
@@ -26,5 +27,6 @@ public:
 		float InterpSpeed;
 
 	float NewValue;
+
 
 };

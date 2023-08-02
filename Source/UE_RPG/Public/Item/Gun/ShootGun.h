@@ -32,15 +32,13 @@ public:
 		FVector ParticleSize;
 
 
-
 	void PullTrigger();
+	bool GunTrace(FHitResult& hitresult, FVector& End);
+	void SpreadBulletRandomRange(FRotator& randDir);
+	AController* GetOwnerController();
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-
-	
-	bool GunTrace(FHitResult& hitresult);
-	AController* GetOwnerController();
 
 private:
 	

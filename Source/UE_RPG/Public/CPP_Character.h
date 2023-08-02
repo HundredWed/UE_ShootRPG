@@ -41,7 +41,10 @@ public:
 		class UInputAction* EquipAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* JumppAction;
+		class UInputAction* JumpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+		class UInputAction* CrouchAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* AttackAction;
@@ -59,7 +62,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* AimingFireMontage;
 
-
+	//spring arm
 	UPROPERTY(EditAnywhere, Category = "EditValue")
 		float SpringArmSocketOffsetYValue = 100.f;
 
@@ -83,6 +86,7 @@ public:
 	void Equip(const FInputActionValue& Value);
 	void Attack(const FInputActionValue& Value);
 	void Aiming(const FInputActionValue& Value);
+	void SetCrouch(const FInputActionValue& Value);
 
 	void GetViewPointVector(FVector& Location, FRotator& Rotation);
 
@@ -113,16 +117,23 @@ public:
 
 	void SetMouseRate();
 
+	void CalculateCrosshairSpread(float DeltaTime);
+
+	UFUNCTION(BlueprintCallable)
+		float GetCrosshairSpreadMultiplier() const;
+
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
 	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
 	FORCEINLINE void RemoveHitResultObject();
-	FORCEINLINE bool GetIsAiming() { return bAiming; }
+	FORCEINLINE bool GetIsAiming() const { return bAiming; }
+
 	
 
 private:
 
 	float ClampRnage(float value);
 
+	//character states
 	ECharacterStateTypes CharacterState = ECharacterStateTypes::UnEquiped;
 	ECharacterActionState ActionState = ECharacterActionState::Normal;
 
@@ -137,28 +148,51 @@ private:
 	UPROPERTY()
 		class AWeapon* EquipedWeapon;
 
+	//item trace
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
 		float ShowItemDistance = 100.f;
+
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
 		float ShowItemRadius = 100.f;
 
+	FCollisionQueryParams Params;
+
+	//camera
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
 		float CameraZoomedFOV = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
 		float ZoomInterpSpeed = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
 		float MouseRate = 50;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
 		float AimingMouseRate = 50;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
 		float HipMouseRate = 50;
 
-	
 	bool bAiming = false;
 	float CameraDefaultFOV = 0;
 	float CameraCurrentFOV = 0;
 
-	FCollisionQueryParams Params;
+	//crosshair
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
+		float CrosshairSpreadMultiplier;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
+		float CrosshairVelocityFactor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
+		float CrosshairInAirFactor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
+		float CrosshairAimFactor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
+		float CrosshairShootingFactor;
+
 	
 	
 };

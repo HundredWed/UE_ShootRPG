@@ -1,6 +1,7 @@
 #include "Item/Gun/ShootGun.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "CPP_Character.h"
 
 
 AShootGun::AShootGun()
@@ -25,24 +26,37 @@ void AShootGun::PullTrigger()
 	
 
 	FHitResult HitResult;
+	FVector End;
 
-	bool OnHit = GunTrace(HitResult);
+	bool OnHit = GunTrace(HitResult,End);
 
 	if (OnHit)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, HitResult.ImpactPoint,FRotator::ZeroRotator, ParticleSize);
-		UE_LOG(LogTemp, Warning, TEXT("Hit!!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Hit!!"));
+
+		FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
+		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
+		if (IsValid(Beam))
+		{
+			Beam->SetVectorParameter(FName("Target"), HitResult.ImpactPoint);
+		}
+	}
+	else
+	{
+		FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
+		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
+		if (IsValid(Beam))
+		{
+			Beam->SetVectorParameter(FName("Target"), End);
+		}
 	}
 
-	FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
-	UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
-	if (IsValid(Beam))
-	{
-		Beam->SetVectorParameter(FName("Target"), HitResult.ImpactPoint);
-	}
+	
 }
 
-bool AShootGun::GunTrace(FHitResult& hitresult)
+
+bool AShootGun::GunTrace(FHitResult& hitresult, FVector& End)
 {
 	AController* OwnerController = GetOwnerController();
 	if (IsValid(OwnerController) == false)
@@ -52,10 +66,13 @@ bool AShootGun::GunTrace(FHitResult& hitresult)
 
 	FVector Location;
 	FRotator Rotation;
-
 	OwnerController->GetPlayerViewPoint(Location, Rotation);
 
-	FVector End = Location + Rotation.Vector() * MaxDir;
+	FRotator spreadBullet = Rotation;
+
+	SpreadBulletRandomRange(spreadBullet);
+
+	End = Location + spreadBullet.Vector() * MaxDir;
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
@@ -66,6 +83,23 @@ bool AShootGun::GunTrace(FHitResult& hitresult)
 	return GetWorld()->LineTraceSingleByChannel(hitresult, Location, End, ECC_GameTraceChannel2, Params);
 }
 
+void AShootGun::SpreadBulletRandomRange(FRotator& randDir)
+{
+	float spreadrange = 1.f;
+
+	ACPP_Character* character = Cast<ACPP_Character>(GetOwner());
+	if (IsValid(character))
+	{
+		spreadrange = character->GetCrosshairSpreadMultiplier();
+		//UE_LOG(LogTemp, Warning, TEXT("spreadrange!!"));
+	}
+
+	float randPich = FMath::FRandRange(-spreadrange, spreadrange);
+	float randYaw = FMath::FRandRange(-spreadrange, spreadrange);
+	float randRoll = FMath::FRandRange(-spreadrange, spreadrange);
+
+	randDir += FRotator(randPich, randYaw, randRoll);
+}
 AController* AShootGun::GetOwnerController()
 {
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());

@@ -9,6 +9,7 @@
 #include "Grabber.h"
 #include "Item/Weapon.h"
 #include "Item/Gun/ShootGun.h"
+#include "CPP_Controller.h"
 
 
 ACPP_Character::ACPP_Character()
@@ -27,6 +28,7 @@ ACPP_Character::ACPP_Character()
 	GetCharacterMovement()->MaxWalkSpeed = 400.f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	//jump
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
@@ -79,6 +81,7 @@ void ACPP_Character::Tick(float DeltaTime)
 	ObjectSearchTrace();
 	SmoothCameraFOV(DeltaTime);
 	SetMouseRate();
+	CalculateCrosshairSpread(DeltaTime);
 }
 
 void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -91,7 +94,8 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACPP_Character::Look);
 		EnhancedInputComponent->BindAction(SpeedAction, ETriggerEvent::Triggered, this, &ACPP_Character::SetSpeed);
 
-		EnhancedInputComponent->BindAction(JumppAction, ETriggerEvent::Triggered, this, &ACPP_Character::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACPP_Character::Jump);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ACPP_Character::SetCrouch);
 
  		EnhancedInputComponent->BindAction(GrabAndPickupAction, ETriggerEvent::Canceled, this, &ACPP_Character::PickUp);
 		EnhancedInputComponent->BindAction(GrabAndPickupAction, ETriggerEvent::Triggered, this, &ACPP_Character::GrabItem);
@@ -149,7 +153,7 @@ bool ACPP_Character::SetShpereTrace(FHitResult& HitResult)
 void ACPP_Character::Move(const FInputActionValue& Value)
 {
 	const FVector MovementVector =  Value.Get<FVector>();
-	if (IsValid(Controller))
+	if (IsValid(GetController()))
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -168,7 +172,7 @@ void ACPP_Character::Move(const FInputActionValue& Value)
 void ACPP_Character::Look(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
-	if (IsValid(Controller))
+	if (IsValid(GetController()))
 	{
 		AddControllerYawInput(LookAxisVector.X * MouseRate);
 		AddControllerPitchInput(LookAxisVector.Y * MouseRate);
@@ -260,11 +264,24 @@ void ACPP_Character::Aiming(const FInputActionValue& Value)
 {
 	if (PressKey(Value) && CharacterState == ECharacterStateTypes::Equiped && ActionState == ECharacterActionState::Normal)
 	{
-		bAiming = true;
+		bAiming = true;		
 	}
 	else
 	{
 		bAiming = false;
+	}
+}
+
+void ACPP_Character::SetCrouch(const FInputActionValue& Value)
+{
+	bool bcanCrouch = !GetCharacterMovement()->IsFalling() && PressKey(Value);
+	if (bcanCrouch && !GetCharacterMovement()->IsCrouching())
+	{
+		Crouch();
+	}
+	else if (bcanCrouch && GetCharacterMovement()->IsCrouching())
+	{
+		UnCrouch();
 	}
 }
 
@@ -317,6 +334,9 @@ void ACPP_Character::SetStateEquiped()
 
 	PlayEquipMontage("Equip");
 	SmoothSpringArmOffset(SpringArmSocketOffsetYValue, false);
+
+	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
+	playercontroller->SetHUDVisibility(true);
 	UE_LOG(LogTemp, Warning, TEXT("Equiped"));
 }
 
@@ -327,6 +347,9 @@ void ACPP_Character::SetStateUnEquiped()
 
 	PlayEquipMontage("UnEquip");
 	SmoothSpringArmOffset(0, true);
+
+	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
+	playercontroller->SetHUDVisibility(false);
 	UE_LOG(LogTemp, Warning, TEXT("UnEquiped"));
 }
 
@@ -393,6 +416,43 @@ void ACPP_Character::SetMouseRate()
 	{
 		MouseRate = ClampRnage(HipMouseRate);
 	}
+}
+
+void ACPP_Character::CalculateCrosshairSpread(float DeltaTime)
+{
+	FVector2D WalkSpeedRange{ 0.f, 600.f };
+	FVector2D VelocityMultiplierRange{ 0.f, 1.f };
+	FVector Velocity{ GetVelocity() };
+	Velocity.Z = 0.f;
+
+	CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(
+		WalkSpeedRange,
+		VelocityMultiplierRange,
+		Velocity.Size());
+
+	if (GetCharacterMovement()->IsFalling())
+	{
+		CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 2.25f, DeltaTime, 2.25f);
+	}
+	else
+	{
+		CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 0.f, DeltaTime, 30.f);
+	}
+
+	if (bAiming)
+	{
+		CrosshairSpreadMultiplier = FMath::FInterpTo(CrosshairSpreadMultiplier, 0.f, DeltaTime, 10.f);
+	}
+	else
+	{
+		CrosshairSpreadMultiplier = 0.25f + CrosshairVelocityFactor + CrosshairInAirFactor;
+	}
+
+}
+
+float ACPP_Character::GetCrosshairSpreadMultiplier() const
+{
+	return CrosshairSpreadMultiplier;
 }
 
 void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
