@@ -136,6 +136,12 @@ private:
 	ECharacterStateTypes CharacterState = ECharacterStateTypes::UnEquiped;
 	ECharacterActionState ActionState = ECharacterActionState::Normal;
 
+	float MoveDelfaultSpeed = 400.f;
+	float MoveRunSpeed = 600.f;
+	float MoveAimingSpeed = 320.f;
+	float MoveDelfaultSpeed_Crouch = 250.f;
+	float MoveAimingSpeed_Crouch = 200.f;
+
 	UPROPERTY()
 		AActor* HitResultObject;
 

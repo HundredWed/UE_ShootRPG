@@ -157,6 +157,7 @@ bool ACPP_Character::SetShpereTrace(FHitResult& HitResult)
 void ACPP_Character::Move(const FInputActionValue& Value)
 {
 	const FVector MovementVector =  Value.Get<FVector>();
+	CameraBoom->bEnableCameraLag = false;
 	if (IsValid(GetController()))
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -187,12 +188,12 @@ void ACPP_Character::SetSpeed(const FInputActionValue& Value)
 {
 	if (PressKey(Value))
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+		GetCharacterMovement()->MaxWalkSpeed = MoveRunSpeed;
 		UE_LOG(LogTemp, Warning, TEXT("Fest!!"));
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 400.f;
+		GetCharacterMovement()->MaxWalkSpeed = MoveDelfaultSpeed;
 		UE_LOG(LogTemp, Warning, TEXT("walk"));
 	}
 }
@@ -268,11 +269,27 @@ void ACPP_Character::Aiming(const FInputActionValue& Value)
 {
 	if (PressKey(Value) && CharacterState == ECharacterStateTypes::Equiped && ActionState == ECharacterActionState::Normal)
 	{
-		bAiming = true;		
+		bAiming = true;	
+		if (GetCharacterMovement()->IsCrouching())
+		{
+			GetCharacterMovement()->MaxWalkSpeedCrouched = MoveAimingSpeed_Crouch;
+		}
+		else
+		{
+			GetCharacterMovement()->MaxWalkSpeed = MoveAimingSpeed;
+		}
 	}
 	else
 	{
 		bAiming = false;
+		if (GetCharacterMovement()->IsCrouching())
+		{
+			GetCharacterMovement()->MaxWalkSpeedCrouched = MoveDelfaultSpeed_Crouch;
+		}
+		else
+		{
+			GetCharacterMovement()->MaxWalkSpeed = MoveDelfaultSpeed;
+		}
 	}
 }
 
@@ -281,11 +298,13 @@ void ACPP_Character::SetCrouch(const FInputActionValue& Value)
 	bool bcanCrouch = !GetCharacterMovement()->IsFalling() && PressKey(Value);
 	if (bcanCrouch && !GetCharacterMovement()->IsCrouching())
 	{
-		Crouch();
+		Crouch();	
+		CameraBoom->bEnableCameraLag = true;
 	}
 	else if (bcanCrouch && GetCharacterMovement()->IsCrouching())
 	{
 		UnCrouch();
+		CameraBoom->bEnableCameraLag = true;
 	}
 }
 
