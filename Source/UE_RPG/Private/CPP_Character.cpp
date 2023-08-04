@@ -62,6 +62,8 @@ void ACPP_Character::BeginPlay()
 	{
 		CameraManager->SetSpringArm(CameraBoom);
 		CameraManager->SetCamera(FollowCamera);
+
+		CameraManager->SetBeginCamera();
 	}
 
 	GraberComponent = FindComponentByClass<UGrabber>();
@@ -74,11 +76,6 @@ void ACPP_Character::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Graver component not found!!"));
 	}
 
-	if (IsValid(FollowCamera))
-	{
-		CameraDefaultFOV = FollowCamera->FieldOfView;
-		CameraCurrentFOV = CameraDefaultFOV;
-	}
 
 	Params.AddIgnoredActor(this);
 }
@@ -87,7 +84,6 @@ void ACPP_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	ObjectSearchTrace();
-	SmoothCameraFOV(DeltaTime);
 	SetMouseRate();
 	CalculateCrosshairSpread(DeltaTime);
 }
@@ -492,23 +488,4 @@ void ACPP_Character::SmoothSpringArmOffset(float NewYoffset, bool bOrientRotatio
 	CameraManager->NewValue = NewYoffset;
 }
 
-void ACPP_Character::SmoothCameraFOV(float DeltaTime)
-{
-	if (bAiming && CharacterState == ECharacterStateTypes::Equiped)
-	{
-		CameraCurrentFOV = FMath::FInterpTo(
-			CameraCurrentFOV,
-			CameraZoomedFOV,
-			DeltaTime,
-			ZoomInterpSpeed);
-	}
-	else
-	{
-		CameraCurrentFOV = FMath::FInterpTo(
-			CameraCurrentFOV,
-			CameraDefaultFOV,
-			DeltaTime,
-			ZoomInterpSpeed);
-	}
-	FollowCamera->SetFieldOfView(CameraCurrentFOV);
-}
+

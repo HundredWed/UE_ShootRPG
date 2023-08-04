@@ -91,7 +91,6 @@ public:
 	void GetViewPointVector(FVector& Location, FRotator& Rotation);
 
 	void SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement);
-	void SmoothCameraFOV(float DeltaTime);
 
 	bool PressKey(const FInputActionValue& Value);
 	class AWeapon* isWeapon(AActor* hitobject) const;
@@ -159,12 +158,6 @@ private:
 
 	//camera
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
-		float CameraZoomedFOV = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
-		float ZoomInterpSpeed = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
 		float MouseRate = 50;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
@@ -174,8 +167,6 @@ private:
 		float HipMouseRate = 50;
 
 	bool bAiming = false;
-	float CameraDefaultFOV = 0;
-	float CameraCurrentFOV = 0;
 
 	//crosshair
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
@@ -193,7 +184,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
 		float CrosshairShootingFactor;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		class UCameraManager* CameraManager;
 	
 };
