@@ -5,12 +5,12 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
-#include "Camera/CharacterSpringArm.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Grabber.h"
 #include "Item/Weapon.h"
 #include "Item/Gun/ShootGun.h"
 #include "CPP_Controller.h"
-
+#include "Camera/CameraManager.h"
 
 ACPP_Character::ACPP_Character()
 {
@@ -34,13 +34,15 @@ ACPP_Character::ACPP_Character()
 	GetCharacterMovement()->AirControl = 0.35f;
 
 
-	SpringArm = CreateDefaultSubobject<UCharacterSpringArm>(TEXT("CameraBoom"));
-	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->bUsePawnControlRotation = true;
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->bUsePawnControlRotation = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(SpringArm);
+	FollowCamera->SetupAttachment(CameraBoom);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	CameraManager = CreateDefaultSubobject<UCameraManager>(TEXT("Camera Manager"));
 }
 
 
@@ -54,6 +56,12 @@ void ACPP_Character::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+	}
+
+	if (IsValid(CameraManager))
+	{
+		CameraManager->SetSpringArm(CameraBoom);
+		CameraManager->SetCamera(FollowCamera);
 	}
 
 	GraberComponent = FindComponentByClass<UGrabber>();
@@ -481,12 +489,12 @@ float ACPP_Character::ClampRnage(float value)
 void ACPP_Character::SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement)
 {
 	GetCharacterMovement()->bOrientRotationToMovement = bOrientRotationToMovement;
-	SpringArm->NewValue = NewYoffset;
+	CameraManager->NewValue = NewYoffset;
 }
 
 void ACPP_Character::SmoothCameraFOV(float DeltaTime)
 {
-	if (bAiming)
+	if (bAiming && CharacterState == ECharacterStateTypes::Equiped)
 	{
 		CameraCurrentFOV = FMath::FInterpTo(
 			CameraCurrentFOV,

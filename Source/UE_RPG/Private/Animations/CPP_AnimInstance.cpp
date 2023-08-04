@@ -54,11 +54,11 @@ void UCPP_AnimInstance::TurnInplace()
 
 		RootYawOffset = UKismetMathLibrary::NormalizeAxis(RootYawOffset - subValueYaw);
 
-		if (GEngine) GEngine->AddOnScreenDebugMessage(
+		/*if (GEngine) GEngine->AddOnScreenDebugMessage(
 			2,
 			-1,
 			FColor::Red,
-			FString::Printf(TEXT("RootYawOffset: %f"), RootYawOffset));
+			FString::Printf(TEXT("RootYawOffset: %f"), RootYawOffset));*/
 
 		//Base GetBaseAimRotation
 		Turning();

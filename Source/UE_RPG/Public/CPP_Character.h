@@ -19,7 +19,7 @@ public:
 		class UCameraComponent* FollowCamera;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-		class UCharacterSpringArm* SpringArm;
+		class USpringArmComponent* CameraBoom;
 
 	//Input
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -193,6 +193,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
 		float CrosshairShootingFactor;
 
-	
+	UPROPERTY()
+		class UCameraManager* CameraManager;
 	
 };
