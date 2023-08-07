@@ -17,7 +17,5 @@ class UE_RPG_API AGrabbableItem : public AItem
 public:
 	AGrabbableItem();
 
-	UPROPERTY(VisibleAnywhere)
-		class UStaticMeshComponent* RootMesh;
 
 };

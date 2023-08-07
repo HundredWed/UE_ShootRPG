@@ -5,6 +5,5 @@
 
 AGrabbableItem::AGrabbableItem()
 {
-	RootMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Root"));
-	RootComponent = RootMesh;
+
 }

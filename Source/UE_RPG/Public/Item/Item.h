@@ -20,17 +20,42 @@ public:
 	
 	AItem();
 
-	FORCEINLINE void SetIsGrabbable(bool grabbable) { isGrabbalble = grabbable; }
+	/**Currently deemed unnecessary.*/
+	/**However, left for future reference.*/
+	/*FORCEINLINE void SetIsGrabbable(bool grabbable) { isGrabbalble = grabbable; }
 	FORCEINLINE bool GetIsGrabbable() { return isGrabbalble; }
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
+		bool isGrabbalble = true;*/
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	EItemState ItemState = EItemState::EIS_UnEquipped;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
-		bool isGrabbalble = true;
+	UPROPERTY(VisibleAnywhere, Category = "Item Component")
+		class UStaticMeshComponent* StaticMesh;
+
+	UPROPERTY(VisibleAnywhere, Category = "Item Component")
+		class USphereComponent* SphereComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Item Widget")
+		class UWidgetComponent* ItemStateWidjet;
+
+	
+	UFUNCTION()
+		virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
+			AActor* OtherActor, 
+			UPrimitiveComponent* OtherComp, 
+			int32 OtherBodyIndex, 
+			bool bFromSweep, 
+			const FHitResult& SweepResult);
+
+	UFUNCTION()
+		virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
+			AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, 
+			int32 OtherBodyIndex);
 private:
 	
 	
-
 };
