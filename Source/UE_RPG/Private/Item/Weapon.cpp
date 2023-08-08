@@ -16,7 +16,7 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	ItemStateWidjet->SetVisibility(true);
+	
 }
 void AWeapon::Tick(float DeltaTime)
 {

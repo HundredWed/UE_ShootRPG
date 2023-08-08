@@ -11,6 +11,7 @@
 #include "Item/Gun/ShootGun.h"
 #include "CPP_Controller.h"
 #include "Camera/CameraManager.h"
+#include "Item/Item.h"
 
 ACPP_Character::ACPP_Character()
 {
@@ -83,7 +84,11 @@ void ACPP_Character::BeginPlay()
 void ACPP_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	ObjectSearchTrace();
+	if (bCanSearchObject)
+	{
+		ObjectSearchTrace();
+	}
+	
 	SetMouseRate();
 	CalculateCrosshairSpread(DeltaTime);
 }
@@ -123,12 +128,24 @@ void ACPP_Character::ObjectSearchTrace()
 		if (IsValid(hitresult))
 		{
 			UE_LOG(LogTemp, Display, TEXT("%s"), *hitresult->GetActorNameOrLabel());
+
+			AItem* item = Cast<AItem>(hitresult);
+			if (IsValid(item) && item->GetWidgetComponent())
+			{
+				item->SetWidgeVisibility(true);
+			}
+
 			SetHitResultObject(hitresult);
 		}
 		
 	}
 	else
 	{
+		AItem* item = Cast<AItem>(HitResultObject);
+		if (IsValid(item) && item->GetWidgetComponent())
+		{
+			item->SetWidgeVisibility(false);
+		}
 		RemoveHitResultObject();
 	}
 }

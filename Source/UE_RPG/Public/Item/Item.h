@@ -27,6 +27,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
 		bool isGrabbalble = true;*/
 
+	FORCEINLINE	void SetWidgeVisibility(bool Visible);
+	FORCEINLINE class UWidgetComponent* GetWidgetComponent() { return ItemStateWidjet; }
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -55,7 +57,7 @@ protected:
 			AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, 
 			int32 OtherBodyIndex);
+
 private:
-	
 	
 };

@@ -125,6 +125,7 @@ public:
 	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
 	FORCEINLINE void RemoveHitResultObject();
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
+	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
 
 	
 
@@ -159,6 +160,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
 		float ShowItemRadius = 100.f;
+
+	bool bCanSearchObject = false;
 
 	FCollisionQueryParams Params;
 
