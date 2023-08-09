@@ -73,7 +73,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
+	void SreachItem();
 	void ObjectSearchTrace();
 	bool SetShpereTrace(FHitResult& HitResult);
 
@@ -95,6 +95,9 @@ public:
 	bool PressKey(const FInputActionValue& Value);
 	class AWeapon* isWeapon(AActor* hitobject) const;
 	void PickUpWeapon(AWeapon* weapon);
+
+	void ResetHitResultState();
+	void RemoveHitResultObject();
 
 	//CharacterState
     void SetStateEquiped();
@@ -123,7 +126,6 @@ public:
 
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
 	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
-	FORCEINLINE void RemoveHitResultObject();
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
 

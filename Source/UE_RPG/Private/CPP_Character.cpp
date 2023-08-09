@@ -84,11 +84,9 @@ void ACPP_Character::BeginPlay()
 void ACPP_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (bCanSearchObject)
-	{
-		ObjectSearchTrace();
-	}
 	
+	SreachItem();
+
 	SetMouseRate();
 	CalculateCrosshairSpread(DeltaTime);
 }
@@ -117,6 +115,20 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
+void ACPP_Character::SreachItem()
+{
+	if (bCanSearchObject)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Tick!!"));
+		ObjectSearchTrace();
+	}
+	else if (IsValid(HitResultObject) && !bCanSearchObject)
+	{
+		ResetHitResultState();
+		UE_LOG(LogTemp, Warning, TEXT("remove!!"));
+	}
+}
+
 void ACPP_Character::ObjectSearchTrace()
 {
 	FHitResult HitResult;
@@ -141,12 +153,7 @@ void ACPP_Character::ObjectSearchTrace()
 	}
 	else
 	{
-		AItem* item = Cast<AItem>(HitResultObject);
-		if (IsValid(item) && item->GetWidgetComponent())
-		{
-			item->SetWidgeVisibility(false);
-		}
-		RemoveHitResultObject();
+		ResetHitResultState();
 	}
 }
 
@@ -240,7 +247,7 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 	{
 		AWeapon* weapon = isWeapon(HitResultObject);
 		bool bweapon = IsValid(weapon);
-		if (bweapon)
+		if (bweapon && EquipedWeapon == nullptr)
 		{
 			PickUpWeapon(weapon);
 			return;
@@ -359,12 +366,21 @@ void ACPP_Character::PickUpWeapon(AWeapon* weapon)
 	weapon->SetOwner(this);
 	EquipedWeapon = weapon;
 	Params.AddIgnoredActor(weapon);
+}
 
-	USkeletalMeshComponent* setcollision = weapon->FindComponentByClass<USkeletalMeshComponent>();
-	if (IsValid(setcollision))
+void ACPP_Character::ResetHitResultState()
+{
+	AItem* item = Cast<AItem>(HitResultObject);
+	if (IsValid(item) && item->GetWidgetComponent())
 	{
-		setcollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
+		item->SetWidgeVisibility(false);
 	}
+	RemoveHitResultObject();
+}
+
+void ACPP_Character::RemoveHitResultObject()
+{
+	HitResultObject = nullptr;
 }
 
 void ACPP_Character::SetStateEquiped()
@@ -505,10 +521,7 @@ void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
 	HitResultObject = hitresultobject;
 }
 
-void ACPP_Character::RemoveHitResultObject()
-{
-	HitResultObject = nullptr;
-}
+
 
 float ACPP_Character::ClampRnage(float value)
 {

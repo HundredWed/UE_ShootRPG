@@ -5,5 +5,6 @@
 
 AGrabbableItem::AGrabbableItem()
 {
-
+	StaticMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
+	StaticMesh->SetAngularDamping(1.f);
 }

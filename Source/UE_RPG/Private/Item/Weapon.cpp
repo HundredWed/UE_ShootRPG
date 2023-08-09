@@ -9,14 +9,13 @@ AWeapon::AWeapon()
 	SphereComponent->SetupAttachment(GetRootComponent());
 	ItemStateWidjet->SetupAttachment(GetRootComponent());
 
-	StaticMesh->DestroyComponent();
 }
 
 
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	SetItemState(EItemState::EIS_UnEquipped);
 }
 void AWeapon::Tick(float DeltaTime)
 {
@@ -33,14 +32,41 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	Super::OnSphereEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 }
 
+
 void AWeapon::Equip(USceneComponent* Inparent, const FName& SocketName)
 {
 	AttachFunc(Inparent, SocketName);
-	ItemState = EItemState::EIS_Equipped;
+	SetItemState(EItemState::EIS_Equipped);
+	ItemStateWidjet->SetVisibility(false);
 }
 
 void AWeapon::AttachFunc(USceneComponent* Inparent, const FName& SocketName)
 {
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	WeaponMesh->AttachToComponent(Inparent, TransformRules, SocketName);
+}
+
+void AWeapon::SetItemState(EItemState State)
+{
+	Super::SetItemState(State);
+	switch (State)
+	{
+	case EItemState::EIS_UnEquipped:
+		/**item mesh*/
+		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetEnableGravity(false);
+		//StaticMesh->SetVisibility(true);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		break;
+	case EItemState::EIS_Equipped:
+		/**item mesh*/
+		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetEnableGravity(false);
+		//StaticMesh->SetVisibility(true);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	}
 }

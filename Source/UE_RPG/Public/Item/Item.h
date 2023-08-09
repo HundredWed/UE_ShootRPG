@@ -58,6 +58,19 @@ protected:
 			UPrimitiveComponent* OtherComp, 
 			int32 OtherBodyIndex);
 
+public:
+
+	virtual void SetItemState(EItemState State);
+
 private:
-	
+
+	/**common item states*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common item states", meta = (AllowPrivateAccess = "true"))
+		FString ItemName;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Common item states", meta = (AllowPrivateAccess = "true"))
+		int32 Price;
+
+
+
 };
