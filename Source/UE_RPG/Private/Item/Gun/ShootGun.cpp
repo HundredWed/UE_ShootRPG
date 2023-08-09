@@ -26,13 +26,13 @@ void AShootGun::PullTrigger()
 	
 
 	FHitResult HitResult;
-	FVector End;
+	
 
-	bool OnHit = GunTrace(HitResult,End);
+	bool OnHit = GunTrace(HitResult);
 
 	if (OnHit)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, HitResult.ImpactPoint,FRotator::ZeroRotator, ParticleSize);
+		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, HitResult.ImpactPoint, FRotator::ZeroRotator/*,ParticleSize*/);
 		//UE_LOG(LogTemp, Warning, TEXT("Hit!!"));
 
 		FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
@@ -41,6 +41,8 @@ void AShootGun::PullTrigger()
 		{
 			Beam->SetVectorParameter(FName("Target"), HitResult.ImpactPoint);
 		}
+
+		/**ondamege...*/
 	}
 	else
 	{
@@ -48,40 +50,62 @@ void AShootGun::PullTrigger()
 		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
 		if (IsValid(Beam))
 		{
-			Beam->SetVectorParameter(FName("Target"), End);
+			Beam->SetVectorParameter(FName("Target"), NoHitLocation);
 		}
 	}
 
 	
 }
 
-
-bool AShootGun::GunTrace(FHitResult& hitresult, FVector& end)
+bool AShootGun::GunTrace(FHitResult& hitresult)
 {
-	AController* OwnerController = GetOwnerController();
-	if (IsValid(OwnerController) == false)
-	{
-		return false;
-	}
-
-	FVector StartLocation;
-	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(StartLocation, Rotation);
-
-	FRotator spreadBullet = Rotation;
-
-	SpreadBulletRandomRange(spreadBullet);
-
-	end = StartLocation + spreadBullet.Vector() * MaxDir;
-	StartLocation = StartLocation + spreadBullet.Vector() * TraceStartPoint;
+	FVector StartLocation = SpawnPoint->GetComponentLocation();
+	FVector end = GetHitPointDirection();
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
 
-	//DrawDebugLine(GetWorld(), Location, End, FColor::Red, false, 5);
+	DrawDebugLine(GetWorld(), StartLocation, end, FColor::Red, false, 5);
 
 	return GetWorld()->LineTraceSingleByChannel(hitresult, StartLocation, end, ECC_GameTraceChannel2, Params);
+}
+
+FVector AShootGun::GetHitPointDirection()
+{
+	AController* OwnerController = GetOwnerController();
+	if (IsValid(OwnerController) == false)
+	{
+		return FVector::Zero();
+	}
+	FVector  location;
+	FRotator rotation;
+
+	OwnerController->GetPlayerViewPoint(location, rotation);
+
+	FRotator spreadBullet = rotation;
+	SpreadBulletRandomRange(spreadBullet);
+
+	/**between camera and player aiming issue*/
+	location = location + rotation.Vector() * TraceStartPoint;
+
+	FVector end = location + spreadBullet.Vector() * MaxDir;
+	NoHitLocation = end;
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
+
+	FHitResult hitresult;
+	bool onhit = GetWorld()->LineTraceSingleByChannel(hitresult, location, end, ECC_GameTraceChannel2, Params);
+	DrawDebugLine(GetWorld(), location, end, FColor::Blue, false, 5);
+
+	if (onhit)
+	{
+		return hitresult.ImpactPoint;
+	}
+
+	return NoHitLocation;
 }
 
 void AShootGun::SpreadBulletRandomRange(FRotator& randDir)
@@ -101,6 +125,10 @@ void AShootGun::SpreadBulletRandomRange(FRotator& randDir)
 
 	randDir += FRotator(randPich, randYaw, randRoll);
 }
+
+
+
+
 AController* AShootGun::GetOwnerController()
 {
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());

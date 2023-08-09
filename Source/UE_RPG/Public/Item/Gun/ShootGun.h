@@ -33,7 +33,9 @@ public:
 
 
 	void PullTrigger();
-	bool GunTrace(FHitResult& hitresult, FVector& End);
+	bool GunTrace(FHitResult& hitresult);
+	FVector GetHitPointDirection();
+
 	void SpreadBulletRandomRange(FRotator& randDir);
 	AController* GetOwnerController();
 protected:
@@ -41,5 +43,9 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	/**between camera and player aiming issue Value*/
 	float TraceStartPoint = 500.f;
+
+	/**when hitresult is not, BeamParticle Direction*/
+	FVector NoHitLocation = FVector::Zero();
 };
