@@ -56,7 +56,7 @@ void AShootGun::PullTrigger()
 }
 
 
-bool AShootGun::GunTrace(FHitResult& hitresult, FVector& End)
+bool AShootGun::GunTrace(FHitResult& hitresult, FVector& end)
 {
 	AController* OwnerController = GetOwnerController();
 	if (IsValid(OwnerController) == false)
@@ -64,15 +64,16 @@ bool AShootGun::GunTrace(FHitResult& hitresult, FVector& End)
 		return false;
 	}
 
-	FVector Location;
+	FVector StartLocation;
 	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(Location, Rotation);
+	OwnerController->GetPlayerViewPoint(StartLocation, Rotation);
 
 	FRotator spreadBullet = Rotation;
 
 	SpreadBulletRandomRange(spreadBullet);
 
-	End = Location + spreadBullet.Vector() * MaxDir;
+	end = StartLocation + spreadBullet.Vector() * MaxDir;
+	StartLocation = StartLocation + spreadBullet.Vector() * TraceStartPoint;
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
@@ -80,7 +81,7 @@ bool AShootGun::GunTrace(FHitResult& hitresult, FVector& End)
 
 	//DrawDebugLine(GetWorld(), Location, End, FColor::Red, false, 5);
 
-	return GetWorld()->LineTraceSingleByChannel(hitresult, Location, End, ECC_GameTraceChannel2, Params);
+	return GetWorld()->LineTraceSingleByChannel(hitresult, StartLocation, end, ECC_GameTraceChannel2, Params);
 }
 
 void AShootGun::SpreadBulletRandomRange(FRotator& randDir)

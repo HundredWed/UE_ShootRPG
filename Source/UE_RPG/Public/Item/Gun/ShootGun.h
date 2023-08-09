@@ -41,5 +41,5 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	
+	float TraceStartPoint = 500.f;
 };
