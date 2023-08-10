@@ -33,9 +33,9 @@ public:
 
 
 	void PullTrigger();
-	bool GunTrace(FHitResult& hitresult);
-	FVector GetHitPointDirection();
-
+	void ViewPointTrace(FHitResult& hitresult, FVector& endpoint);
+	void GunTrace(FHitResult& hitresult, FVector& endpoint);
+	
 	void SpreadBulletRandomRange(FRotator& randDir);
 	AController* GetOwnerController();
 protected:

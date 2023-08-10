@@ -22,61 +22,37 @@ void AShootGun::Tick(float DeltaTime)
 
 void AShootGun::PullTrigger()
 {
-	UGameplayStatics::PlaySoundAtLocation(this, ShootSound,GetActorLocation());
-	
-
-	FHitResult HitResult;
-	
-
-	bool OnHit = GunTrace(HitResult);
-
-	if (OnHit)
+	if (IsValid(ShootSound))
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, HitResult.ImpactPoint, FRotator::ZeroRotator/*,ParticleSize*/);
-		//UE_LOG(LogTemp, Warning, TEXT("Hit!!"));
-
-		FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
-		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
-		if (IsValid(Beam))
-		{
-			Beam->SetVectorParameter(FName("Target"), HitResult.ImpactPoint);
-		}
-
-		/**ondamege...*/
+		UGameplayStatics::PlaySoundAtLocation(this, ShootSound, GetActorLocation());
 	}
-	else
+	
+	FHitResult hitresult;
+	FVector hitpoint;
+
+	ViewPointTrace(hitresult, hitpoint);
+	GunTrace(hitresult, hitpoint);
+
+	if (IsValid(FireParticle))
 	{
-		FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
-		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
-		if (IsValid(Beam))
-		{
-			Beam->SetVectorParameter(FName("Target"), NoHitLocation);
-		}
+		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, hitpoint, FRotator::ZeroRotator, ParticleSize);
 	}
-
+	
+	FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
+	UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
+	if (IsValid(Beam))
+	{
+		Beam->SetVectorParameter(FName("Target"), hitpoint);
+	}
 	
 }
 
-bool AShootGun::GunTrace(FHitResult& hitresult)
-{
-	FVector StartLocation = SpawnPoint->GetComponentLocation();
-	FVector end = GetHitPointDirection();
-
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	Params.AddIgnoredActor(GetOwner());
-
-	DrawDebugLine(GetWorld(), StartLocation, end, FColor::Red, false, 5);
-
-	return GetWorld()->LineTraceSingleByChannel(hitresult, StartLocation, end, ECC_GameTraceChannel2, Params);
-}
-
-FVector AShootGun::GetHitPointDirection()
+void AShootGun::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
 {
 	AController* OwnerController = GetOwnerController();
 	if (IsValid(OwnerController) == false)
 	{
-		return FVector::Zero();
+		return ;
 	}
 	FVector  location;
 	FRotator rotation;
@@ -90,23 +66,44 @@ FVector AShootGun::GetHitPointDirection()
 	location = location + rotation.Vector() * TraceStartPoint;
 
 	FVector end = location + spreadBullet.Vector() * MaxDir;
-	NoHitLocation = end;
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
 
-	FHitResult hitresult;
 	bool onhit = GetWorld()->LineTraceSingleByChannel(hitresult, location, end, ECC_GameTraceChannel2, Params);
-	DrawDebugLine(GetWorld(), location, end, FColor::Blue, false, 5);
+	//DrawDebugLine(GetWorld(), location, end, FColor::Blue, false, 5); 
 
 	if (onhit)
 	{
-		return hitresult.ImpactPoint;
+		endpoint = hitresult.ImpactPoint;
+	}
+	else
+	{
+		endpoint = end;
 	}
 
-	return NoHitLocation;
 }
+
+void AShootGun::GunTrace(FHitResult& hitresult, FVector& endpoint)
+{
+	FVector StartLocation = SpawnPoint->GetComponentLocation();
+	FVector end = endpoint;
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
+
+	//DrawDebugLine(GetWorld(), StartLocation, end, FColor::Red, false, 5);
+
+	bool onhit = GetWorld()->LineTraceSingleByChannel(hitresult, StartLocation, end, ECC_GameTraceChannel2, Params);
+	if (onhit)
+	{
+		endpoint = hitresult.ImpactPoint;
+	}
+}
+
+
 
 void AShootGun::SpreadBulletRandomRange(FRotator& randDir)
 {
@@ -115,7 +112,7 @@ void AShootGun::SpreadBulletRandomRange(FRotator& randDir)
 	ACPP_Character* character = Cast<ACPP_Character>(GetOwner());
 	if (IsValid(character))
 	{
-		spreadrange = character->GetCrosshairSpreadMultiplier();
+		spreadrange = character->GetCrosshairSpreadMultiplier() + 0.2f;
 		//UE_LOG(LogTemp, Warning, TEXT("spreadrange!!"));
 	}
 

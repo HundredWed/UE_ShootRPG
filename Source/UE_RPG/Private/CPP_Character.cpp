@@ -501,7 +501,7 @@ void ACPP_Character::CalculateCrosshairSpread(float DeltaTime)
 	}
 	else
 	{
-		CrosshairSpreadMultiplier = 0.25f + CrosshairVelocityFactor + CrosshairInAirFactor;
+		CrosshairSpreadMultiplier = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor;
 	}
 
 }
