@@ -15,6 +15,9 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	StaticMesh->DestroyComponent();
+
 	SetItemState(EItemState::EIS_UnEquipped);
 }
 void AWeapon::Tick(float DeltaTime)
@@ -48,17 +51,27 @@ void AWeapon::AttachFunc(USceneComponent* Inparent, const FName& SocketName)
 
 void AWeapon::SetItemState(EItemState State)
 {
-	Super::SetItemState(State);
 	switch (State)
 	{
+		/**ECC_Visibility = Item Search Trace*/
+		/**ECC_GameTraceChannel1 = Grab Trace*/
+		/**ECC_GameTraceChannel2 = Gun(hit) Trace*/
+
 	case EItemState::EIS_UnEquipped:
 		/**item mesh*/
 		WeaponMesh->SetSimulatePhysics(false);
 		WeaponMesh->SetEnableGravity(false);
 		//StaticMesh->SetVisibility(true);
 		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Block);
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		/**overlap sphere*/
+		SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+		SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Ignore);
+		SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
+		SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
+		SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly); 
+
 		break;
 	case EItemState::EIS_Equipped:
 		/**item mesh*/
@@ -67,6 +80,9 @@ void AWeapon::SetItemState(EItemState State)
 		//StaticMesh->SetVisibility(true);
 		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		/**overlap sphere*/
+		SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		break;
 	}
 }

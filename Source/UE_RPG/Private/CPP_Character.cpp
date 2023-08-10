@@ -70,7 +70,7 @@ void ACPP_Character::BeginPlay()
 	GraberComponent = FindComponentByClass<UGrabber>();
 	if (IsValid(GraberComponent))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Found GraberComponent! "));
+		UE_LOG(LogTemp, Display, TEXT("Found GraberComponent! "));
 	}
 	else
 	{
@@ -119,19 +119,20 @@ void ACPP_Character::SreachItem()
 {
 	if (bCanSearchObject)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Tick!!"));
+		//UE_LOG(LogTemp, Display, TEXT("Tick!!"));
 		ObjectSearchTrace();
 	}
 	else if (IsValid(HitResultObject) && !bCanSearchObject)
 	{
 		ResetHitResultState();
-		UE_LOG(LogTemp, Warning, TEXT("remove!!"));
+		//UE_LOG(LogTemp, Display, TEXT("remove!!"));
 	}
 }
 
 void ACPP_Character::ObjectSearchTrace()
 {
 	FHitResult HitResult;
+
 	bool OnHit = SetShpereTrace(HitResult);
 
 	if (OnHit)
@@ -144,9 +145,18 @@ void ACPP_Character::ObjectSearchTrace()
 			AItem* item = Cast<AItem>(hitresult);
 			if (IsValid(item) && item->GetWidgetComponent())
 			{
-				item->SetWidgeVisibility(true);
+				item->SetWidgetVisibility(true);
 			}
 
+			if (IsValid(PrevHitResultObject))
+			{
+				if (PrevHitResultObject != item)
+				{
+					PrevHitResultObject->SetWidgetVisibility(false);
+				}
+			}
+
+			PrevHitResultObject = item;
 			SetHitResultObject(hitresult);
 		}
 		
@@ -172,7 +182,7 @@ bool ACPP_Character::SetShpereTrace(FHitResult& HitResult)
 		Location,
 		End,
 		FQuat::Identity,
-		ECC_GameTraceChannel1,
+		ECollisionChannel::ECC_GameTraceChannel3,
 		Sphere,
 		Params);
 }
@@ -193,8 +203,6 @@ void ACPP_Character::Move(const FInputActionValue& Value)
 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightVector, MovementVector.X);
-
-		//UE_LOG(LogTemp, Warning, TEXT("Move!!"));
 	}
 }
 
@@ -213,12 +221,12 @@ void ACPP_Character::SetSpeed(const FInputActionValue& Value)
 	if (PressKey(Value))
 	{
 		GetCharacterMovement()->MaxWalkSpeed = MoveRunSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("Fest!!"));
+		UE_LOG(LogTemp, Display, TEXT("Fest!!"));
 	}
 	else
 	{
 		GetCharacterMovement()->MaxWalkSpeed = MoveDelfaultSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("walk"));
+		UE_LOG(LogTemp, Display, TEXT("walk"));
 	}
 }
 
@@ -227,12 +235,12 @@ void ACPP_Character::GrabItem(const FInputActionValue& Value)
 	if (PressKey(Value))
 	{
 		GraberComponent->Grab();
-		UE_LOG(LogTemp, Warning, TEXT("Grab"));
+		UE_LOG(LogTemp, Display, TEXT("Grab"));
 	}
 	else
 	{
 		GraberComponent->Release();
-		UE_LOG(LogTemp, Warning, TEXT("Release"));
+		UE_LOG(LogTemp, Display, TEXT("Release"));
 	}
 }
 
@@ -254,7 +262,7 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 		}
 
 		//else item
-		UE_LOG(LogTemp, Warning, TEXT("PickUp!!"));
+		//UE_LOG(LogTemp, Display, TEXT("PickUp!!"));
 	}
 	
 }
@@ -373,7 +381,13 @@ void ACPP_Character::ResetHitResultState()
 	AItem* item = Cast<AItem>(HitResultObject);
 	if (IsValid(item) && item->GetWidgetComponent())
 	{
-		item->SetWidgeVisibility(false);
+		item->SetWidgetVisibility(false);
+	}
+
+	if (IsValid(PrevHitResultObject))
+	{
+		PrevHitResultObject->SetWidgetVisibility(false);
+		PrevHitResultObject = nullptr;
 	}
 	RemoveHitResultObject();
 }
@@ -393,7 +407,7 @@ void ACPP_Character::SetStateEquiped()
 
 	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
 	playercontroller->SetHUDVisibility(true);
-	UE_LOG(LogTemp, Warning, TEXT("Equiped"));
+	UE_LOG(LogTemp, Display, TEXT("Equiped"));
 }
 
 void ACPP_Character::SetStateUnEquiped()
@@ -406,7 +420,7 @@ void ACPP_Character::SetStateUnEquiped()
 
 	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
 	playercontroller->SetHUDVisibility(false);
-	UE_LOG(LogTemp, Warning, TEXT("UnEquiped"));
+	UE_LOG(LogTemp, Display, TEXT("UnEquiped"));
 }
 
 bool ACPP_Character::CanAttackState()
@@ -444,7 +458,7 @@ void ACPP_Character::HoldWeapon()
 {
 	if (IsValid(EquipedWeapon))
 	{
-		EquipedWeapon->Equip(GetMesh(), "weapon_socket_r");
+		EquipedWeapon->AttachFunc(GetMesh(), "weapon_socket_r");
 	}
 }
 
@@ -452,13 +466,13 @@ void ACPP_Character::UnHoldWeapon()
 {
 	if (IsValid(EquipedWeapon))
 	{
-		EquipedWeapon->Equip(GetMesh(), "weapon_socket_back");
+		EquipedWeapon->AttachFunc(GetMesh(), "weapon_socket_back");
 	}
 }
 
 void ACPP_Character::EquippingEnd()
 {
-	UE_LOG(LogTemp, Warning, TEXT("EquippingEnd!"));
+	UE_LOG(LogTemp, Display, TEXT("EquippingEnd!"));
 	ActionState = ECharacterActionState::Normal;
 }
 

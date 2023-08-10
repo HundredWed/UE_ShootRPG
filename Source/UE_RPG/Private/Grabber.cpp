@@ -1,7 +1,7 @@
 #include "Grabber.h"
 #include "Engine/World.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
-#include "Item/Item.h"
+#include "Item/GrabbableItem.h"
 UGrabber::UGrabber()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -46,22 +46,39 @@ void UGrabber::Grab()
 
 	if (OnHit)
 	{
+		UE_LOG(LogTemp, Display, TEXT("OnHit grab!!!"));
 		UPrimitiveComponent* HitComponent = hitresult.GetComponent();
 
 		if (IsValid(HitComponent) == false)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Grab HitComponent is not!!!"));
 			return;
 		}
 
 		WakeUp(HitComponent);
 		AActor* HitActor = hitresult.GetActor();
-		HitActor->Tags.Add("Grabbed");
-		PhysicsHandle->GrabComponentAtLocationWithRotation(
-			HitComponent,
-			NAME_None,
-			hitresult.ImpactPoint,
-			GetOwner()->GetActorRotation()
-		);
+		if (IsValid(HitActor))
+		{
+			HitActor->Tags.Add("Grabbed");
+			PhysicsHandle->GrabComponentAtLocationWithRotation(
+				HitComponent,
+				NAME_None,
+				hitresult.ImpactPoint,
+				GetOwner()->GetActorRotation()
+			);
+
+			AGrabbableItem* Grabbeditem = Cast<AGrabbableItem>(HitActor);
+			if (IsValid(Grabbeditem))
+			{
+				Grabbeditem->SetStateEquiped();
+			}
+
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Grab HitActor is not!!!"));
+		}
+		
 	}
 }
 
@@ -78,6 +95,12 @@ void UGrabber::Release()
 		AActor* GrabbedActor = PhysicsHandle->GetGrabbedComponent()->GetOwner();
 		GrabbedActor->Tags.Remove("Grabbed");
 		PhysicsHandle->ReleaseComponent();
+
+		AGrabbableItem* Grabbeditem = Cast<AGrabbableItem>(GrabbedActor);
+		if (IsValid(Grabbeditem))
+		{
+			Grabbeditem->SetStateUnEquiped();
+		}
 	}
 }
 
@@ -100,10 +123,10 @@ UPhysicsHandleComponent* UGrabber::GetPhysicsHandle() const
 	UPhysicsHandleComponent* PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 	if (IsValid(PhysicsHandle) == false)
 	{
-		UE_LOG(LogTemp, Error, TEXT("PhysicsHandle is Not!!"));
+		UE_LOG(LogTemp, Warning, TEXT("PhysicsHandle is Not!!"));
 	}
 
-	//UE_LOG(LogTemp, Warning, TEXT("succeed"));
+	//UE_LOG(LogTemp, Display, TEXT("succeed"));
 	return PhysicsHandle;
 }
 

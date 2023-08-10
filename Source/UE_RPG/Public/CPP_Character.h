@@ -21,7 +21,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class USpringArmComponent* CameraBoom;
 
-	//Input
+	/**Input*/
 	UPROPERTY(EditAnywhere, Category = Input)
 		class UInputMappingContext* DefaultMappingContext;
 
@@ -52,7 +52,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* AimingAction;
 
-	//Montage
+	/**Montage*/
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* EquipMontage;
 
@@ -62,7 +62,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* AimingFireMontage;
 
-	//spring arm
+	/**spring arm*/
 	UPROPERTY(EditAnywhere, Category = "EditValue")
 		float SpringArmSocketOffsetYValue = 100.f;
 
@@ -77,7 +77,7 @@ public:
 	void ObjectSearchTrace();
 	bool SetShpereTrace(FHitResult& HitResult);
 
-	//Input
+	/**Input*/
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void SetSpeed(const FInputActionValue& Value);
@@ -99,12 +99,12 @@ public:
 	void ResetHitResultState();
 	void RemoveHitResultObject();
 
-	//CharacterState
+	/**CharacterState*/
     void SetStateEquiped();
 	void SetStateUnEquiped();
 	bool CanAttackState();
 
-	//Montage
+	/**Montage*/
 	void PlayEquipMontage(FName NotifyName);
 	void PlayFireMontage(UAnimMontage* montage);
 
@@ -135,7 +135,7 @@ private:
 
 	float ClampRnage(float value);
 
-	//character states
+	/**character states*/
 	ECharacterStateTypes CharacterState = ECharacterStateTypes::UnEquiped;
 	ECharacterActionState ActionState = ECharacterActionState::Normal;
 
@@ -147,16 +147,18 @@ private:
 
 	UPROPERTY()
 		AActor* HitResultObject;
+	UPROPERTY()
+		class AItem* PrevHitResultObject;
 
-	//For get Grab & Release Func 
+	/**For get Grab& Release Func*/
 	UPROPERTY()
 		class UGrabber* GraberComponent;
 
-	//check 'is EquipedWeapon?' for  HoldWeapon & UnHoldWeapon Func
+	/**check 'is EquipedWeapon?' for  HoldWeapon& UnHoldWeapon Func*/
 	UPROPERTY()
 		class AWeapon* EquipedWeapon;
 
-	//item trace
+	/**item trace*/
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
 		float ShowItemDistance = 100.f;
 
@@ -167,7 +169,7 @@ private:
 
 	FCollisionQueryParams Params;
 
-	//camera
+	/**camera*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
 		float MouseRate = 50;
 
@@ -179,7 +181,7 @@ private:
 
 	bool bAiming = false;
 
-	//crosshair
+	/**crosshair*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
 		float CrosshairSpreadMultiplier;
 

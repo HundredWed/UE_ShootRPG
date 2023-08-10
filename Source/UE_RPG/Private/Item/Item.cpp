@@ -17,7 +17,8 @@ AItem::AItem()
 	
 }
 
-void AItem::SetWidgeVisibility(bool Visible)
+
+void AItem::SetWidgetVisibility(bool Visible)
 {
 	ItemStateWidjet->SetVisibility(Visible);
 }
@@ -36,7 +37,6 @@ void AItem::BeginPlay()
 	{
 		ItemStateWidjet->SetVisibility(false);
 	}
-	
 }
 
 void AItem::Tick(float DeltaTime)
@@ -63,36 +63,9 @@ void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	}
 }
 
-void AItem::SetItemState(EItemState State)
+void AItem::SetItemState(EItemState Stat)
 {
-	switch (State)
-	{
-	case EItemState::EIS_UnEquipped:
-		/**item mesh*/
-		StaticMesh->SetSimulatePhysics(false);
-		StaticMesh->SetEnableGravity(false);
-		//StaticMesh->SetVisibility(true);
-		StaticMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		StaticMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
-		StaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		/**overlap sphere*/
-		SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-		SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
-		SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
-		SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		break;
-	case EItemState::EIS_Equipped:
-		/**item mesh*/
-		StaticMesh->SetSimulatePhysics(false);
-		StaticMesh->SetEnableGravity(false);
-		//StaticMesh->SetVisibility(true);
-		StaticMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		StaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		/**overlap sphere*/
-		SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		break;
-	}
+
 }
 
 

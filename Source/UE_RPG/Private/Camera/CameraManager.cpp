@@ -73,9 +73,12 @@ void UCameraManager::SetBeginCamera()
 {
 	if (IsValid(Camera))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Camera!!"));
 		CameraDefaultFOV = Camera->FieldOfView;
 		CameraCurrentFOV = CameraDefaultFOV;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("no camera!!"));
 	}
 }
 
