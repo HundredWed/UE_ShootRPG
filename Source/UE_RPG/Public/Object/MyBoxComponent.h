@@ -16,6 +16,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+
+	UPROPERTY(VisibleAnywhere)
+		class USceneComponent* AttachKey;
+
+	UPROPERTY(VisibleAnywhere)
+		class USphereComponent* SphereComponent;
+
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -26,9 +34,26 @@ public:
 
 private:
 	UPROPERTY(EditAnyWhere)
-	FName ActorTag;
+		FName ActorTag;
+
+	
 
 	class UMover* Mover;
 
 	AActor* GetAcceptableActor() const;
+
+	
+	void OnOverlap(UPrimitiveComponent* OverlappedComponent,
+			AActor* OtherActor,
+			UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex,
+			bool bFromSweep,
+			const FHitResult& SweepResult);
+
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent,
+			AActor* OtherActor,
+			UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex);
+
+	bool isPlayerIn = false;
 };

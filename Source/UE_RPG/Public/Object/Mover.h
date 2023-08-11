@@ -19,19 +19,23 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void MoveStart(float deltatime);
 	void SetShouldMove(bool isMove);
 
 
 	UPROPERTY(EditAnywhere)
-	bool moving = false;
+		bool moving = false;
 
 	UPROPERTY(EditAnywhere)
-	FVector MoveOffset;
+		FVector MoveOffset = FVector::Zero();
+		
+	UPROPERTY(EditAnywhere)
+		FVector TagetPos = FVector::Zero();
 
 	UPROPERTY(EditAnywhere)
-	float MoveTime = 4;
+		float MoveTime = 4;
 
-	FVector Pos;
+	FVector Pos = FVector::Zero();
 
 private:
 		
