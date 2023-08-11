@@ -40,6 +40,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Object Component")
 		class UBoxComponent* KeyBoxComponent;
 
+	/**compare gate tag with key tag */
 	UPROPERTY(EditAnyWhere)
 		FName ActorTag;
 
@@ -57,6 +58,7 @@ private:
 			UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex);
 
+	/**mover component*/
 	UPROPERTY()
 		class UMover* Mover;
 

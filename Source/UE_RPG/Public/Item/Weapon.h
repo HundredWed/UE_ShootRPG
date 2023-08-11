@@ -33,11 +33,14 @@ protected:
 		AActor* OtherActor, 
 		UPrimitiveComponent* OtherComp, 
 		int32 OtherBodyIndex) override;
+
+	/**weapon states*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon item states", meta = (AllowPrivateAccess = "true"))
+		int32 ATK = 0;
 public:
 
 	virtual void SetItemState(EItemState State) override;
 private:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon item states", meta = (AllowPrivateAccess = "true"))
-		int32 ATK;
+	
 };

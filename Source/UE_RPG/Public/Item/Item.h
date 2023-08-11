@@ -42,7 +42,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
 		class USphereComponent* SphereComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Item Widget")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item Widget")
 		class UWidgetComponent* ItemStateWidjet;
 
 	
@@ -61,16 +61,18 @@ protected:
 			int32 OtherBodyIndex);
 
 	virtual void SetItemState(EItemState Stat);
+
+	/**common item states*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common item states", meta = (AllowPrivateAccess = "true"))
+		FString ItemName = "Item";
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common item states", meta = (AllowPrivateAccess = "true"))
+		int32 Price = 0;
 public:
 
 private:
 
-	/**common item states*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Common item states", meta = (AllowPrivateAccess = "true"))
-		FString ItemName;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Common item states", meta = (AllowPrivateAccess = "true"))
-		int32 Price;
+	
 
 
 
