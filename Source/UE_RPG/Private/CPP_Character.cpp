@@ -7,11 +7,12 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Grabber.h"
+#include "Item/Item.h"
 #include "Item/Weapon.h"
 #include "Item/Gun/ShootGun.h"
 #include "CPP_Controller.h"
 #include "Camera/CameraManager.h"
-#include "Item/Item.h"
+#include "Inventory.h"
 
 ACPP_Character::ACPP_Character()
 {
@@ -75,6 +76,16 @@ void ACPP_Character::BeginPlay()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Graver component not found!!"));
+	}
+
+	GameInventory = FindComponentByClass<UInventory>();
+	if (IsValid(GameInventory))
+	{
+		UE_LOG(LogTemp, Display, TEXT("Found Inventory! "));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Inventory component not found!!"));
 	}
 
 
@@ -157,7 +168,7 @@ void ACPP_Character::ObjectSearchTrace()
 			}
 
 			PrevHitResultObject = item;
-			SetHitResultObject(hitresult);
+			SetHitResultObject(item);
 		}
 		
 	}
@@ -263,6 +274,10 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 
 		//else item
 		//UE_LOG(LogTemp, Display, TEXT("PickUp!!"));
+		TArray<AItem*> inventory = GameInventory->GetInventory();
+		inventory.Add(HitResultObject);
+		RemoveHitResultObject();
+
 	}
 	
 }
@@ -270,11 +285,11 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 void ACPP_Character::Equip(const FInputActionValue& Value)
 {
 	bool bEquipedWeapon = IsValid(EquipedWeapon);
-	if (CharacterState == ECharacterStateTypes::UnEquiped && bEquipedWeapon)
+	if (CanEquipState() && bEquipedWeapon)
 	{
 		SetStateEquiped();
 	}
-	else if(CharacterState == ECharacterStateTypes::Equiped)
+	else if(CanUnEquipState() && bEquipedWeapon)
 	{
 		SetStateUnEquiped();
 	}
@@ -428,6 +443,20 @@ bool ACPP_Character::CanAttackState()
 	return CharacterState == ECharacterStateTypes::Equiped && ActionState == ECharacterActionState::Normal;
 }
 
+bool ACPP_Character::CanEquipState()
+{
+	return CharacterState == ECharacterStateTypes::UnEquiped 
+		&& !GetCharacterMovement()->IsFalling() 
+		&& ActionState == ECharacterActionState::Normal;
+}
+
+bool ACPP_Character::CanUnEquipState()
+{
+	return CharacterState == ECharacterStateTypes::Equiped
+		&& !GetCharacterMovement()->IsFalling()
+		&& ActionState == ECharacterActionState::Normal;;
+}
+
 void ACPP_Character::PlayEquipMontage(FName NotifyName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -525,7 +554,7 @@ float ACPP_Character::GetCrosshairSpreadMultiplier() const
 	return CrosshairSpreadMultiplier;
 }
 
-void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
+void ACPP_Character::SetHitResultObject(AItem* hitresultobject)
 {
 	if (HitResultObject != nullptr)
 	{

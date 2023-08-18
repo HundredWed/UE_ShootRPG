@@ -94,7 +94,7 @@ public:
 
 	bool PressKey(const FInputActionValue& Value);
 	class AWeapon* isWeapon(AActor* hitobject) const;
-	void PickUpWeapon(AWeapon* weapon);
+	void PickUpWeapon(class AWeapon* weapon);
 
 	void ResetHitResultState();
 	void RemoveHitResultObject();
@@ -103,6 +103,8 @@ public:
     void SetStateEquiped();
 	void SetStateUnEquiped();
 	bool CanAttackState();
+	bool CanEquipState();
+	bool CanUnEquipState();
 
 	/**Montage*/
 	void PlayEquipMontage(FName NotifyName);
@@ -125,7 +127,7 @@ public:
 		float GetCrosshairSpreadMultiplier() const;
 
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
-	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
+	FORCEINLINE void SetHitResultObject(class AItem* hitresultobject);
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
 
@@ -146,7 +148,7 @@ private:
 	float MoveAimingSpeed_Crouch = 200.f;
 
 	UPROPERTY()
-		AActor* HitResultObject;
+		class AItem* HitResultObject;
 	UPROPERTY()
 		class AItem* PrevHitResultObject;
 
@@ -199,5 +201,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		class UCameraManager* CameraManager;
+
+
+	/**inventory*/
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		class UInventory* GameInventory;
 	
 };

@@ -77,8 +77,9 @@ void AMoveObject::AttachKey()
 			Component->SetSimulatePhysics(false);
 		}
 
-		//Actor->AttachToComponent(AttachPoint, FAttachmentTransformRules::KeepWorldTransform);
 		Actor->SetActorLocation(AttachPoint->GetComponentLocation());
+		Actor->AttachToComponent(AttachPoint, FAttachmentTransformRules::KeepWorldTransform);
+
 		Mover->SetShouldMove(true);
 	}
 	else

@@ -65,5 +65,6 @@ private:
 	void AttachKey();
 	AActor* GetAcceptableActor() const;
 
+	/**chek Player in sphere Area for active tick*/
 	bool isPlayerIn = false;
 };
