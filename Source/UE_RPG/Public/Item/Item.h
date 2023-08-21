@@ -58,6 +58,8 @@ public:
 
 	FORCEINLINE	void SetWidgetVisibility(bool Visible);
 	FORCEINLINE class UWidgetComponent* GetWidgetComponent() { return ItemStateWidjet; }
+	FORCEINLINE FItemInfo GetItemInfo() { return ItemInfo; }
+	FORCEINLINE void SetItemInfo(FItemInfo iteminfo) { ItemInfo = iteminfo; }
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -95,6 +97,8 @@ protected:
 	virtual void SetItemState(EItemState Stat);
 
 public:
+
+	
 
 private:
 

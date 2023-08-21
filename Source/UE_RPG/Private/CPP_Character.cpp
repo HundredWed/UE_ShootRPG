@@ -45,6 +45,8 @@ ACPP_Character::ACPP_Character()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	CameraManager = CreateDefaultSubobject<UCameraManager>(TEXT("Camera Manager"));
+
+	GameInventory = CreateDefaultSubobject<UInventory>(TEXT("Inventory"));
 }
 
 
