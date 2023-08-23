@@ -90,7 +90,7 @@ void ACPP_Character::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Inventory component not found!!"));
 	}
 
-
+	/**ignore from item trace*/
 	Params.AddIgnoredActor(this);
 }
 
@@ -124,6 +124,8 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ACPP_Character::Attack);
 
 		EnhancedInputComponent->BindAction(AimingAction, ETriggerEvent::Triggered, this, &ACPP_Character::Aiming);
+
+		EnhancedInputComponent->BindAction(InventoryToggle, ETriggerEvent::Triggered, this, &ACPP_Character::InventoryVisibility);
 	}
 
 }
@@ -357,7 +359,22 @@ void ACPP_Character::SetCrouch(const FInputActionValue& Value)
 	}
 }
 
-
+void ACPP_Character::InventoryVisibility(const FInputActionValue& Value)
+{
+	if (PressKey(Value))
+	{
+		if (isVisible)
+		{
+			GameInventory->HideInventory();
+			isVisible = false;
+		}
+		else
+		{
+			GameInventory->ShowInventory();
+			isVisible = true;
+		}
+	}
+}
 void ACPP_Character::GetViewPointVector(FVector& Location, FRotator& Rotation)
 {
 	AController* MyController = GetController();
@@ -565,6 +582,8 @@ void ACPP_Character::SetHitResultObject(AItem* hitresultobject)
 
 	HitResultObject = hitresultobject;
 }
+
+
 
 
 

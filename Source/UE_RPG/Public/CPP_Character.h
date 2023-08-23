@@ -52,6 +52,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* AimingAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+		class UInputAction* InventoryToggle;
+
 	/**Montage*/
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* EquipMontage;
@@ -87,6 +90,7 @@ public:
 	void Attack(const FInputActionValue& Value);
 	void Aiming(const FInputActionValue& Value);
 	void SetCrouch(const FInputActionValue& Value);
+	void InventoryVisibility(const FInputActionValue& Value);
 
 	void GetViewPointVector(FVector& Location, FRotator& Rotation);
 
@@ -216,5 +220,5 @@ private:
 	UPROPERTY(EditAnywhere, Category = "InventoryComponent", meta = (AllowPrivateAccess = "true"))
 		int32 InventoryRowSize = 5;
 
-	
+	bool isVisible = true;
 };

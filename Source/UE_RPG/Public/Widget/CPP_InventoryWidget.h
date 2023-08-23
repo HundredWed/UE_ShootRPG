@@ -30,10 +30,13 @@ public:
 	UPROPERTY()
 		TArray<class UCPP_Slot*> SlotWidgetArray;
 
-	
+public:	
 
 	UFUNCTION()
 		void GenerateSlotWidget(int32 slotsParRow);
+
+	UFUNCTION()
+		void CloseWidget();
 
 private:
 

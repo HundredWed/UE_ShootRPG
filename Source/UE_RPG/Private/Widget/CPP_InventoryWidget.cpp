@@ -10,6 +10,8 @@
 void UCPP_InventoryWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	CloseButton->OnClicked.AddDynamic(this, &UCPP_InventoryWidget::CloseWidget);
 }
 
 void UCPP_InventoryWidget::GenerateSlotWidget(int32 slotsParRow)
@@ -43,4 +45,9 @@ void UCPP_InventoryWidget::GenerateSlotWidget(int32 slotsParRow)
 	}
 	
 
+}
+
+void UCPP_InventoryWidget::CloseWidget()
+{
+	InventoryRef->HideInventory();
 }

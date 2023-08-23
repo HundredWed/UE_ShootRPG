@@ -34,23 +34,23 @@ class UE_RPG_API UInventory : public UActorComponent
 public:	
 	
 	UInventory();
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-protected:
-	
-	virtual void BeginPlay() override;
 
-public:	
-	
 	/**¾È¾¸*/
 	FORCEINLINE TArray<class AItem*> GetInventory() { return Inventory; }
 
-	FInventorySlot Slot;
-
+	/**main panel widget*/
 	UPROPERTY(EditAnywhere, Category = "Main Widget")
 		TSubclassOf< class UMainPanelWidget> MainPanelclass;
 
+	/**inventory slot*/
 	UPROPERTY()
 		TArray<FInventorySlot> SlotsArray;
+protected:
+	
+	virtual void BeginPlay() override;
+	
+public:
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	/**inventory function*/
 	bool IsSlotEmpty(int32 index);
