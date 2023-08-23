@@ -8,12 +8,40 @@
 #include "Components/TextBlock.h"
 #include "Item/Item.h"
 
-UCPP_Slot::UCPP_Slot()
+void UCPP_Slot::UpdateSlot(int32 index)
 {
+	if (IsValid(Inventory))
+	{
+		bool isSlotEmpty = Inventory->IsSlotEmpty(index); 
 
+		if (isSlotEmpty)
+		{
+			SlotButton->SetIsEnabled(false);
+			ItemIcon->SetVisibility(ESlateVisibility::Hidden);
+			TextAmount->SetVisibility(ESlateVisibility::Hidden);
+		}
+		else
+		{
+			SlotButton->SetIsEnabled(true);
+			AItem item;
+			int32 amount;
+			Inventory->GetItemInfoIndex(index, item, amount);
+
+			ItemIcon->SetBrushFromTexture(item.GetItemInfo().IconTexture);
+			ItemIcon->SetVisibility(ESlateVisibility::HitTestInvisible);
+
+			if (item.GetItemInfo().bCanStacked)
+			{
+				TextAmount->SetText(FText::Format(NSLOCTEXT("CPP_Slot", "TextAmount", "x{0}"), amount));
+				TextAmount->SetVisibility(ESlateVisibility::HitTestInvisible);
+			}
+			else
+			{
+				TextAmount->SetVisibility(ESlateVisibility::Hidden);
+			}
+
+		}
+	}
 }
 
-void UCPP_Slot::UpdateSlot()
-{
 
-}

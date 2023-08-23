@@ -48,6 +48,7 @@ public:
 	void AddItem(class AItem* item, int32 amount);
 	bool SearchEmptySlot(int32& emptySlotIndex);
 	bool SearchFreeStackSlot(class AItem* item, int32& canStackedSlotIndex);
+	void GetItemInfoIndex(const int32 index, class AItem& item, int32& amount);
 
 	/**inventory widget function*/
 	FORCEINLINE void ShowInventory() {

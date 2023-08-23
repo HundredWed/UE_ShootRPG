@@ -185,6 +185,12 @@ bool UInventory::SearchFreeStackSlot(class AItem* item, int32& canStackedSlotInd
 	return false;
 }
 
+void UInventory::GetItemInfoIndex(const int32 index, AItem& item, int32& amount)
+{
+	item.SetItemInfo(SlotsArray[index].Item->GetItemInfo());
+	amount = SlotsArray[index].ItemAmount;
+}
+
 
 
 
