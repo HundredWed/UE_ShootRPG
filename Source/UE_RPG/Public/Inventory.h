@@ -14,6 +14,9 @@ struct FInventorySlot : public FTableRowBase
 {
 	GENERATED_BODY()
 
+		FInventorySlot() :Item(nullptr), ItemAmount(0) {};
+
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class AItem* Item;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -38,17 +41,25 @@ protected:
 
 public:	
 	
+	/**¾È¾¸*/
 	FORCEINLINE TArray<class AItem*> GetInventory() { return Inventory; }
 
 	FInventorySlot Slot;
 
+	UPROPERTY(EditAnywhere, Category = "Main Widget")
+		TSubclassOf< class UMainPanelWidget> MainPanelclass;
+
+	UPROPERTY()
+		TArray<FInventorySlot> SlotsArray;
 
 	/**inventory function*/
 	bool IsSlotEmpty(int32 index);
 	void AddItem(class AItem* item, int32 amount);
 	bool SearchEmptySlot(int32& emptySlotIndex);
 	bool SearchFreeStackSlot(class AItem* item, int32& canStackedSlotIndex);
-	void GetItemInfoIndex(const int32 index, class AItem& item, int32& amount);
+
+	UFUNCTION()
+		FInventorySlot GetSlotInfoIndex(const int32 index);
 
 	/**inventory widget function*/
 	FORCEINLINE void ShowInventory() {
@@ -63,16 +74,19 @@ public:
 private:
 
 	/**inventory value*/
+
+	/**¾È¾¸*/
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		TArray<class AItem*> Inventory;
-
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		TArray<FInventorySlot> SlotsArray;
 
 	int32 MaxStackSize = 99;
 	
 	/**inventory widget value*/
 	UCPP_InventoryWidget* InventoryWidget;
-	
 
+	UPROPERTY()
+		class ACPP_Character* PlayerRef;
+
+	UPROPERTY()
+		class UMainPanelWidget* MainPanelWidget;
 };

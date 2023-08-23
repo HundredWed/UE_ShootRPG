@@ -8,11 +8,16 @@
 #include "Components/TextBlock.h"
 #include "Item/Item.h"
 
+void UCPP_Slot::NativeConstruct()
+{
+	Super::NativeConstruct();
+}
+
 void UCPP_Slot::UpdateSlot(int32 index)
 {
-	if (IsValid(Inventory))
+	if (IsValid(InventoryRef))
 	{
-		bool isSlotEmpty = Inventory->IsSlotEmpty(index); 
+		bool isSlotEmpty = InventoryRef->IsSlotEmpty(index);
 
 		if (isSlotEmpty)
 		{
@@ -23,14 +28,15 @@ void UCPP_Slot::UpdateSlot(int32 index)
 		else
 		{
 			SlotButton->SetIsEnabled(true);
-			AItem item;
-			int32 amount;
-			Inventory->GetItemInfoIndex(index, item, amount);
+			FInventorySlot slotinfo = InventoryRef->GetSlotInfoIndex(index);
+			AItem* item = slotinfo.Item;
+			int32 amount = slotinfo.ItemAmount;
+			
 
-			ItemIcon->SetBrushFromTexture(item.GetItemInfo().IconTexture);
+			ItemIcon->SetBrushFromTexture(item->GetItemInfo().IconTexture);
 			ItemIcon->SetVisibility(ESlateVisibility::HitTestInvisible);
 
-			if (item.GetItemInfo().bCanStacked)
+			if (item->GetItemInfo().bCanStacked)
 			{
 				TextAmount->SetText(FText::Format(NSLOCTEXT("CPP_Slot", "TextAmount", "x{0}"), amount));
 				TextAmount->SetVisibility(ESlateVisibility::HitTestInvisible);

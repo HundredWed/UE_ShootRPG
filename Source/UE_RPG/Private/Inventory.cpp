@@ -1,5 +1,8 @@
 #include "Inventory.h"
 #include "Item/Item.h"
+#include "CPP_Character.h"
+#include "Widget/MainPanelWidget.h"
+#include "Widget/CPP_Slot.h"
 
 UInventory::UInventory()
 {
@@ -14,7 +17,22 @@ void UInventory::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+	PlayerRef = Cast<ACPP_Character>(GetOwner());
+	if (PlayerRef)
+	{
+		SlotsArray.SetNum(PlayerRef->GetInventorySize());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("not found PlayerRef at Inventory!!"));
+	}
+
+	if (MainPanelclass)
+	{
+		MainPanelWidget = CreateWidget<UMainPanelWidget>(GetWorld(), MainPanelclass);
+		InventoryWidget = MainPanelWidget->GetInventoryWidget();
+		MainPanelWidget->AddToViewport();
+	}
 	
 }
 
@@ -31,7 +49,7 @@ bool UInventory::IsSlotEmpty(int32 index)
 {
 	AItem* item = SlotsArray[index].Item;
 
-	if (IsValid(item))
+	if (item == nullptr)
 	{
 		return true;
 	}
@@ -52,7 +70,7 @@ void UInventory::AddItem(AItem* item, int32 amount)
 		int32 canStackedSlotIndex;
 		if (SearchFreeStackSlot(item, canStackedSlotIndex))
 		{
-			/**found can stack slot*/
+			/**found can-stack slot*/
 			int32 amountOver = SlotsArray[canStackedSlotIndex].ItemAmount + amount;
 			if (amountOver > MaxStackSize)
 			{
@@ -60,7 +78,7 @@ void UInventory::AddItem(AItem* item, int32 amount)
 				SlotsArray[canStackedSlotIndex].ItemAmount = MaxStackSize;
 
 				/**update widget*/
-				//...
+				InventoryWidget->SlotWidgetArray[canStackedSlotIndex]->UpdateSlot(canStackedSlotIndex);
 
 				int32 restAmountOver = amountOver - MaxStackSize;
 				AddItem(item, restAmountOver);
@@ -73,7 +91,7 @@ void UInventory::AddItem(AItem* item, int32 amount)
 				SlotsArray[canStackedSlotIndex].ItemAmount = amountOver;
 
 				/**update widget*/
-				//...
+				InventoryWidget->SlotWidgetArray[canStackedSlotIndex]->UpdateSlot(canStackedSlotIndex);
 
 				return;
 
@@ -82,16 +100,16 @@ void UInventory::AddItem(AItem* item, int32 amount)
 		else
 		{
 			/**not found can stack slot*/
-			int32 emptySlot;
-			if (SearchEmptySlot(emptySlot))
+			int32 emptySlotForStack;
+			if (SearchEmptySlot(emptySlotForStack))
 			{
 				if (amount > MaxStackSize)
 				{
-					SlotsArray[emptySlot].Item = item;
-					SlotsArray[emptySlot].ItemAmount = MaxStackSize;
+					SlotsArray[emptySlotForStack].Item = item;
+					SlotsArray[emptySlotForStack].ItemAmount = MaxStackSize;
 
 					/**update widget*/
-					//...
+					InventoryWidget->SlotWidgetArray[emptySlotForStack]->UpdateSlot(emptySlotForStack);
 
 					int32 restAmount = amount - MaxStackSize;
 					AddItem(item, restAmount);
@@ -100,11 +118,11 @@ void UInventory::AddItem(AItem* item, int32 amount)
 				}
 				else
 				{
-					SlotsArray[emptySlot].Item = item;
-					SlotsArray[emptySlot].ItemAmount = amount;
+					SlotsArray[emptySlotForStack].Item = item;
+					SlotsArray[emptySlotForStack].ItemAmount = amount;
 
 					/**update widget*/
-					//...
+					InventoryWidget->SlotWidgetArray[emptySlotForStack]->UpdateSlot(emptySlotForStack);
 
 					return;
 				}
@@ -133,7 +151,7 @@ void UInventory::AddItem(AItem* item, int32 amount)
 		}
 
 		/**update widget*/
-		//...
+		InventoryWidget->SlotWidgetArray[emptySlot]->UpdateSlot(emptySlot);
 
 
 		/**In the case of acquiring multiple 'can't Stacked items' */
@@ -185,10 +203,9 @@ bool UInventory::SearchFreeStackSlot(class AItem* item, int32& canStackedSlotInd
 	return false;
 }
 
-void UInventory::GetItemInfoIndex(const int32 index, AItem& item, int32& amount)
+FInventorySlot UInventory::GetSlotInfoIndex(const int32 index)
 {
-	item.SetItemInfo(SlotsArray[index].Item->GetItemInfo());
-	amount = SlotsArray[index].ItemAmount;
+	return SlotsArray[index];
 }
 
 

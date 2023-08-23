@@ -14,4 +14,12 @@ class UE_RPG_API UCustomUMGWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void NativeConstruct() override;
+
+	UPROPERTY()
+		class ACPP_Character* PlayerRef;
+
+	UPROPERTY()
+		class UInventory* InventoryRef;
 };

@@ -15,6 +15,7 @@ class UE_RPG_API UCPP_Slot : public UCustomUMGWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeConstruct() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UButton* SlotButton;
@@ -25,17 +26,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* TextAmount;
 
-
-	FORCEINLINE void SetInventory(class UInventory* inventory) { Inventory = inventory; }
 	FORCEINLINE void SetInventoryWidget(class UCPP_InventoryWidget* inventoryWidget) { InventoryWidget = inventoryWidget; }
 public: 
 	
 	void UpdateSlot(int32 index);
 
 private:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta =(AllowPrivateAccess = "true"))
-		class UInventory* Inventory;
 
 	UPROPERTY()
 		class UCPP_InventoryWidget* InventoryWidget;

@@ -130,7 +130,11 @@ public:
 	FORCEINLINE void SetHitResultObject(class AItem* hitresultobject);
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
-
+	
+	/**inventory*/
+	FORCEINLINE class UInventory* GetInventory() { return GameInventory; }
+	FORCEINLINE int32 GetInventorySize() { return InventoryAmountOfSlot; }
+	FORCEINLINE int32 GetInventoryRowSize() { return InventoryRowSize; }
 	
 
 private:
@@ -204,7 +208,13 @@ private:
 
 
 	/**inventory*/
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere)
 		class UInventory* GameInventory;
+
+	UPROPERTY(EditAnywhere, Category = "InventoryComponent", meta = (AllowPrivateAccess = "true"))
+		int32 InventoryAmountOfSlot = 20;
+	UPROPERTY(EditAnywhere, Category = "InventoryComponent", meta = (AllowPrivateAccess = "true"))
+		int32 InventoryRowSize = 5;
+
 	
 };
