@@ -131,7 +131,7 @@ public:
 		float GetCrosshairSpreadMultiplier() const;
 
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
-	FORCEINLINE void SetHitResultObject(class AItem* hitresultobject);
+	FORCEINLINE void SetHitResultObject(class APickUpItem* hitresultobject);
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
 	
@@ -156,9 +156,9 @@ private:
 	float MoveAimingSpeed_Crouch = 200.f;
 
 	UPROPERTY()
-		class AItem* HitResultObject;
+		class APickUpItem* HitResultObject;
 	UPROPERTY()
-		class AItem* PrevHitResultObject;
+		class APickUpItem* PrevHitResultObject;
 
 	/**For get Grab& Release Func*/
 	UPROPERTY()

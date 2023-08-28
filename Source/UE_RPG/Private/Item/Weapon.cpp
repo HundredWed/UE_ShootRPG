@@ -16,7 +16,7 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StaticMesh->DestroyComponent();
+	PickUpMesh->DestroyComponent();
 
 	SetItemState(EItemState::EIS_UnEquipped);
 }

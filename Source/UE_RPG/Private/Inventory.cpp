@@ -47,7 +47,7 @@ void UInventory::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
 bool UInventory::IsSlotEmpty(int32 index)
 {
-	AItem* item = SlotsArray[index].Item;
+	UItem* item = SlotsArray[index].Item;
 
 	if (item == nullptr)
 	{
@@ -58,12 +58,11 @@ bool UInventory::IsSlotEmpty(int32 index)
 	
 }
 
-void UInventory::AddItem(AItem* item, int32 amount)
+void UInventory::AddItem(UItem* item, int32 amount)
 {
-	FItemInfo itemInfo = item->GetItemInfo();
 
 	/**item is Stacked?*/
-	if (itemInfo.bCanStacked)
+	if (item->bCanStacked)
 	{
 		/**can Stacked item*/
 
@@ -183,11 +182,11 @@ bool UInventory::SearchEmptySlot(int32& emptySlotIndex)
 	return false;
 }
 
-bool UInventory::SearchFreeStackSlot(class AItem* item, int32& canStackedSlotIndex)
+bool UInventory::SearchFreeStackSlot(class UItem* item, int32& canStackedSlotIndex)
 {
 	for (int32 index = 0; index < SlotsArray.Num(); index++)
 	{
-		AItem* slotItem = SlotsArray[index].Item;
+		UItem* slotItem = SlotsArray[index].Item;
 		int32 slotItemAmount = SlotsArray[index].ItemAmount;
 		if (slotItem != nullptr)
 		{

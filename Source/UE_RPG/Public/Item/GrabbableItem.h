@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Item/Item.h"
+#include "Item/PickUpItem.h"
 #include "GrabbableItem.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class UE_RPG_API AGrabbableItem : public AItem
+class UE_RPG_API AGrabbableItem : public APickUpItem
 {
 	GENERATED_BODY()
 	

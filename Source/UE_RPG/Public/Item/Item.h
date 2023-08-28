@@ -6,65 +6,59 @@
 #include "Item.generated.h"
 
 
-enum class EItemState : uint8
-{
-	EIS_UnEquipped,
-	EIS_Equipped
-};
-
-
 
 UCLASS()
-class UE_RPG_API AItem : public AActor
+class UE_RPG_API UItem : public UObject
 {
 	GENERATED_BODY()
 	
 public:	
 	
-	AItem();
-	
+	UItem();
 
-	FORCEINLINE	void SetWidgetVisibility(bool Visible);
-	FORCEINLINE class UWidgetComponent* GetWidgetComponent() { return ItemStateWidjet; }
-	FORCEINLINE FItemInfo GetItemInfo() { return ItemInfo; }
-	FORCEINLINE void SetItemInfo(FItemInfo iteminfo) { ItemInfo = iteminfo; }
-protected:
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
-
-	/**item states*/
-	EItemState ItemState = EItemState::EIS_UnEquipped;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Info Struct")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FItemInfo ItemInfo;
 
-	/**component*/
-	UPROPERTY(VisibleAnywhere, Category = "Item Component")
-		class UStaticMeshComponent* StaticMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+		FName ItemInfoID;
 
-	UPROPERTY(VisibleAnywhere, Category = "Item Component")
-		class USphereComponent* SphereComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		FText Name;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item Widget")
-		class UWidgetComponent* ItemStateWidjet;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		FText Description;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		bool bCanBeUsed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		bool bCanStacked;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		FText UseText;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		FText Interaction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		int32 ItemPrice;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		EItemCategory ItemType;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		int32 ATK;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Asset Data")
+		UStaticMesh* ItemMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Asset Data")
+		UTexture2D* IconTexture;
+
+	UFUNCTION()
+		UItem* CreateItemCopy();
 	
-	UFUNCTION()
-		virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
-			AActor* OtherActor, 
-			UPrimitiveComponent* OtherComp, 
-			int32 OtherBodyIndex, 
-			bool bFromSweep, 
-			const FHitResult& SweepResult);
-
-	UFUNCTION()
-		virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
-			AActor* OtherActor,
-			UPrimitiveComponent* OtherComp, 
-			int32 OtherBodyIndex);
-
-	virtual void SetItemState(EItemState Stat);
-
-public:
+protected:
 
 	
 

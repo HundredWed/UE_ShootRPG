@@ -1,11 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Item/Item.h"
+#include "Item/PickUpItem.h"
 #include "Weapon.generated.h"
 
 UCLASS()
-class UE_RPG_API AWeapon : public AItem
+class UE_RPG_API AWeapon : public APickUpItem
 {
 	GENERATED_BODY()
 
@@ -35,8 +35,7 @@ protected:
 		int32 OtherBodyIndex) override;
 
 	/**weapon states*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon item states", meta = (AllowPrivateAccess = "true"))
-		int32 ATK = 0;
+	
 public:
 
 	virtual void SetItemState(EItemState State) override;

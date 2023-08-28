@@ -29,14 +29,14 @@ void UCPP_Slot::UpdateSlot(int32 index)
 		{
 			SlotButton->SetIsEnabled(true);
 			FInventorySlot slotinfo = InventoryRef->GetSlotInfoIndex(index);
-			AItem* item = slotinfo.Item;
+			const UItem* item = slotinfo.Item;
 			int32 amount = slotinfo.ItemAmount;
 			
 
-			ItemIcon->SetBrushFromTexture(item->GetItemInfo().IconTexture);
+			ItemIcon->SetBrushFromTexture(item->IconTexture);
 			ItemIcon->SetVisibility(ESlateVisibility::HitTestInvisible);
 
-			if (item->GetItemInfo().bCanStacked)
+			if (item->bCanStacked)
 			{
 				TextAmount->SetText(FText::Format(NSLOCTEXT("CPP_Slot", "TextAmount", "x{0}"), amount));
 				TextAmount->SetVisibility(ESlateVisibility::HitTestInvisible);

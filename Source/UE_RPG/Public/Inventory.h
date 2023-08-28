@@ -18,7 +18,7 @@ struct FInventorySlot : public FTableRowBase
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		class AItem* Item;
+		class UItem* Item;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int32 ItemAmount;
 
@@ -36,7 +36,7 @@ public:
 	UInventory();
 
 	/**¾È¾¸*/
-	FORCEINLINE TArray<class AItem*> GetInventory() { return Inventory; }
+	FORCEINLINE TArray<class UItem*> GetInventory() { return Inventory; }
 
 	/**main panel widget*/
 	UPROPERTY(EditAnywhere, Category = "Main Widget")
@@ -54,9 +54,9 @@ public:
 
 	/**inventory function*/
 	bool IsSlotEmpty(int32 index);
-	void AddItem(class AItem* item, int32 amount);
+	void AddItem(class UItem* item, int32 amount);
 	bool SearchEmptySlot(int32& emptySlotIndex);
-	bool SearchFreeStackSlot(class AItem* item, int32& canStackedSlotIndex);
+	bool SearchFreeStackSlot(class UItem* item, int32& canStackedSlotIndex);
 
 	UFUNCTION()
 		FInventorySlot GetSlotInfoIndex(const int32 index);
@@ -77,7 +77,7 @@ private:
 
 	/**¾È¾¸*/
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		TArray<class AItem*> Inventory;
+		TArray<class UItem*> Inventory;
 
 	int32 MaxStackSize = 99;
 	

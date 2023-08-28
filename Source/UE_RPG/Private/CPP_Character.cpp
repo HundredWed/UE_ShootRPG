@@ -7,9 +7,9 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Grabber.h"
-#include "Item/Item.h"
 #include "Item/Weapon.h"
 #include "Item/Gun/ShootGun.h"
+#include "Item/PickUpItem.h"
 #include "CPP_Controller.h"
 #include "Camera/CameraManager.h"
 #include "Inventory.h"
@@ -157,7 +157,7 @@ void ACPP_Character::ObjectSearchTrace()
 		{
 			UE_LOG(LogTemp, Display, TEXT("%s"), *hitresult->GetActorNameOrLabel());
 
-			AItem* item = Cast<AItem>(hitresult);
+			APickUpItem* item = Cast<APickUpItem>(hitresult);
 			if (IsValid(item) && item->GetWidgetComponent())
 			{
 				item->SetWidgetVisibility(true);
@@ -278,9 +278,9 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 
 		//else item
 		//UE_LOG(LogTemp, Display, TEXT("PickUp!!"));
-		TArray<AItem*> inventory = GameInventory->GetInventory();
+		/*TArray<UItem*> inventory = GameInventory->GetInventory();
 		inventory.Add(HitResultObject);
-		RemoveHitResultObject();
+		RemoveHitResultObject();*/
 
 	}
 	
@@ -365,13 +365,13 @@ void ACPP_Character::InventoryVisibility(const FInputActionValue& Value)
 	{
 		if (isVisible)
 		{
-			GameInventory->HideInventory();
 			isVisible = false;
+			GameInventory->HideInventory();
 		}
-		else
+		else if(!isVisible)
 		{
-			GameInventory->ShowInventory();
 			isVisible = true;
+			GameInventory->ShowInventory();
 		}
 	}
 }
@@ -412,7 +412,7 @@ void ACPP_Character::PickUpWeapon(AWeapon* weapon)
 
 void ACPP_Character::ResetHitResultState()
 {
-	AItem* item = Cast<AItem>(HitResultObject);
+	APickUpItem* item = Cast<APickUpItem>(HitResultObject);
 	if (IsValid(item) && item->GetWidgetComponent())
 	{
 		item->SetWidgetVisibility(false);
@@ -573,7 +573,7 @@ float ACPP_Character::GetCrosshairSpreadMultiplier() const
 	return CrosshairSpreadMultiplier;
 }
 
-void ACPP_Character::SetHitResultObject(AItem* hitresultobject)
+void ACPP_Character::SetHitResultObject(APickUpItem* hitresultobject)
 {
 	if (HitResultObject != nullptr)
 	{

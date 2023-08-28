@@ -6,8 +6,8 @@
 
 AGrabbableItem::AGrabbableItem()
 {
-	StaticMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
-	StaticMesh->SetAngularDamping(1.f);
+	PickUpMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
+	PickUpMesh->SetAngularDamping(1.f);
 }
 
 void AGrabbableItem::BeginPlay()
@@ -26,11 +26,11 @@ void AGrabbableItem::SetItemState(EItemState State)
 	{
 	case EItemState::EIS_UnEquipped:
 		/**item mesh*/
-		StaticMesh->SetSimulatePhysics(true);
-		StaticMesh->SetEnableGravity(true);
+		PickUpMesh->SetSimulatePhysics(true);
+		PickUpMesh->SetEnableGravity(true);
 		//StaticMesh->SetVisibility(true);
-		StaticMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-		StaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		PickUpMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		PickUpMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		/**overlap sphere*/
 		SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 		SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
@@ -39,12 +39,12 @@ void AGrabbableItem::SetItemState(EItemState State)
 		break;
 	case EItemState::EIS_Equipped:
 		/**item mesh*/
-		StaticMesh->SetSimulatePhysics(true);
-		StaticMesh->SetEnableGravity(true);
+		PickUpMesh->SetSimulatePhysics(true);
+		PickUpMesh->SetEnableGravity(true);
 		//StaticMesh->SetVisibility(true);
-		StaticMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		StaticMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
-		StaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		PickUpMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		PickUpMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+		PickUpMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		/**overlap sphere*/
 		SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);

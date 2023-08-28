@@ -5,6 +5,12 @@
 #include "ItemData.generated.h"
 
 
+enum class EItemState : uint8
+{
+	EIS_UnEquipped,
+	EIS_Equipped
+};
+
 UENUM(BlueprintType)
 enum class EItemCategory : uint8
 {
@@ -20,21 +26,28 @@ struct FItemInfo : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category = "Item Data")
+		FName ItemInfoID;
+	UPROPERTY(EditAnywhere, Category = "Item Data")
 		FText Name;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category = "Item Data")
 		FText Description;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		UTexture2D* IconTexture;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category = "Item Data")
 		bool bCanBeUsed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category = "Item Data")
 		bool bCanStacked;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category = "Item Data")
 		FText UseText;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category = "Item Data")
 		FText Interaction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, Category = "Item Data")
 		int32 ItemPrice;
-
+	UPROPERTY(EditAnywhere, Category = "Item Data")
+		EItemCategory ItemType;
+	UPROPERTY(EditAnywhere, Category = "Item Data")
+		int32 ATK;
+	UPROPERTY(EditAnywhere, Category = "Asset Data")
+		UStaticMesh* ItemMesh;
+	UPROPERTY(EditAnywhere, Category = "Asset Data")
+		UTexture2D* IconTexture;
 };
