@@ -8,12 +8,15 @@
 
 UItem::UItem()
 {
+	bCopyItem = false;
 }
 
 UItem* UItem::CreateItemCopy()
 {
+	/**the case other get other inventory. not PickUp */
 	UItem* copy = NewObject<UItem>(StaticClass());
 
+	copy->ItemInfoID = this->ItemInfoID;
 	copy->Name = this->Name;
 	copy->ItemMesh = this->ItemMesh;
 	copy->Description = this->Description;
@@ -25,6 +28,8 @@ UItem* UItem::CreateItemCopy()
 	copy->ItemPrice = this->ItemPrice;
 	copy->ItemType = this->ItemType;
 	copy->ATK = this->ATK;
+
+	copy->bCopyItem = true;
 
 	return copy;
 }

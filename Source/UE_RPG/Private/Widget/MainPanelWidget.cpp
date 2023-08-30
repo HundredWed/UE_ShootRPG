@@ -5,6 +5,7 @@
 #include "CPP_Character.h"
 #include "Widget/CPP_InventoryWidget.h"
 #include "Inventory.h"
+#include "Widget/DragWidget.h"
 
 void UMainPanelWidget::NativeConstruct()
 {
@@ -25,4 +26,27 @@ void UMainPanelWidget::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("not Found PlayerRef at MainPanel!!"));
 	}
+}
+
+bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+
+
+	UDragWidget* inDargWidget = Cast<UDragWidget>(InOperation);
+	if (IsValid(inDargWidget))
+	{
+
+		FVector2D dropPos = InGeometry.AbsoluteToLocal(InDragDropEvent.GetScreenSpacePosition());
+		FVector2D dragPos = inDargWidget->DragOffset;
+
+		FVector2D viewPortPos = dropPos - dragPos;
+
+		inDargWidget->WidgetRef->AddToViewport();
+		inDargWidget->WidgetRef->SetVisibility(ESlateVisibility::Visible);
+		inDargWidget->WidgetRef->SetPositionInViewport(viewPortPos,false);
+
+	}
+	
+	return true;
 }

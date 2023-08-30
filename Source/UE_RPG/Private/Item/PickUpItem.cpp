@@ -3,6 +3,7 @@
 #include "CPP_Character.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Inventory.h"
 
 APickUpItem::APickUpItem()
 {
@@ -16,7 +17,23 @@ APickUpItem::APickUpItem()
 
 	ItemStateWidjet = CreateDefaultSubobject<UWidgetComponent>(TEXT("ItemState Widjet"));
 	ItemStateWidjet->SetupAttachment(GetRootComponent()); 
+	
 
+
+	/**ECC_Visibility = Item Search Trace*/
+	/**ECC_GameTraceChannel1 = Grab Trace*/
+	/**ECC_GameTraceChannel2 = Gun(hit) Trace*/
+	/**item mesh*/
+	PickUpMesh->SetSimulatePhysics(true);
+	PickUpMesh->SetEnableGravity(true);
+	//StaticMesh->SetVisibility(true);
+	PickUpMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	PickUpMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	/**overlap sphere*/
+	SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
+	SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
+	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 void APickUpItem::BeginPlay()
@@ -69,6 +86,7 @@ void APickUpItem::InitializePickUpItem()
 
 		ItemRef = NewObject<UItem>(this, UItem::StaticClass());
 
+		ItemRef->ItemInfoID = thisItemInfo->ItemInfoID;
 		ItemRef->Name = thisItemInfo->Name;
 		ItemRef->ItemMesh = thisItemInfo->ItemMesh;
 		ItemRef->Description = thisItemInfo->Description;
@@ -86,8 +104,16 @@ void APickUpItem::InitializePickUpItem()
 
 }
 
-void APickUpItem::TakePicUp(ACPP_Character* taker)
+void APickUpItem::TakePickUp(ACPP_Character* taker)
 {
+	UInventory* playerinventory = taker->GetInventory();
+
+	if (IsValid(playerinventory) && ItemRef->ItemType != EItemCategory::EIS_Gabbable)
+	{
+		playerinventory->AddItem(ItemRef, ItemAmount);
+		Destroy();
+	}
+	
 }
 
 

@@ -21,8 +21,6 @@ public:
 
 	FORCEINLINE	void SetWidgetVisibility(bool Visible) { ItemStateWidjet->SetVisibility(Visible); }
 	FORCEINLINE class UWidgetComponent* GetWidgetComponent() { return ItemStateWidjet; }
-	/*FORCEINLINE FItemInfo GetItemInfo() { return ItemInfo; }
-	FORCEINLINE void SetItemInfo(FItemInfo iteminfo) { ItemInfo = iteminfo; }*/
 protected:
 
 	virtual void BeginPlay() override;
@@ -30,8 +28,6 @@ protected:
 	/**item states*/
 	EItemState ItemState = EItemState::EIS_UnEquipped;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Info Struct")
-		FItemInfo ItemInfo;*/
 
 	/**component*/
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
@@ -43,9 +39,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item Widget")
 		class UWidgetComponent* ItemStateWidjet;
 
-	UPROPERTY(EditAnywhere)
-		UDataTable* ItemDataTable;
-
 	
 	/**item state*/
 	UPROPERTY(EditAnywhere, Category = "Item state")
@@ -56,6 +49,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category = "Item state")
 		class UItem* ItemRef;
+
+	UPROPERTY(EditAnywhere, Category = "Item state")
+		UDataTable* ItemDataTable;
 
 	UPROPERTY()
 		class ACPP_Character* Player;
@@ -81,7 +77,8 @@ public:
 	
 	void InitializePickUpItem();
 
-	void TakePicUp(class ACPP_Character* taker);
+	UFUNCTION()
+		void TakePickUp(class ACPP_Character* taker);
 	
 
 };

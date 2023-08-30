@@ -278,9 +278,8 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 
 		//else item
 		//UE_LOG(LogTemp, Display, TEXT("PickUp!!"));
-		/*TArray<UItem*> inventory = GameInventory->GetInventory();
-		inventory.Add(HitResultObject);
-		RemoveHitResultObject();*/
+		HitResultObject->TakePickUp(this);
+		RemoveHitResultObject();
 
 	}
 	

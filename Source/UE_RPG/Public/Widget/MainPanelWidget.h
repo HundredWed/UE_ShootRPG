@@ -22,4 +22,7 @@ public:
 		class UCPP_InventoryWidget* InventoryWidget;
 
 	FORCEINLINE UCPP_InventoryWidget* GetInventoryWidget() { return InventoryWidget; }
+
+protected:
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override ;
 };

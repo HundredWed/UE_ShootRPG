@@ -60,6 +60,10 @@ bool UInventory::IsSlotEmpty(int32 index)
 
 void UInventory::AddItem(UItem* item, int32 amount)
 {
+	if (!IsValid(item))
+	{
+		return;
+	}
 
 	/**item is Stacked?*/
 	if (item->bCanStacked)
@@ -190,7 +194,7 @@ bool UInventory::SearchFreeStackSlot(class UItem* item, int32& canStackedSlotInd
 		int32 slotItemAmount = SlotsArray[index].ItemAmount;
 		if (slotItem != nullptr)
 		{
-			if (slotItem == item && slotItemAmount < MaxStackSize)
+			if (slotItem->ItemInfoID == item->ItemInfoID && slotItemAmount < MaxStackSize)
 			{
 				canStackedSlotIndex = index;
 				return true;

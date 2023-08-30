@@ -55,6 +55,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		UTexture2D* IconTexture;
 
+	bool bCopyItem;
+
 	UFUNCTION()
 		UItem* CreateItemCopy();
 	
