@@ -35,9 +35,6 @@ public:
 	
 	UInventory();
 
-	/**¾È¾¸*/
-	FORCEINLINE TArray<class UItem*> GetInventory() { return Inventory; }
-
 	/**main panel widget*/
 	UPROPERTY(EditAnywhere, Category = "Main Widget")
 		TSubclassOf< class UMainPanelWidget> MainPanelclass;
@@ -50,18 +47,20 @@ protected:
 	virtual void BeginPlay() override;
 	
 public:
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	/**inventory function*/
 	bool IsSlotEmpty(int32 index);
 	void AddItem(class UItem* item, int32 amount);
 	bool SearchEmptySlot(int32& emptySlotIndex);
 	bool SearchFreeStackSlot(class UItem* item, int32& canStackedSlotIndex);
+	int32 GetAmountAtIndex(int32 index);
+	void RemoveItemAtIndex(const int32 index, const int32 removeAmount);
+
 
 	UFUNCTION()
 		FInventorySlot GetSlotInfoIndex(const int32 index);
 
-	/**inventory widget function*/
+	/**inventory widget function (FORCEINLINE) */
 	FORCEINLINE void ShowInventory() {
 		InventoryWidget->SetVisibility(ESlateVisibility::Visible);
 		InventoryWidget->SetIsEnabled(true);
@@ -74,14 +73,9 @@ public:
 private:
 
 	/**inventory value*/
-
-	/**¾È¾¸*/
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		TArray<class UItem*> Inventory;
-
 	int32 MaxStackSize = 99;
 	
-	/**inventory widget value*/
+	/**widget value*/
 	UCPP_InventoryWidget* InventoryWidget;
 
 	UPROPERTY()

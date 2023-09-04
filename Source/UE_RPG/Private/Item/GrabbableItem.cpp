@@ -19,9 +19,9 @@ void AGrabbableItem::BeginPlay()
 
 void AGrabbableItem::SetItemState(EItemState State)
 {
-	/**ECC_Visibility = Item Search Trace*/
 	/**ECC_GameTraceChannel1 = Grab Trace*/
 	/**ECC_GameTraceChannel2 = Gun(hit) Trace*/
+	/**ECC_GameTraceChannel3 = Item Search Trace*/
 	switch (State)
 	{
 	case EItemState::EIS_UnEquipped:

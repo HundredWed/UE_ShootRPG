@@ -25,16 +25,27 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* TextAmount;
-
 	
 public: 
 	
 	void UpdateSlot(int32 index);
+
+	UFUNCTION()
+		void SlotClickEvent();
+	UFUNCTION()
+		void ResetCount();
+
 	FORCEINLINE void SetInventoryWidget(class UCPP_InventoryWidget* inventoryWidget) { InventoryWidget = inventoryWidget; }
 
+protected:
+
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 private:
 
 	UPROPERTY()
 		class UCPP_InventoryWidget* InventoryWidget;
 
+	int32 MyArrayNumber = 0;
+
+	int32 ClickCount = 0;
 };

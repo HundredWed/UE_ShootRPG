@@ -69,6 +69,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "EditValue")
 		float SpringArmSocketOffsetYValue = 100.f;
 
+	/**Item search issue overlap counting*/
+	int32 OverlapCount = 0;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -136,6 +139,10 @@ public:
 	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
 	
 	/**inventory*/
+
+	void HideGameInventory();
+	void ShowGameInventory();
+
 	FORCEINLINE class UInventory* GetInventory() { return GameInventory; }
 	FORCEINLINE int32 GetInventorySize() { return InventoryAmountOfSlot; }
 	FORCEINLINE int32 GetInventoryRowSize() { return InventoryRowSize; }

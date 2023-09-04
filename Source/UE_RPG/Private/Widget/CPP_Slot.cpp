@@ -2,6 +2,7 @@
 
 
 #include "Widget/CPP_Slot.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Inventory.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
@@ -11,10 +12,12 @@
 void UCPP_Slot::NativeConstruct()
 {
 	Super::NativeConstruct();
+	SlotButton->OnClicked.AddDynamic(this, &UCPP_Slot::SlotClickEvent);
 }
 
 void UCPP_Slot::UpdateSlot(int32 index)
 {
+	MyArrayNumber = index;
 	if (IsValid(InventoryRef))
 	{
 		bool isSlotEmpty = InventoryRef->IsSlotEmpty(index);
@@ -49,5 +52,39 @@ void UCPP_Slot::UpdateSlot(int32 index)
 		}
 	}
 }
+
+void UCPP_Slot::SlotClickEvent()
+{
+	ClickCount += 1;
+	FTimerHandle TimerHandle;
+	GetOuter()->GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UCPP_Slot::ResetCount, 0.17f);
+
+	if (ClickCount > 1)
+	{
+		/**Equip weapon*/
+		ResetCount();
+	}
+}
+
+void UCPP_Slot::ResetCount()
+{
+	ClickCount = 0;
+}
+
+FReply UCPP_Slot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+	{
+		if (SlotButton->GetIsEnabled())
+		{
+			
+		}
+	}
+
+	return FReply::Handled();
+}
+
 
 

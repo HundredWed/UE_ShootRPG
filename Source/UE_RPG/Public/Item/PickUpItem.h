@@ -34,6 +34,9 @@ protected:
 		class UStaticMeshComponent* PickUpMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
+		class USphereComponent* SearchComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Item Component")
 		class USphereComponent* SphereComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item Widget")

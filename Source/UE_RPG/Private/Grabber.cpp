@@ -22,6 +22,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	if (PhysicsHandle->GetGrabbedComponent() != nullptr)
 	{
+		//UE_LOG(LogTemp, Display, TEXT("OnHit grab!!!"));
 		PhysicsHandle->GetGrabbedComponent()->WakeAllRigidBodies();
 		FVector Targetlocation = GetOwner()->GetActorLocation() + GetOwner()->GetActorRotation().Vector() * HandleDistance;
 		FVector Loc = FVector(Targetlocation.X, Targetlocation.Y, GetComponentLocation().Z);
@@ -46,7 +47,6 @@ void UGrabber::Grab()
 
 	if (OnHit)
 	{
-		UE_LOG(LogTemp, Display, TEXT("OnHit grab!!!"));
 		UPrimitiveComponent* HitComponent = hitresult.GetComponent();
 
 		if (IsValid(HitComponent) == false)
@@ -76,9 +76,13 @@ void UGrabber::Grab()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Grab HitActor is not!!!"));
+			UE_LOG(LogTemp, Warning, TEXT("Grab not valid!!!"));
 		}
 		
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Grab HitActor is not!!!"));
 	}
 }
 

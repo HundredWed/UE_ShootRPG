@@ -83,6 +83,7 @@ void ACPP_Character::BeginPlay()
 	GameInventory = FindComponentByClass<UInventory>();
 	if (IsValid(GameInventory))
 	{
+		HideGameInventory();
 		UE_LOG(LogTemp, Display, TEXT("Found Inventory! "));
 	}
 	else
@@ -155,7 +156,7 @@ void ACPP_Character::ObjectSearchTrace()
 		AActor* hitresult = HitResult.GetActor();
 		if (IsValid(hitresult))
 		{
-			UE_LOG(LogTemp, Display, TEXT("%s"), *hitresult->GetActorNameOrLabel());
+			//UE_LOG(LogTemp, Display, TEXT("%s"), *hitresult->GetActorNameOrLabel());
 
 			APickUpItem* item = Cast<APickUpItem>(hitresult);
 			if (IsValid(item) && item->GetWidgetComponent())
@@ -364,13 +365,11 @@ void ACPP_Character::InventoryVisibility(const FInputActionValue& Value)
 	{
 		if (isVisible)
 		{
-			isVisible = false;
-			GameInventory->HideInventory();
+			HideGameInventory();
 		}
 		else if(!isVisible)
 		{
-			isVisible = true;
-			GameInventory->ShowInventory();
+			ShowGameInventory();
 		}
 	}
 }
@@ -574,16 +573,20 @@ float ACPP_Character::GetCrosshairSpreadMultiplier() const
 
 void ACPP_Character::SetHitResultObject(APickUpItem* hitresultobject)
 {
-	if (HitResultObject != nullptr)
-	{
-		return;
-	}
-
 	HitResultObject = hitresultobject;
 }
 
+void ACPP_Character::HideGameInventory()
+{
+	isVisible = false;
+	GameInventory->HideInventory();
+}
 
-
+void ACPP_Character::ShowGameInventory()
+{
+	isVisible = true;
+	GameInventory->ShowInventory();
+}
 
 
 float ACPP_Character::ClampRnage(float value)

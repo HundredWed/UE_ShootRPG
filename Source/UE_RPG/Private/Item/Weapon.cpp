@@ -8,6 +8,7 @@ AWeapon::AWeapon()
 
 	SphereComponent->SetupAttachment(GetRootComponent());
 	ItemStateWidjet->SetupAttachment(GetRootComponent());
+	SearchComponent->SetupAttachment(GetRootComponent());
 
 }
 
@@ -53,9 +54,9 @@ void AWeapon::SetItemState(EItemState State)
 {
 	switch (State)
 	{
-		/**ECC_Visibility = Item Search Trace*/
 		/**ECC_GameTraceChannel1 = Grab Trace*/
 		/**ECC_GameTraceChannel2 = Gun(hit) Trace*/
+		/**ECC_GameTraceChannel3 = Item Search Trace*/
 
 	case EItemState::EIS_UnEquipped:
 		/**item mesh*/

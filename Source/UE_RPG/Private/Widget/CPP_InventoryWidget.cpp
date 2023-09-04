@@ -80,14 +80,14 @@ void UCPP_InventoryWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 		dragWidget->DefaultDragVisual = this;
 		dragWidget->Pivot = EDragPivot::MouseDown;
 	}
-	RemoveFromParent();
+	
 	OutOperation = dragWidget;
 }
 
 void UCPP_InventoryWidget::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
 	Super::NativeOnDragLeave(InDragDropEvent, InOperation);
-
+	RemoveFromParent();
 	
 }
 

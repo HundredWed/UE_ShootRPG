@@ -7,9 +7,8 @@
 UInventory::UInventory()
 {
 	
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
-	
 }
 
 
@@ -37,13 +36,6 @@ void UInventory::BeginPlay()
 }
 
 
-
-void UInventory::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	
-}
 
 bool UInventory::IsSlotEmpty(int32 index)
 {
@@ -194,7 +186,7 @@ bool UInventory::SearchFreeStackSlot(class UItem* item, int32& canStackedSlotInd
 		int32 slotItemAmount = SlotsArray[index].ItemAmount;
 		if (slotItem != nullptr)
 		{
-			if (slotItem->ItemInfoID == item->ItemInfoID && slotItemAmount < MaxStackSize)
+			if ((slotItem->ItemInfoID == item->ItemInfoID) && (slotItemAmount < MaxStackSize))
 			{
 				canStackedSlotIndex = index;
 				return true;
@@ -204,6 +196,34 @@ bool UInventory::SearchFreeStackSlot(class UItem* item, int32& canStackedSlotInd
 
 	/**not enough invevtory slot!! */
 	return false;
+}
+
+int32 UInventory::GetAmountAtIndex(int32 index)
+{
+	return SlotsArray[index].ItemAmount;
+}
+
+void UInventory::RemoveItemAtIndex(const int32 index, const int32 removeAmount)
+{
+	if (!IsSlotEmpty(index) && (removeAmount > 0))
+	{
+		int32 amount = GetAmountAtIndex(index);
+		if (removeAmount >= amount)
+		{
+			SlotsArray[index].Item = nullptr;
+			SlotsArray[index].ItemAmount = 0;
+			return;
+		}
+		else
+		{
+			SlotsArray[index].ItemAmount = amount - removeAmount;
+			InventoryWidget->SlotWidgetArray[index]->UpdateSlot(index);
+			return;
+		}
+		
+	}
+
+	return;
 }
 
 FInventorySlot UInventory::GetSlotInfoIndex(const int32 index)
