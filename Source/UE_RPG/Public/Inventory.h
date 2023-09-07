@@ -49,16 +49,16 @@ protected:
 public:
 
 	/**inventory function*/
-	bool IsSlotEmpty(int32 index);
-	void AddItem(class UItem* item, int32 amount);
-	bool SearchEmptySlot(int32& emptySlotIndex);
-	bool SearchFreeStackSlot(class UItem* item, int32& canStackedSlotIndex);
-	int32 GetAmountAtIndex(int32 index);
-	void RemoveItemAtIndex(const int32 index, const int32 removeAmount);
+	bool IsSlotEmpty(const uint8 index);
+	void AddItem(class UItem* item, const uint8 amount);
+	bool SearchEmptySlot(uint8& emptySlotIndex);
+	bool SearchFreeStackSlot(class UItem* item, uint8& canStackedSlotIndex);
+	int32 GetAmountAtIndex(const uint8 index);
+	void RemoveItemAtIndex(const uint8 index, const uint8 removeAmount);
 
 
 	UFUNCTION()
-		FInventorySlot GetSlotInfoIndex(const int32 index);
+		FInventorySlot GetSlotInfoIndex(const uint8 index);
 
 	/**inventory widget function (FORCEINLINE) */
 	FORCEINLINE void ShowInventory() {
@@ -73,7 +73,7 @@ public:
 private:
 
 	/**inventory value*/
-	int32 MaxStackSize = 99;
+	uint8 MaxStackSize = 99;
 	
 	/**widget value*/
 	UCPP_InventoryWidget* InventoryWidget;

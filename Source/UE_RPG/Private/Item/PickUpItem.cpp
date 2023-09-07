@@ -107,18 +107,29 @@ void APickUpItem::InitializePickUpItem()
 
 		ItemRef = NewObject<UItem>(this, UItem::StaticClass());
 
+		/**item data*/
 		ItemRef->ItemInfoID = thisItemInfo->ItemInfoID;
 		ItemRef->Name = thisItemInfo->Name;
-		ItemRef->ItemMesh = thisItemInfo->ItemMesh;
 		ItemRef->Description = thisItemInfo->Description;
-		ItemRef->IconTexture = thisItemInfo->IconTexture;
 		ItemRef->bCanBeUsed = thisItemInfo->bCanBeUsed;
 		ItemRef->bCanStacked = thisItemInfo->bCanStacked;
 		ItemRef->UseText = thisItemInfo->UseText;
 		ItemRef->Interaction = thisItemInfo->Interaction;
 		ItemRef->ItemPrice = thisItemInfo->ItemPrice;
-		ItemRef->ItemType = thisItemInfo->ItemType;
 		ItemRef->ATK = thisItemInfo->ATK;
+
+		/**itemtype data*/
+		ItemRef->ItemType = thisItemInfo->ItemType;
+		ItemRef->ConsumeValue = thisItemInfo->ConsumeValue;
+		if (thisItemInfo->ItemClass)
+		{
+			ItemRef->ItemClass = thisItemInfo->ItemClass;
+		}
+
+
+		/**asset data*/
+		ItemRef->ItemMesh = thisItemInfo->ItemMesh;
+		ItemRef->IconTexture = thisItemInfo->IconTexture;
 
 		PickUpMesh->SetStaticMesh(ItemRef->ItemMesh);
 	}

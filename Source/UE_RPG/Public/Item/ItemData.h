@@ -21,6 +21,7 @@ enum class EItemCategory : uint8
 	EIS_Gabbable UMETA(DisplayName = "Grab Item")
 };
 
+
 USTRUCT(BlueprintType)
 struct FItemInfo : public FTableRowBase
 {
@@ -43,9 +44,16 @@ struct FItemInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, Category = "Item Data")
 		int32 ItemPrice;
 	UPROPERTY(EditAnywhere, Category = "Item Data")
-		EItemCategory ItemType;
-	UPROPERTY(EditAnywhere, Category = "Item Data")
 		int32 ATK;
+
+	UPROPERTY(EditAnywhere, Category = "ItemType Data")
+		TSubclassOf<AActor> ItemClass;
+	UPROPERTY(EditAnywhere, Category = "ItemType Data")
+		EItemCategory ItemType;
+	UPROPERTY(EditAnywhere, Category = "ItemType Data")
+		int32 ConsumeValue;
+
+
 	UPROPERTY(EditAnywhere, Category = "Asset Data")
 		UStaticMesh* ItemMesh;
 	UPROPERTY(EditAnywhere, Category = "Asset Data")

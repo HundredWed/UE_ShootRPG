@@ -8,6 +8,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Item/Item.h"
+#include "Item/ItemAbility.h"
 
 void UCPP_Slot::NativeConstruct()
 {
@@ -15,7 +16,7 @@ void UCPP_Slot::NativeConstruct()
 	SlotButton->OnClicked.AddDynamic(this, &UCPP_Slot::SlotClickEvent);
 }
 
-void UCPP_Slot::UpdateSlot(int32 index)
+void UCPP_Slot::UpdateSlot(const uint8 index)
 {
 	MyArrayNumber = index;
 	if (IsValid(InventoryRef))
@@ -31,9 +32,9 @@ void UCPP_Slot::UpdateSlot(int32 index)
 		else
 		{
 			SlotButton->SetIsEnabled(true);
-			FInventorySlot slotinfo = InventoryRef->GetSlotInfoIndex(index);
+			const FInventorySlot slotinfo = InventoryRef->GetSlotInfoIndex(index);
 			const UItem* item = slotinfo.Item;
-			int32 amount = slotinfo.ItemAmount;
+			const uint8 amount = slotinfo.ItemAmount;
 			
 
 			ItemIcon->SetBrushFromTexture(item->IconTexture);
@@ -62,6 +63,7 @@ void UCPP_Slot::SlotClickEvent()
 	if (ClickCount > 1)
 	{
 		/**Equip weapon*/
+
 		ResetCount();
 	}
 }
@@ -79,12 +81,45 @@ FReply UCPP_Slot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPo
 	{
 		if (SlotButton->GetIsEnabled())
 		{
-			
+			if (IsValid(InventoryRef))
+			{
+				OnUseItem(InventoryRef);
+			}
 		}
 	}
 
 	return FReply::Handled();
 }
 
+FReply UCPP_Slot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseButtonDoubleClick(InGeometry, InMouseEvent);
 
+	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+	{
+		if (SlotButton->GetIsEnabled())
+		{
+			if (IsValid(InventoryRef))
+			{
+				OnUseItem(InventoryRef);
+			}
+		}
+	}
+
+	return FReply::Handled();
+}
+
+void UCPP_Slot::OnUseItem(class UInventory* inventory)
+{
+	AActor* item = GetWorld()->SpawnActor(inventory->SlotsArray[MyArrayNumber].Item->ItemClass);
+
+	IItemAbility* itemAbility = Cast<IItemAbility>(item);
+	if (itemAbility)
+	{
+		const uint32 value = inventory->SlotsArray[MyArrayNumber].Item->ConsumeValue;
+		itemAbility->UseItem(PlayerRef, value);
+	}
+	item->Destroy();
+	inventory->RemoveItemAtIndex(MyArrayNumber, 1);
+}
 

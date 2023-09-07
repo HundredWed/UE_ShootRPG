@@ -50,7 +50,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Item state")
 		int32 ItemAmount;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category = "Item state")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Item state")
 		class UItem* ItemRef;
 
 	UPROPERTY(EditAnywhere, Category = "Item state")

@@ -70,7 +70,7 @@ public:
 		float SpringArmSocketOffsetYValue = 100.f;
 
 	/**Item search issue overlap counting*/
-	int32 OverlapCount = 0;
+	uint8 OverlapCount = 0;
 
 protected:
 	virtual void BeginPlay() override;
@@ -137,6 +137,9 @@ public:
 	FORCEINLINE void SetHitResultObject(class APickUpItem* hitresultobject);
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
+
+	FORCEINLINE void IncreasePlayerHP(const uint32 value) { Health += value; }
+	FORCEINLINE void DecreasePlayerHP(const uint32 value) { Health -= value; }
 	
 	/**inventory*/
 
@@ -144,8 +147,8 @@ public:
 	void ShowGameInventory();
 
 	FORCEINLINE class UInventory* GetInventory() { return GameInventory; }
-	FORCEINLINE int32 GetInventorySize() { return InventoryAmountOfSlot; }
-	FORCEINLINE int32 GetInventoryRowSize() { return InventoryRowSize; }
+	FORCEINLINE const uint8 GetInventorySize() { return InventoryAmountOfSlot; }
+	FORCEINLINE const uint8 GetInventoryRowSize() { return InventoryRowSize; }
 	
 
 private:
@@ -155,6 +158,11 @@ private:
 	/**character states*/
 	ECharacterStateTypes CharacterState = ECharacterStateTypes::UnEquiped;
 	ECharacterActionState ActionState = ECharacterActionState::Normal;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
+		int32 Health = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
+		int32 Mana = 0;
 
 	float MoveDelfaultSpeed = 400.f;
 	float MoveRunSpeed = 600.f;
@@ -223,9 +231,9 @@ private:
 		class UInventory* GameInventory;
 
 	UPROPERTY(EditAnywhere, Category = "InventoryComponent", meta = (AllowPrivateAccess = "true"))
-		int32 InventoryAmountOfSlot = 20;
+		uint8 InventoryAmountOfSlot = 20;
 	UPROPERTY(EditAnywhere, Category = "InventoryComponent", meta = (AllowPrivateAccess = "true"))
-		int32 InventoryRowSize = 5;
+		uint8 InventoryRowSize = 5;
 
 	bool isVisible = true;
 };

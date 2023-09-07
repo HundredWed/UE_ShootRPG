@@ -37,7 +37,7 @@ void UInventory::BeginPlay()
 
 
 
-bool UInventory::IsSlotEmpty(int32 index)
+bool UInventory::IsSlotEmpty(const uint8 index)
 {
 	UItem* item = SlotsArray[index].Item;
 
@@ -50,7 +50,7 @@ bool UInventory::IsSlotEmpty(int32 index)
 	
 }
 
-void UInventory::AddItem(UItem* item, int32 amount)
+void UInventory::AddItem(UItem* item, const uint8 amount)
 {
 	if (!IsValid(item))
 	{
@@ -62,11 +62,11 @@ void UInventory::AddItem(UItem* item, int32 amount)
 	{
 		/**can Stacked item*/
 
-		int32 canStackedSlotIndex;
+		uint8 canStackedSlotIndex;
 		if (SearchFreeStackSlot(item, canStackedSlotIndex))
 		{
 			/**found can-stack slot*/
-			int32 amountOver = SlotsArray[canStackedSlotIndex].ItemAmount + amount;
+			const uint8 amountOver = SlotsArray[canStackedSlotIndex].ItemAmount + amount;
 			if (amountOver > MaxStackSize)
 			{
 				SlotsArray[canStackedSlotIndex].Item = item;
@@ -75,7 +75,7 @@ void UInventory::AddItem(UItem* item, int32 amount)
 				/**update widget*/
 				InventoryWidget->SlotWidgetArray[canStackedSlotIndex]->UpdateSlot(canStackedSlotIndex);
 
-				int32 restAmountOver = amountOver - MaxStackSize;
+				const uint8 restAmountOver = amountOver - MaxStackSize;
 				AddItem(item, restAmountOver);
 
 				return;
@@ -95,7 +95,7 @@ void UInventory::AddItem(UItem* item, int32 amount)
 		else
 		{
 			/**not found can stack slot*/
-			int32 emptySlotForStack;
+			uint8 emptySlotForStack;
 			if (SearchEmptySlot(emptySlotForStack))
 			{
 				if (amount > MaxStackSize)
@@ -106,7 +106,7 @@ void UInventory::AddItem(UItem* item, int32 amount)
 					/**update widget*/
 					InventoryWidget->SlotWidgetArray[emptySlotForStack]->UpdateSlot(emptySlotForStack);
 
-					int32 restAmount = amount - MaxStackSize;
+					const uint8 restAmount = amount - MaxStackSize;
 					AddItem(item, restAmount);
 
 					return;
@@ -133,8 +133,8 @@ void UInventory::AddItem(UItem* item, int32 amount)
 	{
 		/**can't Stacked item*/
 
-		int32 emptySlot;
-		const int32 defaultAmount = 1;
+		uint8 emptySlot;
+		const uint8 defaultAmount = 1;
 		if (SearchEmptySlot(emptySlot))
 		{
 			SlotsArray[emptySlot].Item = item;
@@ -152,7 +152,7 @@ void UInventory::AddItem(UItem* item, int32 amount)
 		/**In the case of acquiring multiple 'can't Stacked items' */
 		if (amount > defaultAmount)
 		{
-			int32 addRestItem = amount - 1;
+			const uint8 addRestItem = amount - 1;
 			AddItem(item, addRestItem);
 		}
 		else
@@ -163,7 +163,7 @@ void UInventory::AddItem(UItem* item, int32 amount)
 
 }
 
-bool UInventory::SearchEmptySlot(int32& emptySlotIndex)
+bool UInventory::SearchEmptySlot(uint8& emptySlotIndex)
 {
 	for (int32 index = 0; index < SlotsArray.Num(); index++)
 	{
@@ -178,12 +178,12 @@ bool UInventory::SearchEmptySlot(int32& emptySlotIndex)
 	return false;
 }
 
-bool UInventory::SearchFreeStackSlot(class UItem* item, int32& canStackedSlotIndex)
+bool UInventory::SearchFreeStackSlot(class UItem* item, uint8& canStackedSlotIndex)
 {
 	for (int32 index = 0; index < SlotsArray.Num(); index++)
 	{
 		UItem* slotItem = SlotsArray[index].Item;
-		int32 slotItemAmount = SlotsArray[index].ItemAmount;
+		const uint8 slotItemAmount = SlotsArray[index].ItemAmount;
 		if (slotItem != nullptr)
 		{
 			if ((slotItem->ItemInfoID == item->ItemInfoID) && (slotItemAmount < MaxStackSize))
@@ -198,20 +198,21 @@ bool UInventory::SearchFreeStackSlot(class UItem* item, int32& canStackedSlotInd
 	return false;
 }
 
-int32 UInventory::GetAmountAtIndex(int32 index)
+int32 UInventory::GetAmountAtIndex(const uint8 index)
 {
 	return SlotsArray[index].ItemAmount;
 }
 
-void UInventory::RemoveItemAtIndex(const int32 index, const int32 removeAmount)
+void UInventory::RemoveItemAtIndex(const uint8 index, const uint8 removeAmount)
 {
 	if (!IsSlotEmpty(index) && (removeAmount > 0))
 	{
-		int32 amount = GetAmountAtIndex(index);
+		const uint8 amount = GetAmountAtIndex(index);
 		if (removeAmount >= amount)
 		{
 			SlotsArray[index].Item = nullptr;
 			SlotsArray[index].ItemAmount = 0;
+			InventoryWidget->SlotWidgetArray[index]->UpdateSlot(index);
 			return;
 		}
 		else
@@ -226,7 +227,7 @@ void UInventory::RemoveItemAtIndex(const int32 index, const int32 removeAmount)
 	return;
 }
 
-FInventorySlot UInventory::GetSlotInfoIndex(const int32 index)
+FInventorySlot UInventory::GetSlotInfoIndex(const uint8 index)
 {
 	return SlotsArray[index];
 }

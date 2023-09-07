@@ -17,7 +17,7 @@ void UCPP_InventoryWidget::NativeConstruct()
 	
 }
 
-void UCPP_InventoryWidget::GenerateSlotWidget(int32 slotsParRow)
+void UCPP_InventoryWidget::GenerateSlotWidget(const uint8 slotsParRow)
 {
 	if (IsValid(InventoryRef))
 	{
@@ -35,8 +35,8 @@ void UCPP_InventoryWidget::GenerateSlotWidget(int32 slotsParRow)
 					//SlotWidget->SetInventory(InventoryRef);
 					SlotWidgetArray.Add(SlotWidget);
 
-					int32 row = index / slotsParRow;
-					int32 column = index % slotsParRow;
+					const uint8 row = index / slotsParRow;
+					const uint8 column = index % slotsParRow;
 
 					SlotPanel->AddChildToUniformGrid(SlotWidget, row, column);
 

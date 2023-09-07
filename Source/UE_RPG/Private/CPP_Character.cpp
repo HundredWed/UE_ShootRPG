@@ -1,4 +1,5 @@
 #include "CPP_Character.h"
+#include "CPP_Controller.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -10,7 +11,6 @@
 #include "Item/Weapon.h"
 #include "Item/Gun/ShootGun.h"
 #include "Item/PickUpItem.h"
-#include "CPP_Controller.h"
 #include "Camera/CameraManager.h"
 #include "Inventory.h"
 
@@ -578,12 +578,28 @@ void ACPP_Character::SetHitResultObject(APickUpItem* hitresultobject)
 
 void ACPP_Character::HideGameInventory()
 {
+	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
+	if (IsValid(playercontroller) == false)
+	{
+		return;
+	}
+	
+	playercontroller->HideCursor();
+
 	isVisible = false;
 	GameInventory->HideInventory();
 }
 
 void ACPP_Character::ShowGameInventory()
 {
+	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
+	if (IsValid(playercontroller) == false)
+	{
+		return;
+	}
+
+	playercontroller->ShowCursor();
+
 	isVisible = true;
 	GameInventory->ShowInventory();
 }

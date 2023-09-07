@@ -16,9 +16,6 @@ public:
 	
 	UItem();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FItemInfo ItemInfo;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		FName ItemInfoID;
 
@@ -43,8 +40,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
 		int32 ItemPrice;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+	UPROPERTY(VisibleAnywhere, Category = "ItemType Data")
+		TSubclassOf<AActor> ItemClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemType Data")
 		EItemCategory ItemType;
+
+	UPROPERTY(VisibleAnywhere, Category = "ItemType Data")
+		int32 ConsumeValue;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
 		int32 ATK;
@@ -59,15 +62,13 @@ public:
 
 	UFUNCTION()
 		UItem* CreateItemCopy();
-	
+
+	//virtual void UseItem(class ACPP_Character* player);
 protected:
 
-	
+	UPROPERTY()
+		class ACPP_Character* playerRef;
 
 private:
-
-	
-
-
 
 };

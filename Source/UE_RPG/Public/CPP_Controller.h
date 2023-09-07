@@ -22,4 +22,14 @@ public:
 
 	UFUNCTION()
 		void SetHUDVisibility(bool bshowHUD);
+
+	FORCEINLINE void ShowCursor(){
+		SetInputMode(FInputModeGameAndUI());
+		bShowMouseCursor = true;
+	}
+
+	FORCEINLINE void HideCursor() {
+		SetInputMode(FInputModeGameOnly());
+		bShowMouseCursor = false;
+	}
 };

@@ -33,7 +33,7 @@ public:
 public:	
 
 	UFUNCTION()
-		void GenerateSlotWidget(int32 slotsParRow);
+		void GenerateSlotWidget(const uint8 slotsParRow);
 
 	UFUNCTION()
 		void CloseWidget();

@@ -28,7 +28,8 @@ public:
 	
 public: 
 	
-	void UpdateSlot(int32 index);
+	void UpdateSlot(const uint8 index);
+	void OnUseItem(class UInventory* inventory);
 
 	UFUNCTION()
 		void SlotClickEvent();
@@ -40,12 +41,13 @@ public:
 protected:
 
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 private:
 
 	UPROPERTY()
 		class UCPP_InventoryWidget* InventoryWidget;
 
-	int32 MyArrayNumber = 0;
+	uint8 MyArrayNumber = 0;
 
-	int32 ClickCount = 0;
+	uint8 ClickCount = 0;
 };
