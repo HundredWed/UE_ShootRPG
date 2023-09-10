@@ -65,6 +65,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* AimingFireMontage;
 
+	/**main panel widget*/
+	UPROPERTY(EditAnywhere, Category = "Main Widget")
+		TSubclassOf< class UMainPanelWidget> MainPanelclass;
+
 	/**spring arm*/
 	UPROPERTY(EditAnywhere, Category = "EditValue")
 		float SpringArmSocketOffsetYValue = 100.f;
@@ -224,6 +228,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		class UCameraManager* CameraManager;
+
+	/**widget*/
+	UPROPERTY()
+		class UMainPanelWidget* MainPanelWidget;
 
 
 	/**inventory*/

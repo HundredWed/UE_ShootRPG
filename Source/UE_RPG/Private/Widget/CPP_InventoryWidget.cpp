@@ -32,7 +32,6 @@ void UCPP_InventoryWidget::GenerateSlotWidget(const uint8 slotsParRow)
 				SlotWidget = CreateWidget<UCPP_Slot>(this, SlotWidgetClass);
 				if (IsValid(SlotWidget))
 				{
-					//SlotWidget->SetInventory(InventoryRef);
 					SlotWidgetArray.Add(SlotWidget);
 
 					const uint8 row = index / slotsParRow;
@@ -43,11 +42,8 @@ void UCPP_InventoryWidget::GenerateSlotWidget(const uint8 slotsParRow)
 					SlotWidget->UpdateSlot(index);
 				}
 			}
-
 		}
 	}
-	
-
 }
 
 void UCPP_InventoryWidget::CloseWidget()
@@ -87,8 +83,11 @@ void UCPP_InventoryWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 void UCPP_InventoryWidget::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
 	Super::NativeOnDragLeave(InDragDropEvent, InOperation);
-	RemoveFromParent();
-	
+	UDragWidget* dragWidget = Cast<UDragWidget>(InOperation);
+	if (dragWidget)
+	{
+		RemoveFromParent();
+	}
 }
 
 

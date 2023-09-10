@@ -12,6 +12,7 @@
 #include "Item/Gun/ShootGun.h"
 #include "Item/PickUpItem.h"
 #include "Camera/CameraManager.h"
+#include "Widget/MainPanelWidget.h"
 #include "Inventory.h"
 
 ACPP_Character::ACPP_Character()
@@ -80,9 +81,16 @@ void ACPP_Character::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Graver component not found!!"));
 	}
 
+	if (MainPanelclass)
+	{
+		MainPanelWidget = CreateWidget<UMainPanelWidget>(GetWorld(), MainPanelclass);
+		MainPanelWidget->AddToViewport();
+	}
+
 	GameInventory = FindComponentByClass<UInventory>();
 	if (IsValid(GameInventory))
 	{
+		GameInventory->InventoryWidget = MainPanelWidget->GetInventoryWidget();
 		HideGameInventory();
 		UE_LOG(LogTemp, Display, TEXT("Found Inventory! "));
 	}

@@ -26,6 +26,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* TextAmount;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
+		TSubclassOf< class UCPP_DragSlotWidget> DragWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
+		FButtonStyle OverStlyle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
+		FButtonStyle DefaultStlyle;
+
 public: 
 	
 	void UpdateSlot(const uint8 index);
@@ -36,18 +45,27 @@ public:
 	UFUNCTION()
 		void ResetCount();
 
-	FORCEINLINE void SetInventoryWidget(class UCPP_InventoryWidget* inventoryWidget) { InventoryWidget = inventoryWidget; }
 
 protected:
 
+	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	virtual bool NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation);
+
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	
 private:
 
+
 	UPROPERTY()
-		class UCPP_InventoryWidget* InventoryWidget;
+		class UCPP_DragSlotWidget* DragSlotWidget;
 
 	uint8 MyArrayNumber = 0;
-
 	uint8 ClickCount = 0;
+
+	bool bDraggedOver = false;
 };

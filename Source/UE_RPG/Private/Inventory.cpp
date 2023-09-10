@@ -1,7 +1,6 @@
 #include "Inventory.h"
 #include "Item/Item.h"
 #include "CPP_Character.h"
-#include "Widget/MainPanelWidget.h"
 #include "Widget/CPP_Slot.h"
 
 UInventory::UInventory()
@@ -25,17 +24,8 @@ void UInventory::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("not found PlayerRef at Inventory!!"));
 	}
-
-	if (MainPanelclass)
-	{
-		MainPanelWidget = CreateWidget<UMainPanelWidget>(GetWorld(), MainPanelclass);
-		InventoryWidget = MainPanelWidget->GetInventoryWidget();
-		MainPanelWidget->AddToViewport();
-	}
 	
 }
-
-
 
 bool UInventory::IsSlotEmpty(const uint8 index)
 {
@@ -50,7 +40,7 @@ bool UInventory::IsSlotEmpty(const uint8 index)
 	
 }
 
-void UInventory::AddItem(UItem* item, const uint8 amount)
+void UInventory::AddItem(UItem* item, const uint32 amount)
 {
 	if (!IsValid(item))
 	{
@@ -66,16 +56,16 @@ void UInventory::AddItem(UItem* item, const uint8 amount)
 		if (SearchFreeStackSlot(item, canStackedSlotIndex))
 		{
 			/**found can-stack slot*/
-			const uint8 amountOver = SlotsArray[canStackedSlotIndex].ItemAmount + amount;
+			const uint32 amountOver = SlotsArray[canStackedSlotIndex].ItemAmount + amount;
 			if (amountOver > MaxStackSize)
 			{
 				SlotsArray[canStackedSlotIndex].Item = item;
 				SlotsArray[canStackedSlotIndex].ItemAmount = MaxStackSize;
 
 				/**update widget*/
-				InventoryWidget->SlotWidgetArray[canStackedSlotIndex]->UpdateSlot(canStackedSlotIndex);
+				UpdateSlotAtIndex(canStackedSlotIndex);
 
-				const uint8 restAmountOver = amountOver - MaxStackSize;
+				const uint32 restAmountOver = amountOver - MaxStackSize;
 				AddItem(item, restAmountOver);
 
 				return;
@@ -86,7 +76,7 @@ void UInventory::AddItem(UItem* item, const uint8 amount)
 				SlotsArray[canStackedSlotIndex].ItemAmount = amountOver;
 
 				/**update widget*/
-				InventoryWidget->SlotWidgetArray[canStackedSlotIndex]->UpdateSlot(canStackedSlotIndex);
+				UpdateSlotAtIndex(canStackedSlotIndex);
 
 				return;
 
@@ -104,9 +94,9 @@ void UInventory::AddItem(UItem* item, const uint8 amount)
 					SlotsArray[emptySlotForStack].ItemAmount = MaxStackSize;
 
 					/**update widget*/
-					InventoryWidget->SlotWidgetArray[emptySlotForStack]->UpdateSlot(emptySlotForStack);
+					UpdateSlotAtIndex(emptySlotForStack);
 
-					const uint8 restAmount = amount - MaxStackSize;
+					const uint32 restAmount = amount - MaxStackSize;
 					AddItem(item, restAmount);
 
 					return;
@@ -117,7 +107,7 @@ void UInventory::AddItem(UItem* item, const uint8 amount)
 					SlotsArray[emptySlotForStack].ItemAmount = amount;
 
 					/**update widget*/
-					InventoryWidget->SlotWidgetArray[emptySlotForStack]->UpdateSlot(emptySlotForStack);
+					UpdateSlotAtIndex(emptySlotForStack);
 
 					return;
 				}
@@ -146,7 +136,7 @@ void UInventory::AddItem(UItem* item, const uint8 amount)
 		}
 
 		/**update widget*/
-		InventoryWidget->SlotWidgetArray[emptySlot]->UpdateSlot(emptySlot);
+		UpdateSlotAtIndex(emptySlot);
 
 
 		/**In the case of acquiring multiple 'can't Stacked items' */
@@ -203,7 +193,9 @@ int32 UInventory::GetAmountAtIndex(const uint8 index)
 	return SlotsArray[index].ItemAmount;
 }
 
-void UInventory::RemoveItemAtIndex(const uint8 index, const uint8 removeAmount)
+
+
+void UInventory::RemoveItemAtIndex(const uint8 index, const uint32 removeAmount)
 {
 	if (!IsSlotEmpty(index) && (removeAmount > 0))
 	{
@@ -227,10 +219,132 @@ void UInventory::RemoveItemAtIndex(const uint8 index, const uint8 removeAmount)
 	return;
 }
 
+void UInventory::SwapSlot(const uint8 fromIndex, const uint8 toIndex)
+{
+	const uint8 lastSlot = SlotsArray.Num() - 1;
+
+	if (fromIndex > lastSlot || toIndex > lastSlot)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("not valid slot!!"));
+		return;
+	}
+	else if(IsSlotEmpty(toIndex))
+	{
+		UItem* item = SlotsArray[fromIndex].Item;
+		SlotsArray[toIndex].Item = item;
+		SlotsArray[toIndex].ItemAmount = SlotsArray[fromIndex].ItemAmount;
+
+		SlotsArray[fromIndex].Item = nullptr;
+		SlotsArray[fromIndex].ItemAmount = 0;
+
+		UpdateSlotAtIndex(fromIndex);
+		UpdateSlotAtIndex(toIndex);
+	}
+	else
+	{
+		FInventorySlot tempSlot = SlotsArray[toIndex];
+		SlotsArray[toIndex] = SlotsArray[fromIndex];
+		SlotsArray[fromIndex] = tempSlot;
+
+		UpdateSlotAtIndex(fromIndex);
+		UpdateSlotAtIndex(toIndex);
+	}
+}
+
+void UInventory::AddToIndex(const uint8 fromIndex, const uint8 toIndex)
+{
+	if (CanAddToIndex(fromIndex, toIndex))
+	{
+		const uint8 restAmount = MaxStackSize - SlotsArray[toIndex].ItemAmount;
+		if (restAmount >= SlotsArray[fromIndex].ItemAmount)
+		{
+			const uint8 addAmount = SlotsArray[fromIndex].ItemAmount + SlotsArray[toIndex].ItemAmount;
+
+			/**set slot-toIndex*/
+			SlotsArray[toIndex].ItemAmount = addAmount;
+
+			/**set slot-fromIndex*/
+			SlotsArray[fromIndex].Item = nullptr;
+			SlotsArray[fromIndex].ItemAmount = 0;
+
+			UpdateSlotAtIndex(fromIndex);
+			UpdateSlotAtIndex(toIndex);
+		}
+		else
+		{
+			/**set slot-fromIndex*/
+			SlotsArray[fromIndex].ItemAmount = SlotsArray[fromIndex].ItemAmount - restAmount;
+
+			/**set slot-toIndex*/
+			SlotsArray[toIndex].ItemAmount = MaxStackSize;
+
+			UpdateSlotAtIndex(fromIndex);
+			UpdateSlotAtIndex(toIndex);
+		}
+	}
+	else
+	{
+		return;
+	}
+
+}
+
+bool UInventory::CanAddToIndex(const uint8 fromIndex, const uint8 toIndex)
+{
+	if (IsSlotEmpty(toIndex))
+	{
+		return false;
+	}
+
+	FName fromIndexItemId = SlotsArray[fromIndex].Item->ItemInfoID;
+	FName toIndexItemId = SlotsArray[toIndex].Item->ItemInfoID;
+
+	bool brestAmount = SlotsArray[toIndex].ItemAmount < MaxStackSize;
+	bool bstacked = SlotsArray[toIndex].Item->bCanStacked;
+
+	return (fromIndexItemId == toIndexItemId) && brestAmount && bstacked;
+}
+
+
+void UInventory::SplitStackToIndex(const uint8 fromIndex, const uint8 toIndex, const int32 splitAmount)
+{
+	if (CanSplitStakable(fromIndex, toIndex, splitAmount))
+	{
+		SlotsArray[fromIndex].ItemAmount -= splitAmount;
+
+		UItem* fromIndexItem = SlotsArray[fromIndex].Item;
+		SlotsArray[toIndex].Item = fromIndexItem;
+		SlotsArray[toIndex].ItemAmount = splitAmount;
+
+		UpdateSlotAtIndex(fromIndex);
+		UpdateSlotAtIndex(toIndex);
+	}
+	else
+	{
+		return;
+	}
+
+
+}
+
+bool UInventory::CanSplitStakable(const uint8 fromIndex, const uint8 toIndex, const int32 splitAmount)
+{
+	return IsSlotEmpty(toIndex)
+		&& (SlotsArray[fromIndex].Item->bCanStacked) 
+		&& (SlotsArray[fromIndex].ItemAmount > 1) 
+		&& (SlotsArray[fromIndex].ItemAmount > splitAmount);
+}
+
+void UInventory::UpdateSlotAtIndex(const uint8 index)
+{
+	InventoryWidget->SlotWidgetArray[index]->UpdateSlot(index);
+}
+
 FInventorySlot UInventory::GetSlotInfoIndex(const uint8 index)
 {
 	return SlotsArray[index];
 }
+
 
 
 

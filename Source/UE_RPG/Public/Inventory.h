@@ -21,7 +21,6 @@ public:
 		class UItem* Item;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int32 ItemAmount;
-
 };
 
 
@@ -35,9 +34,8 @@ public:
 	
 	UInventory();
 
-	/**main panel widget*/
-	UPROPERTY(EditAnywhere, Category = "Main Widget")
-		TSubclassOf< class UMainPanelWidget> MainPanelclass;
+	/**widget value*/
+	UCPP_InventoryWidget* InventoryWidget;
 
 	/**inventory slot*/
 	UPROPERTY()
@@ -50,15 +48,24 @@ public:
 
 	/**inventory function*/
 	bool IsSlotEmpty(const uint8 index);
-	void AddItem(class UItem* item, const uint8 amount);
+	void AddItem(class UItem* item, const uint32 amount);
 	bool SearchEmptySlot(uint8& emptySlotIndex);
 	bool SearchFreeStackSlot(class UItem* item, uint8& canStackedSlotIndex);
 	int32 GetAmountAtIndex(const uint8 index);
-	void RemoveItemAtIndex(const uint8 index, const uint8 removeAmount);
+
+	void RemoveItemAtIndex(const uint8 index, const uint32 removeAmount);
+	void SwapSlot(const uint8 fromIndex, const uint8 toIndex);
+	void AddToIndex(const uint8 fromIndex, const uint8 toIndex);
+	bool CanAddToIndex(const uint8 fromIndex, const uint8 toIndex);
+	
+	/**split when drag slot*/
+	void SplitStackToIndex(const uint8 fromIndex, const uint8 toIndex, const int32 splitAmount);
+	bool CanSplitStakable(const uint8 fromIndex, const uint8 toIndex, const int32 splitAmount);
 
 
-	UFUNCTION()
-		FInventorySlot GetSlotInfoIndex(const uint8 index);
+	/**매크로 지정?*/
+	FInventorySlot GetSlotInfoIndex(const uint8 index);
+	void UpdateSlotAtIndex(const uint8 index);
 
 	/**inventory widget function (FORCEINLINE) */
 	FORCEINLINE void ShowInventory() {
@@ -74,13 +81,7 @@ private:
 
 	/**inventory value*/
 	uint8 MaxStackSize = 99;
-	
-	/**widget value*/
-	UCPP_InventoryWidget* InventoryWidget;
 
 	UPROPERTY()
 		class ACPP_Character* PlayerRef;
-
-	UPROPERTY()
-		class UMainPanelWidget* MainPanelWidget;
 };
