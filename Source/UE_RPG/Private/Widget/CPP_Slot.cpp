@@ -4,6 +4,7 @@
 #include "Widget/CPP_Slot.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Inventory.h"
+#include "CPP_Character.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
@@ -11,6 +12,7 @@
 #include "Item/ItemAbility.h"
 #include "Widget/SlotDrag.h"
 #include "Widget/CPP_DragSlotWidget.h"
+#include "Widget/SetAmountWidget.h"
 
 void UCPP_Slot::NativeConstruct()
 {
@@ -20,9 +22,9 @@ void UCPP_Slot::NativeConstruct()
 
 void UCPP_Slot::UpdateSlot(const uint8 index)
 {
-	MyArrayNumber = index;
 	if (IsValid(InventoryRef))
 	{
+		MyArrayNumber = index;
 		bool isSlotEmpty = InventoryRef->IsSlotEmpty(index);
 
 		if (isSlotEmpty)
@@ -36,15 +38,15 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 			SlotButton->SetIsEnabled(true);
 			const FInventorySlot slotinfo = InventoryRef->GetSlotInfoIndex(index);
 			const UItem* item = slotinfo.Item;
-			const uint32 amount = slotinfo.ItemAmount;
-			
+			MyAmount = slotinfo.ItemAmount;
+			bMyItemCanStacked = item->bCanStacked;
 
 			ItemIcon->SetBrushFromTexture(item->IconTexture);
 			ItemIcon->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 
 			if (item->bCanStacked)
 			{
-				TextAmount->SetText(FText::Format(NSLOCTEXT("CPP_Slot", "TextAmount", "x{0}"), amount));
+				TextAmount->SetText(FText::Format(NSLOCTEXT("CPP_Slot", "TextAmount", "x{0}"), MyAmount));
 				TextAmount->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 			}
 			else
@@ -95,7 +97,7 @@ void UCPP_Slot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointer
 	UCPP_DragSlotWidget* dragWidget = CreateWidget<UCPP_DragSlotWidget>(GetWorld(), DragWidgetClass);
 	const FInventorySlot slotinfo = InventoryRef->GetSlotInfoIndex(MyArrayNumber);
 	const UItem* item = slotinfo.Item;
-	const uint32 amount = slotinfo.ItemAmount;
+	const uint32 amount = MyAmount;
 	dragWidget->UpdataWidget(item, amount);
 
 	USlotDrag* dragSlot = Cast<USlotDrag>(UWidgetBlueprintLibrary::CreateDragDropOperation(USlotDrag::StaticClass()));
@@ -163,17 +165,26 @@ bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 		if (dragSlot->WidgetRef != this)
 		{
 			bDraggedOver = false;
+
 			SlotButton->SetStyle(DefaultStlyle);
+
 			if (InventoryRef->CanAddToIndex(fromIndex, toIndex))
 			{
 				InventoryRef->AddToIndex(fromIndex, toIndex);
-
 				return true;
 			}
 			else
 			{
-				InventoryRef->SwapSlot(fromIndex, toIndex);
-				return true;
+				if (PlayerRef->bShiftDown)
+				{
+					InventoryRef->InventoryWidget->SetSpliteWidget(dragSlot->WidgetRef, this);
+					return true;
+				}
+				else
+				{
+					InventoryRef->SwapSlot(fromIndex, toIndex);
+					return true;
+				}
 			}
 		}
 		else

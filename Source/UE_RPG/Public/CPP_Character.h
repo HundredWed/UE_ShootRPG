@@ -76,6 +76,9 @@ public:
 	/**Item search issue overlap counting*/
 	uint8 OverlapCount = 0;
 
+	/**key down info*/
+	bool bShiftDown = false;/*for inventory splite*/
+
 protected:
 	virtual void BeginPlay() override;
 

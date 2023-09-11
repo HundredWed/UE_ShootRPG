@@ -204,13 +204,13 @@ void UInventory::RemoveItemAtIndex(const uint8 index, const uint32 removeAmount)
 		{
 			SlotsArray[index].Item = nullptr;
 			SlotsArray[index].ItemAmount = 0;
-			InventoryWidget->SlotWidgetArray[index]->UpdateSlot(index);
+			UpdateSlotAtIndex(index);
 			return;
 		}
 		else
 		{
 			SlotsArray[index].ItemAmount = amount - removeAmount;
-			InventoryWidget->SlotWidgetArray[index]->UpdateSlot(index);
+			UpdateSlotAtIndex(index);
 			return;
 		}
 		
@@ -321,6 +321,7 @@ void UInventory::SplitStackToIndex(const uint8 fromIndex, const uint8 toIndex, c
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("not SplitStackToIndex!!"));
 		return;
 	}
 

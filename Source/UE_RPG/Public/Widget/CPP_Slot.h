@@ -35,6 +35,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
 		FButtonStyle DefaultStlyle;
 
+	
+
+	/**item info*/
+	uint8 MyArrayNumber = 0;
+	int32 MyAmount = 0;
+	bool  bMyItemCanStacked = false;
+
 public: 
 	
 	void UpdateSlot(const uint8 index);
@@ -53,7 +60,7 @@ protected:
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
-	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation);
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)override;
 
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -64,8 +71,8 @@ private:
 	UPROPERTY()
 		class UCPP_DragSlotWidget* DragSlotWidget;
 
-	uint8 MyArrayNumber = 0;
 	uint8 ClickCount = 0;
 
+	/**for drag over event only once*/
 	bool bDraggedOver = false;
 };

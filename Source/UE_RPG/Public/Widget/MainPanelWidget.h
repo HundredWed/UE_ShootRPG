@@ -21,6 +21,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UCPP_InventoryWidget* InventoryWidget;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+		class USetAmountWidget* ThrowWidget;
+
 	FORCEINLINE UCPP_InventoryWidget* GetInventoryWidget() { return InventoryWidget; }
 
 protected:

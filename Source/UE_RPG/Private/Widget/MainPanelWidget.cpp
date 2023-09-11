@@ -3,9 +3,12 @@
 
 #include "Widget/MainPanelWidget.h"
 #include "CPP_Character.h"
-#include "Widget/CPP_InventoryWidget.h"
 #include "Inventory.h"
+#include "Widget/CPP_InventoryWidget.h"
+#include "Widget/SetAmountWidget.h"
 #include "Widget/DragWidget.h"
+#include "Widget/SlotDrag.h"
+#include "Widget/CPP_Slot.h"
 
 void UMainPanelWidget::NativeConstruct()
 {
@@ -32,8 +35,8 @@ bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDrop
 {
 	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 
-
-	UDragWidget* inDargWidget = Cast<UDragWidget>(InOperation);
+	
+	UDragWidget* inDargWidget = Cast<UDragWidget>(InOperation);/**inventory DragWidget*/
 	if (IsValid(inDargWidget))
 	{
 
@@ -46,6 +49,30 @@ bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDrop
 		inDargWidget->WidgetRef->SetVisibility(ESlateVisibility::Visible);
 		inDargWidget->WidgetRef->SetPositionInViewport(viewPortPos,false);
 
+	}
+	else
+	{
+		USlotDrag* inSlotDragWidget = Cast<USlotDrag>(InOperation);
+		if (inSlotDragWidget)
+		{
+			const uint8 slotIndex = inSlotDragWidget->WidgetRef->MyArrayNumber;
+			const int32 amount = inSlotDragWidget->WidgetRef->MyAmount;
+			bool bstackable = inSlotDragWidget->WidgetRef->bMyItemCanStacked;
+
+			if ((amount > 1) && bstackable)
+			{
+				ThrowWidget->InitWidgetInfo(amount, slotIndex, true);
+				ThrowWidget->SetVisibility(ESlateVisibility::Visible);
+				InventoryWidget->SetPanelEnabled(false);
+				true;
+			}
+			else
+			{
+				InventoryRef->RemoveItemAtIndex(slotIndex, amount);
+				return true;
+			}
+
+		}
 	}
 	
 	return true;

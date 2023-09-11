@@ -245,12 +245,14 @@ void ACPP_Character::SetSpeed(const FInputActionValue& Value)
 	if (PressKey(Value))
 	{
 		GetCharacterMovement()->MaxWalkSpeed = MoveRunSpeed;
-		UE_LOG(LogTemp, Display, TEXT("Fest!!"));
+		bShiftDown = true;
+		//UE_LOG(LogTemp, Display, TEXT("Fest!!"));
 	}
 	else
 	{
 		GetCharacterMovement()->MaxWalkSpeed = MoveDelfaultSpeed;
-		UE_LOG(LogTemp, Display, TEXT("walk"));
+		bShiftDown = false;
+		//UE_LOG(LogTemp, Display, TEXT("walk"));
 	}
 }
 

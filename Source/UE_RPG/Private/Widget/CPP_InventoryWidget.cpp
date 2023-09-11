@@ -3,11 +3,14 @@
 
 #include "Widget/CPP_InventoryWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Components/ScrollBox.h"
+#include "Components/UniformGridSlot.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/Button.h"
 #include "Widget/CPP_Slot.h"
 #include "Inventory.h"
 #include "Widget/DragWidget.h"
+#include "Widget/SetAmountWidget.h"
 
 void UCPP_InventoryWidget::NativeConstruct()
 {
@@ -51,6 +54,29 @@ void UCPP_InventoryWidget::CloseWidget()
 	InventoryRef->HideInventory();
 }
 
+void UCPP_InventoryWidget::SetPanelEnabled(bool enabled)
+{
+	SlotPanel->SetIsEnabled(enabled);
+}
+
+void UCPP_InventoryWidget::SetSpliteWidget(UCPP_Slot* fromSlot, UCPP_Slot* toSlot)
+{
+	UUniformGridSlot* slotGrid = Cast<UUniformGridSlot>(toSlot->Slot);
+
+	float rowSize = (float)(slotGrid->Row * SlotBoxSize) - (InventoryScollBox->GetScrollOffset());
+	float clampRow = FMath::Clamp(rowSize, 0, InventoryBoxSize);
+	float columnSize = (float)(slotGrid->Column * SlotBoxSize);
+
+	FVector2D render = FVector2D(columnSize, clampRow);
+	FWidgetTransform renderTransform = FWidgetTransform(render,FVector2D(1,1), FVector2D::Zero(), 0);
+
+	SpliteWidget->SetRenderTransform(renderTransform);
+	SpliteWidget->InitWidgetInfo(fromSlot->MyAmount, fromSlot->MyArrayNumber, false);
+	SpliteWidget->ToIndex = toSlot->MyArrayNumber;
+	SpliteWidget->SetVisibility(ESlateVisibility::Visible);
+	SetPanelEnabled(false);
+}
+
 FReply UCPP_InventoryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
@@ -88,6 +114,11 @@ void UCPP_InventoryWidget::NativeOnDragLeave(const FDragDropEvent& InDragDropEve
 	{
 		RemoveFromParent();
 	}
+}
+
+bool UCPP_InventoryWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	return true;
 }
 
 
