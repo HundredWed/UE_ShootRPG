@@ -40,6 +40,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
 		int32 ItemPrice;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		float Weight;
+
 	UPROPERTY(VisibleAnywhere, Category = "ItemType Data")
 		TSubclassOf<AActor> ItemClass;
 

@@ -291,7 +291,6 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 		//UE_LOG(LogTemp, Display, TEXT("PickUp!!"));
 		HitResultObject->TakePickUp(this);
 		RemoveHitResultObject();
-
 	}
 	
 }

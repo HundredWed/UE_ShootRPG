@@ -70,7 +70,7 @@ void APickUpItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	ACPP_Character* character = Cast<ACPP_Character>(OtherActor);
 	if (IsValid(character))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Player In!!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Player In!!"));
 		character->SetCanSearchObject(true);
 		character->OverlapCount += 1;
 	}
@@ -84,11 +84,11 @@ void APickUpItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
      	if (character->OverlapCount > 0)
 		{
 			character->OverlapCount -= 1;
-			UE_LOG(LogTemp, Warning, TEXT("Count Min!!"));
+			//UE_LOG(LogTemp, Warning, TEXT("Count Min!!"));
 			if (character->OverlapCount == 0)
 			{
 				character->SetCanSearchObject(false);
-				UE_LOG(LogTemp, Warning, TEXT("Player Out!!"));
+				//UE_LOG(LogTemp, Warning, TEXT("Player Out!!"));
 			}
 		}
 		
@@ -116,6 +116,7 @@ void APickUpItem::InitializePickUpItem()
 		ItemRef->UseText = thisItemInfo->UseText;
 		ItemRef->Interaction = thisItemInfo->Interaction;
 		ItemRef->ItemPrice = thisItemInfo->ItemPrice;
+		ItemRef->Weight = thisItemInfo->Weight;
 		ItemRef->ATK = thisItemInfo->ATK;
 
 		/**itemtype data*/

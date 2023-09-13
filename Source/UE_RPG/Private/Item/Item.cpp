@@ -25,6 +25,7 @@ UItem* UItem::CreateItemCopy()
 	copy->UseText = this->UseText;
 	copy->Interaction = this->Interaction;
 	copy->ItemPrice = this->ItemPrice;
+	copy->Weight = this->Weight;
 	copy->ATK = this->ATK;
 
 	/**itemtype data*/

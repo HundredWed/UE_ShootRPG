@@ -44,6 +44,8 @@ struct FItemInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, Category = "Item Data")
 		int32 ItemPrice;
 	UPROPERTY(EditAnywhere, Category = "Item Data")
+		float Weight;
+	UPROPERTY(EditAnywhere, Category = "Item Data")
 		int32 ATK;
 
 	UPROPERTY(EditAnywhere, Category = "ItemType Data")

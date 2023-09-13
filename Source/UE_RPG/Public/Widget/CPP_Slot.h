@@ -30,12 +30,16 @@ public:
 		TSubclassOf< class UCPP_DragSlotWidget> DragWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
+		TSubclassOf< class UTootipWidget> TootipWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
 		FButtonStyle OverStlyle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
 		FButtonStyle DefaultStlyle;
 
-	
+	UPROPERTY()
+		class UTootipWidget* toolTip;
 
 	/**item info*/
 	uint8 MyArrayNumber = 0;

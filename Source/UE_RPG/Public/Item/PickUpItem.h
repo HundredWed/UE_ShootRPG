@@ -47,7 +47,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Item state")
 		FName ItemInfoID;/**same name*/
 
-	UPROPERTY(EditAnywhere, Category = "Item state")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item state")
 		int32 ItemAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Item state")

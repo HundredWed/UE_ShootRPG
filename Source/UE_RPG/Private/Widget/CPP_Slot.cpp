@@ -13,6 +13,7 @@
 #include "Widget/SlotDrag.h"
 #include "Widget/CPP_DragSlotWidget.h"
 #include "Widget/SetAmountWidget.h"
+#include "Widget/TootipWidget.h"
 
 void UCPP_Slot::NativeConstruct()
 {
@@ -54,6 +55,25 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 				TextAmount->SetVisibility(ESlateVisibility::Hidden);
 			}
 
+			/**set tooltip*/
+			if (IsValid(toolTip))
+			{
+				/**if created tootip before, don't create widget and update that tootip*/
+				toolTip->SetTootipItemRef(item);
+				toolTip->UpdateToolTip();
+				SlotButton->SetToolTip(toolTip);
+			}
+			else
+			{
+				/**CreateWidget only once*/
+				if (TootipWidgetClass)
+				{
+					toolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
+					toolTip->SetTootipItemRef(item);
+					toolTip->UpdateToolTip();
+					SlotButton->SetToolTip(toolTip);
+				}
+			}
 		}
 	}
 }
