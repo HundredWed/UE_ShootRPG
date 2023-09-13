@@ -28,8 +28,11 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void UpdateSpringArmOffset(float NewYoffset, float DeltaTime);
+	void UpdateSpringArmYOffset(float newYoffset, float deltaTime);
 	void SmoothCameraFOV(float DeltaTime);
+
+	void UpdateSpringArmZOffset(float newYoffset,float deltaTime);
+	void SpringArmZOffsetFix(float deltaTime);
 
 	UFUNCTION()
 		void SetBeginCamera();

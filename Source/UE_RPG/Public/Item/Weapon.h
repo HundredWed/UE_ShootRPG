@@ -17,6 +17,11 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		USkeletalMeshComponent* WeaponMesh;
 
+	UPROPERTY(EditAnywhere)
+		class USoundCue* PickUpSound;
+
+	UPROPERTY(EditAnywhere)
+		class USoundCue* EquipSound;
 
 protected:
 	virtual void BeginPlay() override;
@@ -35,7 +40,8 @@ protected:
 		int32 OtherBodyIndex) override;
 
 	/**weapon states*/
-	
+
+
 public:
 
 	virtual void SetItemState(EItemState State) override;

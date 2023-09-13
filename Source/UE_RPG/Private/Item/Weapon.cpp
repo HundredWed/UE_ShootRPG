@@ -1,4 +1,6 @@
 #include "Item/Weapon.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
 AWeapon::AWeapon()
@@ -42,11 +44,19 @@ void AWeapon::Equip(USceneComponent* Inparent, const FName& SocketName)
 	AttachFunc(Inparent, SocketName);
 	SetItemState(EItemState::EIS_Equipped);
 	ItemStateWidjet->SetVisibility(false);
+	if (IsValid(PickUpSound))
+	{
+		UGameplayStatics::PlaySound2D(this, PickUpSound);
+	}
 }
 
 void AWeapon::AttachFunc(USceneComponent* Inparent, const FName& SocketName)
 {
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
+	if (IsValid(EquipSound))
+	{
+		UGameplayStatics::PlaySound2D(this, EquipSound);
+	}
 	WeaponMesh->AttachToComponent(Inparent, TransformRules, SocketName);
 }
 

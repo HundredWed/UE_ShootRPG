@@ -617,7 +617,7 @@ void ACPP_Character::ShowGameInventory()
 float ACPP_Character::ClampRnage(float value)
 {
 	FVector2D Input(0.f, 100.f);
-	FVector2D Output(0.f, 4.f);
+	FVector2D Output(0.f, 1.f);
 
 	return  FMath::GetMappedRangeValueClamped(Input, Output, value);
 }
