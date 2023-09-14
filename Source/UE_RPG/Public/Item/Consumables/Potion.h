@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Item/AbilityBase.h"
 #include "Item/Item.h"
 #include "Item/ItemAbility.h"
 #include "Potion.generated.h"
@@ -11,7 +12,7 @@
  * 
  */
 UCLASS()
-class UE_RPG_API APotion : public AActor , public IItemAbility
+class UE_RPG_API APotion : public AAbilityBase, public IItemAbility
 {
 	GENERATED_BODY()
 

@@ -35,7 +35,8 @@ public:
 	UInventory();
 
 	/**widget value*/
-	UCPP_InventoryWidget* InventoryWidget;
+	UPROPERTY()
+		UCPP_InventoryWidget* InventoryWidget;
 
 	/**inventory slot*/
 	UPROPERTY()
@@ -64,7 +65,7 @@ public:
 
 
 	/**매크로 지정?*/
-	FInventorySlot GetSlotInfoIndex(const uint8 index);
+    FInventorySlot GetSlotInfoIndex(const uint8 index);
 	void UpdateSlotAtIndex(const uint8 index);
 
 	/**inventory widget function (FORCEINLINE) */
@@ -77,6 +78,17 @@ public:
 		InventoryWidget->SetIsEnabled(false);
 	}
 
+	FORCEINLINE void AddItemManage(FName itemId, AActor* iteAbilityClass) {
+		ItemManageSystem.Add(itemId, iteAbilityClass);
+	}
+
+	/**manage ability-actor*/
+	AActor* GetAbilityActor(FName itemId);
+	void StartAbilityActorLife(FName itemId);
+
+	UFUNCTION()
+		void DestroyAbilityActor(AActor* actor,FName itemId);
+
 private:
 
 	/**inventory value*/
@@ -84,4 +96,6 @@ private:
 
 	UPROPERTY()
 		class ACPP_Character* PlayerRef;
+
+	TMap<FName, AActor*> ItemManageSystem;
 };

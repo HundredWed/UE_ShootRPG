@@ -228,7 +228,7 @@ FReply UCPP_Slot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPo
 		{
 			if (IsValid(InventoryRef))
 			{
-				OnUseItem(InventoryRef);
+				OnUseItem();
 			}
 		}
 	}
@@ -246,7 +246,7 @@ FReply UCPP_Slot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, co
 		{
 			if (IsValid(InventoryRef))
 			{
-				OnUseItem(InventoryRef);
+				OnUseItem();
 			}
 		}
 	}
@@ -256,17 +256,49 @@ FReply UCPP_Slot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, co
 
 
 
-void UCPP_Slot::OnUseItem(class UInventory* inventory)
+void UCPP_Slot::OnUseItem()
 {
-	AActor* item = GetWorld()->SpawnActor(inventory->SlotsArray[MyArrayNumber].Item->ItemClass);
-
-	IItemAbility* itemAbility = Cast<IItemAbility>(item);
-	if (itemAbility)
+	const FInventorySlot slotinfo = InventoryRef->GetSlotInfoIndex(MyArrayNumber);
+	AActor* abilityActor = InventoryRef->GetAbilityActor(slotinfo.Item->ItemInfoID);
+	if (abilityActor)
 	{
-		const uint32 value = inventory->SlotsArray[MyArrayNumber].Item->ConsumeValue;
-		itemAbility->UseItem(PlayerRef, value);
+		IItemAbility* itemAbility = Cast<IItemAbility>(abilityActor);
+		if (itemAbility)
+		{
+			const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ConsumeValue;
+			itemAbility->UseItem(PlayerRef, value);
+			InventoryRef->RemoveItemAtIndex(MyArrayNumber, 1);
+
+			GEngine->AddOnScreenDebugMessage(
+				INDEX_NONE,
+				30.f,
+				FColor::Blue,
+				FString::Printf(TEXT("get from Tmap")));
+		}
 	}
-	item->Destroy();
-	inventory->RemoveItemAtIndex(MyArrayNumber, 1);
+	else
+	{
+		AActor* item = GetWorld()->SpawnActor(InventoryRef->SlotsArray[MyArrayNumber].Item->ItemClass);
+
+		IItemAbility* itemAbility = Cast<IItemAbility>(item);
+		if (itemAbility)
+		{
+			const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ConsumeValue;
+			itemAbility->UseItem(PlayerRef, value); 
+
+			InventoryRef->AddItemManage(slotinfo.Item->ItemInfoID, item);
+			InventoryRef->RemoveItemAtIndex(MyArrayNumber, 1);
+			InventoryRef->StartAbilityActorLife(slotinfo.Item->ItemInfoID);
+		}
+		//item->Destroy();
+		GEngine->AddOnScreenDebugMessage(
+			INDEX_NONE,
+			30.f,
+			FColor::Red,
+			FString::Printf(TEXT("get from SpawnActor")));
+	}
+
+
+	
 }
 

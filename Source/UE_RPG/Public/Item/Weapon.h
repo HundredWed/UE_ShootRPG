@@ -25,7 +25,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		AActor* OtherActor, 

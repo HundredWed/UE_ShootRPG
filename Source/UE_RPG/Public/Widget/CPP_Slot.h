@@ -49,7 +49,7 @@ public:
 public: 
 	
 	void UpdateSlot(const uint8 index);
-	void OnUseItem(class UInventory* inventory);
+	void OnUseItem();
 
 	UFUNCTION()
 		void SlotClickEvent();

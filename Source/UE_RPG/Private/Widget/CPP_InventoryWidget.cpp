@@ -62,11 +62,16 @@ void UCPP_InventoryWidget::SetPanelEnabled(bool enabled)
 void UCPP_InventoryWidget::SetSpliteWidget(UCPP_Slot* fromSlot, UCPP_Slot* toSlot)
 {
 	UUniformGridSlot* slotGrid = Cast<UUniformGridSlot>(toSlot->Slot);
-
-	float rowSize = (float)(slotGrid->Row * SlotBoxSize) - (InventoryScollBox->GetScrollOffset());
-	float clampRow = FMath::Clamp(rowSize, 0, InventoryBoxSize);
-	float columnSize = (float)(slotGrid->Column * SlotBoxSize);
-
+	float rowSize;
+	float clampRow;
+	float columnSize;
+	if (IsValid(slotGrid))
+	{
+		rowSize = (float)(slotGrid->GetRow() * SlotBoxSize) - (InventoryScollBox->GetScrollOffset());
+		clampRow = FMath::Clamp(rowSize, 0, InventoryBoxSize);
+		columnSize = (float)(slotGrid->GetColumn() * SlotBoxSize);
+	}
+	
 	FVector2D render = FVector2D(columnSize, clampRow);
 	FWidgetTransform renderTransform = FWidgetTransform(render,FVector2D(1,1), FVector2D::Zero(), 0);
 

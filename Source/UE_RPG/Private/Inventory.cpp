@@ -346,8 +346,42 @@ FInventorySlot UInventory::GetSlotInfoIndex(const uint8 index)
 	return SlotsArray[index];
 }
 
+AActor* UInventory::GetAbilityActor(FName itemId)
+{
+	AActor** abilityActor = ItemManageSystem.Find(itemId);
+	if (abilityActor)
+	{
+		return *abilityActor;
+	}
+	return nullptr;
+}
 
+void UInventory::StartAbilityActorLife(FName itemId)
+{
+	AActor** abilityActor = ItemManageSystem.Find(itemId);
+	if (abilityActor)
+	{
+		FTimerHandle TimerHandle;
+		FTimerDelegate TimerDel;
+		TimerDel.BindUFunction(this, FName("DestroyAbilityActor"),*abilityActor, itemId);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 15.f, false);
+	}
+	
+}
 
+void UInventory::DestroyAbilityActor(AActor* actor, FName itemId)
+{
+	if (actor)
+	{
+		actor->Destroy();
+		ItemManageSystem[itemId] = nullptr;
 
-
+		FString id = itemId.ToString();
+		GEngine->AddOnScreenDebugMessage(
+			INDEX_NONE,
+			30.f,
+			FColor::Yellow,
+			FString::Printf(TEXT("Destroy 'ID:%s ' from ItemManageSystem!"), *id));
+	}
+}
 
