@@ -19,6 +19,7 @@ void UCPP_Slot::NativeConstruct()
 {
 	Super::NativeConstruct();
 	SlotButton->OnClicked.AddDynamic(this, &UCPP_Slot::SlotClickEvent);
+	CombineButton->OnPressed.AddDynamic(this, &UCPP_Slot::CombineItem);
 }
 
 void UCPP_Slot::UpdateSlot(const uint8 index)
@@ -34,6 +35,7 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 			ItemIcon->SetVisibility(ESlateVisibility::Hidden);
 			TextAmount->SetVisibility(ESlateVisibility::Hidden);
 			SlotButton->SetToolTip(nullptr);
+			CombineButton->SetVisibility(ESlateVisibility::Hidden);
 		}
 		else
 		{
@@ -79,20 +81,15 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 			/**FindCombinableSlot*/
 			if (item->ItemType == EItemCategory::EIS_Readables)
 			{
-				int8 slotnum = InventoryRef->FindCombinableSlot(MyArrayNumber);
+				CombinableSlot = InventoryRef->FindCombinableSlot(MyArrayNumber);
 
-				if (slotnum != -1)
+				if (CombinableSlot != -1)
 				{
-					GEngine->AddOnScreenDebugMessage(
-						INDEX_NONE,
-						30.f,
-						FColor::Green,
-						FString::Printf(TEXT("%d slot can combinable!!"), slotnum), true, FVector2D(2.f, 2.f));
+					InventoryRef->InventoryWidget->SlotWidgetArray[CombinableSlot]->
+						CombineButton->SetVisibility(ESlateVisibility::Visible);
 				}
-				
 				InventoryRef->ClearConectArray();
 			}
-
 		}
 	}
 }
@@ -102,7 +99,6 @@ void UCPP_Slot::SlotClickEvent()
 	ClickCount += 1;
 	FTimerHandle TimerHandle;
 	GetOuter()->GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UCPP_Slot::ResetCount, 0.17f);
-
 	if (ClickCount > 1)
 	{
 		/**Equip weapon*/
@@ -119,9 +115,10 @@ void UCPP_Slot::ResetCount()
 FReply UCPP_Slot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
-
+	
 	if (SlotButton->GetIsEnabled())
 	{
+		UE_LOG(LogTemp, Display, TEXT("SlotClickEvent "));
 		FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
 		return reply.NativeReply;
 	}
@@ -163,7 +160,7 @@ bool UCPP_Slot::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEve
 		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
 		if (dragSlot)
 		{
-			UE_LOG(LogTemp, Display, TEXT("DragOver "));
+			//UE_LOG(LogTemp, Display, TEXT("DragOver "));
 			bDraggedOver = true;
 			SlotButton->SetStyle(OverStlyle);
 			return true;
@@ -319,5 +316,11 @@ void UCPP_Slot::OnUseItem()
 
 
 	
+}
+
+void UCPP_Slot::CombineItem()
+{
+	InventoryRef->CombineItem(MyArrayNumber);
+	CombineButton->SetVisibility(ESlateVisibility::Hidden);
 }
 

@@ -419,6 +419,26 @@ void UInventory::ClearConectArray()
 	isConect.Init(false, PlayerRef->GetInventorySize());
 }
 
+void UInventory::CombineItem(const uint8 index)
+{
+	uint8 inventoryRow;
+	if (IsValid(PlayerRef))
+	{
+		inventoryRow = PlayerRef->GetInventoryRowSize();
+	}
+	else
+	{
+		return;
+	}
+
+	int8 dir[4] = { -inventoryRow, 1, inventoryRow, -1 };
+	for (uint8 i = 0; i < 4; i++)
+	{
+		int8 newdir = index + dir[i];
+		RemoveItemAtIndex(newdir, 1);
+	}
+}
+
 AActor* UInventory::GetAbilityActor(FName itemId)
 {
 	AActor** abilityActor = ItemManageSystem.Find(itemId);

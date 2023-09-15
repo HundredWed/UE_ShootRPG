@@ -70,7 +70,7 @@ public:
 	int8 FindCombinableSlot(const int8 slot);
 	bool CompaireID(const uint8 slot1, const uint8 slot2);
     void ClearConectArray();
-
+	void CombineItem(const uint8 index);
 	
 	
 

@@ -21,6 +21,9 @@ public:
 		class UButton* SlotButton;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+		class UButton* CombineButton;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UImage* ItemIcon;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
@@ -50,12 +53,13 @@ public:
 	
 	void UpdateSlot(const uint8 index);
 	void OnUseItem();
-
+	
 	UFUNCTION()
 		void SlotClickEvent();
 	UFUNCTION()
 		void ResetCount();
-
+	UFUNCTION()
+		void CombineItem();
 
 protected:
 
@@ -76,6 +80,9 @@ private:
 		class UCPP_DragSlotWidget* DragSlotWidget;
 
 	uint8 ClickCount = 0;
+
+	int8 CombinableSlot = -1;
+
 
 	/**for drag over event only once*/
 	bool bDraggedOver = false;
