@@ -33,6 +33,7 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 			SlotButton->SetIsEnabled(false);
 			ItemIcon->SetVisibility(ESlateVisibility::Hidden);
 			TextAmount->SetVisibility(ESlateVisibility::Hidden);
+			SlotButton->SetToolTip(nullptr);
 		}
 		else
 		{
@@ -74,6 +75,24 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 					SlotButton->SetToolTip(toolTip);
 				}
 			}
+
+			/**FindCombinableSlot*/
+			if (item->ItemType == EItemCategory::EIS_Readables)
+			{
+				int8 slotnum = InventoryRef->FindCombinableSlot(MyArrayNumber);
+
+				if (slotnum != -1)
+				{
+					GEngine->AddOnScreenDebugMessage(
+						INDEX_NONE,
+						30.f,
+						FColor::Green,
+						FString::Printf(TEXT("%d slot can combinable!!"), slotnum), true, FVector2D(2.f, 2.f));
+				}
+				
+				InventoryRef->ClearConectArray();
+			}
+
 		}
 	}
 }

@@ -63,10 +63,16 @@ public:
 	void SplitStackToIndex(const uint8 fromIndex, const uint8 toIndex, const int32 splitAmount);
 	bool CanSplitStakable(const uint8 fromIndex, const uint8 toIndex, const int32 splitAmount);
 
-
-	/**매크로 지정?*/
-    FInventorySlot GetSlotInfoIndex(const uint8 index);
 	void UpdateSlotAtIndex(const uint8 index);
+	FInventorySlot GetSlotInfoIndex(const uint8 index);
+
+	/**FindCombinableSlot function*/
+	int8 FindCombinableSlot(const int8 slot);
+	bool CompaireID(const uint8 slot1, const uint8 slot2);
+    void ClearConectArray();
+
+	
+	
 
 	/**inventory widget function (FORCEINLINE) */
 	FORCEINLINE void ShowInventory() {
@@ -91,11 +97,15 @@ public:
 
 private:
 
-	/**inventory value*/
-	uint8 MaxStackSize = 99;
-
 	UPROPERTY()
 		class ACPP_Character* PlayerRef;
 
+	/**inventory value*/
+	uint8 MaxStackSize = 99;
+	uint8 InvetoryRow = 0;
+
 	TMap<FName, AActor*> ItemManageSystem;
+
+	/**for FindCombinableSlot function*/
+	TArray<bool> isConect;
 };

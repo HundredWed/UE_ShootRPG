@@ -5,9 +5,7 @@
 
 UInventory::UInventory()
 {
-	
 	PrimaryComponentTick.bCanEverTick = false;
-
 }
 
 
@@ -19,6 +17,12 @@ void UInventory::BeginPlay()
 	if (PlayerRef)
 	{
 		SlotsArray.SetNum(PlayerRef->GetInventorySize());
+
+		isConect.SetNum(PlayerRef->GetInventorySize());
+		ClearConectArray();
+
+		InvetoryRow = PlayerRef->GetInventoryRowSize();
+		
 	}
 	else
 	{
@@ -344,6 +348,75 @@ void UInventory::UpdateSlotAtIndex(const uint8 index)
 FInventorySlot UInventory::GetSlotInfoIndex(const uint8 index)
 {
 	return SlotsArray[index];
+}
+
+int8 UInventory::FindCombinableSlot(const int8 slot)
+{
+	isConect[slot] = true;
+	uint8 count = 0;
+	int8 resultSlot = 0;
+	int8 dir[4] = { -InvetoryRow, 1, InvetoryRow, -1};
+
+	for (uint8 i = 0; i < 4; i++)
+	{
+		int8 newdir = slot + dir[i];
+		if ((newdir < 0) || (newdir > (isConect.Num() - 1)) || !CompaireID(slot, newdir))
+		{
+			continue;
+		}
+
+		if (CompaireID(slot, newdir))
+		{
+			count += 1;
+		}
+	}
+
+	if (count == 4)
+	{
+		return slot;
+	}
+
+	for (uint8 i = 0; i < 4; i++)
+	{
+		int8 newdir = slot + dir[i];
+		
+		if ((newdir < 0) || (newdir > (isConect.Num() - 1)) || !CompaireID(slot, newdir))
+		{
+			continue;
+		}
+		else if((isConect[newdir] == true))
+		{
+			continue;
+		}
+
+
+		if (CompaireID(slot, newdir) && (isConect[newdir] == false))
+		{
+			resultSlot = FindCombinableSlot(newdir);
+
+			if (resultSlot != -1)
+			{
+				return resultSlot;
+			}
+		}
+	}
+	
+	return -1;
+}
+
+bool UInventory::CompaireID(const uint8 slot1, const uint8 slot2)
+{
+	if (SlotsArray[slot2].Item == nullptr)
+	{
+		return false;
+	}
+
+	return SlotsArray[slot1].Item->ItemInfoID == SlotsArray[slot2].Item->ItemInfoID;
+}
+
+void UInventory::ClearConectArray()
+{
+	isConect.Init(false, PlayerRef->GetInventorySize());
 }
 
 AActor* UInventory::GetAbilityActor(FName itemId)
