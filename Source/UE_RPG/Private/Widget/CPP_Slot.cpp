@@ -3,9 +3,9 @@
 
 #include "Widget/CPP_Slot.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Inventory.h"
 #include "CPP_Character.h"
 #include "Components/Button.h"
+#include "Components/Border.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Item/Item.h"
@@ -18,8 +18,8 @@
 void UCPP_Slot::NativeConstruct()
 {
 	Super::NativeConstruct();
-	SlotButton->OnClicked.AddDynamic(this, &UCPP_Slot::SlotClickEvent);
 	CombineButton->OnPressed.AddDynamic(this, &UCPP_Slot::CombineItem);
+	DefaultBorderColor = SlotBorder->GetBrushColor();
 }
 
 void UCPP_Slot::UpdateSlot(const uint8 index)
@@ -31,24 +31,24 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 
 		if (isSlotEmpty)
 		{
-			SlotButton->SetIsEnabled(false);
-			ItemIcon->SetVisibility(ESlateVisibility::Hidden);
-			TextAmount->SetVisibility(ESlateVisibility::Hidden);
-			SlotButton->SetToolTip(nullptr);
-			CombineButton->SetVisibility(ESlateVisibility::Hidden);
+			SlotInactive();			
 		}
 		else
 		{
-			SlotButton->SetIsEnabled(true);
-			const FInventorySlot slotinfo = InventoryRef->GetSlotInfoIndex(index);
-			const UItem* item = slotinfo.Item;
-			MyAmount = slotinfo.ItemAmount;
-			bMyItemCanStacked = item->bCanStacked;
+			/**init this slot info*/
+			InventorySlotinfo = InventoryRef->GetSlotInfoIndex(index);
+			ItemRef = InventorySlotinfo.Item;
+			MyAmount = InventorySlotinfo.ItemAmount;
+			bMyItemCanStacked = ItemRef->bCanStacked;
 
-			ItemIcon->SetBrushFromTexture(item->IconTexture);
-			ItemIcon->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			/**set icon*/
+			ItemIcon->SetIsEnabled(true);
+			ItemIcon->SetBrushFromTexture(ItemRef->IconTexture);
+			ItemIcon->SetVisibility(ESlateVisibility::Visible);
+			/**set border*/
+			SlotBorder->SetBrushColor(FLinearColor::White);
 
-			if (item->bCanStacked)
+			if (ItemRef->bCanStacked)
 			{
 				TextAmount->SetText(FText::Format(NSLOCTEXT("CPP_Slot", "TextAmount", "x{0}"), MyAmount));
 				TextAmount->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
@@ -62,9 +62,10 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 			if (IsValid(toolTip))
 			{
 				/**if created tootip before, don't create widget and update that tootip*/
-				toolTip->SetTootipItemRef(item);
+				toolTip->SetTootipItemRef(ItemRef);
 				toolTip->UpdateToolTip();
-				SlotButton->SetToolTip(toolTip);
+
+				ItemIcon->SetToolTip(toolTip);
 			}
 			else
 			{
@@ -72,14 +73,16 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 				if (TootipWidgetClass)
 				{
 					toolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
-					toolTip->SetTootipItemRef(item);
+					toolTip->SetTootipItemRef(ItemRef);
 					toolTip->UpdateToolTip();
-					SlotButton->SetToolTip(toolTip);
+					//icon
+					//SlotButton->SetToolTip(toolTip);
+					ItemIcon->SetToolTip(toolTip);
 				}
 			}
 
 			/**FindCombinableSlot*/
-			if (item->ItemType == EItemCategory::EIS_Readables)
+			if (ItemRef->ItemType == EItemCategory::EIS_Readables)
 			{
 				CombinableSlot = InventoryRef->FindCombinableSlot(MyArrayNumber);
 
@@ -94,47 +97,12 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 	}
 }
 
-void UCPP_Slot::SlotClickEvent()
-{
-	ClickCount += 1;
-	FTimerHandle TimerHandle;
-	GetOuter()->GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UCPP_Slot::ResetCount, 0.17f);
-	if (ClickCount > 1)
-	{
-		/**Equip weapon*/
-
-		ResetCount();
-	}
-}
-
-void UCPP_Slot::ResetCount()
-{
-	ClickCount = 0;
-}
-
-FReply UCPP_Slot::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
-{
-	Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
-	
-	if (SlotButton->GetIsEnabled())
-	{
-		UE_LOG(LogTemp, Display, TEXT("SlotClickEvent "));
-		FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
-		return reply.NativeReply;
-	}
-
-
-	return FReply::Handled();
-}
 
 void UCPP_Slot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 	UCPP_DragSlotWidget* dragWidget = CreateWidget<UCPP_DragSlotWidget>(GetWorld(), DragWidgetClass);
-	const FInventorySlot slotinfo = InventoryRef->GetSlotInfoIndex(MyArrayNumber);
-	const UItem* item = slotinfo.Item;
-	const uint32 amount = MyAmount;
-	dragWidget->UpdataWidget(item, amount);
+	dragWidget->UpdataWidget(ItemRef, MyAmount);
 
 	USlotDrag* dragSlot = Cast<USlotDrag>(UWidgetBlueprintLibrary::CreateDragDropOperation(USlotDrag::StaticClass()));
 
@@ -162,7 +130,8 @@ bool UCPP_Slot::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEve
 		{
 			//UE_LOG(LogTemp, Display, TEXT("DragOver "));
 			bDraggedOver = true;
-			SlotButton->SetStyle(OverStlyle);
+			//border
+			//SlotButton->SetStyle(OverStlyle);
 			return true;
 		}
 		else
@@ -183,7 +152,8 @@ void UCPP_Slot::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDr
 		if (dragSlot)
 		{
 			bDraggedOver = false;
-			SlotButton->SetStyle(DefaultStlyle);
+			//border
+			//SlotButton->SetStyle(DefaultStlyle);
 		}
 	}
 }
@@ -202,7 +172,8 @@ bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 		{
 			bDraggedOver = false;
 
-			SlotButton->SetStyle(DefaultStlyle);
+			//border
+			//SlotButton->SetStyle(DefaultStlyle);
 
 			if (InventoryRef->CanAddToIndex(fromIndex, toIndex))
 			{
@@ -238,16 +209,31 @@ FReply UCPP_Slot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPo
 {
 	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 	
-	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+	/**확인 후 ItemIcon->GetIsEnabled() 로 통합*/
+
+	if (ItemIcon->GetIsEnabled())
 	{
-		if (SlotButton->GetIsEnabled())
+		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
 		{
-			if (IsValid(InventoryRef))
+			//icon
+			if (ItemIcon->GetIsEnabled())
 			{
-				OnUseItem();
+				if (IsValid(InventoryRef))
+				{
+					OnUseItem();
+				}
 			}
 		}
+		else
+		{
+			//UE_LOG(LogTemp, Display, TEXT("SlotClickEvent "));
+			FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
+			return reply.NativeReply;
+		}
+		
 	}
+
+	
 
 	return FReply::Handled();
 }
@@ -258,7 +244,8 @@ FReply UCPP_Slot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, co
 
 	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
 	{
-		if (SlotButton->GetIsEnabled())
+		//icon
+		if (ItemIcon->GetIsEnabled())
 		{
 			if (IsValid(InventoryRef))
 			{
@@ -274,8 +261,7 @@ FReply UCPP_Slot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, co
 
 void UCPP_Slot::OnUseItem()
 {
-	const FInventorySlot slotinfo = InventoryRef->GetSlotInfoIndex(MyArrayNumber);
-	AActor* abilityActor = InventoryRef->GetAbilityActor(slotinfo.Item->ItemInfoID);
+	AActor* abilityActor = InventoryRef->GetAbilityActor(InventorySlotinfo.Item->ItemInfoID);
 	if (abilityActor)
 	{
 		IItemAbility* itemAbility = Cast<IItemAbility>(abilityActor);
@@ -294,17 +280,17 @@ void UCPP_Slot::OnUseItem()
 	}
 	else
 	{
-		AActor* item = GetWorld()->SpawnActor(InventoryRef->SlotsArray[MyArrayNumber].Item->ItemClass);
+		AActor* itemActor = GetWorld()->SpawnActor(InventoryRef->SlotsArray[MyArrayNumber].Item->ItemClass);
 
-		IItemAbility* itemAbility = Cast<IItemAbility>(item);
+		IItemAbility* itemAbility = Cast<IItemAbility>(itemActor);
 		if (itemAbility)
 		{
 			const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ConsumeValue;
 			itemAbility->UseItem(PlayerRef, value); 
 
-			InventoryRef->AddItemManage(slotinfo.Item->ItemInfoID, item);
+			InventoryRef->AddItemManage(InventorySlotinfo.Item->ItemInfoID, itemActor);
 			InventoryRef->RemoveItemAtIndex(MyArrayNumber, 1);
-			InventoryRef->StartAbilityActorLife(slotinfo.Item->ItemInfoID);
+			InventoryRef->StartAbilityActorLife(InventorySlotinfo.Item->ItemInfoID);
 		}
 		//item->Destroy();
 		GEngine->AddOnScreenDebugMessage(
@@ -316,6 +302,21 @@ void UCPP_Slot::OnUseItem()
 
 
 	
+}
+
+void UCPP_Slot::SlotInactive()
+{
+	/**set icon*/
+	ItemIcon->SetIsEnabled(false);
+	ItemIcon->SetToolTip(nullptr);
+	ItemIcon->SetVisibility(ESlateVisibility::Hidden);
+	/**set border*/
+	SlotBorder->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	SlotBorder->SetBrushColor(DefaultBorderColor);
+	/**set Text*/
+	TextAmount->SetVisibility(ESlateVisibility::Hidden);
+	/**set CombineButton*/
+	CombineButton->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UCPP_Slot::CombineItem()

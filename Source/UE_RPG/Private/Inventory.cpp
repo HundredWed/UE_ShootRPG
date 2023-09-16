@@ -345,7 +345,7 @@ void UInventory::UpdateSlotAtIndex(const uint8 index)
 	InventoryWidget->SlotWidgetArray[index]->UpdateSlot(index);
 }
 
-FInventorySlot UInventory::GetSlotInfoIndex(const uint8 index)
+const FInventorySlot UInventory::GetSlotInfoIndex(const uint8 index)
 {
 	return SlotsArray[index];
 }

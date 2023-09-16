@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Widget/CustomUMGWidget.h"
+#include "Inventory.h"
 #include "CPP_Slot.generated.h"
 
 /**
@@ -18,7 +19,7 @@ public:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UButton* SlotButton;
+		class UBorder* SlotBorder;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UButton* CombineButton;
@@ -53,17 +54,12 @@ public:
 	
 	void UpdateSlot(const uint8 index);
 	void OnUseItem();
+	void SlotInactive();
 	
-	UFUNCTION()
-		void SlotClickEvent();
-	UFUNCTION()
-		void ResetCount();
 	UFUNCTION()
 		void CombineItem();
 
 protected:
-
-	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
@@ -79,11 +75,17 @@ private:
 	UPROPERTY()
 		class UCPP_DragSlotWidget* DragSlotWidget;
 
-	uint8 ClickCount = 0;
+	UPROPERTY()
+		class UItem* ItemRef;
 
+
+	/**slot info*/
+	FInventorySlot InventorySlotinfo;
+	FLinearColor DefaultBorderColor;
+
+	/**found CombinableSlot*/
 	int8 CombinableSlot = -1;
-
-
+	
 	/**for drag over event only once*/
 	bool bDraggedOver = false;
 };

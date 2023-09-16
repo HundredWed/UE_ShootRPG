@@ -64,7 +64,7 @@ public:
 	bool CanSplitStakable(const uint8 fromIndex, const uint8 toIndex, const int32 splitAmount);
 
 	void UpdateSlotAtIndex(const uint8 index);
-	FInventorySlot GetSlotInfoIndex(const uint8 index);
+	const FInventorySlot GetSlotInfoIndex(const uint8 index);
 
 	/**FindCombinableSlot function*/
 	int8 FindCombinableSlot(const int8 slot);
