@@ -41,6 +41,9 @@ public:
 	/**inventory slot*/
 	UPROPERTY()
 		TArray<FInventorySlot> SlotsArray;
+
+	UPROPERTY(EditAnywhere, Category = "Item state")
+		UDataTable* ItemDataTable;
 protected:
 	
 	virtual void BeginPlay() override;
@@ -71,6 +74,10 @@ public:
 	bool CompaireID(const uint8 slot1, const uint8 slot2);
     void ClearConectArray();
 	void CombineItem(const uint8 index);
+	bool SetLinkSlot(const int8 slot, const int8 newdir);
+	bool IsLineChange(const int8 slot);
+	class UCPP_Slot* GetSlotWidgetInfo(const int8 index);
+	void ChangeItemInfo(FName itemInfoID, const uint8 index);
 	
 	
 

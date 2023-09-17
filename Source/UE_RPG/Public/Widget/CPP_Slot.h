@@ -36,25 +36,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
 		TSubclassOf< class UTootipWidget> TootipWidgetClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
-		FButtonStyle OverStlyle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
-		FButtonStyle DefaultStlyle;
 
 	UPROPERTY()
 		class UTootipWidget* toolTip;
 
-	/**item info*/
 	uint8 MyArrayNumber = 0;
 	int32 MyAmount = 0;
 	bool  bMyItemCanStacked = false;
+
+	/**CombinableSlot*/
+	int8 LinkedCombinableSlot = -1;
+
+	/**for drag over event only once*/
+	bool bDraggedOver = false;
 
 public: 
 	
 	void UpdateSlot(const uint8 index);
 	void OnUseItem();
-	void SlotInactive();
+	class UItem* GetItemItemInfo() { return ItemRef; }
+
+	void InactiveCombinableSlot();
+	void ActiveCombinableSlot();
+	bool GetIsActiveCombineButton() { return bActiveCombineButton; }
 	
 	UFUNCTION()
 		void CombineItem();
@@ -71,12 +75,19 @@ protected:
 	
 private:
 
+	void InactiveSlot();
+	void ActiveSlot();
+	void InitSlotInfo();
+	void SetSlotToolTip();
+
+	void SearchCombinableSlot();
+
+	/**item info*/
+	UPROPERTY()
+		class UItem* ItemRef;
 
 	UPROPERTY()
 		class UCPP_DragSlotWidget* DragSlotWidget;
-
-	UPROPERTY()
-		class UItem* ItemRef;
 
 
 	/**slot info*/
@@ -85,7 +96,6 @@ private:
 
 	/**found CombinableSlot*/
 	int8 CombinableSlot = -1;
-	
-	/**for drag over event only once*/
-	bool bDraggedOver = false;
+	bool bActiveCombineButton = false;
+
 };

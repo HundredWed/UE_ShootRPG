@@ -122,6 +122,7 @@ void APickUpItem::InitializePickUpItem()
 		/**itemtype data*/
 		ItemRef->ItemType = thisItemInfo->ItemType;
 		ItemRef->ConsumeValue = thisItemInfo->ConsumeValue;
+		ItemRef->CombinResultID = thisItemInfo->CombinResultID;
 		if (thisItemInfo->ItemClass)
 		{
 			ItemRef->ItemClass = thisItemInfo->ItemClass;

@@ -20,6 +20,7 @@ void UCPP_Slot::NativeConstruct()
 	Super::NativeConstruct();
 	CombineButton->OnPressed.AddDynamic(this, &UCPP_Slot::CombineItem);
 	DefaultBorderColor = SlotBorder->GetBrushColor();
+	ItemRef = nullptr;
 }
 
 void UCPP_Slot::UpdateSlot(const uint8 index)
@@ -31,22 +32,12 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 
 		if (isSlotEmpty)
 		{
-			SlotInactive();			
+			InactiveSlot();			
 		}
 		else
 		{
-			/**init this slot info*/
-			InventorySlotinfo = InventoryRef->GetSlotInfoIndex(index);
-			ItemRef = InventorySlotinfo.Item;
-			MyAmount = InventorySlotinfo.ItemAmount;
-			bMyItemCanStacked = ItemRef->bCanStacked;
-
-			/**set icon*/
-			ItemIcon->SetIsEnabled(true);
-			ItemIcon->SetBrushFromTexture(ItemRef->IconTexture);
-			ItemIcon->SetVisibility(ESlateVisibility::Visible);
-			/**set border*/
-			SlotBorder->SetBrushColor(FLinearColor::White);
+			InitSlotInfo();
+			ActiveSlot();
 
 			if (ItemRef->bCanStacked)
 			{
@@ -59,40 +50,10 @@ void UCPP_Slot::UpdateSlot(const uint8 index)
 			}
 
 			/**set tooltip*/
-			if (IsValid(toolTip))
-			{
-				/**if created tootip before, don't create widget and update that tootip*/
-				toolTip->SetTootipItemRef(ItemRef);
-				toolTip->UpdateToolTip();
-
-				ItemIcon->SetToolTip(toolTip);
-			}
-			else
-			{
-				/**CreateWidget only once*/
-				if (TootipWidgetClass)
-				{
-					toolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
-					toolTip->SetTootipItemRef(ItemRef);
-					toolTip->UpdateToolTip();
-					//icon
-					//SlotButton->SetToolTip(toolTip);
-					ItemIcon->SetToolTip(toolTip);
-				}
-			}
+			SetSlotToolTip();
 
 			/**FindCombinableSlot*/
-			if (ItemRef->ItemType == EItemCategory::EIS_Readables)
-			{
-				CombinableSlot = InventoryRef->FindCombinableSlot(MyArrayNumber);
-
-				if (CombinableSlot != -1)
-				{
-					InventoryRef->InventoryWidget->SlotWidgetArray[CombinableSlot]->
-						CombineButton->SetVisibility(ESlateVisibility::Visible);
-				}
-				InventoryRef->ClearConectArray();
-			}
+			SearchCombinableSlot();
 		}
 	}
 }
@@ -108,6 +69,11 @@ void UCPP_Slot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointer
 
 	if (IsValid(dragSlot))
 	{
+		if (LinkedCombinableSlot != -1)
+		{
+			InventoryRef->InventoryWidget->SlotWidgetArray[LinkedCombinableSlot]->InactiveCombinableSlot();
+		}
+
 		dragSlot->WidgetRef = this;
 		dragSlot->DefaultDragVisual = dragWidget;
 		dragSlot->Pivot = EDragPivot::MouseDown;
@@ -121,21 +87,23 @@ bool UCPP_Slot::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEve
 	Super::NativeOnDragOver(InGeometry, InDragDropEvent, InOperation);
 	if (bDraggedOver)
 	{
+		//UE_LOG(LogTemp, Display, TEXT("DragOver "));
 		return true;
 	}
 	else
 	{
 		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-		if (dragSlot)
+		if (dragSlot && ItemRef == nullptr)
 		{
-			//UE_LOG(LogTemp, Display, TEXT("DragOver "));
+			UE_LOG(LogTemp, Display, TEXT("DragOver"));
 			bDraggedOver = true;
 			//border
-			//SlotButton->SetStyle(OverStlyle);
+			SlotBorder->SetBrushColor(FLinearColor::Gray);
 			return true;
 		}
 		else
 		{
+			UE_LOG(LogTemp, Warning, TEXT("???"));
 			return false;
 		}
 	}
@@ -153,7 +121,7 @@ void UCPP_Slot::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDr
 		{
 			bDraggedOver = false;
 			//border
-			//SlotButton->SetStyle(DefaultStlyle);
+			SlotBorder->SetBrushColor(DefaultBorderColor);
 		}
 	}
 }
@@ -173,7 +141,7 @@ bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 			bDraggedOver = false;
 
 			//border
-			//SlotButton->SetStyle(DefaultStlyle);
+			SlotBorder->SetBrushColor(DefaultBorderColor);
 
 			if (InventoryRef->CanAddToIndex(fromIndex, toIndex))
 			{
@@ -189,6 +157,15 @@ bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 				}
 				else
 				{
+					UItem* item = dragSlot->WidgetRef->ItemRef;
+					if (item->ItemType != EItemCategory::EIS_Readables && LinkedCombinableSlot != -1)
+					{
+						InventoryRef->InventoryWidget->SlotWidgetArray[LinkedCombinableSlot]->InactiveCombinableSlot();
+
+						LinkedCombinableSlot = -1;
+						
+					}
+
 					InventoryRef->SwapSlot(fromIndex, toIndex);
 					return true;
 				}
@@ -226,7 +203,6 @@ FReply UCPP_Slot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPo
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Display, TEXT("SlotClickEvent "));
 			FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
 			return reply.NativeReply;
 		}
@@ -299,12 +275,9 @@ void UCPP_Slot::OnUseItem()
 			FColor::Red,
 			FString::Printf(TEXT("get from SpawnActor")));
 	}
-
-
-	
 }
 
-void UCPP_Slot::SlotInactive()
+void UCPP_Slot::InactiveSlot()
 {
 	/**set icon*/
 	ItemIcon->SetIsEnabled(false);
@@ -317,11 +290,83 @@ void UCPP_Slot::SlotInactive()
 	TextAmount->SetVisibility(ESlateVisibility::Hidden);
 	/**set CombineButton*/
 	CombineButton->SetVisibility(ESlateVisibility::Hidden);
+
+	ItemRef = nullptr;
 }
+
+void UCPP_Slot::ActiveSlot()
+{
+	/**set icon*/
+	ItemIcon->SetIsEnabled(true);
+	ItemIcon->SetBrushFromTexture(ItemRef->IconTexture);
+	ItemIcon->SetVisibility(ESlateVisibility::Visible);
+	/**set border*/
+	SlotBorder->SetBrushColor(FLinearColor::White);
+}
+
+void UCPP_Slot::InitSlotInfo()
+{
+	InventorySlotinfo = InventoryRef->GetSlotInfoIndex(MyArrayNumber);
+	ItemRef = InventorySlotinfo.Item;
+	MyAmount = InventorySlotinfo.ItemAmount;
+	bMyItemCanStacked = ItemRef->bCanStacked;
+}
+
+void UCPP_Slot::SetSlotToolTip()
+{
+	if (IsValid(toolTip))
+	{
+		/**if created tootip before, don't create widget and update that tootip*/
+		toolTip->SetTootipItemRef(ItemRef);
+		toolTip->UpdateToolTip();
+
+		ItemIcon->SetToolTip(toolTip);
+	}
+	else
+	{
+		/**CreateWidget only once*/
+		if (TootipWidgetClass)
+		{
+			toolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
+			toolTip->SetTootipItemRef(ItemRef);
+			toolTip->UpdateToolTip();
+			ItemIcon->SetToolTip(toolTip);
+		}
+	}
+}
+
+void UCPP_Slot::SearchCombinableSlot()
+{
+	if (ItemRef->ItemType == EItemCategory::EIS_Combinables)
+	{
+		CombinableSlot = InventoryRef->FindCombinableSlot(MyArrayNumber);
+
+		if (CombinableSlot != -1)
+		{
+			InventoryRef->InventoryWidget->SlotWidgetArray[CombinableSlot]->ActiveCombinableSlot();
+		}
+
+		InventoryRef->ClearConectArray();
+	}
+}
+
+void UCPP_Slot::InactiveCombinableSlot()
+{
+	CombineButton->SetVisibility(ESlateVisibility::Hidden);
+	bActiveCombineButton = false;
+}
+
+void UCPP_Slot::ActiveCombinableSlot()
+{
+	CombineButton->SetVisibility(ESlateVisibility::Visible);
+	bActiveCombineButton = true;
+}
+
 
 void UCPP_Slot::CombineItem()
 {
-	InventoryRef->CombineItem(MyArrayNumber);
+	InventoryRef->ChangeItemInfo(ItemRef->CombinResultID, MyArrayNumber);
 	CombineButton->SetVisibility(ESlateVisibility::Hidden);
+	bActiveCombineButton = false;
 }
 

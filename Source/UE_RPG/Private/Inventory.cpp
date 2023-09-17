@@ -143,11 +143,12 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 		UpdateSlotAtIndex(emptySlot);
 
 
-		/**In the case of acquiring multiple 'can't Stacked items' */
+		/**In the case of acquiring multiple "can't Stacked items" */
 		if (amount > defaultAmount)
 		{
 			const uint8 addRestItem = amount - 1;
-			AddItem(item, addRestItem);
+			UItem* copyItem = item->CreateItemCopy();
+			AddItem(copyItem, addRestItem);
 		}
 		else
 		{
@@ -352,6 +353,11 @@ const FInventorySlot UInventory::GetSlotInfoIndex(const uint8 index)
 
 int8 UInventory::FindCombinableSlot(const int8 slot)
 {
+	if (IsLineChange(slot))
+	{
+		return -1;
+	}
+
 	isConect[slot] = true;
 	uint8 count = 0;
 	int8 resultSlot = 0;
@@ -367,12 +373,20 @@ int8 UInventory::FindCombinableSlot(const int8 slot)
 
 		if (CompaireID(slot, newdir))
 		{
-			count += 1;
+			/**when drag event linked slot, inactive combine-button*/
+			if (SetLinkSlot(slot, newdir))
+			{
+				/**is Success?*/
+				count += 1;
+			}
+			//count += 1;
 		}
 	}
 
 	if (count == 4)
 	{
+		/**when drag event linked slot, inactive combine-button*/
+		SetLinkSlot(slot, slot);
 		return slot;
 	}
 
@@ -401,6 +415,7 @@ int8 UInventory::FindCombinableSlot(const int8 slot)
 		}
 	}
 	
+	SetLinkSlot(-1, slot);
 	return -1;
 }
 
@@ -437,6 +452,80 @@ void UInventory::CombineItem(const uint8 index)
 		int8 newdir = index + dir[i];
 		RemoveItemAtIndex(newdir, 1);
 	}
+}
+
+bool UInventory::SetLinkSlot(const int8 slot, const int8 newdir)
+{
+	const int8 combinableSlot = GetSlotWidgetInfo(newdir)->LinkedCombinableSlot;
+	bool bactiveCombineBottun = false;
+
+	if (GetSlotWidgetInfo(combinableSlot))
+	{
+		bactiveCombineBottun = GetSlotWidgetInfo(combinableSlot)->GetIsActiveCombineButton();
+	}
+
+	if ((combinableSlot == -1)/**the case wasn't linked before.*/
+		|| (!bactiveCombineBottun && (combinableSlot != -1)) /**the case was linked before, but didn't successfully combine.*/
+		||(slot == newdir))/**the case count 4*/
+	{
+		GetSlotWidgetInfo(newdir)->LinkedCombinableSlot = slot;
+		return true;
+	}
+
+	return false;
+}
+
+bool UInventory::IsLineChange(const int8 slot)
+{
+	return (slot % InvetoryRow == 0) || ((slot + 1) % InvetoryRow == 0);
+}
+
+UCPP_Slot* UInventory::GetSlotWidgetInfo(const int8 index)
+{
+	if (index == -1)
+	{
+		return nullptr;
+	}
+	return InventoryWidget->SlotWidgetArray[index];
+}
+
+void UInventory::ChangeItemInfo(FName itemInfoID, const uint8 index)
+{
+	CombineItem(index);
+
+	const FItemInfo* itemInfo = ItemDataTable->FindRow<FItemInfo>(itemInfoID, TEXT(""));
+	if (itemInfo == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("not valid ChangeItemInfo!! please set 'CombinResultID' from ItemDataTable!!"));
+		return;
+	}
+	UItem* item = SlotsArray[index].Item;
+
+	/**item data*/
+	item->ItemInfoID = itemInfo->ItemInfoID;
+	item->Name = itemInfo->Name;
+	item->Description = itemInfo->Description;
+	item->bCanBeUsed = itemInfo->bCanBeUsed;
+	item->bCanStacked = itemInfo->bCanStacked;
+	item->UseText = itemInfo->UseText;
+	item->Interaction = itemInfo->Interaction;
+	item->ItemPrice = itemInfo->ItemPrice;
+	item->Weight = itemInfo->Weight;
+	item->ATK = itemInfo->ATK;
+
+	/**itemtype data*/
+	item->ItemType = itemInfo->ItemType;
+	item->ConsumeValue = itemInfo->ConsumeValue;
+	if (itemInfo->ItemClass)
+	{
+		item->ItemClass = itemInfo->ItemClass;
+	}
+
+	/**asset data*/
+	item->ItemMesh = itemInfo->ItemMesh;
+	item->IconTexture = itemInfo->IconTexture;
+
+	UpdateSlotAtIndex(index);
 }
 
 AActor* UInventory::GetAbilityActor(FName itemId)

@@ -37,6 +37,11 @@ void UTootipWidget::UpdateToolTip()
 		ATK->SetVisibility(ESlateVisibility::Collapsed);
 		BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
 		break;
+	case EItemCategory::EIS_Combinables:
+		Category->SetText(FText::FromString(TEXT("조합 재료")));
+		ATK->SetVisibility(ESlateVisibility::Collapsed);
+		BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
+		break;
 	default:
 		break;
 	}

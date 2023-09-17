@@ -49,6 +49,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ItemType Data")
 		EItemCategory ItemType;
 
+	UPROPERTY(EditAnywhere, Category = "ItemType Data")
+		FName CombinResultID;
+
 	UPROPERTY(VisibleAnywhere, Category = "ItemType Data")
 		int32 ConsumeValue;
 

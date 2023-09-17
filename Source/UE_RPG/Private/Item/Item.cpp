@@ -31,6 +31,11 @@ UItem* UItem::CreateItemCopy()
 	/**itemtype data*/
 	copy->ItemType = this->ItemType;
 	copy->ConsumeValue = this->ConsumeValue;
+	copy->CombinResultID = this->CombinResultID;
+	if (this->ItemClass)
+	{
+		copy->ItemClass = this->ItemClass;
+	}
 	
 	/**asset data*/
 	copy->ItemMesh = this->ItemMesh;

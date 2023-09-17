@@ -18,6 +18,7 @@ enum class EItemCategory : uint8
 	EIS_Equipment UMETA(DisplayName = "Equipment"),
 	EIS_QuestItems UMETA(DisplayName = "Quest Items"),
 	EIS_Readables UMETA(DisplayName = "Readables"),
+	EIS_Combinables UMETA(DisplayName = "Combinable"),
 	EIS_Gabbable UMETA(DisplayName = "Grab Item")
 };
 
@@ -52,6 +53,8 @@ struct FItemInfo : public FTableRowBase
 		TSubclassOf<AActor> ItemClass;
 	UPROPERTY(EditAnywhere, Category = "ItemType Data")
 		EItemCategory ItemType;
+	UPROPERTY(EditAnywhere, Category = "ItemType Data")
+		FName CombinResultID;
 	UPROPERTY(EditAnywhere, Category = "ItemType Data")
 		int32 ConsumeValue;
 
