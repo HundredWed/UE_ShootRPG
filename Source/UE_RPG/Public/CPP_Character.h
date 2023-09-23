@@ -133,10 +133,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void EquippingEnd();
 
+	/**mouse*/
 	void SetMouseRate();
-
 	void CalculateCrosshairSpread(float DeltaTime);
-
 	UFUNCTION(BlueprintCallable)
 		float GetCrosshairSpreadMultiplier() const;
 
@@ -149,9 +148,9 @@ public:
 	FORCEINLINE void DecreasePlayerHP(const uint32 value) { Health -= value; }
 	
 	/**inventory*/
-
 	void HideGameInventory();
 	void ShowGameInventory();
+	const float GetPlayerWeightInfo() { return InventoryMaxWeight; }
 
 	FORCEINLINE class UInventory* GetInventory() { return GameInventory; }
 	FORCEINLINE const uint8 GetInventorySize() { return InventoryAmountOfSlot; }
@@ -245,6 +244,8 @@ private:
 		uint8 InventoryAmountOfSlot = 20;
 	UPROPERTY(EditAnywhere, Category = "InventoryComponent", meta = (AllowPrivateAccess = "true"))
 		uint8 InventoryRowSize = 5;
+	UPROPERTY(EditAnywhere, Category = "InventoryComponent", meta = (AllowPrivateAccess = "true"))
+		float InventoryMaxWeight = 250.f;
 
 	bool isVisible = true;
 };

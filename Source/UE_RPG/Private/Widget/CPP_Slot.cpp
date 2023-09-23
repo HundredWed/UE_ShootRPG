@@ -23,7 +23,7 @@ void UCPP_Slot::NativeConstruct()
 	ItemRef = nullptr;
 }
 
-void UCPP_Slot::UpdateSlot(const uint8 index)
+void UCPP_Slot::UpdateSlot(const int16 index)
 {
 	if (IsValid(InventoryRef))
 	{
@@ -134,8 +134,8 @@ bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 
 	if (dragSlot)
 	{
-		const uint8 fromIndex = dragSlot->WidgetRef->MyArrayNumber;
-		const uint8 toIndex = MyArrayNumber;
+		const int16 fromIndex = dragSlot->WidgetRef->MyArrayNumber;
+		const int16 toIndex = MyArrayNumber;
 		if (dragSlot->WidgetRef != this)
 		{
 			bDraggedOver = false;
@@ -157,14 +157,14 @@ bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 				}
 				else
 				{
-					UItem* item = dragSlot->WidgetRef->ItemRef;
+					/*UItem* item = dragSlot->WidgetRef->ItemRef;
 					if (item->ItemType != EItemCategory::EIS_Readables && LinkedCombinableSlot != -1)
 					{
 						InventoryRef->InventoryWidget->SlotWidgetArray[LinkedCombinableSlot]->InactiveCombinableSlot();
 
 						LinkedCombinableSlot = -1;
 						
-					}
+					}*/
 
 					InventoryRef->SwapSlot(fromIndex, toIndex);
 					return true;
@@ -256,24 +256,32 @@ void UCPP_Slot::OnUseItem()
 	}
 	else
 	{
-		AActor* itemActor = GetWorld()->SpawnActor(InventoryRef->SlotsArray[MyArrayNumber].Item->ItemClass);
-
-		IItemAbility* itemAbility = Cast<IItemAbility>(itemActor);
-		if (itemAbility)
+		TSubclassOf<AActor> itemClass = InventoryRef->SlotsArray[MyArrayNumber].Item->ItemClass;
+		if (itemClass)
 		{
-			const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ConsumeValue;
-			itemAbility->UseItem(PlayerRef, value); 
+			AActor* itemActor = GetWorld()->SpawnActor(InventoryRef->SlotsArray[MyArrayNumber].Item->ItemClass);
 
-			InventoryRef->AddItemManage(InventorySlotinfo.Item->ItemInfoID, itemActor);
-			InventoryRef->RemoveItemAtIndex(MyArrayNumber, 1);
-			InventoryRef->StartAbilityActorLife(InventorySlotinfo.Item->ItemInfoID);
+			IItemAbility* itemAbility = Cast<IItemAbility>(itemActor);
+			if (itemAbility)
+			{
+				const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ConsumeValue;
+				itemAbility->UseItem(PlayerRef, value);
+
+				InventoryRef->AddItemManage(InventorySlotinfo.Item->ItemInfoID, itemActor);
+				InventoryRef->RemoveItemAtIndex(MyArrayNumber, 1);
+				InventoryRef->StartAbilityActorLife(InventorySlotinfo.Item->ItemInfoID);
+			}
+
+			GEngine->AddOnScreenDebugMessage(
+				INDEX_NONE,
+				30.f,
+				FColor::Red,
+				FString::Printf(TEXT("get from SpawnActor")));
 		}
-		//item->Destroy();
-		GEngine->AddOnScreenDebugMessage(
-			INDEX_NONE,
-			30.f,
-			FColor::Red,
-			FString::Printf(TEXT("get from SpawnActor")));
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("not valid ItemClass to UesItem"));
+		}
 	}
 }
 
@@ -360,6 +368,19 @@ void UCPP_Slot::ActiveCombinableSlot()
 {
 	CombineButton->SetVisibility(ESlateVisibility::Visible);
 	bActiveCombineButton = true;
+}
+
+void UCPP_Slot::CheckCombinability(const int16 fromIndex)
+{
+	UItem* item = InventoryRef->SlotsArray[fromIndex].Item;
+	bool bvalidItem = (item == nullptr) || (item->ItemType != EItemCategory::EIS_Combinables);
+
+	if (bvalidItem && LinkedCombinableSlot != -1)
+	{
+		InventoryRef->InventoryWidget->SlotWidgetArray[LinkedCombinableSlot]->InactiveCombinableSlot();
+
+		LinkedCombinableSlot = -1;
+	}
 }
 
 

@@ -3,6 +3,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CPP_Character.h"
+#include "Kismet/GameplayStatics.h"
 
 UCameraManager::UCameraManager()
 {
@@ -42,13 +43,12 @@ void UCameraManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	{
 		UpdateSpringArmYOffset(NewValue, DeltaTime);
 		SmoothCameraFOV(DeltaTime);
-	}
-
-	
+	}	
 }
 
 void UCameraManager::UpdateSpringArmYOffset(float newYoffset, float deltaTime)
 {
+    
 	SpringArm->SocketOffset.Y = FMath::FInterpTo(SpringArm->SocketOffset.Y, newYoffset, deltaTime, InterpSpeed);
 }
 

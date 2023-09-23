@@ -44,6 +44,10 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Item state")
 		UDataTable* ItemDataTable;
+
+	/**inventory value*/
+	float MaxWeight = 0.0f;
+	int32 MaxGold = 999999999;
 protected:
 	
 	virtual void BeginPlay() override;
@@ -51,35 +55,41 @@ protected:
 public:
 
 	/**inventory function*/
-	bool IsSlotEmpty(const uint8 index);
+	bool IsSlotEmpty(const int16 index);
 	void AddItem(class UItem* item, const uint32 amount);
-	bool SearchEmptySlot(uint8& emptySlotIndex);
-	bool SearchFreeStackSlot(class UItem* item, uint8& canStackedSlotIndex);
-	int32 GetAmountAtIndex(const uint8 index);
+	bool SearchEmptySlot(int16& emptySlotIndex);
+	bool SearchFreeStackSlot(class UItem* item, int16& canStackedSlotIndex);
+	int32 GetAmountAtIndex(const int16 index);
 
-	void RemoveItemAtIndex(const uint8 index, const uint32 removeAmount);
-	void SwapSlot(const uint8 fromIndex, const uint8 toIndex);
-	void AddToIndex(const uint8 fromIndex, const uint8 toIndex);
-	bool CanAddToIndex(const uint8 fromIndex, const uint8 toIndex);
-	
+	void RemoveItemAtIndex(const int16 index, const int32 removeAmount);
+	void SwapSlot(const int16 fromIndex, const int16 toIndex);
+	void CheckItemType(const int16 fromIndex, const int16 toIndex);
+	void AddToIndex(const int16 fromIndex, const int16 toIndex);
+	bool CanAddToIndex(const int16 fromIndex, const int16 toIndex);
+	void UpdateSlotAtIndex(const int16 index);
+	const FInventorySlot GetSlotInfoIndex(const int16 index);
+	void AddWeight(const float amount);
+	void AddGold(const int32 amount);
+	const int32 GetCurrentGold() { return CurrentGold; }
+	bool IsOverGold(const int32 amount) { return (amount + CurrentGold) > MaxGold; }
+
 	/**split when drag slot*/
-	void SplitStackToIndex(const uint8 fromIndex, const uint8 toIndex, const int32 splitAmount);
-	bool CanSplitStakable(const uint8 fromIndex, const uint8 toIndex, const int32 splitAmount);
-
-	void UpdateSlotAtIndex(const uint8 index);
-	const FInventorySlot GetSlotInfoIndex(const uint8 index);
+	void SplitStackToIndex(const int16 fromIndex, const int16 toIndex, const int32 splitAmount);
+	bool CanSplitStakable(const int16 fromIndex, const int16 toIndex, const int32 splitAmount);
 
 	/**FindCombinableSlot function*/
-	int8 FindCombinableSlot(const int8 slot);
-	bool CompaireID(const uint8 slot1, const uint8 slot2);
+	int16 FindCombinableSlot(const int16 slot);
+	bool CompaireID(const int16 slot1, const int16 slot2);
     void ClearConectArray();
-	void CombineItem(const uint8 index);
-	bool SetLinkSlot(const int8 slot, const int8 newdir);
-	bool IsLineChange(const int8 slot);
-	class UCPP_Slot* GetSlotWidgetInfo(const int8 index);
-	void ChangeItemInfo(FName itemInfoID, const uint8 index);
+	void CombineItem(const int16 index);
+	bool SetLinkSlot(const int16 slot, const int16 newdir);
+	bool IsLineChange(const int16 slot);
+	class UCPP_Slot* GetSlotWidgetInfo(const int16 index);
+	void ChangeItemInfo(FName itemInfoID, const int16 index);
 	
-	
+	void InventorySort(int16 left, int16 right);
+	int16 Partition(int16 left, int16 right);
+	uint8 GetCompaireValue(int16 index);
 
 	/**inventory widget function (FORCEINLINE) */
 	FORCEINLINE void ShowInventory() {
@@ -110,6 +120,10 @@ private:
 	/**inventory value*/
 	uint8 MaxStackSize = 99;
 	uint8 InvetoryRow = 0;
+	float CurrnetWeight = 0.0f;
+	int32 CurrentGold = 0;
+	
+
 
 	TMap<FName, AActor*> ItemManageSystem;
 
