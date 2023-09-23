@@ -142,8 +142,23 @@ void APickUpItem::TakePickUp(ACPP_Character* taker)
 {
 	UInventory* playerinventory = taker->GetInventory();
 
-	if (IsValid(playerinventory) && ItemRef->ItemType != EItemCategory::EIS_Gabbable)
+	if (IsValid(playerinventory))
 	{
+		EItemCategory itemType = ItemRef->ItemType;
+		switch (itemType)
+		{
+		case EItemCategory::EIS_Gabbable:
+			return;
+		case EItemCategory::EIS_Gold:
+			const int32 amountOver = playerinventory->GetCurrentGold() + ItemRef->ItemPrice;
+			if (playerinventory->IsOverGold(amountOver))
+			{
+				return;
+			}
+			playerinventory->AddGold(ItemRef->ItemPrice);
+			Destroy();
+			return;
+		}
 		playerinventory->AddItem(ItemRef, ItemAmount);
 		Destroy();
 	}

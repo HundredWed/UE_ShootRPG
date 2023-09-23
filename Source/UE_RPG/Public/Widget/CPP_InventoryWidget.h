@@ -22,6 +22,9 @@ public:
 		class UButton* CloseButton;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+		class UButton* SortButton;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UUniformGridPanel* SlotPanel;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
@@ -29,6 +32,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UScrollBox* InventoryScollBox;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* WeightText;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* GoldText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Widget")
 		TSubclassOf< class UCPP_Slot> SlotWidgetClass;
@@ -42,18 +51,22 @@ public:
 	UPROPERTY()
 		TArray<class UCPP_Slot*> SlotWidgetArray;
 
-	
-
 public:	
 
 	UFUNCTION()
-		void GenerateSlotWidget(const uint8 slotsParRow);
+		void GenerateSlotWidget(const int16 slotsParRow);
 
 	UFUNCTION()
 		void CloseWidget();
 
+	UFUNCTION()
+		void SortInventory();
+
 	void SetPanelEnabled(bool enabled);
 	void SetSpliteWidget(class UCPP_Slot* fromSlot, class UCPP_Slot* toSlot);
+	void UpdateWeightText(const float amount);
+	void UpdateWeightMaxAmount(const float amount);
+	void UpdateGoldText(const int32 amount);
 
 protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -65,5 +78,7 @@ private:
 
 	UPROPERTY()
 		class UCPP_Slot* SlotWidget;
+
+	float MaxWeight = 0.0f;
 
 };

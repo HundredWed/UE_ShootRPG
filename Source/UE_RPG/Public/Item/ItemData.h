@@ -19,10 +19,16 @@ enum class EItemCategory : uint8
 	EIS_QuestItems UMETA(DisplayName = "Quest Items"),
 	EIS_Readables UMETA(DisplayName = "Readables"),
 	EIS_Combinables UMETA(DisplayName = "Combinable"),
-	EIS_Gabbable UMETA(DisplayName = "Grab Item")
+	EIS_Gabbable UMETA(DisplayName = "Grab Item"),
+	EIS_Gold UMETA(DisplayName = "Gold"),
+
+	EIS_None UMETA(DisplayName = "NoneItem")
 };
 
 
+/**If there is a change in this structure, 
+the Item class's header file, CreateItemCopy() function, 
+and the PickUpItem class's InitializePickUpItem() function should also be updated accordingly.*/
 USTRUCT(BlueprintType)
 struct FItemInfo : public FTableRowBase
 {
@@ -46,17 +52,20 @@ struct FItemInfo : public FTableRowBase
 		int32 ItemPrice;
 	UPROPERTY(EditAnywhere, Category = "Item Data")
 		float Weight;
-	UPROPERTY(EditAnywhere, Category = "Item Data")
-		int32 ATK;
+
 
 	UPROPERTY(EditAnywhere, Category = "ItemType Data")
 		TSubclassOf<AActor> ItemClass;
 	UPROPERTY(EditAnywhere, Category = "ItemType Data")
 		EItemCategory ItemType;
-	UPROPERTY(EditAnywhere, Category = "ItemType Data")
+
+	UPROPERTY(EditAnywhere, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Combinables", EditConditionHides))
 		FName CombinResultID;
-	UPROPERTY(EditAnywhere, Category = "ItemType Data")
+	UPROPERTY(EditAnywhere, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Consumeable", EditConditionHides))
 		int32 ConsumeValue;
+	UPROPERTY(EditAnywhere, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
+		int32 ATK;
+	
 
 
 	UPROPERTY(EditAnywhere, Category = "Asset Data")

@@ -40,24 +40,26 @@ public:
 	UPROPERTY()
 		class UTootipWidget* toolTip;
 
-	uint8 MyArrayNumber = 0;
+	int16 MyArrayNumber = 0;
 	int32 MyAmount = 0;
 	bool  bMyItemCanStacked = false;
 
 	/**CombinableSlot*/
-	int8 LinkedCombinableSlot = -1;
+	int16 LinkedCombinableSlot = -1;
 
 	/**for drag over event only once*/
 	bool bDraggedOver = false;
 
 public: 
 	
-	void UpdateSlot(const uint8 index);
+	void UpdateSlot(const int16 index);
 	void OnUseItem();
 	class UItem* GetItemItemInfo() { return ItemRef; }
 
+	/**Combinae function*/
 	void InactiveCombinableSlot();
 	void ActiveCombinableSlot();
+	void CheckCombinability(const int16 fromIndex);
 	bool GetIsActiveCombineButton() { return bActiveCombineButton; }
 	
 	UFUNCTION()
@@ -95,7 +97,7 @@ private:
 	FLinearColor DefaultBorderColor;
 
 	/**found CombinableSlot*/
-	int8 CombinableSlot = -1;
+	int16 CombinableSlot = -1;
 	bool bActiveCombineButton = false;
 
 };
