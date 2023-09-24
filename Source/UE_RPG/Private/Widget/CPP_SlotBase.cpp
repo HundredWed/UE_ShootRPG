@@ -42,11 +42,15 @@ void UCPP_SlotBase::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDr
 	if (bDraggedOver)
 	{
 		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-		if (dragSlot)
+		if (dragSlot && ItemRef == nullptr)
 		{
 			bDraggedOver = false;
-			//border
 			SlotBorder->SetBrushColor(DefaultBorderColor);
+		}
+		else if (dragSlot && ItemRef)
+		{
+			bDraggedOver = false;
+			SlotBorder->SetBrushColor(FLinearColor::White);
 		}
 	}
 }
