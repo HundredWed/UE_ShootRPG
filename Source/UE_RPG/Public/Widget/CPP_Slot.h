@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Widget/CPP_SlotBase.h"
-#include "Widget/CustomUMGWidget.h"
 #include "Inventory.h"
 #include "CPP_Slot.generated.h"
 
@@ -12,33 +11,18 @@
  * Inevntory Slot
  */
 UCLASS()
-class UE_RPG_API UCPP_Slot : public UCustomUMGWidget
+class UE_RPG_API UCPP_Slot : public UCPP_SlotBase
 {
 	GENERATED_BODY()
 
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UBorder* SlotBorder;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UButton* CombineButton;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UImage* ItemIcon;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* TextAmount;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
-		TSubclassOf< class UCPP_DragSlotWidget> DragWidgetClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
-		TSubclassOf< class UTootipWidget> TootipWidgetClass;
-
-
-	UPROPERTY()
-		class UTootipWidget* ToolTip;
 
 	int16 MyArrayNumber = 0;
 	int32 MyAmount = 0;
@@ -46,9 +30,6 @@ public:
 
 	/**CombinableSlot*/
 	int16 LinkedCombinableSlot = -1;
-
-	/**for drag over event only once*/
-	bool bDraggedOver = false;
 
 public: 
 	
@@ -78,24 +59,19 @@ protected:
 	
 private:
 
-	void InactiveSlot();
-	void ActiveSlot();
-	void InitSlotInfo();
-	void SetSlotToolTip();
+	virtual void InactiveSlot() override;
+	virtual void ActiveSlot() override;
+
+	/**you must init ItemRef this Func*/
+	virtual void InitSlotInfo() override;
 
 	void SearchCombinableSlot();
-
-	/**item info*/
-	UPROPERTY()
-		class UItem* ItemRef;
 
 	UPROPERTY()
 		class UCPP_DragSlotWidget* DragSlotWidget;
 
-
 	/**slot info*/
 	FInventorySlot InventorySlotinfo;
-	FLinearColor DefaultBorderColor;
 
 	/**found CombinableSlot*/
 	int16 CombinableSlot = -1;

@@ -5,14 +5,14 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "CPP_Character.h"
 #include "Components/Button.h"
-#include "Components/Border.h"
-#include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "Item/Item.h"
 #include "Item/ItemAbility.h"
-#include "Widget/SlotDrag.h"
 #include "Widget/CPP_DragSlotWidget.h"
 #include "Widget/SetAmountWidget.h"
+#include "Components/Border.h"
+#include "Widget/SlotDrag.h"
+#include "Components/Image.h"
+#include "Item/Item.h"
 #include "Widget/TootipWidget.h"
 
 void UCPP_Slot::NativeConstruct()
@@ -89,46 +89,12 @@ void UCPP_Slot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointer
 
 bool UCPP_Slot::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-	Super::NativeOnDragOver(InGeometry, InDragDropEvent, InOperation);
-	if (bDraggedOver)
-	{
-		//UE_LOG(LogTemp, Display, TEXT("DragOver "));
-		return true;
-	}
-	else
-	{
-		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-		if (dragSlot)
-		{
-			UE_LOG(LogTemp, Display, TEXT("DragOver"));
-			bDraggedOver = true;
-			//border
-			SlotBorder->SetBrushColor(FLinearColor::Gray);
-			return true;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("???"));
-			return false;
-		}
-	}
-	
+	return Super::NativeOnDragOver(InGeometry, InDragDropEvent, InOperation);
 }
 
 void UCPP_Slot::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
 	Super::NativeOnDragLeave(InDragDropEvent, InOperation);
-
-	if (bDraggedOver)
-	{
-		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-		if (dragSlot)
-		{
-			bDraggedOver = false;
-			//border
-			SlotBorder->SetBrushColor(DefaultBorderColor);
-		}
-	}
 }
 
 bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
@@ -275,13 +241,8 @@ void UCPP_Slot::OnUseItem()
 
 void UCPP_Slot::InactiveSlot()
 {
-	/**set icon*/
-	ItemIcon->SetIsEnabled(false);
-	ItemIcon->SetToolTip(nullptr);
-	ItemIcon->SetVisibility(ESlateVisibility::Hidden);
-	/**set border*/
-	SlotBorder->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	SlotBorder->SetBrushColor(DefaultBorderColor);
+	Super::InactiveSlot();
+
 	/**set Text*/
 	TextAmount->SetVisibility(ESlateVisibility::Hidden);
 	/**set CombineButton*/
@@ -292,12 +253,7 @@ void UCPP_Slot::InactiveSlot()
 
 void UCPP_Slot::ActiveSlot()
 {
-	/**set icon*/
-	ItemIcon->SetIsEnabled(true);
-	ItemIcon->SetBrushFromTexture(ItemRef->IconTexture);
-	ItemIcon->SetVisibility(ESlateVisibility::Visible);
-	/**set border*/
-	SlotBorder->SetBrushColor(FLinearColor::White);
+	Super::ActiveSlot();
 }
 
 void UCPP_Slot::InitSlotInfo()
@@ -308,28 +264,6 @@ void UCPP_Slot::InitSlotInfo()
 	bMyItemCanStacked = ItemRef->bCanStacked;
 }
 
-void UCPP_Slot::SetSlotToolTip()
-{
-	if (IsValid(ToolTip))
-	{
-		/**if created tootip before, don't create widget and update that tootip*/
-		ToolTip->SetTootipItemRef(ItemRef);
-		ToolTip->UpdateToolTip();
-
-		ItemIcon->SetToolTip(ToolTip);
-	}
-	else
-	{
-		/**CreateWidget only once*/
-		if (TootipWidgetClass)
-		{
-			ToolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
-			ToolTip->SetTootipItemRef(ItemRef);
-			ToolTip->UpdateToolTip();
-			ItemIcon->SetToolTip(ToolTip);
-		}
-	}
-}
 
 void UCPP_Slot::SearchCombinableSlot()
 {
