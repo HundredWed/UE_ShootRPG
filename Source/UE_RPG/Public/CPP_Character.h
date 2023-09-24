@@ -116,6 +116,7 @@ public:
 	/**CharacterState*/
     void SetStateEquiped();
 	void SetStateUnEquiped();
+	void SetEquipedWeapon(class AWeapon* equipedWeapon);
 	bool CanAttackState();
 	bool CanEquipState();
 	bool CanUnEquipState();

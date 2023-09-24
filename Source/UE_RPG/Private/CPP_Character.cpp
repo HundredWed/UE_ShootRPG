@@ -413,7 +413,7 @@ void ACPP_Character::PickUpWeapon(AWeapon* weapon)
 {
 	weapon->Equip(GetMesh(), "weapon_socket_back");
 	weapon->SetOwner(this);
-	EquipedWeapon = weapon;
+	SetEquipedWeapon(weapon);
 	Params.AddIgnoredActor(weapon);
 }
 
@@ -462,6 +462,11 @@ void ACPP_Character::SetStateUnEquiped()
 	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
 	playercontroller->SetHUDVisibility(false);
 	UE_LOG(LogTemp, Display, TEXT("UnEquiped"));
+}
+
+void ACPP_Character::SetEquipedWeapon(AWeapon* equipedWeapon)
+{
+	EquipedWeapon = equipedWeapon;
 }
 
 bool ACPP_Character::CanAttackState()

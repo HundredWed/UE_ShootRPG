@@ -62,8 +62,13 @@ void UCPP_Slot::UpdateSlot(const int16 index)
 void UCPP_Slot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+
+	if (!IsValid(DragWidgetClass))
+		return;
+
 	UCPP_DragSlotWidget* dragWidget = CreateWidget<UCPP_DragSlotWidget>(GetWorld(), DragWidgetClass);
-	dragWidget->UpdataWidget(ItemRef, MyAmount);
+	if(IsValid(dragWidget))
+		dragWidget->UpdataWidget(ItemRef, MyAmount);
 
 	USlotDrag* dragSlot = Cast<USlotDrag>(UWidgetBlueprintLibrary::CreateDragDropOperation(USlotDrag::StaticClass()));
 
@@ -93,7 +98,7 @@ bool UCPP_Slot::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEve
 	else
 	{
 		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-		if (dragSlot && ItemRef == nullptr)
+		if (dragSlot)
 		{
 			UE_LOG(LogTemp, Display, TEXT("DragOver"));
 			bDraggedOver = true;
@@ -157,15 +162,6 @@ bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 				}
 				else
 				{
-					/*UItem* item = dragSlot->WidgetRef->ItemRef;
-					if (item->ItemType != EItemCategory::EIS_Readables && LinkedCombinableSlot != -1)
-					{
-						InventoryRef->InventoryWidget->SlotWidgetArray[LinkedCombinableSlot]->InactiveCombinableSlot();
-
-						LinkedCombinableSlot = -1;
-						
-					}*/
-
 					InventoryRef->SwapSlot(fromIndex, toIndex);
 					return true;
 				}
@@ -185,20 +181,14 @@ bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 FReply UCPP_Slot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-	
-	/**확인 후 ItemIcon->GetIsEnabled() 로 통합*/
 
 	if (ItemIcon->GetIsEnabled())
 	{
 		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
 		{
-			//icon
-			if (ItemIcon->GetIsEnabled())
+			if (IsValid(InventoryRef))
 			{
-				if (IsValid(InventoryRef))
-				{
-					OnUseItem();
-				}
+				OnUseItem();
 			}
 		}
 		else
@@ -208,8 +198,6 @@ FReply UCPP_Slot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPo
 		}
 		
 	}
-
-	
 
 	return FReply::Handled();
 }
@@ -322,23 +310,23 @@ void UCPP_Slot::InitSlotInfo()
 
 void UCPP_Slot::SetSlotToolTip()
 {
-	if (IsValid(toolTip))
+	if (IsValid(ToolTip))
 	{
 		/**if created tootip before, don't create widget and update that tootip*/
-		toolTip->SetTootipItemRef(ItemRef);
-		toolTip->UpdateToolTip();
+		ToolTip->SetTootipItemRef(ItemRef);
+		ToolTip->UpdateToolTip();
 
-		ItemIcon->SetToolTip(toolTip);
+		ItemIcon->SetToolTip(ToolTip);
 	}
 	else
 	{
 		/**CreateWidget only once*/
 		if (TootipWidgetClass)
 		{
-			toolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
-			toolTip->SetTootipItemRef(ItemRef);
-			toolTip->UpdateToolTip();
-			ItemIcon->SetToolTip(toolTip);
+			ToolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
+			ToolTip->SetTootipItemRef(ItemRef);
+			ToolTip->UpdateToolTip();
+			ItemIcon->SetToolTip(ToolTip);
 		}
 	}
 }
