@@ -7,7 +7,7 @@
 #include "SlotDrag.generated.h"
 
 /**
- * 
+ * DragDropOperation class
  */
 UCLASS()
 class UE_RPG_API USlotDrag : public UDragDropOperation

@@ -7,7 +7,7 @@
 #include "CPP_DragSlotWidget.generated.h"
 
 /**
- * 
+ * the slot visual when Drag Even. 
  */
 UCLASS()
 class UE_RPG_API UCPP_DragSlotWidget : public UCustomUMGWidget

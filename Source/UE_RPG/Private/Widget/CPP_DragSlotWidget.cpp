@@ -14,7 +14,7 @@ void UCPP_DragSlotWidget::UpdataWidget(const UItem* item, uint32 amount)
 		ItemIcon->SetBrushFromTexture(item->IconTexture);
 		ItemIcon->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 
-		if (item->bCanStacked)
+		if (item->bCanStacked && amount > 0)
 		{
 			TextAmount->SetText(FText::Format(NSLOCTEXT("CPP_Slot", "TextAmount", "x{0}"), amount));
 		}
