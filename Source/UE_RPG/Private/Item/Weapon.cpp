@@ -5,13 +5,11 @@
 #include "Components/SphereComponent.h"
 AWeapon::AWeapon()
 {
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMeshComponent"));
 	SetRootComponent(WeaponMesh);
 
 	SphereComponent->SetupAttachment(GetRootComponent());
 	ItemStateWidjet->SetupAttachment(GetRootComponent());
 	SearchComponent->SetupAttachment(GetRootComponent());
-
 }
 
 
@@ -54,6 +52,17 @@ void AWeapon::AttachFunc(USceneComponent* Inparent, const FName& SocketName)
 		UGameplayStatics::PlaySound2D(this, EquipSound);
 	}
 	WeaponMesh->AttachToComponent(Inparent, TransformRules, SocketName);
+}
+
+void AWeapon::SetActiveWeapon(bool bactive)
+{
+	bActiveWeapon = bactive;
+	SetActorHiddenInGame(!bactive);
+}
+
+bool AWeapon::IsActiveWaepon()
+{
+	return bActiveWeapon;
 }
 
 void AWeapon::SetItemState(EItemState State)

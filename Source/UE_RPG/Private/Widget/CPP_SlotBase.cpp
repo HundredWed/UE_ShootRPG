@@ -64,6 +64,8 @@ void UCPP_SlotBase::InactiveSlot()
 	/**set border*/
 	SlotBorder->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	SlotBorder->SetBrushColor(DefaultBorderColor);
+
+	ItemRef = nullptr;
 }
 
 void UCPP_SlotBase::ActiveSlot()

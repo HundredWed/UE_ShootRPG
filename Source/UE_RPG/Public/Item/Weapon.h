@@ -14,9 +14,9 @@ public:
 	void Equip(USceneComponent* Inparent, const FName& SocketName);
 	void AttachFunc(USceneComponent* Inparent, const FName& SocketName);
 
-	UPROPERTY(VisibleAnywhere)
-		USkeletalMeshComponent* WeaponMesh;
-
+	void SetActiveWeapon(bool bactive);
+	bool IsActiveWaepon();
+	
 	UPROPERTY(EditAnywhere)
 		class USoundCue* PickUpSound;
 
@@ -39,12 +39,13 @@ protected:
 		int32 OtherBodyIndex) override;
 
 	/**weapon states*/
-
+	bool bActiveWeapon = true;
 
 public:
 
 	virtual void SetItemState(EItemState State) override;
 private:
 
+	
 	
 };

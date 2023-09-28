@@ -14,6 +14,8 @@
 #include "Components/Image.h"
 #include "Item/Item.h"
 #include "Widget/TootipWidget.h"
+#include "Widget/CPP_EquipmentInventory.h"
+#include "Widget/CPP_EquipSlot.h"
 
 void UCPP_Slot::NativeConstruct()
 {
@@ -105,12 +107,12 @@ bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 
 	if (dragSlot)
 	{
-		const int16 fromIndex = dragSlot->WidgetRef->MyArrayNumber;
-		const int16 toIndex = MyArrayNumber;
-		if (dragSlot->WidgetRef != this)
+		if (dragSlot->WidgetRef && dragSlot->WidgetRef != this)
 		{
-			bDraggedOver = false;
+			const int16 fromIndex = dragSlot->WidgetRef->MyArrayNumber;
+			const int16 toIndex = MyArrayNumber;
 
+			bDraggedOver = false;
 			//border
 			SlotBorder->SetBrushColor(DefaultBorderColor);
 
@@ -133,6 +135,11 @@ bool UCPP_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& 
 				}
 			}
 		}
+		else if(dragSlot->bFromEquipmentSlot)
+		{
+			InventoryRef->UnEquipWeaponAndAddItem(MyArrayNumber);
+			return true;
+		}
 		else
 		{
 			return true;
@@ -152,9 +159,15 @@ FReply UCPP_Slot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPo
 	{
 		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
 		{
-			if (IsValid(InventoryRef))
+			if (IsValid(InventoryRef) 
+				&& ItemRef->ItemType != EItemCategory::EIS_Equipment)
 			{
 				OnUseItem();
+			}
+			else if(IsValid(InventoryRef)
+				&& ItemRef->ItemType == EItemCategory::EIS_Equipment)
+			{
+				EquipSlotItem();
 			}
 		}
 		else
@@ -177,13 +190,16 @@ FReply UCPP_Slot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, co
 		//icon
 		if (ItemIcon->GetIsEnabled())
 		{
-			if (IsValid(InventoryRef))
+			if (IsValid(InventoryRef) && ItemRef->ItemType != EItemCategory::EIS_Equipment)
 			{
 				OnUseItem();
 			}
+			else
+			{
+				return FReply::Handled();
+			}
 		}
 	}
-
 	return FReply::Handled();
 }
 
@@ -239,6 +255,11 @@ void UCPP_Slot::OnUseItem()
 	}
 }
 
+void UCPP_Slot::EquipSlotItem()
+{
+	InventoryRef->SetEquipWeapon(ItemRef, MyArrayNumber);
+}
+
 void UCPP_Slot::InactiveSlot()
 {
 	Super::InactiveSlot();
@@ -247,8 +268,6 @@ void UCPP_Slot::InactiveSlot()
 	TextAmount->SetVisibility(ESlateVisibility::Hidden);
 	/**set CombineButton*/
 	CombineButton->SetVisibility(ESlateVisibility::Hidden);
-
-	ItemRef = nullptr;
 }
 
 void UCPP_Slot::ActiveSlot()

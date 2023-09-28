@@ -1,26 +1,26 @@
-#include "Item/Gun/ShootGun.h"
+#include "Item/Gun/Rifle.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "CPP_Character.h"
 
 
-AShootGun::AShootGun()
+ARifle::ARifle()
 {
 	SpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnPoint"));
 	SpawnPoint->SetupAttachment(WeaponMesh);
 }
 
-void AShootGun::BeginPlay()
+void ARifle::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void AShootGun::Tick(float DeltaTime)
+void ARifle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-void AShootGun::PullTrigger()
+void ARifle::PullTrigger()
 {
 	if (IsValid(ShootSound))
 	{
@@ -47,7 +47,7 @@ void AShootGun::PullTrigger()
 	
 }
 
-void AShootGun::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
+void ARifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
 {
 	AController* OwnerController = GetOwnerController();
 	if (IsValid(OwnerController) == false)
@@ -85,7 +85,7 @@ void AShootGun::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
 
 }
 
-void AShootGun::GunTrace(FHitResult& hitresult, FVector& endpoint)
+void ARifle::GunTrace(FHitResult& hitresult, FVector& endpoint)
 {
 	FVector StartLocation = SpawnPoint->GetComponentLocation();
 	FVector end = endpoint;
@@ -105,7 +105,7 @@ void AShootGun::GunTrace(FHitResult& hitresult, FVector& endpoint)
 
 
 
-void AShootGun::SpreadBulletRandomRange(FRotator& randDir)
+void ARifle::SpreadBulletRandomRange(FRotator& randDir)
 {
 	float spreadrange = 1.f;
 
@@ -126,7 +126,7 @@ void AShootGun::SpreadBulletRandomRange(FRotator& randDir)
 
 
 
-AController* AShootGun::GetOwnerController()
+AController* ARifle::GetOwnerController()
 {
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (IsValid(OwnerPawn) == false)

@@ -13,5 +13,18 @@ UCLASS()
 class UE_RPG_API UCPP_EquipmentInventory : public UCustomUMGWidget
 {
 	GENERATED_BODY()
-	
+
+public:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+		class UCPP_EquipSlot* EquipSlot;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+		class UTextBlock* ATKText;
+
+protected:
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)override;
+
+public:
+	void UpdateEquipSlot(class UItem* item);
 };

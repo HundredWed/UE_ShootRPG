@@ -61,6 +61,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		UStaticMesh* ItemMesh;
 
+	UPROPERTY(EditAnywhere, Category = "Asset Data")
+		USkeletalMesh* ItemSkeletalMesh;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		UTexture2D* IconTexture;
 

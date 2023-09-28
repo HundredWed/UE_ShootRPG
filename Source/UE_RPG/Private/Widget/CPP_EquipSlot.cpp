@@ -2,114 +2,113 @@
 
 
 #include "Widget/CPP_EquipSlot.h"
+#include "CPP_Character.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Widget/TootipWidget.h"
 #include "Components/Image.h"
 #include "Components/Border.h"
 #include "Widget/SlotDrag.h"
+#include "Widget/CPP_DragSlotWidget.h"
+#include "Widget/CPP_Slot.h"
 #include "Item/Item.h"
+#include "Item/Weapon.h"
+#include "Item/Gun/Rifle.h"
+
+
 
 void UCPP_EquipSlot::NativeConstruct()
 {
 	Super::NativeConstruct();
+	DefaultBorderColor = SlotBorder->GetBrushColor(); 
+	InactiveSlot();
 }
 
 void UCPP_EquipSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
-}
 
-bool UCPP_EquipSlot::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
-{
-	Super::NativeOnDragOver(InGeometry,  InDragDropEvent, InOperation);
+	if (!IsValid(DragWidgetClass))
+		return;
 
-	if (bDraggedOver)
+	UCPP_DragSlotWidget* dragWidget = CreateWidget<UCPP_DragSlotWidget>(GetWorld(), DragWidgetClass);
+	if (IsValid(dragWidget))
+		dragWidget->UpdataWidget(ItemRef);
+
+	USlotDrag* dragSlot = Cast<USlotDrag>(UWidgetBlueprintLibrary::CreateDragDropOperation(USlotDrag::StaticClass()));
+
+	if (IsValid(dragSlot))
 	{
-		//UE_LOG(LogTemp, Display, TEXT("DragOver "));
-		return true;
+		dragSlot->bFromEquipmentSlot = true;
+		dragSlot->DefaultDragVisual = dragWidget;
+		dragSlot->Pivot = EDragPivot::MouseDown;
 	}
-	else
-	{
-		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-		if (dragSlot)
-		{
-			UE_LOG(LogTemp, Display, TEXT("DragOver"));
-			bDraggedOver = true;
-			//border
-			SlotBorder->SetBrushColor(FLinearColor::Gray);
-			return true;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("???"));
-			return false;
-		}
-	}
-}
 
-void UCPP_EquipSlot::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
-{
-	Super::NativeOnDragLeave(InDragDropEvent, InOperation);
-
-	if (bDraggedOver)
-	{
-		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-		if (dragSlot)
-		{
-			bDraggedOver = false;
-			//border
-			SlotBorder->SetBrushColor(DefaultBorderColor);
-		}
-	}
+	OutOperation = dragSlot;
 }
 
 bool UCPP_EquipSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
 	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+
+	USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
+
+	if (IsValid(dragSlot) 
+		&& dragSlot->WidgetRef
+		&& dragSlot->WidgetRef->GetItemRef()->ItemType == EItemCategory::EIS_Equipment)
+	{
+		dragSlot->WidgetRef->EquipSlotItem();
+		return true;
+	}
+
 	return false;
+}
+
+bool UCPP_EquipSlot::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	return Super::NativeOnDragOver(InGeometry,  InDragDropEvent, InOperation);
+}
+
+void UCPP_EquipSlot::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	Super::NativeOnDragLeave(InDragDropEvent, InOperation);
 }
 
 FReply UCPP_EquipSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+	if (ItemIcon->GetIsEnabled() && ItemRef)
+	{
+		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+		{
+			InventoryRef->AddItem(ItemRef);
+			UnEquipWeapon();
+		}
+		FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
+		return reply.NativeReply;
+	}
 	return FReply::Handled();
 }
 
-void UCPP_EquipSlot::InitEquipSlot()
+void UCPP_EquipSlot::UpdateEquipmentSlot(UItem* weapon)
 {
-	DefaultBorderColor = SlotBorder->GetBrushColor();
-
-	/**set icon*/
-	ItemIcon->SetIsEnabled(false);
-	ItemIcon->SetToolTip(nullptr);
-	ItemIcon->SetVisibility(ESlateVisibility::Hidden);
-	/**set border*/
-	SlotBorder->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	SlotBorder->SetBrushColor(DefaultBorderColor);
+	ItemRef = weapon;
+	ActiveSlot();
+	SetSlotToolTip();
 }
 
-void UCPP_EquipSlot::UpdateEquipSlot(class UItem* item)
+void UCPP_EquipSlot::UnEquipWeapon()
 {
+	InactiveSlot();
+	AWeapon* weapon = PlayerRef->GetEquipedWeapon();
 
-}
-void UCPP_EquipSlot::SetSlotToolTip(class UItem* item)
-{
-	if (IsValid(ToolTip))
+	if (IsValid(weapon))
 	{
-		/**if created tootip before, don't create widget and update that tootip*/
-		ToolTip->SetTootipItemRef(item);
-		ToolTip->UpdateToolTip();
-
-		ItemIcon->SetToolTip(ToolTip);
-	}
-	else
-	{
-		/**CreateWidget only once*/
-		if (TootipWidgetClass)
-		{
-			ToolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
-			ToolTip->SetTootipItemRef(item);
-			ToolTip->UpdateToolTip();
-			ItemIcon->SetToolTip(ToolTip);
-		}
+		weapon->SetActiveWeapon(false);
+		PlayerRef->SetStateUnEquiped();
 	}
 }
+
+
+
+

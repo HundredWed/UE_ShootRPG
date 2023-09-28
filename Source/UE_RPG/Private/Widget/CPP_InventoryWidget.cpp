@@ -56,6 +56,7 @@ void UCPP_InventoryWidget::GenerateSlotWidget(const int16 slotsParRow)
 void UCPP_InventoryWidget::CloseWidget()
 {
 	PlayerRef->HideGameInventory();
+	SpliteWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UCPP_InventoryWidget::SortInventory()
@@ -68,7 +69,7 @@ void UCPP_InventoryWidget::SetPanelEnabled(bool enabled)
 	SlotPanel->SetIsEnabled(enabled);
 }
 
-void UCPP_InventoryWidget::SetSpliteWidget(UCPP_Slot* fromSlot, UCPP_Slot* toSlot)
+void UCPP_InventoryWidget::SetSpliteWidget(const UCPP_Slot* fromSlot, const UCPP_Slot* toSlot)
 {
 	UUniformGridSlot* slotGrid = Cast<UUniformGridSlot>(toSlot->Slot);
 	float rowSize;
@@ -101,7 +102,7 @@ void UCPP_InventoryWidget::UpdateWeightText(const float amount)
 	FNumberFormattingOptions NumberFormatOptions;
 	NumberFormatOptions.MinimumFractionalDigits = 1;
 	FText amountText = FText::AsNumber(amount, &NumberFormatOptions);
-	WeightText->SetText(FText::Format(NSLOCTEXT("UCPP_InventoryWidget", "WeightText", "{current} / {max}"), amountText, MaxWeight));
+	WeightText->SetText(FText::Format(NSLOCTEXT("UCPP_InventoryWidget", "WeightText", "{0} / {1}"), amountText, MaxWeight));
 }
 
 void UCPP_InventoryWidget::UpdateWeightMaxAmount(const float amount)
@@ -114,7 +115,7 @@ void UCPP_InventoryWidget::UpdateGoldText(const int32 amount)
 	FNumberFormattingOptions NumberFormatOptions;
 	NumberFormatOptions.UseGrouping = true;
 	FText amountText = FText::AsNumber(amount, &NumberFormatOptions); 
-	GoldText->SetText(FText::Format(NSLOCTEXT("UCPP_InventoryWidget", "GoldText", "{current}"), amountText));
+	GoldText->SetText(FText::Format(NSLOCTEXT("UCPP_InventoryWidget", "GoldText", "{0}"), amountText));
 }
 
 FReply UCPP_InventoryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -158,6 +159,7 @@ void UCPP_InventoryWidget::NativeOnDragLeave(const FDragDropEvent& InDragDropEve
 
 bool UCPP_InventoryWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
+	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 	return true;
 }
 

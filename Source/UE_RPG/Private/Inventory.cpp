@@ -2,6 +2,10 @@
 #include "Item/Item.h"
 #include "CPP_Character.h"
 #include "Widget/CPP_Slot.h"
+#include "Widget/CPP_EquipmentInventory.h"
+#include "Widget/CPP_EquipSlot.h"
+#include "Item/Weapon.h"
+#include "Item/PickUpItem.h"
 
 UInventory::UInventory()
 {
@@ -66,12 +70,10 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 			if (amountOver > MaxStackSize)
 			{
 				const float restWeight = MaxStackSize - SlotsArray[canStackedSlotIndex].ItemAmount;
-				SlotsArray[canStackedSlotIndex].Item = item;
-				SlotsArray[canStackedSlotIndex].ItemAmount = MaxStackSize;
 
 				/**update widget*/
+				UpdateInventory(canStackedSlotIndex, item, MaxStackSize);
 				AddWeight(item->Weight * restWeight);
-				UpdateSlotAtIndex(canStackedSlotIndex);
 
 				const uint32 restAmountOver = amountOver - MaxStackSize;
 				AddItem(item, restAmountOver);
@@ -80,13 +82,9 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 			}
 			else
 			{
-				SlotsArray[canStackedSlotIndex].Item = item;
-				SlotsArray[canStackedSlotIndex].ItemAmount = amountOver;
-
 				/**update widget*/
+				UpdateInventory(canStackedSlotIndex, item, amountOver);
 				AddWeight(item->Weight * amount);
-				UpdateSlotAtIndex(canStackedSlotIndex);
-
 				return;
 
 			}
@@ -99,12 +97,9 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 			{
 				if (amount > MaxStackSize)
 				{
-					SlotsArray[emptySlotToStack].Item = item;
-					SlotsArray[emptySlotToStack].ItemAmount = MaxStackSize;
-
 					/**update widget*/
+					UpdateInventory(emptySlotToStack, item, MaxStackSize);
 					AddWeight(item->Weight * MaxStackSize);
-					UpdateSlotAtIndex(emptySlotToStack);
 
 					const uint32 restAmount = amount - MaxStackSize;
 					AddItem(item, restAmount);
@@ -113,12 +108,9 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 				}
 				else
 				{
-					SlotsArray[emptySlotToStack].Item = item;
-					SlotsArray[emptySlotToStack].ItemAmount = amount;
-
 					/**update widget*/
+					UpdateInventory(emptySlotToStack, item, amount);
 					AddWeight(item->Weight * amount);
-					UpdateSlotAtIndex(emptySlotToStack);
 
 					return;
 				}
@@ -136,18 +128,14 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 		const int16 defaultAmount = 1;
 		if (SearchEmptySlot(emptySlot))
 		{
-			SlotsArray[emptySlot].Item = item;
-			SlotsArray[emptySlot].ItemAmount = defaultAmount;
+			/**update widget*/
+			UpdateInventory(emptySlot, item, defaultAmount);
+			AddWeight(item->Weight);
 		}
 		else
 		{
 			return;
 		}
-
-		/**update widget*/
-		AddWeight(item->Weight);
-		UpdateSlotAtIndex(emptySlot);
-
 
 		/**In the case of acquiring multiple "can't Stacked items" */
 		if (amount > defaultAmount)
@@ -214,9 +202,7 @@ void UInventory::RemoveItemAtIndex(const int16 index, const int32 removeAmount)
 		const float weight = SlotsArray[index].Item->Weight;
 		if (removeAmount >= amount)
 		{ 
-			SlotsArray[index].Item = nullptr;
-			SlotsArray[index].ItemAmount = 0;
-			UpdateSlotAtIndex(index);			
+			UpdateInventory(index, nullptr, 0);			
 		}
 		else
 		{
@@ -245,14 +231,8 @@ void UInventory::SwapSlot(const int16 fromIndex, const int16 toIndex)
 	else if(IsSlotEmpty(toIndex))
 	{
 		UItem* item = SlotsArray[fromIndex].Item;
-		SlotsArray[toIndex].Item = item;
-		SlotsArray[toIndex].ItemAmount = SlotsArray[fromIndex].ItemAmount;
-
-		SlotsArray[fromIndex].Item = nullptr;
-		SlotsArray[fromIndex].ItemAmount = 0;
-
-		UpdateSlotAtIndex(fromIndex);
-		UpdateSlotAtIndex(toIndex);
+		UpdateInventory(toIndex, item, SlotsArray[fromIndex].ItemAmount);
+		UpdateInventory(fromIndex, nullptr, 0);
 	}
 	else
 	{
@@ -287,10 +267,7 @@ void UInventory::AddToIndex(const int16 fromIndex, const int16 toIndex)
 			SlotsArray[toIndex].ItemAmount = addAmount;
 
 			/**set slot-fromIndex*/
-			SlotsArray[fromIndex].Item = nullptr;
-			SlotsArray[fromIndex].ItemAmount = 0;
-
-			UpdateSlotAtIndex(fromIndex);
+			UpdateInventory(fromIndex, nullptr, 0);
 			UpdateSlotAtIndex(toIndex);
 		}
 		else
@@ -328,19 +305,24 @@ bool UInventory::CanAddToIndex(const int16 fromIndex, const int16 toIndex)
 	return (fromIndexItemId == toIndexItemId) && brestAmount && bstacked;
 }
 
+void UInventory::UpdateInventory(int16 index, UItem* item, int32 amount)
+{
+	SlotsArray[index].Item = item;
+	SlotsArray[index].ItemAmount = amount;
+
+	UpdateSlotAtIndex(index);
+}
+
 
 void UInventory::SplitStackToIndex(const int16 fromIndex, const int16 toIndex, const int32 splitAmount)
 {
 	if (CanSplitStakable(fromIndex, toIndex, splitAmount))
 	{
 		SlotsArray[fromIndex].ItemAmount -= splitAmount;
-
 		UItem* fromIndexItem = SlotsArray[fromIndex].Item;
-		SlotsArray[toIndex].Item = fromIndexItem;
-		SlotsArray[toIndex].ItemAmount = splitAmount;
 
 		UpdateSlotAtIndex(fromIndex);
-		UpdateSlotAtIndex(toIndex);
+		UpdateInventory(toIndex, fromIndexItem, splitAmount);
 	}
 	else
 	{
@@ -598,6 +580,62 @@ uint8 UInventory::GetCompaireValue(int16 index)
 	}
 
 	return (uint8)SlotsArray[index].Item->ItemType;
+}
+
+void UInventory::SetEquipWeapon(UItem* item, const int16 index)
+{
+	UCPP_EquipSlot* equipSlot = InventoryWidget->EquipmentInventory->EquipSlot;
+
+	/**swap Inventory item and EquipmentInventory item */
+	if (IsValid(equipSlot))
+	{
+		UItem* equipRef = equipSlot->GetItemRef();
+
+
+		/**set Inventory item to EquipmentInventory item*/
+		if (IsValid(equipRef))
+		{
+			UpdateInventory(index, equipRef, 1);
+		}
+		else
+		{
+			UpdateInventory(index, equipRef, 0);
+		}
+
+		/**set EquipmentInventory item to Inventory item*/
+		UpdateEquipmentInventory(item);
+		EquipWeaponToPlayer(item);
+	}
+	
+}
+
+void UInventory::EquipWeaponToPlayer(UItem* item)
+{
+	APickUpItem* weapon = Cast<APickUpItem>(PlayerRef->GetEquipedWeapon());
+
+	if (IsValid(weapon))
+	{
+		if (IsValid(PlayerRef->GetEquipedWeapon()))
+		{
+			PlayerRef->GetEquipedWeapon()->SetActiveWeapon(true);
+		}
+		weapon->SetItemInfoID(item->ItemInfoID);
+		weapon->InitializePickUpItem();
+		PlayerRef->SetStateEquiped();
+	}
+}
+
+void UInventory::UpdateEquipmentInventory(UItem* item)
+{
+	InventoryWidget->EquipmentInventory->UpdateEquipSlot(item);
+}
+
+void UInventory::UnEquipWeaponAndAddItem(const int16 index)
+{
+	UCPP_EquipSlot* equipSlot = InventoryWidget->EquipmentInventory->EquipSlot;
+	UItem* equipRef = equipSlot->GetItemRef();
+	UpdateInventory(index, equipRef, 1);
+	equipSlot->UnEquipWeapon();
 }
 
 AActor* UInventory::GetAbilityActor(FName itemId)

@@ -2,18 +2,18 @@
 
 #include "CoreMinimal.h"
 #include "Item/Weapon.h"
-#include "ShootGun.generated.h"
+#include "Rifle.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class UE_RPG_API AShootGun : public AWeapon
+class UE_RPG_API ARifle : public AWeapon
 {
 	GENERATED_BODY()
 
 public:
-	AShootGun();
+	ARifle();
 
 	UPROPERTY(EditAnywhere)
 		float MaxDir = 500.f;

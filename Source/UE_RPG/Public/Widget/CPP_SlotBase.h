@@ -32,12 +32,13 @@ protected:
 	virtual bool NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
-	/**you must init ItemRef this Func*/
-	virtual void InitSlotInfo() PURE_VIRTUAL(UCPP_SlotBase::InitSlotInfo, );
-
 	virtual void InactiveSlot();
 	virtual void ActiveSlot();
 	void SetSlotToolTip();
+
+public:
+
+	FORCEINLINE class UItem* GetItemRef() { return ItemRef; }
 
 protected:
 

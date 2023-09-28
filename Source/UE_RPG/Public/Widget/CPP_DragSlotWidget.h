@@ -15,7 +15,7 @@ class UE_RPG_API UCPP_DragSlotWidget : public UCustomUMGWidget
 	GENERATED_BODY()
 
 public:
-	void UpdataWidget(const class UItem* item, uint32 amount);
+	void UpdataWidget(const class UItem* item, uint32 amount = 0);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UImage* ItemIcon;
