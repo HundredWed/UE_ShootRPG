@@ -40,6 +40,7 @@ UItem* UItem::CreateItemCopy()
 	/**asset data*/
 	copy->ItemMesh = this->ItemMesh;
 	copy->IconTexture = this->IconTexture;
+	copy->ItemSkeletalMesh = this->ItemSkeletalMesh;
 
 	copy->bCopyItem = true;
 

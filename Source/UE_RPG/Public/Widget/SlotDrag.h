@@ -17,5 +17,7 @@ class UE_RPG_API USlotDrag : public UDragDropOperation
 public:
 
 	UPROPERTY()
-		class UCPP_Slot* WidgetRef;
+		class UCPP_Slot* WidgetRef = nullptr;
+
+	bool bFromEquipmentSlot = false;
 };

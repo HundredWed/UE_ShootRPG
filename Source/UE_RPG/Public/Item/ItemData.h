@@ -69,7 +69,10 @@ struct FItemInfo : public FTableRowBase
 
 
 	UPROPERTY(EditAnywhere, Category = "Asset Data")
-		UStaticMesh* ItemMesh;
+		UStaticMesh* ItemMesh; 
+	UPROPERTY(EditAnywhere, Category = "Asset Data")
+		USkeletalMesh* ItemSkeletalMesh;
 	UPROPERTY(EditAnywhere, Category = "Asset Data")
 		UTexture2D* IconTexture;
+	
 };

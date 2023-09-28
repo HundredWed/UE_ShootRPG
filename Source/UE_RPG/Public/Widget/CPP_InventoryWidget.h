@@ -31,6 +31,9 @@ public:
 		class USetAmountWidget* SpliteWidget;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+		class UCPP_EquipmentInventory* EquipmentInventory;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UScrollBox* InventoryScollBox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
@@ -63,7 +66,7 @@ public:
 		void SortInventory();
 
 	void SetPanelEnabled(bool enabled);
-	void SetSpliteWidget(class UCPP_Slot* fromSlot, class UCPP_Slot* toSlot);
+	void SetSpliteWidget(const class UCPP_Slot* fromSlot,const class UCPP_Slot* toSlot);
 	void UpdateWeightText(const float amount);
 	void UpdateWeightMaxAmount(const float amount);
 	void UpdateGoldText(const int32 amount);

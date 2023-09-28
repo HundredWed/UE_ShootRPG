@@ -21,6 +21,9 @@ public:
 
 	FORCEINLINE	void SetWidgetVisibility(bool Visible) { ItemStateWidjet->SetVisibility(Visible); }
 	FORCEINLINE class UWidgetComponent* GetWidgetComponent() { return ItemStateWidjet; }
+	FORCEINLINE	void SetItemInfoID(FName itemid) { ItemInfoID = itemid; }
+	FORCEINLINE	class UItem* GetPickUpItemRef() { return ItemRef; }
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -32,6 +35,9 @@ protected:
 	/**component*/
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
 		class UStaticMeshComponent* PickUpMesh;
+
+	UPROPERTY(VisibleAnywhere, Category = "Item Component")
+		USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
 		class USphereComponent* SearchComponent;
@@ -50,8 +56,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item state")
 		int32 ItemAmount;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Item state")
-		class UItem* ItemRef;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item state")
+		class UItem* ItemRef = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Item state")
 		UDataTable* ItemDataTable;

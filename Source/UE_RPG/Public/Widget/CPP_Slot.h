@@ -20,7 +20,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UButton* CombineButton;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget)) 
 		class UTextBlock* TextAmount;
 
 
@@ -32,10 +32,14 @@ public:
 	int16 LinkedCombinableSlot = -1;
 
 public: 
-	
+	virtual void InactiveSlot() override;
+	virtual void ActiveSlot() override;
+
 	void UpdateSlot(const int16 index);
 	void OnUseItem();
-	class UItem* GetItemItemInfo() { return ItemRef; }
+	void EquipSlotItem();
+	class UItem* GetItemInfoFromSlot() { return ItemRef; }
+	
 
 	/**Combinae function*/
 	void InactiveCombinableSlot();
@@ -50,20 +54,21 @@ protected:
 	virtual void NativeConstruct() override;
 
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)override;
+
+	/**from UCPP_SlotBase*/
 	virtual bool NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
-	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)override;
 
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	
 private:
 
-	virtual void InactiveSlot() override;
-	virtual void ActiveSlot() override;
+	
 
 	/**you must init ItemRef this Func*/
-	virtual void InitSlotInfo() override;
+	 void InitSlotInfo();
 
 	void SearchCombinableSlot();
 

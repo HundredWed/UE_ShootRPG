@@ -12,6 +12,8 @@ APickUpItem::APickUpItem()
 	PickUpMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Pick Mesh"));
 	SetRootComponent(PickUpMesh);
 
+	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMeshComponent"));
+
 	SearchComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Respone item search trace"));
 	SearchComponent->SetupAttachment(GetRootComponent());
 
@@ -104,7 +106,12 @@ void APickUpItem::InitializePickUpItem()
 	if (IsValid(ItemDataTable))
 	{
 		const FItemInfo* thisItemInfo = ItemDataTable->FindRow<FItemInfo>(ItemInfoID, TEXT(""));
-
+		if (thisItemInfo == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[%s] was not found!! Please check the ID."), *ItemInfoID.ToString());
+			return;
+		}
+				
 		ItemRef = NewObject<UItem>(this, UItem::StaticClass());
 
 		/**item data*/
@@ -132,8 +139,13 @@ void APickUpItem::InitializePickUpItem()
 		/**asset data*/
 		ItemRef->ItemMesh = thisItemInfo->ItemMesh;
 		ItemRef->IconTexture = thisItemInfo->IconTexture;
+		ItemRef->ItemSkeletalMesh = thisItemInfo->ItemSkeletalMesh;
 
-		PickUpMesh->SetStaticMesh(ItemRef->ItemMesh);
+		if(IsValid(ItemRef->ItemMesh))
+			PickUpMesh->SetStaticMesh(ItemRef->ItemMesh);
+
+		if (IsValid(ItemRef->ItemSkeletalMesh))
+			WeaponMesh->SetSkeletalMesh(ItemRef->ItemSkeletalMesh);
 	}
 
 }

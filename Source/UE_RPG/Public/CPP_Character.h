@@ -102,13 +102,17 @@ public:
 	void SetCrouch(const FInputActionValue& Value);
 	void InventoryVisibility(const FInputActionValue& Value);
 
+	/**trace*/
 	void GetViewPointVector(FVector& Location, FRotator& Rotation);
 
+	/**camera*/
 	void SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement);
 
 	bool PressKey(const FInputActionValue& Value);
 	class AWeapon* isWeapon(AActor* hitobject) const;
-	void PickUpWeapon(class AWeapon* weapon);
+	bool PickUpWeapon();
+	bool IsInActivePrevEquipedWeapon();
+	
 
 	void ResetHitResultState();
 	void RemoveHitResultObject();
@@ -117,9 +121,11 @@ public:
     void SetStateEquiped();
 	void SetStateUnEquiped();
 	void SetEquipedWeapon(class AWeapon* equipedWeapon);
+	class AWeapon* GetEquipedWeapon();
 	bool CanAttackState();
 	bool CanEquipState();
 	bool CanUnEquipState();
+	bool IsValidEquipWeapon();
 
 	/**Montage*/
 	void PlayEquipMontage(FName NotifyName);
@@ -188,7 +194,7 @@ private:
 
 	/**check 'is EquipedWeapon?' for  HoldWeapon& UnHoldWeapon Func*/
 	UPROPERTY()
-		class AWeapon* EquipedWeapon;
+		class AWeapon* EquipedWeapon = nullptr;
 
 	/**item trace*/
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")

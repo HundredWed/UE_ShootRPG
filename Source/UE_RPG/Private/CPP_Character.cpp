@@ -8,8 +8,9 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Grabber.h"
+#include "Item/Item.h"
 #include "Item/Weapon.h"
-#include "Item/Gun/ShootGun.h"
+#include "Item/Gun/Rifle.h"
 #include "Item/PickUpItem.h"
 #include "Camera/CameraManager.h"
 #include "Widget/MainPanelWidget.h"
@@ -279,13 +280,8 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 	}
 	else
 	{
-		AWeapon* weapon = isWeapon(HitResultObject);
-		bool bweapon = IsValid(weapon);
-		if (bweapon && EquipedWeapon == nullptr)
-		{
-			PickUpWeapon(weapon);
+		if (PickUpWeapon())
 			return;
-		}
 
 		//else item
 		//UE_LOG(LogTemp, Display, TEXT("PickUp!!"));
@@ -297,7 +293,7 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 
 void ACPP_Character::Equip(const FInputActionValue& Value)
 {
-	bool bEquipedWeapon = IsValid(EquipedWeapon);
+	bool bEquipedWeapon = IsValidEquipWeapon();
 	if (CanEquipState() && bEquipedWeapon)
 	{
 		SetStateEquiped();
@@ -310,18 +306,18 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 
 void ACPP_Character::Attack(const FInputActionValue& Value)
 {
-	AShootGun* shootgun = Cast<AShootGun>(EquipedWeapon);
-	bool bshootgun = IsValid(shootgun);
+	ARifle* rifle = Cast<ARifle>(EquipedWeapon);
+	bool brifle = IsValid(rifle);
 
-	if (CanAttackState() && bshootgun && bAiming == false)
+	if (CanAttackState() && brifle && bAiming == false)
 	{
 		PlayFireMontage(FireMontage);
-		shootgun->PullTrigger();
+		rifle->PullTrigger();
 	}
-	else if (CanAttackState() && bshootgun && bAiming)
+	else if (CanAttackState() && brifle && bAiming)
 	{
 		PlayFireMontage(AimingFireMontage);
-		shootgun->PullTrigger();
+		rifle->PullTrigger();
 	}
 }
 
@@ -409,12 +405,37 @@ AWeapon* ACPP_Character::isWeapon(AActor* hitobject) const
 	return weapon;
 }
 
-void ACPP_Character::PickUpWeapon(AWeapon* weapon)
+bool ACPP_Character::PickUpWeapon()
 {
-	weapon->Equip(GetMesh(), "weapon_socket_back");
-	weapon->SetOwner(this);
-	SetEquipedWeapon(weapon);
-	Params.AddIgnoredActor(weapon);
+	AWeapon* weapon = isWeapon(HitResultObject);
+
+	if (IsValid(weapon))
+	{
+		if (EquipedWeapon)
+		{
+			if (IsInActivePrevEquipedWeapon())
+			{
+				EquipedWeapon->Destroy();
+				SetEquipedWeapon(weapon);
+				return true;
+			}
+
+			return false;
+		}
+		else
+		{
+			SetEquipedWeapon(weapon);
+			return true;
+		}
+	}
+
+	return false;
+	
+}
+
+bool ACPP_Character::IsInActivePrevEquipedWeapon()
+{
+	return !EquipedWeapon->IsActiveWaepon();
 }
 
 void ACPP_Character::ResetHitResultState()
@@ -467,6 +488,18 @@ void ACPP_Character::SetStateUnEquiped()
 void ACPP_Character::SetEquipedWeapon(AWeapon* equipedWeapon)
 {
 	EquipedWeapon = equipedWeapon;
+	equipedWeapon->Equip(GetMesh(), "weapon_socket_back");
+	equipedWeapon->SetOwner(this);
+
+	/**search trace ignor*/
+	Params.AddIgnoredActor(equipedWeapon);
+
+	GameInventory->UpdateEquipmentInventory(equipedWeapon->GetPickUpItemRef());
+}
+
+AWeapon* ACPP_Character::GetEquipedWeapon()
+{
+	return EquipedWeapon;
 }
 
 bool ACPP_Character::CanAttackState()
@@ -486,6 +519,11 @@ bool ACPP_Character::CanUnEquipState()
 	return CharacterState == ECharacterStateTypes::Equiped
 		&& !GetCharacterMovement()->IsFalling()
 		&& ActionState == ECharacterActionState::Normal;;
+}
+
+bool ACPP_Character::IsValidEquipWeapon()
+{
+	return IsValid(EquipedWeapon) && EquipedWeapon->IsActiveWaepon();
 }
 
 void ACPP_Character::PlayEquipMontage(FName NotifyName)

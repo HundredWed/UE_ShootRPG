@@ -56,7 +56,7 @@ public:
 
 	/**inventory function*/
 	bool IsSlotEmpty(const int16 index);
-	void AddItem(class UItem* item, const uint32 amount);
+	void AddItem(class UItem* item, const uint32 amount = 1);
 	bool SearchEmptySlot(int16& emptySlotIndex);
 	bool SearchFreeStackSlot(class UItem* item, int16& canStackedSlotIndex);
 	int32 GetAmountAtIndex(const int16 index);
@@ -66,6 +66,7 @@ public:
 	void CheckItemType(const int16 fromIndex, const int16 toIndex);
 	void AddToIndex(const int16 fromIndex, const int16 toIndex);
 	bool CanAddToIndex(const int16 fromIndex, const int16 toIndex);
+	void UpdateInventory(int16 index, class UItem* item, int32 amount);
 	void UpdateSlotAtIndex(const int16 index);
 	const FInventorySlot GetSlotInfoIndex(const int16 index);
 	void AddWeight(const float amount);
@@ -104,6 +105,13 @@ public:
 	FORCEINLINE void AddItemManage(FName itemId, AActor* iteAbilityClass) {
 		ItemManageSystem.Add(itemId, iteAbilityClass);
 	}
+
+	/**equip weapon*/
+	/**this func set equipment and swap weapon*/
+	void SetEquipWeapon(class UItem* item, int16 index);
+	void EquipWeaponToPlayer(class UItem* item);
+	void UpdateEquipmentInventory(class UItem* item);
+	void UnEquipWeaponAndAddItem(const int16 index);
 
 	/**manage ability-actor*/
 	AActor* GetAbilityActor(FName itemId);
