@@ -74,5 +74,7 @@ struct FItemInfo : public FTableRowBase
 		USkeletalMesh* ItemSkeletalMesh;
 	UPROPERTY(EditAnywhere, Category = "Asset Data")
 		UTexture2D* IconTexture;
+	UPROPERTY(EditAnywhere, Category = "Asset Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
+		class UParticleSystem* FireParticle;
 	
 };

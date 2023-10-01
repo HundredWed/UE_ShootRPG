@@ -1,5 +1,6 @@
 #include "Item/Weapon.h"
 #include "Sound/SoundCue.h"
+#include "Item/Item.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
@@ -100,5 +101,17 @@ void AWeapon::SetItemState(EItemState State)
 		SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		break;
+	}
+}
+
+void AWeapon::InitializeWeapon()
+{
+	InitializePickUpItem();
+
+	if (ItemRef && ItemRef->FireParticle)
+	{
+		FireParticle = ItemRef->FireParticle;
+
+		/**ShootSound, BeamParticle, ParticleSize*/
 	}
 }

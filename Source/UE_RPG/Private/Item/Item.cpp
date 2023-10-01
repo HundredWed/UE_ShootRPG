@@ -41,14 +41,11 @@ UItem* UItem::CreateItemCopy()
 	copy->ItemMesh = this->ItemMesh;
 	copy->IconTexture = this->IconTexture;
 	copy->ItemSkeletalMesh = this->ItemSkeletalMesh;
+	copy->FireParticle = this->FireParticle;
 
 	copy->bCopyItem = true;
 
 	return copy;
 }
 
-//void UItem::UseItem(ACPP_Character* player)
-//{
-//	UE_LOG(LogTemp, Warning, TEXT("UseItem!!"));
-//}
 

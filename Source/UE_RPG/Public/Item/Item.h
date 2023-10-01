@@ -67,12 +67,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		UTexture2D* IconTexture;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Asset Data")
+		class UParticleSystem* FireParticle;
+
 	bool bCopyItem;
 
 	UFUNCTION()
 		UItem* CreateItemCopy();
 
-	//virtual void UseItem(class ACPP_Character* player);
 protected:
 
 	UPROPERTY()

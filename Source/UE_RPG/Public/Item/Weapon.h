@@ -23,6 +23,18 @@ public:
 	UPROPERTY(EditAnywhere)
 		class USoundCue* EquipSound;
 
+	UPROPERTY(EditAnywhere, Category = "FireEffect")
+		class USoundBase* ShootSound;
+
+	UPROPERTY(EditAnywhere, Category = "FireEffect")
+		class UParticleSystem* BeamParticle;
+
+	UPROPERTY(EditAnywhere, Category = "FireEffect")
+		FVector ParticleSize;
+
+	UPROPERTY(EditAnywhere, Category = "FireEffect")
+		class UParticleSystem* FireParticle;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -44,6 +56,7 @@ protected:
 public:
 
 	virtual void SetItemState(EItemState State) override;
+	void InitializeWeapon();
 private:
 
 	
