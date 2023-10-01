@@ -611,17 +611,23 @@ void UInventory::SetEquipWeapon(UItem* item, const int16 index)
 
 void UInventory::EquipWeaponToPlayer(UItem* item)
 {
-	APickUpItem* weapon = Cast<APickUpItem>(PlayerRef->GetEquipedWeapon());
+	AWeapon* playerWeapon = PlayerRef->GetEquipedWeapon();
+	if (!IsValid(playerWeapon))
+		return;
 
-	if (IsValid(weapon))
+	APickUpItem* worldWeapon = Cast<APickUpItem>(PlayerRef->GetEquipedWeapon());
+
+	if (IsValid(worldWeapon))
 	{
 		if (IsValid(PlayerRef->GetEquipedWeapon()))
 		{
 			PlayerRef->GetEquipedWeapon()->SetActiveWeapon(true);
 		}
-		weapon->SetItemInfoID(item->ItemInfoID);
-		weapon->InitializePickUpItem();
+		worldWeapon->SetItemInfoID(item->ItemInfoID);
+		playerWeapon->InitializeWeapon();
 		PlayerRef->SetStateEquiped();
+
+		PlayerRef->SetWeaponAbility(item->ItemInfoID);
 	}
 }
 

@@ -15,6 +15,7 @@
 #include "Camera/CameraManager.h"
 #include "Widget/MainPanelWidget.h"
 #include "Inventory.h"
+#include "Item/WeaponAbiliys/WeaponAbilityBase.h"
 
 ACPP_Character::ACPP_Character()
 {
@@ -308,6 +309,8 @@ void ACPP_Character::Attack(const FInputActionValue& Value)
 {
 	ARifle* rifle = Cast<ARifle>(EquipedWeapon);
 	bool brifle = IsValid(rifle);
+
+	WeaponAbility["weapon_0001"/**Id*/]->WeaponAbility();
 
 	if (CanAttackState() && brifle && bAiming == false)
 	{
@@ -656,6 +659,15 @@ void ACPP_Character::ShowGameInventory()
 	GameInventory->ShowInventory();
 }
 
+
+void ACPP_Character::SetWeaponAbility(const FName& id)
+{
+	UWeaponAbilityBase* ability = UWeaponAbilityBase::GetAbility(id);
+	if (ability == nullptr)
+		return;
+
+	WeaponAbility.Add(id, ability);
+}
 
 float ACPP_Character::ClampRnage(float value)
 {

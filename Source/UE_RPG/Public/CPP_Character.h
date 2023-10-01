@@ -162,8 +162,9 @@ public:
 	FORCEINLINE class UInventory* GetInventory() { return GameInventory; }
 	FORCEINLINE const uint8 GetInventorySize() { return InventoryAmountOfSlot; }
 	FORCEINLINE const uint8 GetInventoryRowSize() { return InventoryRowSize; }
-	
 
+
+	void SetWeaponAbility(const FName& id);
 private:
 
 	float ClampRnage(float value);
@@ -255,4 +256,9 @@ private:
 		float InventoryMaxWeight = 250.f;
 
 	bool isVisible = true;
+
+	UPROPERTY()
+		TMap<FName, class UWeaponAbilityBase*> WeaponAbility;
+
+
 };

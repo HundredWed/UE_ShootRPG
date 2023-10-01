@@ -140,6 +140,7 @@ void APickUpItem::InitializePickUpItem()
 		ItemRef->ItemMesh = thisItemInfo->ItemMesh;
 		ItemRef->IconTexture = thisItemInfo->IconTexture;
 		ItemRef->ItemSkeletalMesh = thisItemInfo->ItemSkeletalMesh;
+		ItemRef->FireParticle = thisItemInfo->FireParticle;
 
 		if(IsValid(ItemRef->ItemMesh))
 			PickUpMesh->SetStaticMesh(ItemRef->ItemMesh);

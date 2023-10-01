@@ -21,17 +21,6 @@ public:
 	UPROPERTY(VisibleAnywhere)
 		USceneComponent* SpawnPoint;
 
-	UPROPERTY(EditAnywhere, Category = "FireEffect")
-		class USoundBase* ShootSound;
-	UPROPERTY(EditAnywhere, Category = "FireEffect")
-		class UParticleSystem* FireParticle;
-	UPROPERTY(EditAnywhere, Category = "FireEffect")
-		class UParticleSystem* BeamParticle;
-
-	UPROPERTY(EditAnywhere, Category = "FireEffect")
-		FVector ParticleSize;
-
-
 	void PullTrigger();
 	void ViewPointTrace(FHitResult& hitresult, FVector& endpoint);
 	void GunTrace(FHitResult& hitresult, FVector& endpoint);
@@ -40,7 +29,6 @@ public:
 	AController* GetOwnerController();
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 private:
 	/**between camera and player aiming issue Value*/

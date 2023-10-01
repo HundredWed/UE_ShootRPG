@@ -6,6 +6,7 @@
 
 ARifle::ARifle()
 {
+	PrimaryActorTick.bCanEverTick = false;
 	SpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnPoint"));
 	SpawnPoint->SetupAttachment(WeaponMesh);
 }
@@ -13,11 +14,6 @@ ARifle::ARifle()
 void ARifle::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void ARifle::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void ARifle::PullTrigger()
