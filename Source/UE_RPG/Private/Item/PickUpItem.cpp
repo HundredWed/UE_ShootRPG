@@ -48,6 +48,14 @@ APickUpItem::APickUpItem()
 
 }
 
+void APickUpItem::SetWidgetVisibility(bool Visible)
+{
+	if(!IsValid(ItemStateWidjet))
+		return;
+	
+	ItemStateWidjet->SetVisibility(Visible);
+}
+
 void APickUpItem::BeginPlay()
 {
 	Super::BeginPlay();
@@ -105,6 +113,7 @@ void APickUpItem::InitializePickUpItem()
 {
 	if (IsValid(ItemDataTable))
 	{
+		// 엔진 Slate Struct와 이름이 겹침 변경을 추천함 [10/03/2023 Sunny8747]
 		const FItemInfo* thisItemInfo = ItemDataTable->FindRow<FItemInfo>(ItemInfoID, TEXT(""));
 		if (thisItemInfo == nullptr)
 		{
