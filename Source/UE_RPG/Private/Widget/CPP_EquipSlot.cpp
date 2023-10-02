@@ -100,7 +100,7 @@ void UCPP_EquipSlot::UpdateEquipmentSlot(UItem* weapon)
 void UCPP_EquipSlot::UnEquipWeapon()
 {
 	InactiveSlot();
-	AWeapon* weapon = PlayerRef->GetEquipedWeapon();
+	AWeapon* weapon = PlayerRef->GetEquippedWeapon();
 
 	if (IsValid(weapon))
 	{

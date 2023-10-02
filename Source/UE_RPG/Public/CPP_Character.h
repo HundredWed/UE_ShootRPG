@@ -111,17 +111,17 @@ public:
 	bool PressKey(const FInputActionValue& Value);
 	class AWeapon* isWeapon(AActor* hitobject) const;
 	bool PickUpWeapon();
-	bool IsInActivePrevEquipedWeapon();
+	bool IsInActivePrevEquippedWeapon();
 	
 
 	void ResetHitResultState();
 	void RemoveHitResultObject();
 
 	/**CharacterState*/
-    void SetStateEquiped();
-	void SetStateUnEquiped();
-	void SetEquipedWeapon(class AWeapon* equipedWeapon);
-	class AWeapon* GetEquipedWeapon();
+    void SetStateEquipped();
+	void SetStateUnEquipped();
+	void SetEquippedWeapon(class AWeapon* equippedWeapon);
+	class AWeapon* GetEquippedWeapon();
 	bool CanAttackState();
 	bool CanEquipState();
 	bool CanUnEquipState();
@@ -195,7 +195,7 @@ private:
 
 	/**check 'is EquipedWeapon?' for  HoldWeapon& UnHoldWeapon Func*/
 	UPROPERTY()
-		class AWeapon* EquipedWeapon = nullptr;
+		class AWeapon* EquippedWeapon = nullptr;
 
 	/**item trace*/
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")

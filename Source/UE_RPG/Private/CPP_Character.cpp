@@ -259,7 +259,11 @@ void ACPP_Character::SetSpeed(const FInputActionValue& Value)
 }
 
 void ACPP_Character::GrabItem(const FInputActionValue& Value)
-{	
+{
+	// 코드를 보니까 컴포넌트 없어도 캐릭터가 문제없이 생성되므로 Validate를 해줄 필요가 있음 [10/03/2023 Sunny8747]
+	if(!IsValid(GraberComponent))
+		return;
+	
 	if (PressKey(Value))
 	{
 		GraberComponent->Grab();
@@ -297,29 +301,36 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 	bool bEquipedWeapon = IsValidEquipWeapon();
 	if (CanEquipState() && bEquipedWeapon)
 	{
-		SetStateEquiped();
+		SetStateEquipped();
 	}
 	else if(CanUnEquipState() && bEquipedWeapon)
 	{
-		SetStateUnEquiped();
+		SetStateUnEquipped();
 	}
 }
 
 void ACPP_Character::Attack(const FInputActionValue& Value)
 {
-	ARifle* rifle = Cast<ARifle>(EquipedWeapon);
-	bool brifle = IsValid(rifle);
-
+	// 해당 이름이 존재하지 않으면 assertion
+	// @return The value associated with the specified key, or triggers an assertion if the key does not exist.
+	// TMap FindChecked 참조 [10/03/2023 Sunny8747] 
 	WeaponAbility["weapon_0001"/**Id*/]->WeaponAbility();
 
-	if (CanAttackState() && brifle && bAiming == false)
+	ARifle* rifle = Cast<ARifle>(EquippedWeapon);
+	if(!IsValid(rifle))
+		return;
+
+	if (CanAttackState())
 	{
-		PlayFireMontage(FireMontage);
-		rifle->PullTrigger();
-	}
-	else if (CanAttackState() && brifle && bAiming)
-	{
-		PlayFireMontage(AimingFireMontage);
+		if(bAiming)
+		{
+			PlayFireMontage(AimingFireMontage);
+		}
+		else
+		{
+			PlayFireMontage(FireMontage);
+		}
+		
 		rifle->PullTrigger();
 	}
 }
@@ -400,7 +411,7 @@ bool ACPP_Character::PressKey(const FInputActionValue& Value)
 AWeapon* ACPP_Character::isWeapon(AActor* hitobject) const
 {
 	AWeapon* weapon = Cast<AWeapon>(hitobject);
-	if (weapon == nullptr)
+	if (IsValid(weapon))
 	{
 		return nullptr;
 	}
@@ -414,12 +425,12 @@ bool ACPP_Character::PickUpWeapon()
 
 	if (IsValid(weapon))
 	{
-		if (EquipedWeapon)
+		if (EquippedWeapon)
 		{
-			if (IsInActivePrevEquipedWeapon())
+			if (IsInActivePrevEquippedWeapon())
 			{
-				EquipedWeapon->Destroy();
-				SetEquipedWeapon(weapon);
+				EquippedWeapon->Destroy();
+				SetEquippedWeapon(weapon);
 				return true;
 			}
 
@@ -427,7 +438,7 @@ bool ACPP_Character::PickUpWeapon()
 		}
 		else
 		{
-			SetEquipedWeapon(weapon);
+			SetEquippedWeapon(weapon);
 			return true;
 		}
 	}
@@ -436,14 +447,19 @@ bool ACPP_Character::PickUpWeapon()
 	
 }
 
-bool ACPP_Character::IsInActivePrevEquipedWeapon()
+bool ACPP_Character::IsInActivePrevEquippedWeapon()
 {
-	return !EquipedWeapon->IsActiveWaepon();
+	if(IsValid(EquippedWeapon))
+	{
+		return EquippedWeapon->IsActiveWaepon();
+	}
+	return false;
 }
 
 void ACPP_Character::ResetHitResultState()
 {
 	APickUpItem* item = Cast<APickUpItem>(HitResultObject);
+	// widget에 대해 validate 위에서 하지말고 setWidget쪽에서 할것 [10/03/2023 Sunny8747]
 	if (IsValid(item) && item->GetWidgetComponent())
 	{
 		item->SetWidgetVisibility(false);
@@ -462,7 +478,7 @@ void ACPP_Character::RemoveHitResultObject()
 	HitResultObject = nullptr;
 }
 
-void ACPP_Character::SetStateEquiped()
+void ACPP_Character::SetStateEquipped()
 {
 	ActionState = ECharacterActionState::Action;
 	CharacterState = ECharacterStateTypes::Equiped;
@@ -475,7 +491,7 @@ void ACPP_Character::SetStateEquiped()
 	UE_LOG(LogTemp, Display, TEXT("Equiped"));
 }
 
-void ACPP_Character::SetStateUnEquiped()
+void ACPP_Character::SetStateUnEquipped()
 {
 	ActionState = ECharacterActionState::Action;
 	CharacterState = ECharacterStateTypes::UnEquiped;
@@ -488,21 +504,21 @@ void ACPP_Character::SetStateUnEquiped()
 	UE_LOG(LogTemp, Display, TEXT("UnEquiped"));
 }
 
-void ACPP_Character::SetEquipedWeapon(AWeapon* equipedWeapon)
+void ACPP_Character::SetEquippedWeapon(AWeapon* equippedWeapon)
 {
-	EquipedWeapon = equipedWeapon;
-	equipedWeapon->Equip(GetMesh(), "weapon_socket_back");
-	equipedWeapon->SetOwner(this);
+	EquippedWeapon = equippedWeapon;
+	equippedWeapon->Equip(GetMesh(), "weapon_socket_back");
+	equippedWeapon->SetOwner(this);
 
 	/**search trace ignor*/
-	Params.AddIgnoredActor(equipedWeapon);
+	Params.AddIgnoredActor(equippedWeapon);
 
-	GameInventory->UpdateEquipmentInventory(equipedWeapon->GetPickUpItemRef());
+	GameInventory->UpdateEquipmentInventory(equippedWeapon->GetPickUpItemRef());
 }
 
-AWeapon* ACPP_Character::GetEquipedWeapon()
+AWeapon* ACPP_Character::GetEquippedWeapon()
 {
-	return EquipedWeapon;
+	return EquippedWeapon;
 }
 
 bool ACPP_Character::CanAttackState()
@@ -526,7 +542,7 @@ bool ACPP_Character::CanUnEquipState()
 
 bool ACPP_Character::IsValidEquipWeapon()
 {
-	return IsValid(EquipedWeapon) && EquipedWeapon->IsActiveWaepon();
+	return IsValid(EquippedWeapon) && EquippedWeapon->IsActiveWaepon();
 }
 
 void ACPP_Character::PlayEquipMontage(FName NotifyName)
@@ -542,32 +558,37 @@ void ACPP_Character::PlayEquipMontage(FName NotifyName)
 
 void ACPP_Character::PlayFireMontage(UAnimMontage* montage)
 {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	bool bFireMontage = IsValid(montage);
-	if (AnimInstance && bFireMontage)
+	if(IsValid(montage))
 	{
-		AnimInstance->Montage_Play(montage);
+		USkeletalMeshComponent* SkeletalMeshComponent = GetMesh();
+		if(IsValid(SkeletalMeshComponent))
+		{
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			if (IsValid(AnimInstance))
+			{
+				AnimInstance->Montage_Play(montage);
+				return;
+			}
+		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't montage play!"));
-	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Can't montage play!"));
 }
 
 
 void ACPP_Character::HoldWeapon()
 {
-	if (IsValid(EquipedWeapon))
+	if (IsValid(EquippedWeapon))
 	{
-		EquipedWeapon->AttachFunc(GetMesh(), "weapon_socket_r");
+		EquippedWeapon->AttachFunc(GetMesh(), "weapon_socket_r");
 	}
 }
 
 void ACPP_Character::UnHoldWeapon()
 {
-	if (IsValid(EquipedWeapon))
+	if (IsValid(EquippedWeapon))
 	{
-		EquipedWeapon->AttachFunc(GetMesh(), "weapon_socket_back");
+		EquippedWeapon->AttachFunc(GetMesh(), "weapon_socket_back");
 	}
 }
 
@@ -663,7 +684,7 @@ void ACPP_Character::ShowGameInventory()
 void ACPP_Character::SetWeaponAbility(const FName& id)
 {
 	UWeaponAbilityBase* ability = UWeaponAbilityBase::GetAbility(id);
-	if (ability == nullptr)
+	if (IsValid(ability))
 		return;
 
 	WeaponAbility.Add(id, ability);
