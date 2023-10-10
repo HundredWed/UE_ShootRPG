@@ -231,8 +231,8 @@ void UInventory::SwapSlot(const int16 fromIndex, const int16 toIndex)
 	else if(IsSlotEmpty(toIndex))
 	{
 		UItem* item = SlotsArray[fromIndex].Item;
-		UpdateInventory(toIndex, item, SlotsArray[fromIndex].ItemAmount);
 		UpdateInventory(fromIndex, nullptr, 0);
+		UpdateInventory(toIndex, item, SlotsArray[fromIndex].ItemAmount);
 	}
 	else
 	{
@@ -365,35 +365,33 @@ void UInventory::AddGold(const int32 amount)
 
 int16 UInventory::FindCombinableSlot(const int16 slot)
 {
-	if (IsLineChange(slot))
-	{
-		return -1;
-	}
-
 	isConect[slot] = true;
 	int16 count = 0;
 	int16 resultSlot = 0;
-	int16 dir[4] = { -InvetoryRow, 1, InvetoryRow, -1};
+	int16 dir[4] = { -InvetoryRow, 1, InvetoryRow, -1 };
 
-	for (int16 i = 0; i < 4; i++)
+	if (IsLineChange(slot) == false)
 	{
-		int16 newdir = slot + dir[i];
-		if ((newdir < 0) || (newdir > (isConect.Num() - 1)) || !CompaireID(slot, newdir))
+		for (int16 i = 0; i < 4; i++)
 		{
-			continue;
-		}
-
-		if (CompaireID(slot, newdir))
-		{
-			/**when drag event linked slot, inactive combine-button*/
-			if (SetLinkSlot(slot, newdir))
+			int16 newdir = slot + dir[i];
+			if ((newdir < 0) || (newdir > (isConect.Num() - 1)) || !CompaireID(slot, newdir))
 			{
-				/**is Success?*/
-				count += 1;
+				continue;
 			}
-			//count += 1;
+
+			if (CompaireID(slot, newdir))
+			{
+				/**when drag event linked slot, inactive combine-button*/
+				if (SetLinkSlot(slot, newdir))
+				{
+					/**is Success?*/
+					count += 1;
+				}
+			}
 		}
 	}
+
 
 	if (count == 4)
 	{

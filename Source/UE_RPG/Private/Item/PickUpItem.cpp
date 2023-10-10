@@ -175,12 +175,12 @@ void APickUpItem::TakePickUp(ACPP_Character* taker)
 		case EItemCategory::EIS_Gabbable:
 			return;
 		case EItemCategory::EIS_Gold:
-			const int32 amountOver = (playerinventory->GetCurrentGold() + ItemRef->ItemPrice) * ItemAmount;
+			const int32 amountOver = (playerinventory->GetCurrentGold() + (ItemRef->ItemPrice * ItemAmount));
 			if (playerinventory->IsOverGold(amountOver))
 			{
 				return;
 			}
-			playerinventory->AddGold(amountOver);
+			playerinventory->AddGold(ItemRef->ItemPrice * ItemAmount);
 			Destroy();
 			return;
 		}
