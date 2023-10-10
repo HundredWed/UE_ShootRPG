@@ -260,7 +260,6 @@ void ACPP_Character::SetSpeed(const FInputActionValue& Value)
 
 void ACPP_Character::GrabItem(const FInputActionValue& Value)
 {
-	// 코드를 보니까 컴포넌트 없어도 캐릭터가 문제없이 생성되므로 Validate를 해줄 필요가 있음 [10/03/2023 Sunny8747]
 	if(!IsValid(GraberComponent))
 		return;
 	
@@ -311,11 +310,6 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 
 void ACPP_Character::Attack(const FInputActionValue& Value)
 {
-	// 해당 이름이 존재하지 않으면 assertion
-	// @return The value associated with the specified key, or triggers an assertion if the key does not exist.
-	// TMap FindChecked 참조 [10/03/2023 Sunny8747] 
-	WeaponAbility["weapon_0001"/**Id*/]->WeaponAbility();
-
 	ARifle* rifle = Cast<ARifle>(EquippedWeapon);
 	if(!IsValid(rifle))
 		return;
@@ -332,6 +326,7 @@ void ACPP_Character::Attack(const FInputActionValue& Value)
 		}
 		
 		rifle->PullTrigger();
+		ActionWeaponAbility();
 	}
 }
 
@@ -411,7 +406,7 @@ bool ACPP_Character::PressKey(const FInputActionValue& Value)
 AWeapon* ACPP_Character::isWeapon(AActor* hitobject) const
 {
 	AWeapon* weapon = Cast<AWeapon>(hitobject);
-	if (IsValid(weapon))
+	if (!IsValid(weapon))
 	{
 		return nullptr;
 	}
@@ -451,16 +446,25 @@ bool ACPP_Character::IsInActivePrevEquippedWeapon()
 {
 	if(IsValid(EquippedWeapon))
 	{
-		return EquippedWeapon->IsActiveWaepon();
+		return !EquippedWeapon->IsActiveWaepon();
 	}
 	return false;
+}
+
+void ACPP_Character::ActionWeaponAbility()
+{
+	
+	if (WeaponAbilityStorage.Find(AbilityId) == nullptr)
+		return;
+
+	WeaponAbility[AbilityId]->WeaponAbility();
 }
 
 void ACPP_Character::ResetHitResultState()
 {
 	APickUpItem* item = Cast<APickUpItem>(HitResultObject);
-	// widget에 대해 validate 위에서 하지말고 setWidget쪽에서 할것 [10/03/2023 Sunny8747]
-	if (IsValid(item) && item->GetWidgetComponent())
+
+	if (IsValid(item) && item->IsValidWidget())
 	{
 		item->SetWidgetVisibility(false);
 	}
@@ -506,7 +510,13 @@ void ACPP_Character::SetStateUnEquipped()
 
 void ACPP_Character::SetEquippedWeapon(AWeapon* equippedWeapon)
 {
+	UItem* weaponRef = equippedWeapon->GetPickUpItemRef();
+	if (!IsValid(weaponRef))
+		return;
+
 	EquippedWeapon = equippedWeapon;
+	SetWeaponAbility((uint8)weaponRef->WeaponAbilityID);
+
 	equippedWeapon->Equip(GetMesh(), "weapon_socket_back");
 	equippedWeapon->SetOwner(this);
 
@@ -681,12 +691,15 @@ void ACPP_Character::ShowGameInventory()
 }
 
 
-void ACPP_Character::SetWeaponAbility(const FName& id)
+void ACPP_Character::SetWeaponAbility(const uint8 id)
 {
+	AbilityId = id;
+
 	UWeaponAbilityBase* ability = UWeaponAbilityBase::GetAbility(id);
-	if (IsValid(ability))
+	if (!IsValid(ability))
 		return;
 
+	WeaponAbilityStorage.Add(id);
 	WeaponAbility.Add(id, ability);
 }
 
@@ -703,5 +716,4 @@ void ACPP_Character::SmoothSpringArmOffset(float NewYoffset, bool bOrientRotatio
 	GetCharacterMovement()->bOrientRotationToMovement = bOrientRotationToMovement;
 	CameraManager->NewValue = NewYoffset;
 }
-
 

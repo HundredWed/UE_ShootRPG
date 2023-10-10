@@ -69,6 +69,7 @@ void APickUpItem::BeginPlay()
 	if (IsValid(ItemStateWidjet))
 	{
 		ItemStateWidjet->SetVisibility(false);
+		bValidWidget = true;
 	}
 
 	InitializePickUpItem();
@@ -113,8 +114,7 @@ void APickUpItem::InitializePickUpItem()
 {
 	if (IsValid(ItemDataTable))
 	{
-		// 엔진 Slate Struct와 이름이 겹침 변경을 추천함 [10/03/2023 Sunny8747]
-		const FItemInfo* thisItemInfo = ItemDataTable->FindRow<FItemInfo>(ItemInfoID, TEXT(""));
+		const FItemInfoTable* thisItemInfo = ItemDataTable->FindRow<FItemInfoTable>(ItemInfoID, TEXT(""));
 		if (thisItemInfo == nullptr)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("[%s] was not found!! Please check the ID."), *ItemInfoID.ToString());
@@ -122,6 +122,8 @@ void APickUpItem::InitializePickUpItem()
 		}
 				
 		ItemRef = NewObject<UItem>(this, UItem::StaticClass());
+
+		//ItemRef->ItemInfoTable = thisItemInfo;
 
 		/**item data*/
 		ItemRef->ItemInfoID = thisItemInfo->ItemInfoID;
@@ -143,6 +145,7 @@ void APickUpItem::InitializePickUpItem()
 		{
 			ItemRef->ItemClass = thisItemInfo->ItemClass;
 		}
+		ItemRef->WeaponAbilityID = thisItemInfo->WeaponAbilityID;
 
 
 		/**asset data*/
@@ -172,12 +175,12 @@ void APickUpItem::TakePickUp(ACPP_Character* taker)
 		case EItemCategory::EIS_Gabbable:
 			return;
 		case EItemCategory::EIS_Gold:
-			const int32 amountOver = playerinventory->GetCurrentGold() + ItemRef->ItemPrice;
+			const int32 amountOver = (playerinventory->GetCurrentGold() + ItemRef->ItemPrice) * ItemAmount;
 			if (playerinventory->IsOverGold(amountOver))
 			{
 				return;
 			}
-			playerinventory->AddGold(ItemRef->ItemPrice);
+			playerinventory->AddGold(amountOver);
 			Destroy();
 			return;
 		}

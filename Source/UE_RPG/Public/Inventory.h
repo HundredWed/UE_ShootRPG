@@ -127,13 +127,12 @@ private:
 
 	/**inventory value*/
 	uint8 MaxStackSize = 99;
-	uint8 InvetoryRow = 0;
+	int16 InvetoryRow = 0;
 	float CurrnetWeight = 0.0f;
 	int32 CurrentGold = 0;
 
-	// UPROPERTY 까먹지 말것 gc에 쓸려나감 [10/03/2023 Sunny8747]
 	UPROPERTY()
-	TMap<FName, AActor*> ItemManageSystem;
+		TMap<FName, AActor*> ItemManageSystem;
 
 	/**for FindCombinableSlot function*/
 	TArray<bool> isConect;

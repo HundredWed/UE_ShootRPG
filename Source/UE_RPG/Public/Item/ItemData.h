@@ -25,56 +25,104 @@ enum class EItemCategory : uint8
 	EIS_None UMETA(DisplayName = "NoneItem")
 };
 
+UENUM(BlueprintType)
+enum class EWeaponAbilityID : uint8
+{
+	EWA_Normal UMETA(DisplayName = "NormalRifle"),
+	EWA_Red UMETA(DisplayName = "RedRifle"),
+
+	EIS_AbilityNone UMETA(DisplayName = "NoneItem")
+};
+
 
 /**If there is a change in this structure, 
 the Item class's header file, CreateItemCopy() function, 
 and the PickUpItem class's InitializePickUpItem() function should also be updated accordingly.*/
 USTRUCT(BlueprintType)
-struct FItemInfo : public FTableRowBase
+struct FItemInfoTable : public FTableRowBase
 {
 	GENERATED_BODY()
+		
+public:
+	FItemInfoTable() {};
 
-	UPROPERTY(EditAnywhere, Category = "Item Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		FName ItemInfoID;
-	UPROPERTY(EditAnywhere, Category = "Item Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		FText Name;
-	UPROPERTY(EditAnywhere, Category = "Item Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		FText Description;
-	UPROPERTY(EditAnywhere, Category = "Item Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		bool bCanBeUsed;
-	UPROPERTY(EditAnywhere, Category = "Item Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		bool bCanStacked;
-	UPROPERTY(EditAnywhere, Category = "Item Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		FText UseText;
-	UPROPERTY(EditAnywhere, Category = "Item Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		FText Interaction;
-	UPROPERTY(EditAnywhere, Category = "Item Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		int32 ItemPrice;
-	UPROPERTY(EditAnywhere, Category = "Item Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		float Weight;
 
 
-	UPROPERTY(EditAnywhere, Category = "ItemType Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data")
 		TSubclassOf<AActor> ItemClass;
-	UPROPERTY(EditAnywhere, Category = "ItemType Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data")
 		EItemCategory ItemType;
 
-	UPROPERTY(EditAnywhere, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Combinables", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Combinables", EditConditionHides))
 		FName CombinResultID;
-	UPROPERTY(EditAnywhere, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Consumeable", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Consumeable", EditConditionHides))
 		int32 ConsumeValue;
-	UPROPERTY(EditAnywhere, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
 		int32 ATK;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
+		EWeaponAbilityID WeaponAbilityID;
 	
 
 
-	UPROPERTY(EditAnywhere, Category = "Asset Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		UStaticMesh* ItemMesh; 
-	UPROPERTY(EditAnywhere, Category = "Asset Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		USkeletalMesh* ItemSkeletalMesh;
-	UPROPERTY(EditAnywhere, Category = "Asset Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		UTexture2D* IconTexture;
-	UPROPERTY(EditAnywhere, Category = "Asset Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
 		class UParticleSystem* FireParticle;
-	
+
+public:
+
+	FItemInfoTable& operator=(const FItemInfoTable* other)
+	{
+		ItemInfoID = other->ItemInfoID;
+		Name = other->Name;
+		Description = other->Description;
+		bCanBeUsed = other->bCanBeUsed;
+		bCanStacked = other->bCanStacked;
+		UseText = other->UseText;
+		Interaction = other->Interaction;
+		ItemPrice = other->ItemPrice;
+		Weight = other->Weight;
+		ATK = other->ATK;
+
+		/**itemtype data*/
+		ItemType = other->ItemType;
+		ConsumeValue = other->ConsumeValue;
+		CombinResultID = other->CombinResultID;
+		if (other->ItemClass)
+		{
+			ItemClass = other->ItemClass;
+		}
+
+
+		/**asset data*/
+		ItemMesh = other->ItemMesh;
+		IconTexture = other->IconTexture;
+		ItemSkeletalMesh = other->ItemSkeletalMesh;
+		FireParticle = other->FireParticle;
+
+		return *this;
+	}
+
 };

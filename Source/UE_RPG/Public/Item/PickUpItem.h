@@ -17,12 +17,12 @@ class UE_RPG_API APickUpItem : public AActor
 public:	
 	APickUpItem();
 	
+	FORCEINLINE bool IsValidWidget() { return bValidWidget; }
 	FORCEINLINE class UWidgetComponent* GetWidgetComponent() { return ItemStateWidjet; }
 	FORCEINLINE	void SetItemInfoID(FName itemid) { ItemInfoID = itemid; }
 	FORCEINLINE	class UItem* GetPickUpItemRef() { return ItemRef; }
 
-	// 이거는 FORCEINCLINE 쓰면 안됨 하위 함수까지 전부다 FORCEINLINE 적용됨 FORCEINCLINE은 주의해서 사용할것
-	// 그리고 이런종류는 내부에서 Validate를 해줘야함 [10/03/2023 Sunny8747]
+
 	void SetWidgetVisibility(bool Visible);
 
 protected:
@@ -82,6 +82,8 @@ protected:
 			int32 OtherBodyIndex);
 
 	virtual void SetItemState(EItemState Stat);
+
+	bool bValidWidget = false;
 
 public:	
 	

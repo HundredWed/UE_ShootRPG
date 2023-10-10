@@ -18,5 +18,5 @@ public:
 
 	virtual void WeaponAbility();
 
-	static UWeaponAbilityBase* GetAbility(const FName& id);
+	static UWeaponAbilityBase* GetAbility(const uint8 id);
 };

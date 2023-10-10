@@ -207,6 +207,8 @@ FReply UCPP_Slot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, co
 
 void UCPP_Slot::OnUseItem()
 {
+	
+
 	AActor* abilityActor = InventoryRef->GetAbilityActor(InventorySlotinfo.Item->ItemInfoID);
 	if (abilityActor)
 	{
@@ -227,7 +229,7 @@ void UCPP_Slot::OnUseItem()
 	else
 	{
 		TSubclassOf<AActor> itemClass = InventoryRef->SlotsArray[MyArrayNumber].Item->ItemClass;
-		if (itemClass)
+		if (IsValid(itemClass))
 		{
 			AActor* itemActor = GetWorld()->SpawnActor(InventoryRef->SlotsArray[MyArrayNumber].Item->ItemClass);
 

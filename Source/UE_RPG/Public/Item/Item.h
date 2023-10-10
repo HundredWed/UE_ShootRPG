@@ -17,6 +17,9 @@ public:
 	UItem();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+		FItemInfoTable ItemInfoTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 		FName ItemInfoID;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
@@ -57,6 +60,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
 		int32 ATK;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
+		EWeaponAbilityID WeaponAbilityID;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		UStaticMesh* ItemMesh;

@@ -105,7 +105,7 @@ void UCPP_EquipSlot::UnEquipWeapon()
 	if (IsValid(weapon))
 	{
 		weapon->SetActiveWeapon(false);
-		PlayerRef->SetStateUnEquiped();
+		PlayerRef->SetStateUnEquipped();
 	}
 }
 

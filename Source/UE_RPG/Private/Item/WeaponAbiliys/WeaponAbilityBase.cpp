@@ -3,17 +3,18 @@
 
 #include "Item/WeaponAbiliys/WeaponAbilityBase.h"
 #include "Item/WeaponAbiliys/RedRifleAbility.h"
+#include "Item/ItemData.h"
 
 void UWeaponAbilityBase::WeaponAbility()
 {
 
 }
 
-UWeaponAbilityBase* UWeaponAbilityBase::GetAbility(const FName& id)
+UWeaponAbilityBase* UWeaponAbilityBase::GetAbility(const uint8 id)
 {
-	if (id == "weapon_0001")
+	if (id == (uint8)EWeaponAbilityID::EWA_Red)
 		return NewObject<URedRifleAbility>();
-	/*else if (id == "weapon_0002")
+	/*else if (id == (uint8)EWeaponAbilityID::EWA_Normal))
 		return NewObject<UNormalRifleAbility>();*/
 	return nullptr;
 }

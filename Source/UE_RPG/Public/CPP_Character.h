@@ -112,6 +112,7 @@ public:
 	class AWeapon* isWeapon(AActor* hitobject) const;
 	bool PickUpWeapon();
 	bool IsInActivePrevEquippedWeapon();
+	void ActionWeaponAbility();
 	
 
 	void ResetHitResultState();
@@ -126,6 +127,7 @@ public:
 	bool CanEquipState();
 	bool CanUnEquipState();
 	bool IsValidEquipWeapon();
+	void SetWeaponAbility(const uint8 id);
 
 	/**Montage*/
 	void PlayEquipMontage(FName NotifyName);
@@ -160,11 +162,9 @@ public:
 	const float GetPlayerWeightInfo() { return InventoryMaxWeight; }
 
 	FORCEINLINE class UInventory* GetInventory() { return GameInventory; }
-	FORCEINLINE const uint8 GetInventorySize() { return InventoryAmountOfSlot; }
-	FORCEINLINE const uint8 GetInventoryRowSize() { return InventoryRowSize; }
+	FORCEINLINE const int16 GetInventorySize() { return InventoryAmountOfSlot; }
+	FORCEINLINE const int16 GetInventoryRowSize() { return InventoryRowSize; }
 
-
-	void SetWeaponAbility(const FName& id);
 private:
 
 	float ClampRnage(float value);
@@ -183,6 +183,9 @@ private:
 	float MoveAimingSpeed = 320.f;
 	float MoveDelfaultSpeed_Crouch = 250.f;
 	float MoveAimingSpeed_Crouch = 200.f;
+
+	/**weapon*/
+	int16 AbilityId = -1;
 
 	UPROPERTY()
 		class APickUpItem* HitResultObject;
@@ -258,7 +261,8 @@ private:
 	bool isVisible = true;
 
 	UPROPERTY()
-		TMap<FName, class UWeaponAbilityBase*> WeaponAbility;
-
+		TMap<uint8, class UWeaponAbilityBase*> WeaponAbility;
+	UPROPERTY()
+		TSet<uint8> WeaponAbilityStorage;
 
 };

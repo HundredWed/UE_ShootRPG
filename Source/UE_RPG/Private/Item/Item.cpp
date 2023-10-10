@@ -36,6 +36,7 @@ UItem* UItem::CreateItemCopy()
 	{
 		copy->ItemClass = this->ItemClass;
 	}
+	copy->WeaponAbilityID = this->WeaponAbilityID;
 	
 	/**asset data*/
 	copy->ItemMesh = this->ItemMesh;

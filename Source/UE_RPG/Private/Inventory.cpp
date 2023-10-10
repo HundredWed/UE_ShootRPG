@@ -373,8 +373,6 @@ int16 UInventory::FindCombinableSlot(const int16 slot)
 	isConect[slot] = true;
 	int16 count = 0;
 	int16 resultSlot = 0;
-	// uint8이 인자로 들어간다 오버플로우 위험 있음
-	// -128 ~ 127 넘치는 범위가 들어가면 문제가 생긴다. [10/03/2023 Sunny8747]
 	int16 dir[4] = { -InvetoryRow, 1, InvetoryRow, -1};
 
 	for (int16 i = 0; i < 4; i++)
@@ -445,7 +443,7 @@ void UInventory::ClearConectArray()
 
 void UInventory::CombineItem(const int16 index)
 {
-	uint8 inventoryRow;
+	int16 inventoryRow;
 	if (IsValid(PlayerRef))
 	{
 		inventoryRow = PlayerRef->GetInventoryRowSize();
@@ -455,10 +453,8 @@ void UInventory::CombineItem(const int16 index)
 		return;
 	}
 
-	// uint8이 인자로 들어간다 오버플로우 위험 있음
-	// -128 ~ 127 넘치는 범위가 들어가면 문제가 생긴다. [10/03/2023 Sunny8747]
-	int8 dir[4] = { -inventoryRow, 1, inventoryRow, -1 };
-	for (uint8 i = 0; i < 4; i++)
+	int16 dir[4] = { -inventoryRow, 1, inventoryRow, -1 };
+	for (int16 i = 0; i < 4; i++)
 	{
 		int16 newdir = index + dir[i];
 		RemoveItemAtIndex(newdir, 1);
@@ -504,8 +500,7 @@ void UInventory::ChangeItemInfo(FName itemInfoID, const int16 index)
 {
 	CombineItem(index);
 
-	// 엔진 Slate에 있는 구조체랑 이름이 겹친다. 변경이 필요함 [10/03/2023 Sunny8747]  
-	const FItemInfo* itemInfo = ItemDataTable->FindRow<FItemInfo>(itemInfoID, TEXT(""));
+	const FItemInfoTable* itemInfo = ItemDataTable->FindRow<FItemInfoTable>(itemInfoID, TEXT(""));
 	if (itemInfo == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("not valid ChangeItemInfo!! please set 'CombinResultID' from ItemDataTable!!"));
@@ -616,7 +611,6 @@ void UInventory::SetEquipWeapon(UItem* item, const int16 index)
 
 void UInventory::EquipWeaponToPlayer(UItem* item)
 {
-	// 플레이어도 포인터이므로 IsValid를 사용해야 한다. [10/03/2023 Sunny8747]
 	if(!IsValid(PlayerRef))
 		return;
 	
@@ -628,14 +622,16 @@ void UInventory::EquipWeaponToPlayer(UItem* item)
 	if (!IsValid(pickUpItem))
 		return;
 
-	// 코드 세팅 순서 고정이 필요하다면 주석에 써놓는 것이 좋음 [10/03/2023 Sunny8747]
+	/**1. set active weapon
+	   2. change weapon info(need set new itemid before 'InitializeWeapon')
+	   3. set player weapon*/
 	playerWeapon->SetActiveWeapon(true);
+
+	pickUpItem->SetItemInfoID(item->ItemInfoID);
 	playerWeapon->InitializeWeapon();
 		
-	pickUpItem->SetItemInfoID(item->ItemInfoID);
-		
 	PlayerRef->SetStateEquipped();
-	PlayerRef->SetWeaponAbility(item->ItemInfoID);
+	PlayerRef->SetWeaponAbility((uint8)item->WeaponAbilityID);
 }
 
 void UInventory::UpdateEquipmentInventory(UItem* item)
