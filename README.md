@@ -9,6 +9,7 @@
 ---
 
 ## 현재 구현 완료 목록
+[영상]<https://youtu.be/NJ5AvRFwZ2c>
 
 ### 캐릭터
 
