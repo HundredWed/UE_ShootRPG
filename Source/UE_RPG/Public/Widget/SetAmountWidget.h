@@ -36,16 +36,17 @@ public:
 	int32 SetAmountCount = 0;
 	int32 MaxAmountCount = 99;
 
-	uint8 InventoryIndex = 0;
+	int16 InventoryIndex = 0;
 	/**when split*/
-	uint8 ToIndex = 0;
+	int16 ToIndex = -1;
 
 	uint8 ClickCount = 0;
 
 	bool bThrowWidget = false;
 
 public:
-	void InitWidgetInfo(const int32 amount, const uint8 index, bool bthrowEvent);
+	void InitWidgetInfo(const int32 amount, const int16 index, bool bthrowEvent, 
+		/*when split*/const int16 toIndex = -1);
 	void IncreaseCount();
 	void DecreaseCount();
 	void SetCnountText(const int32 count);

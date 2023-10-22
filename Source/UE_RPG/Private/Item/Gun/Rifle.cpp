@@ -2,6 +2,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "CPP_Character.h"
+#include "NPC/EnemyBase.h"
 
 
 ARifle::ARifle()
@@ -29,18 +30,10 @@ void ARifle::PullTrigger()
 	ViewPointTrace(hitresult, hitpoint);
 	GunTrace(hitresult, hitpoint);
 
-	if (IsValid(FireParticle))
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, hitpoint, FRotator::ZeroRotator, ParticleSize);
-	}
+	TakeDamege(hitresult, SpawnPoint->GetComponentLocation());
 	
-	FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
-	UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
-	if (IsValid(Beam))
-	{
-		Beam->SetVectorParameter(FName("Target"), hitpoint);
-	}
-	
+	ShootEffect(hitpoint);
+
 }
 
 void ARifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
@@ -69,9 +62,9 @@ void ARifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
 
 	bool onhit = GetWorld()->LineTraceSingleByChannel(hitresult, location, end, ECC_GameTraceChannel2, Params);
 	//DrawDebugLine(GetWorld(), location, end, FColor::Blue, false, 5); 
-
 	if (onhit)
 	{
+		//SCREENLOG(INDEX_NONE, 5.f, FColor::Blue, TEXT("hit actor"));
 		endpoint = hitresult.ImpactPoint;
 	}
 	else
@@ -92,14 +85,40 @@ void ARifle::GunTrace(FHitResult& hitresult, FVector& endpoint)
 
 	//DrawDebugLine(GetWorld(), StartLocation, end, FColor::Red, false, 5);
 
-	bool onhit = GetWorld()->LineTraceSingleByChannel(hitresult, StartLocation, end, ECC_GameTraceChannel2, Params);
+
+	FHitResult hitresult_gunTrace;
+	bool onhit = GetWorld()->LineTraceSingleByChannel(hitresult_gunTrace, StartLocation, end, ECC_GameTraceChannel2, Params);
 	if (onhit)
 	{
-		endpoint = hitresult.ImpactPoint;
+		//SCREENLOG(INDEX_NONE, 5.f, FColor::Blue, TEXT("hit actor"));
+		endpoint = hitresult_gunTrace.ImpactPoint;
+		hitresult = hitresult_gunTrace;
 	}
 }
 
+void ARifle::ShootEffect(const FVector& hitpoint)
+{
+	if (IsValid(FireParticle))
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, hitpoint, FRotator::ZeroRotator, ParticleSize);
+	}
 
+	FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
+	UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
+	if (IsValid(Beam))
+	{
+		Beam->SetVectorParameter(FName("Target"), hitpoint);
+	}
+}
+
+void ARifle::TakeDamege(FHitResult& hitresult, const FVector& hitpoint)
+{
+	AEnemyBase* enemy = Cast<AEnemyBase>(hitresult.GetActor());
+	if (IsValid(enemy))
+	{
+		enemy->GetHit(hitpoint);
+	}
+}
 
 void ARifle::SpreadBulletRandomRange(FRotator& randDir)
 {

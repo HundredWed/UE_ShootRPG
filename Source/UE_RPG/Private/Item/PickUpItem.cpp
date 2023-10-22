@@ -4,6 +4,7 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Inventory.h"
+#include "UE_RPG/MyLogMecro.h"
 
 APickUpItem::APickUpItem()
 {
@@ -81,7 +82,7 @@ void APickUpItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	ACPP_Character* character = Cast<ACPP_Character>(OtherActor);
 	if (IsValid(character))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Player In!!"));
+		//DISPLAYLOG(TEXT("Player In!!"));
 		character->SetCanSearchObject(true);
 		character->OverlapCount += 1;
 	}
@@ -95,11 +96,11 @@ void APickUpItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
      	if (character->OverlapCount > 0)
 		{
 			character->OverlapCount -= 1;
-			//UE_LOG(LogTemp, Warning, TEXT("Count Min!!"));
+			//DISPLAYLOG(TEXT("Count Min!!"));
 			if (character->OverlapCount == 0)
 			{
 				character->SetCanSearchObject(false);
-				//UE_LOG(LogTemp, Warning, TEXT("Player Out!!"));
+				//DISPLAYLOG(TEXT("Player Out!!"));
 			}
 		}
 		

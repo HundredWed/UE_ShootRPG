@@ -5,9 +5,5 @@
 
 void URedRifleAbility::WeaponAbility()
 {
-	GEngine->AddOnScreenDebugMessage(
-		INDEX_NONE,
-		30.f,
-		FColor::Red,
-		FString::Printf(TEXT("Fire!!!")));
+	//SCREENLOG(INDEX_NONE, 5.f, FColor::Blue, TEXT("Fire Red!!"));
 }

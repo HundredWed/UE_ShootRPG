@@ -17,11 +17,12 @@ void USetAmountWidget::NativeConstruct()
 	PlusButton->OnClicked.AddDynamic(this, &USetAmountWidget::ClickPlus);
 }
 
-void USetAmountWidget::InitWidgetInfo(const int32 amount, const uint8 index, bool bthrowEvent)
+void USetAmountWidget::InitWidgetInfo(const int32 amount, const int16 index, bool bthrowEvent, const int16 toIndex)
 {
 	MaxAmountCount = amount;
 	InventoryIndex = index;
 	bThrowWidget = bthrowEvent;
+	ToIndex = toIndex;
 
 	SetAmountCount = 1;
 	SetCnountText(SetAmountCount);

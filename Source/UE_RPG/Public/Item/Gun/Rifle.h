@@ -24,7 +24,10 @@ public:
 	void PullTrigger();
 	void ViewPointTrace(FHitResult& hitresult, FVector& endpoint);
 	void GunTrace(FHitResult& hitresult, FVector& endpoint);
-	
+	void ShootEffect(const FVector& hitpoint);
+	void TakeDamege(FHitResult& hitresult , const FVector& hitpoint);
+
+
 	void SpreadBulletRandomRange(FRotator& randDir);
 	AController* GetOwnerController();
 protected:

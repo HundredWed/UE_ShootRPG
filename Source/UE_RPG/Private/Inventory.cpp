@@ -228,20 +228,22 @@ void UInventory::SwapSlot(const int16 fromIndex, const int16 toIndex)
 		UE_LOG(LogTemp, Warning, TEXT("not valid slot!!"));
 		return;
 	}
-	else if(IsSlotEmpty(toIndex))
+	/*else if(IsSlotEmpty(toIndex))
 	{
 		UItem* item = SlotsArray[fromIndex].Item;
-		UpdateInventory(fromIndex, nullptr, 0);
 		UpdateInventory(toIndex, item, SlotsArray[fromIndex].ItemAmount);
-	}
+		UpdateInventory(fromIndex, nullptr, 0);
+		
+	}*/
 	else
 	{
 		FInventorySlot tempSlot = SlotsArray[toIndex];
 		SlotsArray[toIndex] = SlotsArray[fromIndex];
 		SlotsArray[fromIndex] = tempSlot;
 
-		UpdateSlotAtIndex(fromIndex);
 		UpdateSlotAtIndex(toIndex);
+		UpdateSlotAtIndex(fromIndex);
+		
 	}
 }
 
@@ -673,7 +675,7 @@ void UInventory::StartAbilityActorLife(FName itemId)
 		FTimerHandle TimerHandle;
 		FTimerDelegate TimerDel;
 		TimerDel.BindUFunction(this, FName("DestroyAbilityActor"),*abilityActor, itemId);
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 15.f, false);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 5.f, false);
 	}
 	
 }

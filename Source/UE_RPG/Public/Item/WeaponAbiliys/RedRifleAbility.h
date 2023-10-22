@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Item/WeaponAbiliys/WeaponAbilityBase.h"
+#include "UE_RPG/MyLogMecro.h"
 #include "RedRifleAbility.generated.h"
 
 /**

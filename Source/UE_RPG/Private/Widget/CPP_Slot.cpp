@@ -41,7 +41,7 @@ void UCPP_Slot::UpdateSlot(const int16 index)
 			InitSlotInfo();
 			ActiveSlot();
 
-			if (ItemRef->bCanStacked)
+			if (ItemRef->bCanStacked && MyAmount > 0)
 			{
 				TextAmount->SetText(FText::Format(NSLOCTEXT("CPP_Slot", "TextAmount", "x{0}"), MyAmount));
 				TextAmount->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
@@ -243,6 +243,7 @@ void UCPP_Slot::OnUseItem()
 				InventoryRef->RemoveItemAtIndex(MyArrayNumber, 1);
 				InventoryRef->StartAbilityActorLife(InventorySlotinfo.Item->ItemInfoID);
 			}
+
 
 			GEngine->AddOnScreenDebugMessage(
 				INDEX_NONE,

@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "CharacterStates.h"
+#include "UE_RPG/MyLogMecro.h"
 #include "CPP_Character.generated.h"
 
 
@@ -145,6 +146,7 @@ public:
 	/**mouse*/
 	void SetMouseRate();
 	void CalculateCrosshairSpread(float DeltaTime);
+
 	UFUNCTION(BlueprintCallable)
 		float GetCrosshairSpreadMultiplier() const;
 

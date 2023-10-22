@@ -91,8 +91,7 @@ void UCPP_InventoryWidget::SetSpliteWidget(const UCPP_Slot* fromSlot, const UCPP
 	FWidgetTransform renderTransform = FWidgetTransform(render,FVector2D(1,1), FVector2D::Zero(), 0);
 
 	SpliteWidget->SetRenderTransform(renderTransform);
-	SpliteWidget->InitWidgetInfo(fromSlot->MyAmount, fromSlot->MyArrayNumber, false);
-	SpliteWidget->ToIndex = toSlot->MyArrayNumber;
+	SpliteWidget->InitWidgetInfo(fromSlot->MyAmount, fromSlot->MyArrayNumber, false, toSlot->MyArrayNumber);
 	SpliteWidget->SetVisibility(ESlateVisibility::Visible);
 	SetPanelEnabled(false);
 }

@@ -145,13 +145,13 @@ void ACPP_Character::SreachItem()
 {
 	if (bCanSearchObject)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Tick!!"));
 		ObjectSearchTrace();
+		DISPLAYLOG(TEXT("search item"));
 	}
 	else if (IsValid(HitResultObject) && !bCanSearchObject)
 	{
 		ResetHitResultState();
-		//UE_LOG(LogTemp, Display, TEXT("remove!!"));
+		DISPLAYLOG(TEXT("reset hit result"))
 	}
 }
 
