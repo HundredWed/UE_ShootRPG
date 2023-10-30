@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "UE_RPG/UtilityMecro.h"
 #include "Mover.generated.h"
 
 
@@ -17,25 +18,22 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void MoveStart(float deltatime);
-	void SetShouldMove(bool isMove);
+	UFUNCTION(BlueprintCallable)
+		void MoveStart();
 
-
-	UPROPERTY(EditAnywhere)
-		bool moving = false;
 
 	UPROPERTY(EditAnywhere)
 		FVector MoveOffset = FVector::Zero();
 		
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 		FVector TagetPos = FVector::Zero();
 
 	UPROPERTY(EditAnywhere)
 		float MoveTime = 4;
 
-	FVector Pos = FVector::Zero();
+	UPROPERTY(VisibleAnywhere)
+		FVector Pos = FVector::Zero();
 
 private:
 		

@@ -19,7 +19,7 @@ public:
 
 	AEnemyBase();
 
-	virtual void GetHit(const FVector& targetLocation = FVector::Zero()) override;
+	virtual bool GetHit(const FVector& targetLocation = FVector::Zero()) override;
 
 	virtual void BeginPlay() override;
 
@@ -28,8 +28,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void SetActionStateNormal();
 
-	void NoDamaged(UAnimInstance* animInstance ,const FVector& targetLocation);
-	void GetDamage(UAnimInstance* animInstance);
+	void NoDamaged(const FVector& targetLocation);
 
 	void LooAtTarget(const FVector& targetLocation);
 	void TurnAtHitDir(const double theta);

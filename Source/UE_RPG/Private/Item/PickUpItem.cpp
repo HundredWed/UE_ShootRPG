@@ -2,9 +2,10 @@
 #include "Item/Item.h"
 #include "CPP_Character.h"
 #include "Components/SphereComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Inventory.h"
-#include "UE_RPG/MyLogMecro.h"
+
 
 APickUpItem::APickUpItem()
 {
@@ -103,7 +104,6 @@ void APickUpItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 				//DISPLAYLOG(TEXT("Player Out!!"));
 			}
 		}
-		
 	}
 }
 

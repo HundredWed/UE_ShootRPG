@@ -30,9 +30,11 @@ void ARifle::PullTrigger()
 	ViewPointTrace(hitresult, hitpoint);
 	GunTrace(hitresult, hitpoint);
 
-	TakeDamege(hitresult, SpawnPoint->GetComponentLocation());
+	TakeHit(hitresult, SpawnPoint->GetComponentLocation());
 	
 	ShootEffect(hitpoint);
+
+	
 
 }
 
@@ -111,12 +113,12 @@ void ARifle::ShootEffect(const FVector& hitpoint)
 	}
 }
 
-void ARifle::TakeDamege(FHitResult& hitresult, const FVector& hitpoint)
+void ARifle::TakeHit(FHitResult& hitresult, const FVector& hitpoint)
 {
 	AEnemyBase* enemy = Cast<AEnemyBase>(hitresult.GetActor());
-	if (IsValid(enemy))
+	if (IsValid(enemy) && enemy->GetHit(hitpoint))
 	{
-		enemy->GetHit(hitpoint);
+		UGameplayStatics::ApplyDamage(enemy, FinalDamage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
 	}
 }
 

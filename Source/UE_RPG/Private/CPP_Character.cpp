@@ -146,12 +146,12 @@ void ACPP_Character::SreachItem()
 	if (bCanSearchObject)
 	{
 		ObjectSearchTrace();
-		DISPLAYLOG(TEXT("search item"));
+		//DISPLAYLOG(TEXT("search item"));
 	}
 	else if (IsValid(HitResultObject) && !bCanSearchObject)
 	{
 		ResetHitResultState();
-		DISPLAYLOG(TEXT("reset hit result"))
+		//DISPLAYLOG(TEXT("reset hit result"))
 	}
 }
 
@@ -517,9 +517,11 @@ void ACPP_Character::SetEquippedWeapon(AWeapon* equippedWeapon)
 	EquippedWeapon = equippedWeapon;
 	SetWeaponAbility((uint8)weaponRef->WeaponAbilityID);
 
-	equippedWeapon->Equip(GetMesh(), "weapon_socket_back");
 	equippedWeapon->SetOwner(this);
 
+	/**equip weapon after SetOwner,TakePlayerATk*/
+	equippedWeapon->Equip(GetMesh(), "weapon_socket_back");
+	
 	/**search trace ignor*/
 	Params.AddIgnoredActor(equippedWeapon);
 

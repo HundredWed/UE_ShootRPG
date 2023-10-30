@@ -16,6 +16,7 @@ class UE_RPG_API UHealthBarComponent : public UWidgetComponent
 	
 public:
 	void SetHealthPercent(float Percent);
+	bool IsValidHealthBarWidget();
 private:
 	UPROPERTY()
 		class UNPCHealthBar* HealthBarWidget;

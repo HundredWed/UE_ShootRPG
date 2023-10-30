@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "UE_RPG/UtilityMecro.h"
 #include "CustomUMGWidget.generated.h"
 
 /**

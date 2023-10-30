@@ -5,6 +5,12 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Animations/CPP_NPCAnimInstance.h"
+
+#define THETA_LEFT(theta) theta <= -70.f && theta >= -110.f 
+#define THETA_RIGHT(theta) theta >= 70.f && theta <= 110.f 
+#define THETA_BACK(theta) theta <= -160.f || theta >= 160.f 
+
 AEnemyBase::AEnemyBase()
 {
 
@@ -27,45 +33,41 @@ void AEnemyBase::SetActionStateNormal()
 	CharaterActionState = ECharacterActionState::Normal;
 }
 
-void AEnemyBase::GetHit(const FVector& targetLocation)
+bool AEnemyBase::GetHit(const FVector& targetLocation)
 {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (CharaterActionState == ECharacterActionState::Death)
+		return false;
 
-	if (!IsValid(AnimInstance))
+	if (!IsValid(NPCAnimInstance))
 	{
 		WARNINGLOG(TEXT("is not IsValid Enemy AnimInstance!!"));
-		return;
+		return false;
 	}
 
 	double dis = (GetActorLocation() - targetLocation).Length();
 
 	if (dis >= NoDamagedDistance)
 	{
-		NoDamaged(AnimInstance, targetLocation);
-		SCREENLOG(INDEX_NONE, 5.f, FColor::Black, TEXT("NoDamaged!!"));
-		return;
+		NoDamaged(targetLocation);
+		//SCREENLOG(INDEX_NONE, 5.f, FColor::Black, TEXT("NoDamaged!!"));
+		return false;
 	}
 
-	GetDamage(AnimInstance);
+	NPCAnimInstance->Montage_Play(HitActionMontage);
+	return true;
 }
 
-void AEnemyBase::NoDamaged(UAnimInstance* animInstance, const FVector& targetLocation)
+void AEnemyBase::NoDamaged(const FVector& targetLocation)
 {
 	if (IsValid(HitActionMontage_NoDamaged) && CharaterActionState == ECharacterActionState::Normal)
 	{
 		//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Ouch!!"));
-		animInstance->Montage_Play(HitActionMontage_NoDamaged);
+		NPCAnimInstance->Montage_Play(HitActionMontage_NoDamaged);
 		LooAtTarget(targetLocation);
 		CharaterActionState = ECharacterActionState::Action;
 	}
 }
 
-void AEnemyBase::GetDamage(UAnimInstance* animInstance)
-{
-	animInstance->Montage_Play(HitActionMontage);
-
-	/**update hp*/
-}
 
 void AEnemyBase::LooAtTarget(const FVector& targetLocation)
 {
@@ -86,19 +88,19 @@ void AEnemyBase::LooAtTarget(const FVector& targetLocation)
 
 	CurrentTurningValue = 0;
 
-	if (theta <= -70.f && theta >= -110.f)/**left*/
+	if (THETA_LEFT(theta))
 	{
 		//enemyrot.Yaw += Theta;
 		//SetActorRotation(enemyrot);
 		TurnAtHitDir(theta);
 	}
-	else if (theta >= 70.f && theta <= 110.f)/**right*/
+	else if (THETA_RIGHT(theta))
 	{
 		//enemyrot.Yaw += Theta;
 		//SetActorRotation(enemyrot);
 		TurnAtHitDir(theta);
 	}
-	else if (theta <= -160.f || theta >= 160.f)/**back*/
+	else if (THETA_BACK(theta))
 	{
 		//enemyrot.Yaw += Theta;
 		//SetActorRotation(enemyrot);

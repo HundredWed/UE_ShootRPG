@@ -16,7 +16,7 @@ class UE_RPG_API UNPCHealthBar : public UUserWidget
 
 public:
 
-	bool IsValideHealthBar();
+	bool IsValidHealthBar();
 
 	UPROPERTY(meta = (BindWidget))
 		class UProgressBar* HealthBar;

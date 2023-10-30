@@ -1,7 +1,12 @@
 #pragma once
 #include "CoreMinimal.h"
 
+// value
 
+
+
+
+// debug
 #define DISPLAYLOG(text, ...) UE_LOG(LogTemp, Display, text,##__VA_ARGS__);
 #define WARNINGLOG(text, ...) UE_LOG(LogTemp, Warning, text,##__VA_ARGS__);
 #define	ERRORLOG(text, ...) UE_LOG(LogTemp, Error, text,##__VA_ARGS__);

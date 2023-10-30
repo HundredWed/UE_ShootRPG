@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ItemData.h"
 #include "Engine/DataTable.h"
-#include "Components/WidgetComponent.h"
+#include "UE_RPG/UtilityMecro.h"
 #include "PickUpItem.generated.h"
 
 UCLASS()

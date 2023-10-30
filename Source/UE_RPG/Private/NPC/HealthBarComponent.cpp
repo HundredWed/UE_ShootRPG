@@ -7,13 +7,18 @@
 
 void UHealthBarComponent::SetHealthPercent(float Percent)
 {
-	if (HealthBarWidget == nullptr)
+	if (!IsValid(HealthBarWidget))
 	{
 		HealthBarWidget = Cast<UNPCHealthBar>(GetUserWidgetObject());
 	}
 
-	if (HealthBarWidget && HealthBarWidget->IsValideHealthBar())
+	if (HealthBarWidget && HealthBarWidget->IsValidHealthBar())
 	{
 		HealthBarWidget->HealthBar->SetPercent(Percent);
 	}
+}
+
+bool UHealthBarComponent::IsValidHealthBarWidget()
+{
+	return IsValid(HealthBarWidget);
 }

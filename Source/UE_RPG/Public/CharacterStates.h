@@ -11,7 +11,8 @@ UENUM(BlueprintType)
 enum class ECharacterActionState : uint8
 {
 	Normal,
-	Action
+	Action,
+	Death
 };
 
 UENUM(BlueprintType)

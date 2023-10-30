@@ -6,7 +6,7 @@
 
 AMoveObject::AMoveObject()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Root Mesh"));
 	RootComponent = StaticMesh;
@@ -14,61 +14,39 @@ AMoveObject::AMoveObject()
 	AttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Attach Key"));
 	AttachPoint->SetupAttachment(GetRootComponent());
 
-	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("WakeUp Tick Area"));
-	SphereComponent->SetupAttachment(GetRootComponent());
-
 	KeyBoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Trigger Key"));
 	KeyBoxComponent->SetupAttachment(GetRootComponent());
+	 
+	Mover = CreateDefaultSubobject<UMover>(TEXT("Moving component"));
 }
 
 
 void AMoveObject::BeginPlay()
 {
 	Super::BeginPlay();
-	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AMoveObject::OnOverlap);
-	SphereComponent->OnComponentEndOverlap.AddDynamic(this, &AMoveObject::OnEndOverlap);
+
+	if (IsValid(KeyBoxComponent))
+	{
+		KeyBoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AMoveObject::OnBoxOverlap);
+	}
+	else
+	{
+		WARNINGLOG(TEXT("KeyBoxComponent is not valid at MoveObject"))
+	}
 }
 
-void AMoveObject::Tick(float DeltaTime)
+void AMoveObject::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Super::Tick(DeltaTime);
-	
-	if (isPlayerIn)
+	if (moving == false)
 	{
 		AttachKey();
-	}
-
-}
-
-void AMoveObject::SetMoverCompnent(UMover* NewMover)
-{
-	Mover = NewMover;
-}
-
-void AMoveObject::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	ACPP_Character* player = Cast<ACPP_Character>(OtherActor);
-	if (IsValid(player))
-	{
-		UE_LOG(LogTemp,Display,TEXT("Player In!"))
-		isPlayerIn = true;
-	}
-}
-
-void AMoveObject::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	ACPP_Character* player = Cast<ACPP_Character>(OtherActor);
-	if (IsValid(player))
-	{
-		UE_LOG(LogTemp, Display, TEXT("Player Out!"))
-		isPlayerIn = false;
 	}
 }
 
 void AMoveObject::AttachKey()
 {
 	AActor* Actor = GetAcceptableActor();
-	if (IsValid(Actor))
+	if (IsValid(Actor) && IsValid(Mover))
 	{
 		UPrimitiveComponent* Component = Cast<UPrimitiveComponent>(Actor->GetRootComponent());
 		if (IsValid(Component))
@@ -80,11 +58,8 @@ void AMoveObject::AttachKey()
 		Actor->SetActorLocation(AttachPoint->GetComponentLocation());
 		Actor->AttachToComponent(AttachPoint, FAttachmentTransformRules::KeepWorldTransform);
 
-		Mover->SetShouldMove(true);
-	}
-	else
-	{
-		Mover->SetShouldMove(false);
+		Mover->MoveStart();
+		moving = true;
 	}
 }
 

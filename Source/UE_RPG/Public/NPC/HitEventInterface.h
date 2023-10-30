@@ -22,5 +22,5 @@ class UE_RPG_API IHitEventInterface
 
 public:
 
-	virtual void GetHit(const FVector& hitDir) = 0;
+	virtual bool GetHit(const FVector& hitDir) = 0;
 };

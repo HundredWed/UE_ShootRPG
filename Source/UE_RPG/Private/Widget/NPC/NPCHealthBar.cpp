@@ -4,7 +4,7 @@
 #include "Widget/NPC/NPCHealthBar.h"
 #include "Components/ProgressBar.h"
 
-bool UNPCHealthBar::IsValideHealthBar()
+bool UNPCHealthBar::IsValidHealthBar()
 {
 	return IsValid(HealthBar);
 }

@@ -14,18 +14,15 @@ class UE_RPG_API AMoveObject : public AActor
 public:	
 	
 	AMoveObject();
+	void AttachKey();
 
 protected:
 	
 	virtual void BeginPlay() override;
 
-public:	
-	
-	virtual void Tick(float DeltaTime) override;
-
-	UFUNCTION(BlueprintCallable)
-		void SetMoverCompnent(class UMover* NewMover);
-
+	UFUNCTION()
+		void OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Object Component")
@@ -35,34 +32,18 @@ private:
 		class USceneComponent* AttachPoint;
 
 	UPROPERTY(VisibleAnywhere, Category = "Object Component")
-		class USphereComponent* SphereComponent;
-
-	UPROPERTY(VisibleAnywhere, Category = "Object Component")
 		class UBoxComponent* KeyBoxComponent;
 
 	/**compare gate tag with key tag */
 	UPROPERTY(EditAnyWhere)
 		FName ActorTag;
 
-	UFUNCTION()
-		void OnOverlap(UPrimitiveComponent* OverlappedComponent,
-			AActor* OtherActor,
-			UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex,
-			bool bFromSweep,
-			const FHitResult& SweepResult);
-
-	UFUNCTION()
-		void OnEndOverlap(UPrimitiveComponent* OverlappedComponent,
-			AActor* OtherActor,
-			UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex);
-
+	
 	/**mover component*/
-	UPROPERTY()
+	UPROPERTY(EditAnyWhere)
 		class UMover* Mover;
+	bool moving = false;
 
-	void AttachKey();
 	AActor* GetAcceptableActor() const;
 
 	/**chek Player in sphere Area for active tick*/

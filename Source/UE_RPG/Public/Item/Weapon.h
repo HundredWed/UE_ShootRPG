@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Item/PickUpItem.h"
+#include "UE_RPG/UtilityMecro.h"
 #include "Weapon.generated.h"
 
 UCLASS()
@@ -11,11 +12,6 @@ class UE_RPG_API AWeapon : public APickUpItem
 
 public:
 	AWeapon();
-	void Equip(USceneComponent* Inparent, const FName& SocketName);
-	void AttachFunc(USceneComponent* Inparent, const FName& SocketName);
-
-	void SetActiveWeapon(bool bactive);
-	bool IsActiveWaepon();
 	
 	UPROPERTY(EditAnywhere)
 		class USoundCue* PickUpSound;
@@ -52,13 +48,16 @@ protected:
 
 	/**weapon states*/
 	bool bActiveWeapon = true;
+	float FinalDamage = 0;
 
 public:
+	void Equip(USceneComponent* Inparent, const FName& SocketName);
+	void AttachFunc(USceneComponent* Inparent, const FName& SocketName);
+
+	void SetActiveWeapon(bool bactive);
+	bool IsActiveWaepon();
 
 	virtual void SetItemState(EItemState State) override;
 	void InitializeWeapon();
-private:
-
-	
-	
+	void UpdateFinalDamage();
 };

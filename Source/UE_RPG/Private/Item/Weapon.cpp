@@ -4,6 +4,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
+#include "CPP_Character.h"
+
+#define DAMAGERATIO 15
+
 AWeapon::AWeapon()
 {
 	SetRootComponent(WeaponMesh);
@@ -19,6 +23,15 @@ void AWeapon::BeginPlay()
 	Super::BeginPlay();
 
 	PickUpMesh->DestroyComponent();
+
+	if (IsValid(ItemRef))
+	{
+		FinalDamage = ItemRef->ATK;
+	}
+	else
+	{
+		WARNINGLOG(TEXT("not valid weapon ItemRef"));
+	}
 
 	SetItemState(EItemState::EIS_UnEquipped);
 }
@@ -38,7 +51,9 @@ void AWeapon::Equip(USceneComponent* Inparent, const FName& SocketName)
 {
 	AttachFunc(Inparent, SocketName);
 	SetItemState(EItemState::EIS_Equipped);
+	UpdateFinalDamage();
 	ItemStateWidjet->SetVisibility(false);
+
 	if (IsValid(PickUpSound))
 	{
 		UGameplayStatics::PlaySound2D(this, PickUpSound);
@@ -114,4 +129,12 @@ void AWeapon::InitializeWeapon()
 
 		/**ShootSound, BeamParticle, ParticleSize*/
 	}
+}
+
+void AWeapon::UpdateFinalDamage()
+{
+	if (!IsValid(ItemRef))
+		return;
+	ACPP_Character* player = Cast<ACPP_Character>(GetOwner());
+	FinalDamage = (FinalDamage + player->GetPlayerATK()) / DAMAGERATIO;
 }

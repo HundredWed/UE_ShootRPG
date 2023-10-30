@@ -4,7 +4,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "CharacterStates.h"
-#include "UE_RPG/MyLogMecro.h"
+#include "UE_RPG/UtilityMecro.h"
 #include "CPP_Character.generated.h"
 
 
@@ -157,6 +157,7 @@ public:
 
 	FORCEINLINE void IncreasePlayerHP(const uint32 value) { Health += value; }
 	FORCEINLINE void DecreasePlayerHP(const uint32 value) { Health -= value; }
+	FORCEINLINE int32 GetPlayerATK() { return PlayerATK; }
 	
 	/**inventory*/
 	void HideGameInventory();
@@ -175,10 +176,12 @@ private:
 	ECharacterStateTypes CharacterState = ECharacterStateTypes::UnEquiped;
 	ECharacterActionState ActionState = ECharacterActionState::Normal;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
 		int32 Health = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
 		int32 Mana = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
+		int32 PlayerATK = 0;
 
 	float MoveDelfaultSpeed = 400.f;
 	float MoveRunSpeed = 600.f;
