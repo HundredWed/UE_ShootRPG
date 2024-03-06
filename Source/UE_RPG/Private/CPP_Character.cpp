@@ -7,6 +7,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
+
 #include "Grabber.h"
 #include "Item/Item.h"
 #include "Item/Weapon.h"
@@ -310,23 +312,15 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 
 void ACPP_Character::Attack(const FInputActionValue& Value)
 {
-	ARifle* rifle = Cast<ARifle>(EquippedWeapon);
-	if(!IsValid(rifle))
+	Rifle = Cast<ARifle>(EquippedWeapon);
+	if(!IsValid(Rifle))
 		return;
 
-	if (CanAttackState())
+	PressFireKey = PressKey(Value);
+	
+	if (bTrigger)
 	{
-		if(bAiming)
-		{
-			PlayFireMontage(AimingFireMontage);
-		}
-		else
-		{
-			PlayFireMontage(FireMontage);
-		}
-		
-		rifle->PullTrigger();
-		ActionWeaponAbility();
+		FireWeapon();
 	}
 }
 
@@ -460,6 +454,37 @@ void ACPP_Character::ActionWeaponAbility()
 	WeaponAbility[AbilityId]->WeaponAbility();
 }
 
+void ACPP_Character::FireWeapon()
+{
+	if (CanAttackState())
+	{
+		if (bAiming)
+		{
+			PlayFireMontage(AimingFireMontage);
+		}
+		else
+		{
+			PlayFireMontage(FireMontage);
+		}
+
+		Rifle->PullTrigger();
+		ActionWeaponAbility();
+
+		bTrigger = false;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Character::CanTrigger, TriggerRate, false);
+	}
+
+	/*if (PressFireKey or when a skill or other trigger condition is true)
+	{
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Character::FireWeapon, FireRate, false);
+	}*/
+}
+
+void ACPP_Character::CanTrigger()
+{
+	bTrigger = true;
+}
+
 void ACPP_Character::ResetHitResultState()
 {
 	APickUpItem* item = Cast<APickUpItem>(HitResultObject);
@@ -535,7 +560,9 @@ AWeapon* ACPP_Character::GetEquippedWeapon()
 
 bool ACPP_Character::CanAttackState()
 {
-	return CharacterState == ECharacterStateTypes::Equiped && ActionState == ECharacterActionState::Normal;
+	return CharacterState == ECharacterStateTypes::Equiped 
+		&& ActionState == ECharacterActionState::Normal
+		&& PressFireKey;
 }
 
 bool ACPP_Character::CanEquipState()
@@ -703,6 +730,11 @@ void ACPP_Character::SetWeaponAbility(const uint8 id)
 
 	WeaponAbilityStorage.Add(id);
 	WeaponAbility.Add(id, ability);
+}
+
+void ACPP_Character::SetFireRate(float rate)
+{
+	FireRate = rate;
 }
 
 float ACPP_Character::ClampRnage(float value)

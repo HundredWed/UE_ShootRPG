@@ -114,6 +114,8 @@ public:
 	bool PickUpWeapon();
 	bool IsInActivePrevEquippedWeapon();
 	void ActionWeaponAbility();
+	void FireWeapon();
+	void CanTrigger();
 	
 
 	void ResetHitResultState();
@@ -129,6 +131,7 @@ public:
 	bool CanUnEquipState();
 	bool IsValidEquipWeapon();
 	void SetWeaponAbility(const uint8 id);
+	void SetFireRate(float rate);
 
 	/**Montage*/
 	void PlayEquipMontage(FName NotifyName);
@@ -176,18 +179,28 @@ private:
 	ECharacterStateTypes CharacterState = ECharacterStateTypes::UnEquiped;
 	ECharacterActionState ActionState = ECharacterActionState::Normal;
 
+	/**character states - weapon*/
+	bool PressFireKey = false;
+	bool bTrigger = true;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
 		int32 Health = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
 		int32 Mana = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
 		int32 PlayerATK = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
+		float FireRate = 0.3f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
+		float TriggerRate = 0.5f;
 
 	float MoveDelfaultSpeed = 400.f;
 	float MoveRunSpeed = 600.f;
 	float MoveAimingSpeed = 320.f;
 	float MoveDelfaultSpeed_Crouch = 250.f;
 	float MoveAimingSpeed_Crouch = 200.f;
+	FTimerHandle TimerHandle;
+
 
 	/**weapon*/
 	int16 AbilityId = -1;
@@ -196,6 +209,8 @@ private:
 		class APickUpItem* HitResultObject;
 	UPROPERTY()
 		class APickUpItem* PrevHitResultObject;
+	UPROPERTY()
+		class ARifle* Rifle;
 
 	/**For get Grab& Release Func*/
 	UPROPERTY()

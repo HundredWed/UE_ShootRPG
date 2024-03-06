@@ -15,3 +15,4 @@
 	{\
 		GEngine->AddOnScreenDebugMessage(key,time,color,text,__VA_ARGS__); \
 	}
+// ex) SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Red!!"));
