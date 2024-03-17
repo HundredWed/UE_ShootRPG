@@ -8,6 +8,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 #include "Grabber.h"
 #include "Item/Item.h"
@@ -35,6 +36,7 @@ ACPP_Character::ACPP_Character()
 	GetCharacterMovement()->MaxWalkSpeed = 400.f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->RotationRate.Yaw = DefaultMRR;
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	//jump
 	GetCharacterMovement()->JumpZVelocity = 700.f;
@@ -129,6 +131,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACPP_Character::Jump);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ACPP_Character::SetCrouch);
+		EnhancedInputComponent->BindAction(DodgeToggle, ETriggerEvent::Triggered, this, &ACPP_Character::Dodge);
 
  		EnhancedInputComponent->BindAction(GrabAndPickupAction, ETriggerEvent::Canceled, this, &ACPP_Character::PickUp);
 		EnhancedInputComponent->BindAction(GrabAndPickupAction, ETriggerEvent::Triggered, this, &ACPP_Character::GrabItem);
@@ -218,6 +221,9 @@ bool ACPP_Character::SetShpereTrace(FHitResult& HitResult)
 
 void ACPP_Character::Move(const FInputActionValue& Value)
 {
+	if (ActionState == ECharacterActionState::SuperAction)
+		return;
+
 	const FVector MovementVector =  Value.Get<FVector>();
 	CameraBoom->bEnableCameraLag = false;
 	if (IsValid(GetController()))
@@ -231,7 +237,13 @@ void ACPP_Character::Move(const FInputActionValue& Value)
 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightVector, MovementVector.X);
+
+		//
+		float speed = GetCharacterMovement()->Velocity.Length();
+		bMoving = (Value.Get<FVector>().Length()) != 0 && (speed >= 3.f);
 	}
+
+	
 }
 
 void ACPP_Character::Look(const FInputActionValue& Value)
@@ -315,20 +327,23 @@ void ACPP_Character::Attack(const FInputActionValue& Value)
 	Rifle = Cast<ARifle>(EquippedWeapon);
 	if(!IsValid(Rifle))
 		return;
-
+	
 	PressFireKey = PressKey(Value);
 	
 	if (bTrigger)
 	{
 		FireWeapon();
+		CharacterState = ECharacterStateTypes::Aim;
 	}
 }
 
 void ACPP_Character::Aiming(const FInputActionValue& Value)
 {
-	if (PressKey(Value) && CharacterState == ECharacterStateTypes::Equiped && ActionState == ECharacterActionState::Normal)
+	if (PressKey(Value) && CharacterState != ECharacterStateTypes::UnEquiped && ActionState == ECharacterActionState::Normal)
 	{
 		bAiming = true;	
+		CharacterState = ECharacterStateTypes::Aim;
+		SetMovementRotate(false, FocusingMRR);
 		if (GetCharacterMovement()->IsCrouching())
 		{
 			GetCharacterMovement()->MaxWalkSpeedCrouched = MoveAimingSpeed_Crouch;
@@ -341,6 +356,12 @@ void ACPP_Character::Aiming(const FInputActionValue& Value)
 	else
 	{
 		bAiming = false;
+		if (CharacterState != ECharacterStateTypes::UnEquiped)
+		{
+			CharacterState = ECharacterStateTypes::Equiped;
+		}
+		
+		SetMovementRotate(true, DefaultMRR);
 		if (GetCharacterMovement()->IsCrouching())
 		{
 			GetCharacterMovement()->MaxWalkSpeedCrouched = MoveDelfaultSpeed_Crouch;
@@ -364,6 +385,17 @@ void ACPP_Character::SetCrouch(const FInputActionValue& Value)
 	{
 		UnCrouch();
 		CameraBoom->bEnableCameraLag = true;
+	}
+}
+
+void ACPP_Character::Dodge(const FInputActionValue& Value)
+{
+	if (ActionState != ECharacterActionState::SuperAction)
+	{
+		bMoving = false;
+		LookAt();
+		PlayAnimMontage(DodgeMontage);
+		ActionState = ECharacterActionState::SuperAction;
 	}
 }
 
@@ -458,13 +490,15 @@ void ACPP_Character::FireWeapon()
 {
 	if (CanAttackState())
 	{
+		SetMovementRotate(false, FocusingMRR);
+
 		if (bAiming)
 		{
-			PlayFireMontage(AimingFireMontage);
+			PlayAnimMontage(AimingFireMontage);
 		}
 		else
 		{
-			PlayFireMontage(FireMontage);
+			PlayAnimMontage(FireMontage);
 		}
 
 		Rifle->PullTrigger();
@@ -483,6 +517,27 @@ void ACPP_Character::FireWeapon()
 void ACPP_Character::CanTrigger()
 {
 	bTrigger = true;
+}
+
+void ACPP_Character::SetMovementRotate(bool bORT, float rotationRate)
+{
+	GetCharacterMovement()->bOrientRotationToMovement = bORT;
+	GetCharacterMovement()->RotationRate.Yaw = rotationRate;
+}
+
+void ACPP_Character::LookAt()
+{
+	FRotator currentRot = GetActorRotation();
+
+	FRotator AimRotation = GetBaseAimRotation();
+	FRotator newRot;
+	if (GetCharacterMovement()->Velocity.Length() == 0 || CharacterState != ECharacterStateTypes::Aim)
+	{
+		return;
+	}
+	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(GetCharacterMovement()->Velocity);
+	newRot.Yaw = currentRot.Yaw + UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;;
+	SetActorRotation(newRot);
 }
 
 void ACPP_Character::ResetHitResultState()
@@ -513,7 +568,7 @@ void ACPP_Character::SetStateEquipped()
 	CharacterState = ECharacterStateTypes::Equiped;
 
 	PlayEquipMontage("Equip");
-	SmoothSpringArmOffset(SpringArmSocketOffsetYValue, false);
+	SmoothSpringArmOffset(SpringArmSocketOffsetYValue);
 
 	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
 	playercontroller->SetHUDVisibility(true);
@@ -526,7 +581,7 @@ void ACPP_Character::SetStateUnEquipped()
 	CharacterState = ECharacterStateTypes::UnEquiped;
 
 	PlayEquipMontage("UnEquip");
-	SmoothSpringArmOffset(0, true);
+	SmoothSpringArmOffset(0);
 
 	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
 	playercontroller->SetHUDVisibility(false);
@@ -560,7 +615,7 @@ AWeapon* ACPP_Character::GetEquippedWeapon()
 
 bool ACPP_Character::CanAttackState()
 {
-	return CharacterState == ECharacterStateTypes::Equiped 
+	return CharacterState != ECharacterStateTypes::UnEquiped 
 		&& ActionState == ECharacterActionState::Normal
 		&& PressFireKey;
 }
@@ -595,7 +650,7 @@ void ACPP_Character::PlayEquipMontage(FName NotifyName)
 	}
 }
 
-void ACPP_Character::PlayFireMontage(UAnimMontage* montage)
+void ACPP_Character::PlayAnimMontage(UAnimMontage* montage)
 {
 	if(IsValid(montage))
 	{
@@ -635,6 +690,12 @@ void ACPP_Character::EquippingEnd()
 {
 	UE_LOG(LogTemp, Display, TEXT("EquippingEnd!"));
 	ActionState = ECharacterActionState::Normal;
+}
+
+void ACPP_Character::DodgeEnd()
+{
+	ActionState = ECharacterActionState::Normal;
+	WARNINGLOG(TEXT("bOrientRotationToMovement is true"))
 }
 
 void ACPP_Character::SetMouseRate()
@@ -745,9 +806,9 @@ float ACPP_Character::ClampRnage(float value)
 	return  FMath::GetMappedRangeValueClamped(Input, Output, value);
 }
 
-void ACPP_Character::SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement)
+void ACPP_Character::SmoothSpringArmOffset(float NewYoffset)
 {
-	GetCharacterMovement()->bOrientRotationToMovement = bOrientRotationToMovement;
+	//GetCharacterMovement()->bOrientRotationToMovement = bOrientRotationToMovement;
 	CameraManager->NewValue = NewYoffset;
 }
 

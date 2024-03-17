@@ -19,6 +19,8 @@ public:
 	virtual void NativeInitializeAnimation() override;//== beginplay
 	virtual void NativeUpdateAnimation(float DeltaTime) override;//==tick
 
+	void SetIsMoving(bool isMove) { isMoving = isMove; }
+
 	UPROPERTY(BlueprintReadOnly)
 		class ACPP_Character* MyCharacter;
 

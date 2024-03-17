@@ -26,6 +26,7 @@ void UCPP_AnimInstance::NativeUpdateAnimation(float DeltaTime)
 	{
 		Velocity = MyCharacterMovement->Velocity;
 		GroundSpeed = UKismetMathLibrary::VSizeXY(MyCharacterMovement->Velocity);
+		isMoving = MyCharacter->GetPlayerMoveState();
 		Angle = GetAngle2(); 
 		isFalling = MyCharacterMovement->IsFalling();
 		CharacterState = MyCharacter->GetCharacterState();

@@ -6,6 +6,14 @@
 
 ## 업데이트 정보
 
+2024/03/17
+Dodge 애니메이션 추가 및 그로인한 캐릭터 상태 변경 [영상]<https://youtu.be/yWqI1j-HFaA>
+
+스노우브레이크 게임의 Dodge조작을 참고
+
+1. 기존: UnEquiped과 Equiped 상태로 나눴지만 상태를 스노우브레이크를 참고하여 UnEquiped,	Equiped, Aim 으로 세분화.
+OrientRotationToMovement의 활성화를 Equiped에서 Aim으로 변경.
+
 2023/10/31
 
 데미지 적용 및 Mover/MoveObject 리펙토링

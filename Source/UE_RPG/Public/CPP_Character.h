@@ -48,6 +48,9 @@ public:
 		class UInputAction* CrouchAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+		class UInputAction* DodgeToggle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* AttackAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -55,6 +58,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* InventoryToggle;
+
 
 	/**Montage*/
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
@@ -65,6 +69,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* AimingFireMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+		class UAnimMontage* DodgeMontage;
 
 	/**main panel widget*/
 	UPROPERTY(EditAnywhere, Category = "Main Widget")
@@ -101,13 +108,14 @@ public:
 	void Attack(const FInputActionValue& Value);
 	void Aiming(const FInputActionValue& Value);
 	void SetCrouch(const FInputActionValue& Value);
+	void Dodge(const FInputActionValue& Value);
 	void InventoryVisibility(const FInputActionValue& Value);
 
 	/**trace*/
 	void GetViewPointVector(FVector& Location, FRotator& Rotation);
 
 	/**camera*/
-	void SmoothSpringArmOffset(float NewYoffset, bool bOrientRotationToMovement);
+	void SmoothSpringArmOffset(float NewYoffset);
 
 	bool PressKey(const FInputActionValue& Value);
 	class AWeapon* isWeapon(AActor* hitobject) const;
@@ -116,6 +124,8 @@ public:
 	void ActionWeaponAbility();
 	void FireWeapon();
 	void CanTrigger();
+	void SetMovementRotate(bool bORT, float rotationRate);
+	void LookAt();
 	
 
 	void ResetHitResultState();
@@ -135,7 +145,7 @@ public:
 
 	/**Montage*/
 	void PlayEquipMontage(FName NotifyName);
-	void PlayFireMontage(UAnimMontage* montage);
+	void PlayAnimMontage(UAnimMontage* montage);
 
 	UFUNCTION(BlueprintCallable)
 		void HoldWeapon();
@@ -145,6 +155,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void EquippingEnd();
+
+	UFUNCTION(BlueprintCallable)
+		void DodgeEnd();
 
 	/**mouse*/
 	void SetMouseRate();
@@ -161,6 +174,7 @@ public:
 	FORCEINLINE void IncreasePlayerHP(const uint32 value) { Health += value; }
 	FORCEINLINE void DecreasePlayerHP(const uint32 value) { Health -= value; }
 	FORCEINLINE int32 GetPlayerATK() { return PlayerATK; }
+	FORCEINLINE bool GetPlayerMoveState() { return bMoving; }
 	
 	/**inventory*/
 	void HideGameInventory();
@@ -182,6 +196,7 @@ private:
 	/**character states - weapon*/
 	bool PressFireKey = false;
 	bool bTrigger = true;
+	bool bMoving = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
 		int32 Health = 0;
@@ -193,6 +208,10 @@ private:
 		float FireRate = 0.3f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
 		float TriggerRate = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
+		float DefaultMRR = 500.f;//MovementRotationRate
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
+		float FocusingMRR = 3000.f;//MovementRotationRate
 
 	float MoveDelfaultSpeed = 400.f;
 	float MoveRunSpeed = 600.f;

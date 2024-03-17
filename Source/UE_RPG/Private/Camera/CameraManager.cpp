@@ -72,7 +72,7 @@ void UCameraManager::SpringArmZOffsetFix(float deltaTime)
 
 void UCameraManager::SmoothCameraFOV(float DeltaTime)
 {
-	if (isAiming && CharacterState == ECharacterStateTypes::Equiped)
+	if (isAiming && CharacterState != ECharacterStateTypes::UnEquiped)
 	{
 		CameraCurrentFOV = FMath::FInterpTo(
 			CameraCurrentFOV,
