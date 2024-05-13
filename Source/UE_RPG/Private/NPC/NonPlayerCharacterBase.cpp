@@ -1,19 +1,32 @@
 #include "NPC/NonPlayerCharacterBase.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+
 #include "NPC/HealthBarComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Animations/CPP_NPCAnimInstance.h"
 #include "Object/Mover.h"
+#include "CPP_Character.h"
 
 ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 {
 	//PrimaryActorTick.bCanEverTick = true;
-
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-
 	HealthBarComponent = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HPBar"));
 	HealthBarComponent->SetupAttachment(GetRootComponent());
 
 	Mover = CreateDefaultSubobject<UMover>(TEXT("Moving component"));
+	
+	/**set Collision*/
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	HealthBarComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	//CharacterMovement Settting Base 
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+	GetCharacterMovement()->RotationRate.Yaw = 180;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 
@@ -22,24 +35,41 @@ void ANonPlayerCharacterBase::BeginPlay()
 	Super::BeginPlay();
 
 	NPCAnimInstance = Cast<UCPP_NPCAnimInstance>(GetMesh()->GetAnimInstance());
-	CurrentHP = MaxHealth;
+	if (!IsValid(NPCAnimInstance))
+	{
+		WARNINGLOG(TEXT("NPCAnimInstance is not valid!!"))
+	}
+	else
+	{
+		DISPLAYLOG(TEXT("NPCAnimInstance is nvalid!!"))
+	}
 
-	UpdateHealthPercent(CurrentHP);
-	
+	if (IsValid(HealthBarComponent))
+	{
+		CurrentHP = MaxHealth;
+		UpdateHealthPercent(CurrentHP);
+		SetHealthBarWidget(false);
+	}
 }
 
 float ANonPlayerCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	SetHealthBarWidget(true);
 
 	CurrentHP = FMath::Clamp(CurrentHP - DamageAmount, 0.f, MaxHealth);
 	UpdateHealthPercent(CurrentHP);
-
+	WARNINGLOG(TEXT("%f"), CurrentHP)
 	if (CurrentHP <= 0)
 	{
+		WARNINGLOG(TEXT("DieNPC"))
 		DieNPC();
 	}
 
 	return DamageAmount;
+}
+
+void ANonPlayerCharacterBase::UpdateState()
+{
 }
 
 void ANonPlayerCharacterBase::UpdateHealthPercent(float currentAmount)
@@ -50,7 +80,6 @@ void ANonPlayerCharacterBase::UpdateHealthPercent(float currentAmount)
 		return;
 	}
 		
-	
 	float hp = currentAmount / MaxHealth;
 
 	HealthBarComponent->SetHealthPercent(hp);
@@ -66,19 +95,93 @@ void ANonPlayerCharacterBase::DieNPC()
 	NPCAnimInstance->Montage_Play(DeathActionMontage);
 	
 	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel;
-	TimerDel.BindUFunction(this, TEXT("MoveDown"));
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 2.f, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle,this, &ANonPlayerCharacterBase::MoveDown, 
+		DeathActionMontage->GetPlayLength() * 2.f, false);
 }
 
 void ANonPlayerCharacterBase::SetStateDeath()
 {
-	if (IsValid(HealthBarComponent))
-		HealthBarComponent->SetVisibility(false);
-
-	CharaterActionState = ECharacterActionState::Death;
-	NPCAnimInstance->SetNPCActionState(CharaterActionState);
+	SetHealthBarWidget(false);
+	NPCState = ENPCState::Death;
+	NPCAnimInstance->SetNPCState(NPCState);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ANonPlayerCharacterBase::LookAtTarget()
+{
+	if (!IsValid(Target))
+		return;
+
+	const FVector forward = FVector(GetActorForwardVector().X, GetActorForwardVector().Y, 0.f);
+	const FVector target = FVector(Target->GetActorLocation().X, Target->GetActorLocation().Y, 0.f);
+	const FVector targetDir = (Target->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+
+	const float dtheta = FVector::DotProduct(GetActorForwardVector(), targetDir);
+	double theta = FMath::Acos(dtheta);
+	theta = FMath::RadiansToDegrees(theta);
+	TurningValue = theta;
+
+	const FVector CrossProduct = FVector::CrossProduct(forward, targetDir);
+	//WARNINGLOG(TEXT("CrossProduct: %f"), CrossProduct.Z)
+	if (CrossProduct.Z < 0)
+	{
+		//WARNINGLOG(TEXT("Rotation: %f"), GetActorRotation().Yaw)
+		TurnLeft();
+	}
+	else 
+	{
+		//WARNINGLOG(TEXT("Rotation: %f"), GetActorRotation().Yaw)
+		TurnRight();
+	}
+}
+
+void ANonPlayerCharacterBase::TurnRight()
+{
+	FRotator newRot = GetActorRotation();
+	newRot.Yaw += TurnSpeed;
+	CurrentTurningValue += TurnSpeed;
+	//WARNINGLOG(TEXT("Right TurnDest: %f"), newRot.Yaw)
+
+	if ((CurrentTurningValue >= TurningValue) ||
+		(NPCState == ENPCState::Death))
+	{
+		CurrentTurningValue = 0;
+		return;
+	}
+	SetActorRotation(newRot);
+
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ANonPlayerCharacterBase::TurnRight, 0.01f, false);
+}
+
+void ANonPlayerCharacterBase::TurnLeft()
+{
+	FRotator newRot = GetActorRotation();
+	newRot.Yaw -= TurnSpeed;
+	CurrentTurningValue += TurnSpeed;
+	//WARNINGLOG(TEXT("Left TurnDest: %f"), newRot.Yaw)
+
+	if ((CurrentTurningValue >= TurningValue) ||
+		(NPCState == ENPCState::Death))
+	{
+		CurrentTurningValue = 0;
+		return;
+	}
+
+	SetActorRotation(newRot);
+
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ANonPlayerCharacterBase::TurnLeft, 0.01f, false);
+}
+
+void ANonPlayerCharacterBase::ClearTargetInfo()
+{
+	Target = nullptr;
+}
+
+void ANonPlayerCharacterBase::SetHealthBarWidget(bool bvisibility)
+{
+	HealthBarComponent->SetVisibility(bvisibility);
 }
 
 void ANonPlayerCharacterBase::MoveDown()
@@ -86,7 +189,7 @@ void ANonPlayerCharacterBase::MoveDown()
 	if (!IsValid(Mover))
 		return;
 
-	Mover->MoveStart();
+	Mover->MoveDown();
 }
 
 

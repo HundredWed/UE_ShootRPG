@@ -11,11 +11,14 @@ UMover::UMover()
 void UMover::BeginPlay()
 {
 	Super::BeginPlay();
-
-	Pos = GetOwner()->GetActorLocation();
-	TagetPos = Pos + MoveOffset;
 }
 
+
+void UMover::MoveDown()
+{
+	TagetPos = GetOwner()->GetActorLocation() + MoveOffset;
+	MoveStart();
+}
 
 void UMover::MoveStart()
 {
@@ -28,14 +31,12 @@ void UMover::MoveStart()
 	if ((int32)currentPos.Z == (int32)TagetPos.Z)
 	{
 		//SCREENLOG(INDEX_NONE, 5.f, FColor::Blue, FString::Printf(TEXT("%f / %f"), currentPos.Z, newPos.Z));
-		GetOwner()->SetActorHiddenInGame(true);
+		//GetOwner()->SetActorHiddenInGame(true);
 		return;
 	}
 		
 	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel;
-	TimerDel.BindUFunction(this, TEXT("MoveStart"));
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 0.001f, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UMover::MoveStart, 0.001f, false);
 }
 
 

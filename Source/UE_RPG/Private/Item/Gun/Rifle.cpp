@@ -7,7 +7,7 @@
 
 ARifle::ARifle()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	SpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnPoint"));
 	SpawnPoint->SetupAttachment(WeaponMesh);
 }
@@ -25,14 +25,14 @@ void ARifle::PullTrigger()
 	}
 	
 	FHitResult hitresult;
-	FVector hitpoint;
+	FVector shootpoint;
 
-	ViewPointTrace(hitresult, hitpoint);
-	GunTrace(hitresult, hitpoint);
+	ViewPointTrace(hitresult, shootpoint);
+	GunTrace(hitresult, shootpoint);
 
 	TakeHit(hitresult, SpawnPoint->GetComponentLocation());
 	
-	ShootEffect(hitpoint);
+	ShootEffect(shootpoint);
 
 	
 
@@ -98,27 +98,28 @@ void ARifle::GunTrace(FHitResult& hitresult, FVector& endpoint)
 	}
 }
 
-void ARifle::ShootEffect(const FVector& hitpoint)
+void ARifle::ShootEffect(const FVector& shootpoint)
 {
 	if (IsValid(FireParticle))
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, hitpoint, FRotator::ZeroRotator, ParticleSize);
+		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, shootpoint, FRotator::ZeroRotator, ParticleSize);
 	}
 
 	FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
 	UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
 	if (IsValid(Beam))
 	{
-		Beam->SetVectorParameter(FName("Target"), hitpoint);
+		Beam->SetVectorParameter(FName("Target"), shootpoint);
 	}
 }
 
-void ARifle::TakeHit(FHitResult& hitresult, const FVector& hitpoint)
+void ARifle::TakeHit(FHitResult& hitresult, const FVector& shootpoint)
 {
 	AEnemyBase* enemy = Cast<AEnemyBase>(hitresult.GetActor());
-	if (IsValid(enemy) && enemy->GetHit(hitpoint))
+	if (IsValid(enemy) && enemy->GetHit(shootpoint))
 	{
 		UGameplayStatics::ApplyDamage(enemy, FinalDamage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
+		SpawnDamageUI(hitresult.ImpactPoint, FinalDamage);
 	}
 }
 

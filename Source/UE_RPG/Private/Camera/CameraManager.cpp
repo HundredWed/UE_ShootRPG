@@ -31,7 +31,7 @@ void UCameraManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (MyCharacter)
+	if (IsValid(MyCharacter))
 	{
 		isAiming = MyCharacter->GetIsAiming();
 		CharacterState = MyCharacter->GetCharacterState();

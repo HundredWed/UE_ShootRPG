@@ -7,9 +7,8 @@
 #include "NPC/HitEventInterface.h"
 #include "EnemyBase.generated.h"
 
-/**
- * 
- */
+class ACPP_Character;
+
 UCLASS()
 class UE_RPG_API AEnemyBase : public ANonPlayerCharacterBase, public IHitEventInterface
 {
@@ -22,23 +21,45 @@ public:
 	virtual bool GetHit(const FVector& targetLocation = FVector::Zero()) override;
 
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
-protected:
+	void Spawn();
+	void UnSpawn();
+	void SetTarget(ACPP_Character* target);
+	FORCEINLINE void IsOrderfromSpawnArea(bool order) { bOrderfromSpawnArea = order; }
+
+	/**ai*/
+	void NoDamaged(const FVector& targetLocation);
+	void BehaviorMode(ENPCState enemyState);
+	float CheckDist();
+	bool CanUpdateState();
+
+	/**action*/
+	void Patrol();
+	void ChaseTarget();
+	void ThinkAction();
 
 	UFUNCTION(BlueprintCallable)
 		void SetActionStateNormal();
+	
 
-	void NoDamaged(const FVector& targetLocation);
+protected:
 
-	void LooAtTarget(const FVector& targetLocation);
-	void TurnAtHitDir(const double theta);
-	void TurnAtHitDir_Ver1(const FRotator& enemyrot);
+	UFUNCTION()
+	virtual	void UpdateState() override;
 
 private:
 
-	UPROPERTY(EditAnywhere, Category = "NPC State", meta = (AllowPrivateAccess = "true"))
-		double NoDamagedDistance = 500.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+		float NoDamagedDistance = 500.f;
 
-	float TurnSpeed = 15.f;
-	float CurrentTurningValue = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+		float CombatDis = 100.f;
+
+	UPROPERTY()
+		class AAIController* EnemyController;
+
+	FVector SpawnPos;
+	int8 PrevRandomTarget = -1;
+	bool bOrderfromSpawnArea = false;
 };

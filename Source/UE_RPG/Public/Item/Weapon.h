@@ -31,8 +31,19 @@ public:
 	UPROPERTY(EditAnywhere, Category = "FireEffect")
 		class UParticleSystem* FireParticle;
 
+	/**widget*/
+	UPROPERTY(VisibleAnywhere, Category = "DamageWidget")
+		class UCPP_DamageUI* DamageWidget;
+
+	UPROPERTY(EditAnywhere, Category = "DamgeWidget")
+		TSubclassOf< class UCPP_DamageUI> DamageWidgetclass;
+	
+	UPROPERTY()
+		TMap<UCPP_DamageUI*,FVector> DamageWidgets;
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float deltatime) override;
 
 	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 		AActor* OtherActor, 
@@ -45,6 +56,13 @@ protected:
 		AActor* OtherActor, 
 		UPrimitiveComponent* OtherComp, 
 		int32 OtherBodyIndex) override;
+
+	/**damage ui*/
+	void SpawnDamageUI(const FVector pos, float damage);
+	void UpdateDamageUIPos();
+
+	UFUNCTION()
+	void DestroyDamageUI(UCPP_DamageUI* ui);
 
 	/**weapon states*/
 	bool bActiveWeapon = true;

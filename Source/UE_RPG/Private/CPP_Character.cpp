@@ -314,10 +314,12 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 	bool bEquipedWeapon = IsValidEquipWeapon();
 	if (CanEquipState() && bEquipedWeapon)
 	{
+		SCREENLOG(INDEX_NONE, 5.f, FColor::Blue, TEXT("Equipped!!"));
 		SetStateEquipped();
 	}
 	else if(CanUnEquipState() && bEquipedWeapon)
 	{
+		SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("UnEquipped!!"));
 		SetStateUnEquipped();
 	}
 }
@@ -325,7 +327,7 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 void ACPP_Character::Attack(const FInputActionValue& Value)
 {
 	Rifle = Cast<ARifle>(EquippedWeapon);
-	if(!IsValid(Rifle))
+	if(!IsValid(Rifle) || CharacterState == ECharacterStateTypes::UnEquiped)
 		return;
 	
 	PressFireKey = PressKey(Value);
@@ -390,11 +392,12 @@ void ACPP_Character::SetCrouch(const FInputActionValue& Value)
 
 void ACPP_Character::Dodge(const FInputActionValue& Value)
 {
-	if (ActionState != ECharacterActionState::SuperAction)
+	if (ActionState != ECharacterActionState::SuperAction && Stamina >= 10)
 	{
 		bMoving = false;
 		LookAt();
-		PlayAnimMontage(DodgeMontage);
+		PlayMontage(DodgeMontage);
+		Stamina -= 10;
 		ActionState = ECharacterActionState::SuperAction;
 	}
 }
@@ -494,11 +497,11 @@ void ACPP_Character::FireWeapon()
 
 		if (bAiming)
 		{
-			PlayAnimMontage(AimingFireMontage);
+			PlayMontage(AimingFireMontage);
 		}
 		else
 		{
-			PlayAnimMontage(FireMontage);
+			PlayMontage(FireMontage);
 		}
 
 		Rifle->PullTrigger();
@@ -650,7 +653,7 @@ void ACPP_Character::PlayEquipMontage(FName NotifyName)
 	}
 }
 
-void ACPP_Character::PlayAnimMontage(UAnimMontage* montage)
+void ACPP_Character::PlayMontage(UAnimMontage* montage)
 {
 	if(IsValid(montage))
 	{
@@ -695,7 +698,7 @@ void ACPP_Character::EquippingEnd()
 void ACPP_Character::DodgeEnd()
 {
 	ActionState = ECharacterActionState::Normal;
-	WARNINGLOG(TEXT("bOrientRotationToMovement is true"))
+	//DISPLAYLOG(TEXT("bOrientRotationToMovement is true"))
 }
 
 void ACPP_Character::SetMouseRate()
@@ -712,6 +715,10 @@ void ACPP_Character::SetMouseRate()
 
 void ACPP_Character::CalculateCrosshairSpread(float DeltaTime)
 {
+
+	if (!bMoving)
+		return;
+
 	FVector2D WalkSpeedRange{ 0.f, 600.f };
 	FVector2D VelocityMultiplierRange{ 0.f, 1.f };
 	FVector Velocity{ GetVelocity() };

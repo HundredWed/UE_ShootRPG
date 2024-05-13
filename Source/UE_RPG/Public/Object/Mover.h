@@ -16,25 +16,20 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void MoveStart();
 
 public:	
 
-	UFUNCTION(BlueprintCallable)
-		void MoveStart();
-
-
+	void MoveDown();
+	
 	UPROPERTY(EditAnywhere)
 		FVector MoveOffset = FVector::Zero();
-		
-	UPROPERTY(VisibleAnywhere)
-		FVector TagetPos = FVector::Zero();
 
 	UPROPERTY(EditAnywhere)
 		float MoveTime = 4;
 
-	UPROPERTY(VisibleAnywhere)
-		FVector Pos = FVector::Zero();
-
 private:
-		
+
+	UPROPERTY(VisibleAnywhere)
+	FVector TagetPos = FVector::Zero();
 };

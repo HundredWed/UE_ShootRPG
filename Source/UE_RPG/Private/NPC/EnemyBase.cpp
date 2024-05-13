@@ -6,10 +6,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Animations/CPP_NPCAnimInstance.h"
+#include "AIController.h"
 
-#define THETA_LEFT(theta) theta <= -70.f && theta >= -110.f 
-#define THETA_RIGHT(theta) theta >= 70.f && theta <= 110.f 
-#define THETA_BACK(theta) theta <= -160.f || theta >= 160.f 
+#include "CPP_Character.h"
+
+#define NO_TARGET -1
 
 AEnemyBase::AEnemyBase()
 {
@@ -22,20 +23,67 @@ void AEnemyBase::BeginPlay()
 
 	if (!IsValid(HitActionMontage_NoDamaged) && !IsValid(HitActionMontage))
 	{
-		WARNINGLOG(TEXT("Enemy HitMontage is not!!"));
+		WARNINGLOG(TEXT("Enemy HitMontage is not Valid!!"));
+	}
+
+	EnemyController = Cast<AAIController>(GetController());
+	if (!IsValid(EnemyController))
+	{
+		WARNINGLOG(TEXT("Enemy EnemyController is not Valid!!"));
+		return;
 	}
 
 	CharaterType = ECharacterTypes::NPC_Monster;
+	SpawnPos = GetActorLocation();
+	SetActorTickEnabled(false);
+}
+
+void AEnemyBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (NPCState == ENPCState::Chase)
+	{
+		ThinkAction();
+	}
 }
 
 void AEnemyBase::SetActionStateNormal()
 {
-	CharaterActionState = ECharacterActionState::Normal;
+	ENPCActionState = ENPCActionState::Normal;
+}
+
+void AEnemyBase::UpdateState()
+{	
+	if (NPCState == ENPCState::Death)
+	{
+		BehaviorMode(NPCState = ENPCState::Death);
+	}
+	else if (!IsValid(Target))
+	{
+		ClearTargetInfo();
+		BehaviorMode(NPCState = ENPCState::Patrol);
+	}
+	else if (IsValid(Target))
+	{
+		float dis = CheckDist();
+		if (dis < 0)
+			return;
+
+		if (dis > CombatDis)
+		{
+			BehaviorMode(NPCState = ENPCState::Chase);
+		}
+		else
+		{
+			BehaviorMode(NPCState = ENPCState::Combat);
+		}
+	}
 }
 
 bool AEnemyBase::GetHit(const FVector& targetLocation)
 {
-	if (CharaterActionState == ECharacterActionState::Death)
+	if (NPCState == ENPCState::Death)
 		return false;
 
 	if (!IsValid(NPCAnimInstance))
@@ -44,7 +92,7 @@ bool AEnemyBase::GetHit(const FVector& targetLocation)
 		return false;
 	}
 
-	double dis = (GetActorLocation() - targetLocation).Length();
+	float dis = (GetActorLocation() - targetLocation).Length();
 
 	if (dis >= NoDamagedDistance)
 	{
@@ -59,109 +107,113 @@ bool AEnemyBase::GetHit(const FVector& targetLocation)
 
 void AEnemyBase::NoDamaged(const FVector& targetLocation)
 {
-	if (IsValid(HitActionMontage_NoDamaged) && CharaterActionState == ECharacterActionState::Normal)
-	{
-		//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Ouch!!"));
-		NPCAnimInstance->Montage_Play(HitActionMontage_NoDamaged);
-		LooAtTarget(targetLocation);
-		CharaterActionState = ECharacterActionState::Action;
-	}
+	SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Ouch!!"));
+	NPCAnimInstance->Montage_Play(HitActionMontage_NoDamaged);
 }
 
-
-void AEnemyBase::LooAtTarget(const FVector& targetLocation)
+void AEnemyBase::BehaviorMode(ENPCState enemyState)
 {
-	const FVector forward = GetActorForwardVector();
-
-	const FVector impactLowered(targetLocation.X, targetLocation.Y, GetActorLocation().Z);
-	const FVector toHit = (impactLowered - GetActorLocation()).GetSafeNormal();
-
-	const double cosTheta = FVector::DotProduct(forward, toHit);
-	double theta = FMath::Acos(cosTheta);
-	theta = FMath::RadiansToDegrees(theta);
-
-	const FVector CrossProduct = FVector::CrossProduct(forward, toHit);
-	if (CrossProduct.Z < 0)
-	{
-		theta *= -1.f;
-	}
-
-	CurrentTurningValue = 0;
-
-	if (THETA_LEFT(theta))
-	{
-		//enemyrot.Yaw += Theta;
-		//SetActorRotation(enemyrot);
-		TurnAtHitDir(theta);
-	}
-	else if (THETA_RIGHT(theta))
-	{
-		//enemyrot.Yaw += Theta;
-		//SetActorRotation(enemyrot);
-		TurnAtHitDir(theta);
-	}
-	else if (THETA_BACK(theta))
-	{
-		//enemyrot.Yaw += Theta;
-		//SetActorRotation(enemyrot);
-		TurnAtHitDir(theta);
-	}
-}
-
-void AEnemyBase::TurnAtHitDir(const double theta)
-{
-	if (CurrentTurningValue > fabs(theta))
-	{
-		WARNINGLOG(TEXT("TurnAtHitDir End!!!"));
-		return;
-	}
-		
-	if (theta > 0)
-	{
-		CurrentTurningValue += TurnSpeed;
-
-		FRotator rot = GetActorRotation();
-		rot.Yaw += TurnSpeed;
-		SetActorRotation(rot);
-	}
-	else if (theta < 0)
-	{
-		CurrentTurningValue += TurnSpeed;
-
-		FRotator rot = GetActorRotation();
-		rot.Yaw -= TurnSpeed;
-		SetActorRotation(rot);
-	}
-
 	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel;
-	TimerDel.BindLambda([this, theta]() {TurnAtHitDir(theta); });
-
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 0.01f, false);
-
+	float animLength = CombatActionMontage->GetPlayLength() + 0.05f;
+	switch (enemyState)
+	{
+	case ENPCState::Patrol:
+		Patrol();
+		SetHealthBarWidget(true);
+		bOrderfromSpawnArea = false;
+		break;
+	case ENPCState::Combat:
+		NPCAnimInstance->Montage_Play(CombatActionMontage);
+		EnemyController->StopMovement();
+		LookAtTarget();
+		if (CanUpdateState())
+		{
+			// юс╫ц
+			GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::UpdateState, animLength, false);
+		}
+		break;
+	case ENPCState::Chase:
+		SetHealthBarWidget(true);
+		ChaseTarget();
+		break;
+	case ENPCState::Death:
+		EnemyController->StopMovement();
+		SetActorTickEnabled(false);
+		break;
+	default:
+		break;
+	}
 }
 
-void AEnemyBase::TurnAtHitDir_Ver1(const FRotator& enemyrot) 
+
+void AEnemyBase::Spawn()
 {
-	//SCREENLOG(INDEX_NONE, 5.f, FColor::Black, FString::Printf(TEXT("TurnAtHitDir")));
-	//DISPLAYLOG(TEXT("TurnAtHitDir"));
+	SetActorHiddenInGame(false);
+}
 
-	FRotator currentRot = GetActorRotation();
-	float newYaw = FMath::FInterpTo(currentRot.Yaw, enemyrot.Yaw, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 15.f);
+void AEnemyBase::UnSpawn()
+{
+	SetActorHiddenInGame(true);
+}
 
-	if (((int32)(fabs(newYaw))) == ((int32)(fabs(enemyrot.Yaw))))
-	{
-		WARNINGLOG(TEXT("TurnAtHitDir End!!"));
+float AEnemyBase::CheckDist()
+{
+	if (!IsValid(Target))
+		return NO_TARGET;
+
+	FVector targetPos = Target->GetActorLocation();
+	return (targetPos - GetActorLocation()).Length();
+}
+
+bool AEnemyBase::CanUpdateState()
+{
+	return !bOrderfromSpawnArea && 
+		ENPCActionState != ENPCActionState::Action &&
+		NPCState != ENPCState::Death;
+}
+
+void AEnemyBase::SetTarget(ACPP_Character* target)
+{
+	Target = target;
+	UpdateState();
+}
+
+void AEnemyBase::Patrol()
+{
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalLocation(SpawnPos);
+	MoveRequest.SetAcceptanceRadius(3.f);
+	EnemyController->MoveTo(MoveRequest);
+
+	if (CurrentHP != MaxHealth)
+		CurrentHP = MaxHealth;
+
+	UpdateHealthPercent(CurrentHP);
+}
+
+void AEnemyBase::ChaseTarget()
+{
+	if (!IsValid(Target))
 		return;
+
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalActor(Target);
+	MoveRequest.SetAcceptanceRadius(3.f);
+	EnemyController->MoveTo(MoveRequest);
+
+	SetActorTickEnabled(true);
+}
+
+void AEnemyBase::ThinkAction()
+{
+	float dis = CheckDist();
+
+	if (dis < 0)
+		return;
+
+	if (dis < CombatDis)
+	{
+		SetActorTickEnabled(false);
+		UpdateState();
 	}
-
-	FRotator NewRot{ 0, newYaw ,0 };
-
-	SetActorRotation(NewRot);
-
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel;
-	TimerDel.BindLambda([this, enemyrot]() {TurnAtHitDir_Ver1(enemyrot); });
-
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 0.01f, false);
 }

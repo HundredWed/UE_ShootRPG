@@ -24,8 +24,8 @@ public:
 	void PullTrigger();
 	void ViewPointTrace(FHitResult& hitresult, FVector& endpoint);
 	void GunTrace(FHitResult& hitresult, FVector& endpoint);
-	void ShootEffect(const FVector& hitpoint);
-	void TakeHit(FHitResult& hitresult , const FVector& hitpoint);
+	void ShootEffect(const FVector& shootpoint);
+	void TakeHit(FHitResult& hitresult , const FVector& shootpoint);
 
 
 	void SpreadBulletRandomRange(FRotator& randDir);

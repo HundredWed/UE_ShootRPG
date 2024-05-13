@@ -1,6 +1,18 @@
 #pragma once
 
 UENUM(BlueprintType)
+enum class ECharacterTypes : uint8
+{
+	Player,
+	NPC_Monster,
+	NPC_Person,
+
+	Type_None
+};
+
+//Player
+//====================================================================
+UENUM(BlueprintType)
 enum class ECharacterStateTypes : uint8
 {
 	UnEquiped,
@@ -16,13 +28,28 @@ enum class ECharacterActionState : uint8
 	SuperAction,/*can't working**/
 	Death
 };
+//====================================================================
+
+
+//NPC
+//====================================================================
+UENUM(BlueprintType)
+enum class ENPCState : uint8
+{
+	Normal,
+	Patrol,
+	Combat,
+	Chase,
+	Death
+};
 
 UENUM(BlueprintType)
-enum class ECharacterTypes : uint8
+enum class ENPCActionState : uint8
 {
-	Player,
-	NPC_Monster,
-	NPC_Person,
-
-	Type_None
+	Normal,
+	Action,
+	SuperAction
 };
+//====================================================================
+
+

@@ -58,7 +58,7 @@ void AMoveObject::AttachKey()
 		Actor->SetActorLocation(AttachPoint->GetComponentLocation());
 		Actor->AttachToComponent(AttachPoint, FAttachmentTransformRules::KeepWorldTransform);
 
-		Mover->MoveStart();
+		Mover->MoveDown();
 		moving = true;
 	}
 }

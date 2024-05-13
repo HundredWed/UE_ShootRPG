@@ -145,7 +145,7 @@ public:
 
 	/**Montage*/
 	void PlayEquipMontage(FName NotifyName);
-	void PlayAnimMontage(UAnimMontage* montage);
+	void PlayMontage(UAnimMontage* montage);
 
 	UFUNCTION(BlueprintCallable)
 		void HoldWeapon();
@@ -199,9 +199,11 @@ private:
 	bool bMoving = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
-		int32 Health = 0;
+		int32 Health = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
-		int32 Mana = 0;
+		int32 Mana = 100;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
+		int32 Stamina = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
 		int32 PlayerATK = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))

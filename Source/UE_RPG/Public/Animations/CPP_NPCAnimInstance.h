@@ -1,10 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "CharacterStates.h"
+#include "UE_RPG/UtilityMecro.h"
 #include "CPP_NPCAnimInstance.generated.h"
 
 /**
@@ -17,15 +16,46 @@ class UE_RPG_API UCPP_NPCAnimInstance : public UAnimInstance
 	
 public:
 	virtual void NativeInitializeAnimation() override;
-	//virtual void NativeUpdateAnimation(float DeltaTime) override;
+	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
-	void SetNPCActionState(ECharacterActionState state);
 
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		class UCharacterMovementComponent* MyCharacterMovement;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		float GroundSpeed = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		float Angle = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		float MovementYawOffset = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		float MovementPrevYawOffset = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		float RootYawOffset = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		float Pich = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		FVector Velocity = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		bool isFalling = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		bool isMoving = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Movement | CharacterState")
+		ENPCState NPCState = ENPCState::Normal;
+
+	float GetAngle2();
+	void SetNPCState(ENPCState state) { NPCState = state; }
 private:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		class AEnemyBase* NPCPawn;
-
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		ECharacterActionState NPCActionState = ECharacterActionState::Normal;
+		class ANonPlayerCharacterBase* NPC;
 };

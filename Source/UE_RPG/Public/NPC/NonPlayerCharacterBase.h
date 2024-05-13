@@ -33,6 +33,8 @@ public:
 		class UAnimMontage* HitActionMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* DeathActionMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+		class UAnimMontage* CombatActionMontage;
 
 protected:
 	
@@ -49,27 +51,41 @@ protected:
 		int32 DEF = 10;
 	UPROPERTY(EditAnywhere, Category = "NPC State")
 		ECharacterTypes CharaterType = ECharacterTypes::Type_None;
-	UPROPERTY(EditAnywhere, Category = "NPC State")
-		ECharacterActionState CharaterActionState = ECharacterActionState::Normal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NPC State")
+		ENPCActionState ENPCActionState = ENPCActionState::Normal;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NPC State")
+		ENPCState NPCState = ENPCState::Patrol;
+
+	UPROPERTY(VisibleAnywhere, Category = "Enemy Info")
+		class ACPP_Character* Target = nullptr;
 
 	FVector HitDir = FVector::Zero();
 	float CurrentHP = 0;
 
 	virtual void BeginPlay() override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	
+	virtual	void UpdateState();
+
 	void UpdateHealthPercent(float currentAmount);
 	void DieNPC();
 	void SetStateDeath();
+	void LookAtTarget();
+	void TurnRight();
+	void TurnLeft();
+	void ClearTargetInfo();
+	void SetHealthBarWidget(bool bvisibility);
+
 
 	UFUNCTION()
 		void MoveDown();
 
-public:	
 	
-	
-
 private:
 
-	
+	float CurrentTurningValue = 0.f;
+	float TurnSpeed = 5.f;
+	float TurningValue = 0.f;
 
 };

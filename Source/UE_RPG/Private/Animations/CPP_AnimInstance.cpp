@@ -11,7 +11,7 @@ void UCPP_AnimInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	MyCharacter = Cast<ACPP_Character>(TryGetPawnOwner());
-	if (MyCharacter)
+	if (IsValid(MyCharacter))
 	{
 		MyCharacterMovement = MyCharacter->GetCharacterMovement();
 	}
@@ -22,7 +22,7 @@ void UCPP_AnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (MyCharacterMovement)
+	if (IsValid(MyCharacterMovement))
 	{
 		Velocity = MyCharacterMovement->Velocity;
 		GroundSpeed = UKismetMathLibrary::VSizeXY(MyCharacterMovement->Velocity);

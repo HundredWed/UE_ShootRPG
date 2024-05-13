@@ -106,6 +106,6 @@ void USetAmountWidget::ResetCount()
 }
 void USetAmountWidget::SetCnountText(const int32 count)
 {
-	FText textcount = FText::AsNumber(SetAmountCount);
+	FText textcount = FText::AsNumber(count);
 	TextCount->SetText(textcount);
 }
