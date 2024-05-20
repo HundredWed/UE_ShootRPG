@@ -6,9 +6,22 @@
 
 void UCPP_DamageUI::UpdateWidget(const int32 amount)
 {
+	if (!IsValid(DamageText))
+		return;
+
 	FText textcount = FText::AsNumber(amount);
 	DamageText->SetText(textcount);
 
-	FTimerHandle TimerHandle;
-	//GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UCPP_DamageUI::SetHide, 0.8f, false);
+	int32 randomDir = FMath::RandRange(-1, 0);
+
+	if (randomDir == 0)
+	{
+		PlayAnimation(DamageAnimRight);
+	}
+	else
+	{
+		PlayAnimation(DamageAnimLeft);
+	}
+	
+	
 }

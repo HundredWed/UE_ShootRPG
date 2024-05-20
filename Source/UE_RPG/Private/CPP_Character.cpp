@@ -17,6 +17,7 @@
 #include "Item/PickUpItem.h"
 #include "Camera/CameraManager.h"
 #include "Widget/MainPanelWidget.h"
+#include "Widget/NPC/CPP_DamageActor.h"
 #include "Inventory.h"
 #include "Item/WeaponAbiliys/WeaponAbilityBase.h"
 
@@ -104,6 +105,8 @@ void ACPP_Character::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Inventory component not found!!"));
 	}
+
+	StoreDamageUI();
 
 	/**ignore from item trace*/
 	Params.AddIgnoredActor(this);
@@ -803,6 +806,40 @@ void ACPP_Character::SetWeaponAbility(const uint8 id)
 void ACPP_Character::SetFireRate(float rate)
 {
 	FireRate = rate;
+}
+
+void ACPP_Character::StoreDamageUI()
+{
+	UWorld* world = GetWorld();
+	const int32 amount = 50;
+
+	if (IsValid(world) && IsValid(DamageUIActorClass))
+	{
+		for (int32 i = 0; i < amount; i++)
+		{
+			ACPP_DamageActor* damageActor = world->SpawnActor<ACPP_DamageActor>(DamageUIActorClass);
+			DamageUIActors.Push(damageActor);
+		}
+	}
+	else
+	{
+		WARNINGLOG(TEXT("is not valid DamageUIActorClass!!"))
+	}
+}
+
+ACPP_DamageActor* ACPP_Character::GetDamageActor()
+{
+	NextUI = NextUI > (DamageUIActors.Num() - 1) ? 0 : NextUI;
+	ACPP_DamageActor* nextUI = DamageUIActors[NextUI];
+	NextUI++;
+	DISPLAYLOG(TEXT("%d"), NextUI);
+
+	return nextUI;
+}
+
+int32 ACPP_Character::GetDamageUIArrayLength()
+{
+	return DamageUIActors.Num();
 }
 
 float ACPP_Character::ClampRnage(float value)

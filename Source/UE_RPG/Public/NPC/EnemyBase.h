@@ -18,6 +18,9 @@ public:
 
 	AEnemyBase();
 
+
+public:
+
 	virtual bool GetHit(const FVector& targetLocation = FVector::Zero()) override;
 
 	virtual void BeginPlay() override;
@@ -26,6 +29,7 @@ public:
 	void Spawn();
 	void UnSpawn();
 	void SetTarget(ACPP_Character* target);
+	void WeaponReady();
 	FORCEINLINE void IsOrderfromSpawnArea(bool order) { bOrderfromSpawnArea = order; }
 
 	/**ai*/
@@ -56,8 +60,21 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		float CombatDis = 100.f;
 
+	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class ACPP_EnemyCombatBox> CombatBoxClass;
+
+	UPROPERTY()
+		TArray<class ACPP_EnemyCombatBox*> CombatBoxes;
+
 	UPROPERTY()
 		class AAIController* EnemyController;
+	
+	/**data table info*/
+	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+		EEnemyCombatTypes CombatTypes = EEnemyCombatTypes::Dummy;
+	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+		TArray<FName> SocketNames;
+
 
 	FVector SpawnPos;
 	int8 PrevRandomTarget = -1;

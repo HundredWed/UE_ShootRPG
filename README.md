@@ -6,6 +6,14 @@
 
 ## 업데이트 정보
 
+2024/05/20
+[데미지 UI 구현(영상)](https://youtu.be/GoyNYIIh_oI).
+기존의 spawn & destory를한 데미지 UI -> 오브젝트풀링으로 변경.
+데미지 UI를 스크린에 그려 매번 Tick을 이용하여 위치를 업데이트 -> widget을 붙인 actor를 생성하는 것으로 변경. 
+
+기타 몬스터 공격 밑작업 
+
+
 2024/05/13
 몬스터 클래스 로직 전면 수정.
 [몬스터 AI 기반 구현(영상)](https://youtu.be/WZrKghVmXCo).

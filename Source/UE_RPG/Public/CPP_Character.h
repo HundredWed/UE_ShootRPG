@@ -73,9 +73,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* DodgeMontage;
 
-	/**main panel widget*/
-	UPROPERTY(EditAnywhere, Category = "Main Widget")
+	/**widget*/
+	UPROPERTY(EditAnywhere, Category = "Player Widget")
 		TSubclassOf< class UMainPanelWidget> MainPanelclass;
+
+	UPROPERTY(EditAnywhere, Category = "Player Widget")
+		TSubclassOf<class ACPP_DamageActor> DamageUIActorClass;
 
 	/**spring arm*/
 	UPROPERTY(EditAnywhere, Category = "EditValue")
@@ -185,6 +188,11 @@ public:
 	FORCEINLINE const int16 GetInventorySize() { return InventoryAmountOfSlot; }
 	FORCEINLINE const int16 GetInventoryRowSize() { return InventoryRowSize; }
 
+
+	/**damage ui*/
+	void StoreDamageUI();
+	class ACPP_DamageActor* GetDamageActor();
+	int32 GetDamageUIArrayLength();
 private:
 
 	float ClampRnage(float value);
@@ -286,6 +294,9 @@ private:
 	/**widget*/
 	UPROPERTY()
 		class UMainPanelWidget* MainPanelWidget;
+	UPROPERTY()
+		TArray<class ACPP_DamageActor*> DamageUIActors;
+	int32 NextUI = 0;
 
 
 	/**inventory*/

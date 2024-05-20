@@ -31,12 +31,16 @@ void UMover::MoveStart()
 	if ((int32)currentPos.Z == (int32)TagetPos.Z)
 	{
 		//SCREENLOG(INDEX_NONE, 5.f, FColor::Blue, FString::Printf(TEXT("%f / %f"), currentPos.Z, newPos.Z));
-		//GetOwner()->SetActorHiddenInGame(true);
+		GetOwner()->SetActorHiddenInGame(true);
 		return;
 	}
-		
+
+	UWorld* world = GetWorld();
+	if (!IsValid(world))
+		return;
+
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UMover::MoveStart, 0.001f, false);
+	world->GetTimerManager().SetTimer(TimerHandle, this, &UMover::MoveStart, 0.01f, false);
 }
 
 

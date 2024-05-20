@@ -53,3 +53,12 @@ enum class ENPCActionState : uint8
 //====================================================================
 
 
+//Enemy Only
+//====================================================================
+UENUM(BlueprintType)
+enum class EEnemyCombatTypes : uint8
+{
+	Dummy,
+	One_Hand,
+	Two_Hand	
+};

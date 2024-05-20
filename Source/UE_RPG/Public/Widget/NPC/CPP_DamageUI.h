@@ -19,5 +19,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UTextBlock* DamageText;
 
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+		class UWidgetAnimation* DamageAnimRight;
+
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+		class UWidgetAnimation* DamageAnimLeft;
+
 	void UpdateWidget(const int32 amount);
 };

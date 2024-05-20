@@ -5,10 +5,11 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Animations/CPP_NPCAnimInstance.h"
 #include "AIController.h"
 
+#include "Animations/CPP_NPCAnimInstance.h"
 #include "CPP_Character.h"
+#include "NPC/CPP_EnemyCombatBox.h"
 
 #define NO_TARGET -1
 
@@ -33,7 +34,13 @@ void AEnemyBase::BeginPlay()
 		return;
 	}
 
+	if (CombatTypes == EEnemyCombatTypes::Dummy || !IsValid(CombatBoxClass))
+	{
+		WARNINGLOG(TEXT("Please set CombatType!!"));
+	}
+
 	CharaterType = ECharacterTypes::NPC_Monster;
+	WeaponReady();
 	SpawnPos = GetActorLocation();
 	SetActorTickEnabled(false);
 }
@@ -53,6 +60,7 @@ void AEnemyBase::SetActionStateNormal()
 	ENPCActionState = ENPCActionState::Normal;
 }
 
+
 void AEnemyBase::UpdateState()
 {	
 	if (NPCState == ENPCState::Death)
@@ -66,6 +74,8 @@ void AEnemyBase::UpdateState()
 	}
 	else if (IsValid(Target))
 	{
+		//WeaponReady();
+
 		float dis = CheckDist();
 		if (dis < 0)
 			return;
@@ -123,8 +133,8 @@ void AEnemyBase::BehaviorMode(ENPCState enemyState)
 		bOrderfromSpawnArea = false;
 		break;
 	case ENPCState::Combat:
-		NPCAnimInstance->Montage_Play(CombatActionMontage);
 		EnemyController->StopMovement();
+		NPCAnimInstance->Montage_Play(CombatActionMontage);
 		LookAtTarget();
 		if (CanUpdateState())
 		{
@@ -176,6 +186,26 @@ void AEnemyBase::SetTarget(ACPP_Character* target)
 {
 	Target = target;
 	UpdateState();
+}
+
+void AEnemyBase::WeaponReady()
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(CombatBoxClass) && !IsValid(World))
+		return;
+
+	uint8 weapons = (uint8)CombatTypes;
+
+	if (weapons != SocketNames.Num())
+		return;
+
+	for (uint8 i = 0; i < weapons; i++)
+	{
+		ACPP_EnemyCombatBox* weapon = World->SpawnActor<ACPP_EnemyCombatBox>(CombatBoxClass);
+		CombatBoxes.Push(weapon);
+		FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
+		CombatBoxes[i]->AttachToComponent(GetMesh(), TransformRules, SocketNames[i]);
+	}
 }
 
 void AEnemyBase::Patrol()

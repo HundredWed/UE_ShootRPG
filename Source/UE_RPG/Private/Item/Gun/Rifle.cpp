@@ -33,9 +33,6 @@ void ARifle::PullTrigger()
 	TakeHit(hitresult, SpawnPoint->GetComponentLocation());
 	
 	ShootEffect(shootpoint);
-
-	
-
 }
 
 void ARifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)

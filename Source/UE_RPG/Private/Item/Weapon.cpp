@@ -6,7 +6,7 @@
 #include "Item/Item.h"
 #include "Kismet/GameplayStatics.h"
 #include "CPP_Character.h"
-#include "Widget/NPC/CPP_DamageUI.h"
+#include "Widget/NPC/CPP_DamageActor.h"
 
 #define DAMAGERATIO 15
 #define NODATA 0
@@ -41,11 +41,6 @@ void AWeapon::BeginPlay()
 	SetActorTickEnabled(false);
 }
 
-void AWeapon::Tick(float deltatime)
-{
-	Super::Tick(deltatime);
-	UpdateDamageUIPos();
-}
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -59,62 +54,13 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void AWeapon::SpawnDamageUI(const FVector pos, float damage)
 {
-	if (IsValid(DamageWidgetclass))
+	ACPP_Character* character = Cast<ACPP_Character>(GetOwner());
+	if (IsValid(character))
 	{
-		DamageWidget = CreateWidget<UCPP_DamageUI>(GetWorld(), DamageWidgetclass);
-		if (!IsValid(DamageWidget))
-		{
-			WARNINGLOG(TEXT("not valid DamageWidget!!"))
-			return;
-		}
-			
-		DamageWidget->UpdateWidget(damage);
-		DamageWidget->AddToViewport();
-
-		FVector2D proj;
-		UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), pos, proj);
-		DamageWidget->SetPositionInViewport(proj);
-
-		DamageWidgets.Add(DamageWidget, pos);
-		SetActorTickEnabled(true);
-
-		{
-			FTimerHandle TimerHandle;
-			FTimerDelegate td; 
-			td.BindUFunction(this, "DestroyDamageUI", DamageWidget);
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle, td, 0.8f, false);
-		}
-	}
-	else
-	{
-		WARNINGLOG(TEXT("not valid DamageWidgetclass!!"))
+		ACPP_DamageActor* damageActor = character->GetDamageActor();
+		damageActor->UpdateDamageActor(pos, damage);
 	}
 }
-
-void AWeapon::UpdateDamageUIPos()
-{
-	if (DamageWidgets.Num() == 0)
-	{
-		SetActorTickEnabled(false);
-		return;
-	}
-
-	for (auto& ui : DamageWidgets)
-	{
-		UCPP_DamageUI* widget = ui.Key;
-		FVector pos = ui.Value;
-		FVector2D proj;
-		UGameplayStatics::ProjectWorldToScreen(GetWorld()->GetFirstPlayerController(), pos, proj);
-		widget->SetPositionInViewport(proj);
-	}
-}
-
-void AWeapon::DestroyDamageUI(UCPP_DamageUI* ui)
-{
-	DamageWidgets.Remove(ui);
-	ui->RemoveFromParent();
-}
-
 
 void AWeapon::Equip(USceneComponent* Inparent, const FName& SocketName)
 {
@@ -205,6 +151,10 @@ void AWeapon::UpdateFinalDamage()
 	if (!IsValid(ItemRef))
 		return;
 
-	ACPP_Character* player = Cast<ACPP_Character>(GetOwner());
-	FinalDamage = (FinalDamage + player->GetPlayerATK()) / DAMAGERATIO;
+	ACPP_Character* character = Cast<ACPP_Character>(GetOwner());
+
+	if (IsValid(character)) 
+	{
+		FinalDamage = (FinalDamage + character->GetPlayerATK()) / DAMAGERATIO;
+	}
 }

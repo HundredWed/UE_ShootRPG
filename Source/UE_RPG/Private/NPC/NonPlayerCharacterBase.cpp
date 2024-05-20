@@ -58,7 +58,6 @@ float ANonPlayerCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const
 
 	CurrentHP = FMath::Clamp(CurrentHP - DamageAmount, 0.f, MaxHealth);
 	UpdateHealthPercent(CurrentHP);
-	WARNINGLOG(TEXT("%f"), CurrentHP)
 	if (CurrentHP <= 0)
 	{
 		WARNINGLOG(TEXT("DieNPC"))
