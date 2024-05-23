@@ -6,6 +6,10 @@
 
 ## 업데이트 정보
 
+### 2024/05/24   
+[RPG HPBar 구현(영상)](https://youtu.be/A7mOwiHCFLU).   
+- #### [그외 커밋 메세지](https://github.com/HundredWed/UE_ShootRPG/commit/e54534c10af5e772968d73662c7155c1ebce965c)
+
 ### 2024/05/20   
 [데미지 UI 구현(영상)](https://youtu.be/GoyNYIIh_oI).   
 기존의 spawn & destory를한 데미지 UI -> 오브젝트풀링으로 변경.     
