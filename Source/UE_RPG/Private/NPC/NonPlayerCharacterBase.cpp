@@ -82,7 +82,6 @@ void ANonPlayerCharacterBase::UpdateHealthPercent(float currentAmount)
 	float hp = currentAmount / MaxHealth;
 
 	HealthBarComponent->SetHealthPercent(hp);
-	
 }
 
 void ANonPlayerCharacterBase::DieNPC()

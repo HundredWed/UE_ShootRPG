@@ -2,7 +2,10 @@
 #include "CoreMinimal.h"
 
 // value
-
+#define SPEED1 0.1
+#define SPEED2 0.01
+#define SPEED3 0.001
+#define SPEED4 0.0001
 
 
 

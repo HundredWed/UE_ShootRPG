@@ -10,8 +10,9 @@
 #include "Animations/CPP_NPCAnimInstance.h"
 #include "CPP_Character.h"
 #include "NPC/CPP_EnemyCombatBox.h"
+#include "NPC/CPP_EnemySpawnArea.h"
 
-#define NO_TARGET -1
+#define NO_TARGET 0
 
 AEnemyBase::AEnemyBase()
 {
@@ -49,10 +50,7 @@ void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (NPCState == ENPCState::Chase)
-	{
-		ThinkAction();
-	}
+	ThinkAction();
 }
 
 void AEnemyBase::SetActionStateNormal()
@@ -74,10 +72,8 @@ void AEnemyBase::UpdateState()
 	}
 	else if (IsValid(Target))
 	{
-		//WeaponReady();
-
 		float dis = CheckDist();
-		if (dis < 0)
+		if (dis < NO_TARGET)
 			return;
 
 		if (dis > CombatDis)
@@ -117,7 +113,7 @@ bool AEnemyBase::GetHit(const FVector& targetLocation)
 
 void AEnemyBase::NoDamaged(const FVector& targetLocation)
 {
-	SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Ouch!!"));
+	//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Ouch!!"));
 	NPCAnimInstance->Montage_Play(HitActionMontage_NoDamaged);
 }
 
@@ -133,6 +129,7 @@ void AEnemyBase::BehaviorMode(ENPCState enemyState)
 		bOrderfromSpawnArea = false;
 		break;
 	case ENPCState::Combat:
+		SetActorTickEnabled(false);
 		EnemyController->StopMovement();
 		NPCAnimInstance->Montage_Play(CombatActionMontage);
 		LookAtTarget();
@@ -147,6 +144,7 @@ void AEnemyBase::BehaviorMode(ENPCState enemyState)
 		ChaseTarget();
 		break;
 	case ENPCState::Death:
+		MySpawnArea->EnemyDeathCount();
 		EnemyController->StopMovement();
 		SetActorTickEnabled(false);
 		break;
@@ -156,8 +154,9 @@ void AEnemyBase::BehaviorMode(ENPCState enemyState)
 }
 
 
-void AEnemyBase::Spawn()
+void AEnemyBase::Spawn(ACPP_EnemySpawnArea* spawnarea)
 {
+	MySpawnArea = spawnarea;
 	SetActorHiddenInGame(false);
 }
 
@@ -169,7 +168,7 @@ void AEnemyBase::UnSpawn()
 float AEnemyBase::CheckDist()
 {
 	if (!IsValid(Target))
-		return NO_TARGET;
+		return -1;
 
 	FVector targetPos = Target->GetActorLocation();
 	return (targetPos - GetActorLocation()).Length();
@@ -202,6 +201,7 @@ void AEnemyBase::WeaponReady()
 	for (uint8 i = 0; i < weapons; i++)
 	{
 		ACPP_EnemyCombatBox* weapon = World->SpawnActor<ACPP_EnemyCombatBox>(CombatBoxClass);
+		weapon->SetDamage(ATK);
 		CombatBoxes.Push(weapon);
 		FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 		CombatBoxes[i]->AttachToComponent(GetMesh(), TransformRules, SocketNames[i]);
@@ -236,9 +236,14 @@ void AEnemyBase::ChaseTarget()
 
 void AEnemyBase::ThinkAction()
 {
+	if (NPCState == ENPCState::Death)
+	{
+		BehaviorMode(NPCState = ENPCState::Death);
+	}
+
 	float dis = CheckDist();
 
-	if (dis < 0)
+	if (dis < NO_TARGET)
 		return;
 
 	if (dis < CombatDis)
@@ -246,4 +251,16 @@ void AEnemyBase::ThinkAction()
 		SetActorTickEnabled(false);
 		UpdateState();
 	}
+}
+
+void AEnemyBase::ActivateCombatBox(const uint8 index)
+{
+	CombatBoxes[index]->SetCombatBoxCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("ActiveCombatBox"));
+}
+
+void AEnemyBase::DeactivateCombatBox(const uint8 index)
+{
+	CombatBoxes[index]->SetCombatBoxCollisionEnabled(ECollisionEnabled::NoCollision);
+	//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("InactiveCombatBox"));
 }

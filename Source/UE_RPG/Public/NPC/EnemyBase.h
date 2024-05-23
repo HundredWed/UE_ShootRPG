@@ -26,7 +26,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	void Spawn();
+	void Spawn(class ACPP_EnemySpawnArea* spawnarea);
 	void UnSpawn();
 	void SetTarget(ACPP_Character* target);
 	void WeaponReady();
@@ -42,6 +42,10 @@ public:
 	void Patrol();
 	void ChaseTarget();
 	void ThinkAction();
+
+	/**notify triggered*/
+	void ActivateCombatBox(const uint8 index);
+	void DeactivateCombatBox(const uint8 index);
 
 	UFUNCTION(BlueprintCallable)
 		void SetActionStateNormal();
@@ -68,6 +72,9 @@ private:
 
 	UPROPERTY()
 		class AAIController* EnemyController;
+
+	UPROPERTY()
+		class ACPP_EnemySpawnArea* MySpawnArea;
 	
 	/**data table info*/
 	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))

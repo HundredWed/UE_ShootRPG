@@ -15,7 +15,6 @@ void UCPP_AnimInstance::NativeInitializeAnimation()
 	{
 		MyCharacterMovement = MyCharacter->GetCharacterMovement();
 	}
-	
 }
 
 void UCPP_AnimInstance::NativeUpdateAnimation(float DeltaTime)

@@ -2,6 +2,7 @@
 
 
 #include "Widget/MainPanelWidget.h"
+
 #include "CPP_Character.h"
 #include "Inventory.h"
 #include "Widget/CPP_InventoryWidget.h"
@@ -9,6 +10,7 @@
 #include "Widget/DragWidget.h"
 #include "Widget/SlotDrag.h"
 #include "Widget/CPP_Slot.h"
+#include "Widget/CPP_PlayerStateBar.h"
 
 void UMainPanelWidget::NativeConstruct()
 {
@@ -29,6 +31,29 @@ void UMainPanelWidget::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("not Found PlayerRef at MainPanel!!"));
 	}
+}
+
+void UMainPanelWidget::InitState(const int32 level, const float healt, const float maxHP, const float mana, const float stamina)
+{
+	if (!IsValid(StateWidget))
+		return;
+
+	StateWidget->InitStateBar(level, healt, maxHP, mana, stamina);
+}
+
+void UMainPanelWidget::UpdateHealthBarPercent(const float currentHp, const float max)
+{
+	StateWidget->UpdateHealthBarPercent(currentHp, max);
+}
+
+void UMainPanelWidget::UpdateManaBarPercent(const float percent)
+{
+	StateWidget->UpdateManaBarPercent(percent);
+}
+
+void UMainPanelWidget::UpdateLevel(int32 level)
+{
+	StateWidget->UpdateLevel(level);
 }
 
 bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)

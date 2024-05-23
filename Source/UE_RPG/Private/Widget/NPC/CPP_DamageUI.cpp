@@ -22,6 +22,4 @@ void UCPP_DamageUI::UpdateWidget(const int32 amount)
 	{
 		PlayAnimation(DamageAnimLeft);
 	}
-	
-	
 }

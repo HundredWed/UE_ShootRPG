@@ -6,9 +6,13 @@
 #include "UE_RPG/UtilityMecro.h"
 #include "CPP_NPCAnimInstance.generated.h"
 
-/**
- * 
- */
+
+enum CombatBoxNumber
+{
+	BoxIndex0,
+	BoxIndex1,
+};
+
 UCLASS()
 class UE_RPG_API UCPP_NPCAnimInstance : public UAnimInstance
 {
@@ -54,8 +58,22 @@ public:
 
 	float GetAngle2();
 	void SetNPCState(ENPCState state) { NPCState = state; }
+
+	/**AnimNotify_*/
+	UFUNCTION()
+		void AnimNotify_ActivateCombatBox_0(UAnimNotify* Notify);
+	UFUNCTION()
+		void AnimNotify_DeactivateCombatBox_0(UAnimNotify* Notify);
+
+	UFUNCTION()
+		void AnimNotify_ActivateCombatBox_1(UAnimNotify* Notify);
+	UFUNCTION()
+		void AnimNotify_DeactivateCombatBox_1(UAnimNotify* Notify);
+
 private:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		class ANonPlayerCharacterBase* NPC;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		class AEnemyBase* TypEnemy;
 };

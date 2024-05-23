@@ -46,7 +46,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "NPC State")
 		int32 MaxStamina = 100;
 	UPROPERTY(EditAnywhere, Category = "NPC State")
-		int32 ATK = 10;
+		int32 ATK = 15;
 	UPROPERTY(EditAnywhere, Category = "NPC State")
 		int32 DEF = 10;
 	UPROPERTY(EditAnywhere, Category = "NPC State")

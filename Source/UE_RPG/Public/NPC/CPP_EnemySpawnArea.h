@@ -16,11 +16,14 @@ class UE_RPG_API ACPP_EnemySpawnArea : public AActor
 public:
 	ACPP_EnemySpawnArea();
 
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
 
 	void SpawnEnemy();
-	void CalculateDis();
+	void FocusTarget();
 	void SetStateNormal();
+	void Encounter();
+	void TargetIsNotValid();
+	void EnemyDeathCount();
 
 protected:
 
@@ -34,11 +37,11 @@ protected:
 			bool bFromSweep,
 			const FHitResult& SweepResult);
 
-	UFUNCTION()
+	/*UFUNCTION()
 		virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
 			AActor* OtherActor,
 			UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex);
+			int32 OtherBodyIndex);*/
 
 public:
 
@@ -60,5 +63,7 @@ private:
 		ACPP_Character* Target;
 
 	FVector CenterPos;
+
+	int32 EnemysNum;
 
 };

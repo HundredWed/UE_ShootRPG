@@ -23,8 +23,11 @@
 
 ACPP_Character::ACPP_Character()
 {
- 	
-	PrimaryActorTick.bCanEverTick = true;
+ 	PrimaryActorTick.bCanEverTick = true;
+
+	CurrentHealth = MaxHealth;
+	CurrentMana = MaxMana;
+	CurrentStamina = MaxStamina;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -88,10 +91,15 @@ void ACPP_Character::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Graver component not found!!"));
 	}
 
-	if (MainPanelclass)
+	if (IsValid(MainPanelclass))
 	{
 		MainPanelWidget = CreateWidget<UMainPanelWidget>(GetWorld(), MainPanelclass);
-		MainPanelWidget->AddToViewport();
+
+		if (IsValid(MainPanelWidget))
+		{
+			MainPanelWidget->AddToViewport();
+			MainPanelWidget->InitState(Level, CurrentHealth, MaxHealth, MaxMana, CurrentStamina);
+		}
 	}
 
 	GameInventory = FindComponentByClass<UInventory>();
@@ -147,6 +155,13 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(InventoryToggle, ETriggerEvent::Triggered, this, &ACPP_Character::InventoryVisibility);
 	}
 
+}
+
+float ACPP_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	PlayMontage(DamagedMontage);
+	DecreasePlayerHP(DamageAmount);
+	return DamageAmount;
 }
 
 void ACPP_Character::SreachItem()
@@ -395,12 +410,12 @@ void ACPP_Character::SetCrouch(const FInputActionValue& Value)
 
 void ACPP_Character::Dodge(const FInputActionValue& Value)
 {
-	if (ActionState != ECharacterActionState::SuperAction && Stamina >= 10)
+	if (ActionState != ECharacterActionState::SuperAction && CurrentStamina >= 10)
 	{
 		bMoving = false;
 		LookAt();
 		PlayMontage(DodgeMontage);
-		Stamina -= 10;
+		CurrentStamina -= 10;
 		ActionState = ECharacterActionState::SuperAction;
 	}
 }
@@ -762,6 +777,17 @@ void ACPP_Character::SetHitResultObject(APickUpItem* hitresultobject)
 	HitResultObject = hitresultobject;
 }
 
+void ACPP_Character::DecreasePlayerHP(const float value)
+{
+	CurrentHealth -= value;
+	CurrentHealth = CurrentHealth < 0 ? 0 : CurrentHealth;
+
+	MainPanelWidget->UpdateHealthBarPercent(CurrentHealth, MaxHealth);
+
+	if (CurrentHealth <= 0)
+		CharacterState = ECharacterStateTypes::Death;
+}
+
 void ACPP_Character::HideGameInventory()
 {
 	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
@@ -832,7 +858,6 @@ ACPP_DamageActor* ACPP_Character::GetDamageActor()
 	NextUI = NextUI > (DamageUIActors.Num() - 1) ? 0 : NextUI;
 	ACPP_DamageActor* nextUI = DamageUIActors[NextUI];
 	NextUI++;
-	DISPLAYLOG(TEXT("%d"), NextUI);
 
 	return nextUI;
 }

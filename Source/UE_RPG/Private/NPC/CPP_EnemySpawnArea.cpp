@@ -10,16 +10,11 @@
 // Sets default values
 ACPP_EnemySpawnArea::ACPP_EnemySpawnArea()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	SpawnArea = CreateDefaultSubobject<USphereComponent>(TEXT("Respone item search trace"));
 	SpawnArea->SetupAttachment(GetRootComponent());
 
-	SpawnArea->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	SpawnArea->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
-	SpawnArea->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
-	SpawnArea->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SpawnArea->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	SpawnArea->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 }
 
 // Called when the game starts or when spawned
@@ -30,12 +25,10 @@ void ACPP_EnemySpawnArea::BeginPlay()
 	if (IsValid(SpawnArea))
 	{
 		SpawnArea->OnComponentBeginOverlap.AddDynamic(this, &ACPP_EnemySpawnArea::OnSphereOverlap);
-		SpawnArea->OnComponentEndOverlap.AddDynamic(this, &ACPP_EnemySpawnArea::OnSphereEndOverlap);
+		//SpawnArea->OnComponentEndOverlap.AddDynamic(this, &ACPP_EnemySpawnArea::OnSphereEndOverlap);
 
 		CenterPos = GetActorLocation();
 	}
-
-	SetActorTickEnabled(false);
 	SpawnEnemy();
 }
 
@@ -44,29 +37,13 @@ void ACPP_EnemySpawnArea::OnSphereOverlap(UPrimitiveComponent* OverlappedCompone
 	ACPP_Character* character = Cast<ACPP_Character>(OtherActor);
 	if (IsValid(character))
 	{
-		Target = character;
-
-		for (int16 i = 0; i < Enemys.Num(); i++)
-		{
-			if (!IsValid(Enemys[i]))
-				return;
-
-			Enemys[i]->SetTarget(Target);
-		}
+		/**for Encounter function call once*/
+		if (Target == character)
+			return;
+		
+		Target = character; 
+		Encounter();
 	}
-}
-
-void ACPP_EnemySpawnArea::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	SetActorTickEnabled(true);
-}
-
-// Called every frame
-void ACPP_EnemySpawnArea::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	CalculateDis();
 }
 
 void ACPP_EnemySpawnArea::SpawnEnemy()
@@ -74,30 +51,68 @@ void ACPP_EnemySpawnArea::SpawnEnemy()
 	if (Enemys.Num() <= 0)
 		return;
 
+	EnemysNum = Enemys.Num();
 
 	for (int16 i = 0; i < Enemys.Num(); i++)
 	{
 		if (!IsValid(Enemys[i]))
 			return;
 
-
-		Enemys[i]->Spawn();
+		Enemys[i]->Spawn(this);
 	}
 }
 
-void ACPP_EnemySpawnArea::CalculateDis()
+void ACPP_EnemySpawnArea::FocusTarget()
 {
-	if (!IsValid(Target))
+	if (!IsValid(Target) || EnemysNum <= 0)
+	{
+		WARNINGLOG(TEXT("stop"))
 		return;
+	}
+		
 
 	FVector targetPos = Target->GetActorLocation();
 
 	float dis = (CenterPos - targetPos).Length();
-	//UE_LOG(LogTemp, Display, TEXT("%f"), dis);
 
-	if (dis < ValidDis)
+	if (dis > ValidDis || Target->GetCharacterState() == ECharacterStateTypes::Death)
+	{
+		WARNINGLOG(TEXT("stop"))
+		TargetIsNotValid();
+		SetStateNormal();
 		return;
+	}
 
+	{
+		UWorld* world = GetWorld();
+		if (!IsValid(world))
+			return;
+
+		FTimerHandle TimerHandle;
+		world->GetTimerManager().SetTimer(TimerHandle, this, &ACPP_EnemySpawnArea::FocusTarget, SPEED1, false);
+	}
+}
+
+void ACPP_EnemySpawnArea::SetStateNormal()
+{
+	Target = nullptr;
+}
+
+void ACPP_EnemySpawnArea::Encounter()
+{
+	for (int16 i = 0; i < Enemys.Num(); i++)
+	{
+		if (!IsValid(Enemys[i]))
+			return;
+
+		Enemys[i]->SetTarget(Target);
+	}
+
+	FocusTarget();
+}
+
+void ACPP_EnemySpawnArea::TargetIsNotValid()
+{
 	for (int16 i = 0; i < Enemys.Num(); i++)
 	{
 		if (!IsValid(Enemys[i]))
@@ -106,13 +121,13 @@ void ACPP_EnemySpawnArea::CalculateDis()
 		Enemys[i]->IsOrderfromSpawnArea(true);
 		Enemys[i]->SetTarget(nullptr);
 	}
-
-	SetStateNormal();
 }
 
-void ACPP_EnemySpawnArea::SetStateNormal()
+void ACPP_EnemySpawnArea::EnemyDeathCount()
 {
-	SetActorTickEnabled(false);
-	Target = nullptr;
+	EnemysNum--;
+	WARNINGLOG(TEXT("EnemysNum"))
+	//TODO
+	/**respawn enemy after a few seconds*/
 }
 

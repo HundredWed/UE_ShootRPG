@@ -73,6 +73,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* DodgeMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+		class UAnimMontage* DamagedMontage;
+
 	/**widget*/
 	UPROPERTY(EditAnywhere, Category = "Player Widget")
 		TSubclassOf< class UMainPanelWidget> MainPanelclass;
@@ -96,6 +99,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void SreachItem();
 	void ObjectSearchTrace();
@@ -173,11 +177,23 @@ public:
 	FORCEINLINE void SetHitResultObject(class APickUpItem* hitresultobject);
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
-
-	FORCEINLINE void IncreasePlayerHP(const uint32 value) { Health += value; }
-	FORCEINLINE void DecreasePlayerHP(const uint32 value) { Health -= value; }
 	FORCEINLINE int32 GetPlayerATK() { return PlayerATK; }
 	FORCEINLINE bool GetPlayerMoveState() { return bMoving; }
+
+	FORCEINLINE int32 GetPlayerHealth() { return CurrentHealth; }
+	FORCEINLINE int32 GetPlayerMaxHealth() { return MaxHealth; }
+	FORCEINLINE int32 GetPlayerMana() { return CurrentMana; }
+	FORCEINLINE int32 GetPlayerMaxMana() { return MaxMana; }
+	FORCEINLINE int32 GetPlayerStamina() { return CurrentStamina; }
+	FORCEINLINE int32 GetPlayerMaxStamina() { return MaxStamina; }
+
+	FORCEINLINE void IncreasePlayerHP(const float value) { 
+		CurrentHealth += value;
+		CurrentHealth = CurrentHealth > MaxHealth ? MaxHealth : CurrentHealth;
+	}
+	void DecreasePlayerHP(const float value);
+
+	
 	
 	/**inventory*/
 	void HideGameInventory();
@@ -207,11 +223,11 @@ private:
 	bool bMoving = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
-		int32 Health = 100;
+		int32 MaxHealth = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
-		int32 Mana = 100;
+		int32 MaxMana = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
-		int32 Stamina = 100;
+		int32 MaxStamina = 150;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
 		int32 PlayerATK = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
@@ -223,6 +239,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
 		float FocusingMRR = 3000.f;//MovementRotationRate
 
+	float Level = 1;
+	float CurrentHealth = 0;
+	float CurrentMana = 0;
+	float CurrentStamina = 0;
 	float MoveDelfaultSpeed = 400.f;
 	float MoveRunSpeed = 600.f;
 	float MoveAimingSpeed = 320.f;

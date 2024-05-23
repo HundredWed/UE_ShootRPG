@@ -17,7 +17,8 @@ enum class ECharacterStateTypes : uint8
 {
 	UnEquiped,
 	Equiped,
-	Aim
+	Aim,
+	Death
 };
 
 UENUM(BlueprintType)
@@ -26,7 +27,6 @@ enum class ECharacterActionState : uint8
 	Normal,
 	Action,/*can working**/
 	SuperAction,/*can't working**/
-	Death
 };
 //====================================================================
 
