@@ -37,10 +37,13 @@ protected:
 	UFUNCTION()
 		void OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION()
+		void InitCount() { Hicount = 0; }
+
 private:
 	
 	float Damage = 0.f;
-	
+	int8 Hicount  = 0;
 
 
 };

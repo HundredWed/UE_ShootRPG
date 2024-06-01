@@ -34,14 +34,18 @@ public:
 
 	/**ai*/
 	void NoDamaged(const FVector& targetLocation);
+	void ThinkAction();
 	void BehaviorMode(ENPCState enemyState);
-	float CheckDist();
+	void InitBehaviorState();
 	bool CanUpdateState();
-
+	
 	/**action*/
 	void Patrol();
 	void ChaseTarget();
-	void ThinkAction();
+	void SideStep();
+	void Combat();
+	void ApproachToTarget();
+	bool IsCorwd();
 
 	/**notify triggered*/
 	void ActivateCombatBox(const uint8 index);
@@ -62,16 +66,16 @@ private:
 		float NoDamagedDistance = 500.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
-		float CombatDis = 100.f;
+		float CombatDis = 200.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+		float ValidSightDis = 500.f;
 
 	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<class ACPP_EnemyCombatBox> CombatBoxClass;
 
 	UPROPERTY()
 		TArray<class ACPP_EnemyCombatBox*> CombatBoxes;
-
-	UPROPERTY()
-		class AAIController* EnemyController;
 
 	UPROPERTY()
 		class ACPP_EnemySpawnArea* MySpawnArea;
@@ -86,4 +90,5 @@ private:
 	FVector SpawnPos;
 	int8 PrevRandomTarget = -1;
 	bool bOrderfromSpawnArea = false;
+	float CorwdTraceRadius = 0.f;
 };

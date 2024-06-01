@@ -160,7 +160,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 float ACPP_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	PlayMontage(DamagedMontage);
-	DecreasePlayerHP(DamageAmount);
+	//DecreasePlayerHP(DamageAmount);
 	return DamageAmount;
 }
 

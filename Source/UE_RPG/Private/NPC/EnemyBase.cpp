@@ -5,9 +5,9 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "AIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
 
-#include "Animations/CPP_NPCAnimInstance.h"
 #include "CPP_Character.h"
 #include "NPC/CPP_EnemyCombatBox.h"
 #include "NPC/CPP_EnemySpawnArea.h"
@@ -16,7 +16,7 @@
 
 AEnemyBase::AEnemyBase()
 {
-
+	CorwdTraceRadius = GetCapsuleComponent()->GetUnscaledCapsuleRadius();
 }
 
 void AEnemyBase::BeginPlay()
@@ -26,13 +26,6 @@ void AEnemyBase::BeginPlay()
 	if (!IsValid(HitActionMontage_NoDamaged) && !IsValid(HitActionMontage))
 	{
 		WARNINGLOG(TEXT("Enemy HitMontage is not Valid!!"));
-	}
-
-	EnemyController = Cast<AAIController>(GetController());
-	if (!IsValid(EnemyController))
-	{
-		WARNINGLOG(TEXT("Enemy EnemyController is not Valid!!"));
-		return;
 	}
 
 	if (CombatTypes == EEnemyCombatTypes::Dummy || !IsValid(CombatBoxClass))
@@ -58,7 +51,6 @@ void AEnemyBase::SetActionStateNormal()
 	ENPCActionState = ENPCActionState::Normal;
 }
 
-
 void AEnemyBase::UpdateState()
 {	
 	if (NPCState == ENPCState::Death)
@@ -67,11 +59,10 @@ void AEnemyBase::UpdateState()
 	}
 	else if (!IsValid(Target))
 	{
-		ClearTargetInfo();
 		BehaviorMode(NPCState = ENPCState::Patrol);
 	}
-	else if (IsValid(Target))
-	{
+	else
+	{	
 		float dis = CheckDist();
 		if (dis < NO_TARGET)
 			return;
@@ -92,12 +83,6 @@ bool AEnemyBase::GetHit(const FVector& targetLocation)
 	if (NPCState == ENPCState::Death)
 		return false;
 
-	if (!IsValid(NPCAnimInstance))
-	{
-		WARNINGLOG(TEXT("is not IsValid Enemy AnimInstance!!"));
-		return false;
-	}
-
 	float dis = (GetActorLocation() - targetLocation).Length();
 
 	if (dis >= NoDamagedDistance)
@@ -107,52 +92,66 @@ bool AEnemyBase::GetHit(const FVector& targetLocation)
 		return false;
 	}
 
-	NPCAnimInstance->Montage_Play(HitActionMontage);
+	PlayNPCMontage(HitActionMontage);
 	return true;
 }
 
 void AEnemyBase::NoDamaged(const FVector& targetLocation)
 {
 	//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Ouch!!"));
-	NPCAnimInstance->Montage_Play(HitActionMontage_NoDamaged);
+	PlayNPCMontage(HitActionMontage_NoDamaged);
+}
+
+void AEnemyBase::ThinkAction()
+{
+	float dis = CheckDist();
+
+	if (dis < NO_TARGET)
+		return;
+
+	if (dis < CombatDis)
+	{
+		SetActorTickEnabled(false);
+		UpdateState();
+	}
 }
 
 void AEnemyBase::BehaviorMode(ENPCState enemyState)
 {
-	FTimerHandle TimerHandle;
-	float animLength = CombatActionMontage->GetPlayLength() + 0.05f;
+	InitBehaviorState();
+
 	switch (enemyState)
 	{
 	case ENPCState::Patrol:
+		ClearTargetInfo();
 		Patrol();
-		SetHealthBarWidget(true);
-		bOrderfromSpawnArea = false;
 		break;
 	case ENPCState::Combat:
-		SetActorTickEnabled(false);
-		EnemyController->StopMovement();
-		NPCAnimInstance->Montage_Play(CombatActionMontage);
-		LookAtTarget();
-		if (CanUpdateState())
-		{
-			// 임시
-			GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::UpdateState, animLength, false);
-		}
+		Combat();
 		break;
 	case ENPCState::Chase:
-		SetHealthBarWidget(true);
 		ChaseTarget();
+		SetHealthBarWidget(true);
+		SetActorTickEnabled(true);
+		break;
+	case ENPCState::SideStep:
+		SideStep();
 		break;
 	case ENPCState::Death:
 		MySpawnArea->EnemyDeathCount();
-		EnemyController->StopMovement();
-		SetActorTickEnabled(false);
 		break;
 	default:
 		break;
 	}
 }
 
+void AEnemyBase::InitBehaviorState()
+{
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->MaxWalkSpeed = 630.f;
+	SetActorTickEnabled(false);
+	StopMove();
+}
 
 void AEnemyBase::Spawn(ACPP_EnemySpawnArea* spawnarea)
 {
@@ -163,15 +162,6 @@ void AEnemyBase::Spawn(ACPP_EnemySpawnArea* spawnarea)
 void AEnemyBase::UnSpawn()
 {
 	SetActorHiddenInGame(true);
-}
-
-float AEnemyBase::CheckDist()
-{
-	if (!IsValid(Target))
-		return -1;
-
-	FVector targetPos = Target->GetActorLocation();
-	return (targetPos - GetActorLocation()).Length();
 }
 
 bool AEnemyBase::CanUpdateState()
@@ -210,47 +200,77 @@ void AEnemyBase::WeaponReady()
 
 void AEnemyBase::Patrol()
 {
-	FAIMoveRequest MoveRequest;
-	MoveRequest.SetGoalLocation(SpawnPos);
-	MoveRequest.SetAcceptanceRadius(3.f);
-	EnemyController->MoveTo(MoveRequest);
+	SetHealthBarWidget(true);
+	bOrderfromSpawnArea = false;
 
-	if (CurrentHP != MaxHealth)
-		CurrentHP = MaxHealth;
+	MoveToLocation(SpawnPos);
+	SetHPMAX();
+}
 
-	UpdateHealthPercent(CurrentHP);
+void AEnemyBase::SideStep()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 90.f;
+
+	FVector side = GetActorLocation();
+	int32 randomDir = FMath::RandRange(-1, 0);
+	int32 dir = randomDir == -1 ? -1 : 1;
+	side.X = side.X + (300.f * dir);
+
+	MoveToLocation(side); 
+}
+
+void AEnemyBase::Combat()
+{
+	float animLength = PlayNPCMontage(CombatActionMontage);
+	LookAtTarget(Target->GetActorLocation());
+
+	if (CanUpdateState() && animLength > 0)
+	{
+		// 임시
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::UpdateState, animLength, false);
+	}
+}
+
+void AEnemyBase::ApproachToTarget()
+{
+
+}
+
+bool AEnemyBase::IsCorwd()
+{
+	//WARNINGLOG(TEXT("IsCorwd"))
+	FHitResult hit;
+	FVector start = GetActorLocation();
+	FVector end = Target->GetActorLocation();
+
+	FCollisionShape sphere = FCollisionShape::MakeSphere(CorwdTraceRadius);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	bool ishit = GetWorld()->SweepSingleByChannel(
+		hit,
+		start,
+		end,
+		FQuat::Identity,
+		ECollisionChannel::ECC_Visibility,
+		sphere,
+		Params);
+
+	DrawDebugLine(GetWorld(), start, end, FColor::Red, true, 5.f);
+
+	AEnemyBase* actor = Cast<AEnemyBase>(hit.GetActor());
+
+	if(ishit)
+		WARNINGLOG(TEXT("%s actor hit: %s"), *this->GetName(), *actor->GetName())
+
+	return actor != nullptr;
 }
 
 void AEnemyBase::ChaseTarget()
 {
-	if (!IsValid(Target))
-		return;
+	MoveToActor(Target);
 
-	FAIMoveRequest MoveRequest;
-	MoveRequest.SetGoalActor(Target);
-	MoveRequest.SetAcceptanceRadius(3.f);
-	EnemyController->MoveTo(MoveRequest);
-
-	SetActorTickEnabled(true);
-}
-
-void AEnemyBase::ThinkAction()
-{
-	if (NPCState == ENPCState::Death)
-	{
-		BehaviorMode(NPCState = ENPCState::Death);
-	}
-
-	float dis = CheckDist();
-
-	if (dis < NO_TARGET)
-		return;
-
-	if (dis < CombatDis)
-	{
-		SetActorTickEnabled(false);
-		UpdateState();
-	}
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 void AEnemyBase::ActivateCombatBox(const uint8 index)

@@ -7,6 +7,10 @@
 #define SPEED3 0.001
 #define SPEED4 0.0001
 
+#define DELAY1 0.1
+#define DELAY2 0.2
+#define DELAY3 0.3
+#define DELAY4 0.4
 
 
 // debug

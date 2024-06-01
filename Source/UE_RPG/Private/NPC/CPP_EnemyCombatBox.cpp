@@ -4,6 +4,8 @@
 
 #include "CPP_Character.h"
 
+#define OVERHIT 1
+
 ACPP_EnemyCombatBox::ACPP_EnemyCombatBox()
 {
 	CombatBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Combat Box"));
@@ -11,7 +13,7 @@ ACPP_EnemyCombatBox::ACPP_EnemyCombatBox()
 
 	/**ECC_GameTraceChannel4 = PlayerMesh*/
 	CombatBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	CombatBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	CombatBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CombatBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel4, ECollisionResponse::ECR_Overlap);
 }
 
@@ -35,8 +37,21 @@ AController* ACPP_EnemyCombatBox::GetOwnerController()
 
 void ACPP_EnemyCombatBox::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Player = Cast<ACPP_Character>(OtherActor);
+	/**overlap event tiwce issue*/
+	{
+		Hicount++;
 
+		if (Hicount > OVERHIT)
+		{
+			WARNINGLOG(TEXT("OverHit!!!"))
+			return;
+		}
+		FTimerHandle TimeHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimeHandle, this, &ACPP_EnemyCombatBox::InitCount, DELAY1, false);
+	}
+
+	Player = Cast<ACPP_Character>(OtherActor);
+	
 	if (IsValid(Player))
 	{
 		UGameplayStatics::ApplyDamage(Player, Damage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
@@ -45,6 +60,8 @@ void ACPP_EnemyCombatBox::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent,
 			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 		}
 	}
+
+	
 }
 
 void ACPP_EnemyCombatBox::SetCombatBoxCollisionEnabled(ECollisionEnabled::Type newType)

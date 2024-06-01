@@ -9,6 +9,8 @@ void ACPP_Controller::BeginPlay()
 	CrosshairHUD = GetHUD();
 
 	CrosshairHUD->bShowHUD = false;
+
+	GetCharacter();
 }
 
 void ACPP_Controller::SetHUDVisibility(bool bshowHUD)

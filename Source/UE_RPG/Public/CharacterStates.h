@@ -40,6 +40,7 @@ enum class ENPCState : uint8
 	Patrol,
 	Combat,
 	Chase,
+	SideStep,
 	Death
 };
 

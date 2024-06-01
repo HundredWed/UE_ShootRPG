@@ -57,11 +57,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NPC State")
 		ENPCState NPCState = ENPCState::Patrol;
 
-	UPROPERTY(VisibleAnywhere, Category = "Enemy Info")
+	UPROPERTY(VisibleAnywhere, Category = "NPC State | Target Info")
 		class ACPP_Character* Target = nullptr;
+
+	UPROPERTY()
+		class AAIController* NPCController;
 
 	FVector HitDir = FVector::Zero();
 	float CurrentHP = 0;
+
+	FTimerHandle TimerHandle;
+	FTimerHandle TurningHandle;
 
 	virtual void BeginPlay() override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
@@ -71,11 +77,18 @@ protected:
 	void UpdateHealthPercent(float currentAmount);
 	void DieNPC();
 	void SetStateDeath();
-	void LookAtTarget();
+	void MoveToActor(const AActor* actor, const int acceptanceRadius = 3.f);
+	void MoveToLocation(const FVector& pos, const int acceptanceRadius = 3.f);
+	float PlayNPCMontage(UAnimMontage* montageToPlay);
+	float CheckDist();
+	void LookAtTarget(const FVector& targetpos);
 	void TurnRight();
 	void TurnLeft();
 	void ClearTargetInfo();
 	void SetHealthBarWidget(bool bvisibility);
+	void SetHPMAX();
+	void StopMove();
+	
 
 
 	UFUNCTION()

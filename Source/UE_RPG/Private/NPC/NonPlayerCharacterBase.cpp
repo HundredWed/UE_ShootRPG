@@ -1,6 +1,7 @@
 #include "NPC/NonPlayerCharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "AIController.h"
 
 #include "NPC/HealthBarComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -18,15 +19,17 @@ ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 	
 	/**set Collision*/
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
 	HealthBarComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
 	//CharacterMovement Settting Base 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
+	GetCharacterMovement()->MaxWalkSpeed = 630.f;
 	GetCharacterMovement()->RotationRate.Yaw = 180;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
 
@@ -42,6 +45,13 @@ void ANonPlayerCharacterBase::BeginPlay()
 	else
 	{
 		DISPLAYLOG(TEXT("NPCAnimInstance is nvalid!!"))
+	}
+
+	NPCController = Cast<AAIController>(GetController());
+	if (!IsValid(NPCController))
+	{
+		WARNINGLOG(TEXT("Enemy EnemyController is not Valid!!"));
+		return;
 	}
 
 	if (IsValid(HealthBarComponent))
@@ -91,28 +101,72 @@ void ANonPlayerCharacterBase::DieNPC()
 	
 	SetStateDeath();
 	NPCAnimInstance->Montage_Play(DeathActionMontage);
-	
-	FTimerHandle TimerHandle;
+
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle,this, &ANonPlayerCharacterBase::MoveDown, 
 		DeathActionMontage->GetPlayLength() * 2.f, false);
 }
 
 void ANonPlayerCharacterBase::SetStateDeath()
 {
+	StopMove();
 	SetHealthBarWidget(false);
 	NPCState = ENPCState::Death;
 	NPCAnimInstance->SetNPCState(NPCState);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-void ANonPlayerCharacterBase::LookAtTarget()
+void ANonPlayerCharacterBase::MoveToActor(const AActor* actor, const int acceptanceRadius)
+{
+	if (!IsValid(actor))
+	{
+		WARNINGLOG(TEXT("is not valid actor of MoveToActor Func!!"))
+		return;
+	}
+
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalActor(actor);
+	MoveRequest.SetAcceptanceRadius(acceptanceRadius);
+	NPCController->MoveTo(MoveRequest);
+
+	LookAtTarget(actor->GetActorLocation());
+}
+
+void ANonPlayerCharacterBase::MoveToLocation(const FVector& pos, const int acceptanceRadius)
+{
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalLocation(pos);
+	MoveRequest.SetAcceptanceRadius(acceptanceRadius);
+	NPCController->MoveTo(MoveRequest);
+	LookAtTarget(pos);
+}
+
+float ANonPlayerCharacterBase::PlayNPCMontage(UAnimMontage* montageToPlay)
+{
+	if (!IsValid(montageToPlay) || !IsValid(NPCAnimInstance))
+	{
+		WARNINGLOG(TEXT("is not valid montage or NPCAnimInstance!!"))
+		return 0.f;
+	}
+		
+	NPCAnimInstance->Montage_Play(montageToPlay);
+	
+	return montageToPlay->GetPlayLength() + 0.05f;/**0.05f delay*/
+}
+
+float ANonPlayerCharacterBase::CheckDist()
 {
 	if (!IsValid(Target))
-		return;
+		return -1;
 
+	FVector targetPos = Target->GetActorLocation();
+	return (targetPos - GetActorLocation()).Length();
+}
+
+void ANonPlayerCharacterBase::LookAtTarget(const FVector& targetpos)
+{
 	const FVector forward = FVector(GetActorForwardVector().X, GetActorForwardVector().Y, 0.f);
-	const FVector target = FVector(Target->GetActorLocation().X, Target->GetActorLocation().Y, 0.f);
-	const FVector targetDir = (Target->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+	const FVector target = FVector(targetpos.X, targetpos.Y, 0.f);
+	const FVector targetDir = (targetpos - GetActorLocation()).GetSafeNormal();
 
 	const float dtheta = FVector::DotProduct(GetActorForwardVector(), targetDir);
 	double theta = FMath::Acos(dtheta);
@@ -148,8 +202,8 @@ void ANonPlayerCharacterBase::TurnRight()
 	}
 	SetActorRotation(newRot);
 
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ANonPlayerCharacterBase::TurnRight, 0.01f, false);
+	
+	GetWorld()->GetTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnRight, 0.01f, false);
 }
 
 void ANonPlayerCharacterBase::TurnLeft()
@@ -165,11 +219,9 @@ void ANonPlayerCharacterBase::TurnLeft()
 		CurrentTurningValue = 0;
 		return;
 	}
-
 	SetActorRotation(newRot);
 
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ANonPlayerCharacterBase::TurnLeft, 0.01f, false);
+	GetWorld()->GetTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnLeft, 0.01f, false);
 }
 
 void ANonPlayerCharacterBase::ClearTargetInfo()
@@ -180,6 +232,17 @@ void ANonPlayerCharacterBase::ClearTargetInfo()
 void ANonPlayerCharacterBase::SetHealthBarWidget(bool bvisibility)
 {
 	HealthBarComponent->SetVisibility(bvisibility);
+}
+
+void ANonPlayerCharacterBase::SetHPMAX()
+{
+	CurrentHP = MaxHealth;
+	UpdateHealthPercent(CurrentHP);
+}
+
+void ANonPlayerCharacterBase::StopMove()
+{
+	NPCController->StopMovement();
 }
 
 void ANonPlayerCharacterBase::MoveDown()
