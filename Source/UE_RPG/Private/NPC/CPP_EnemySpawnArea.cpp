@@ -29,6 +29,7 @@ void ACPP_EnemySpawnArea::BeginPlay()
 
 		CenterPos = GetActorLocation();
 	}
+	//CreateEnemy();
 	SpawnEnemy();
 }
 
@@ -129,5 +130,16 @@ void ACPP_EnemySpawnArea::EnemyDeathCount()
 	WARNINGLOG(TEXT("EnemysNum"))
 	//TODO
 	/**respawn enemy after a few seconds*/
+}
+
+void ACPP_EnemySpawnArea::CreateEnemy()
+{
+	UWorld* world = GetWorld();
+	for (int32 i = 0; i < EnemyClass.Num(); i++)
+	{
+		AEnemyBase* enemy = world->SpawnActor<AEnemyBase>(EnemyClass[i]);
+		//enemy->SetEnemyID(i);
+		Enemys.Push(enemy);
+	}
 }
 

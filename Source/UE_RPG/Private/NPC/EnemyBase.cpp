@@ -11,6 +11,8 @@
 #include "CPP_Character.h"
 #include "NPC/CPP_EnemyCombatBox.h"
 #include "NPC/CPP_EnemySpawnArea.h"
+#include "NPC/CPP_NPCcontroller.h"
+#include "Animations/CPP_NPCAnimInstance.h"
 
 #define NO_TARGET 0
 
@@ -32,11 +34,11 @@ void AEnemyBase::BeginPlay()
 	{
 		WARNINGLOG(TEXT("Please set CombatType!!"));
 	}
-
+		
 	CharaterType = ECharacterTypes::NPC_Monster;
 	WeaponReady();
 	SpawnPos = GetActorLocation();
-	SetActorTickEnabled(false);
+	NPCController->SetControlOwner(this);
 }
 
 void AEnemyBase::Tick(float DeltaTime)
@@ -67,7 +69,11 @@ void AEnemyBase::UpdateState()
 		if (dis < NO_TARGET)
 			return;
 
-		if (dis > CombatDis)
+		if (bCorwd)
+		{
+			BehaviorMode(NPCState = ENPCState::SideStep);
+		}
+		else if (dis > CombatDis)
 		{
 			BehaviorMode(NPCState = ENPCState::Chase);
 		}
@@ -109,6 +115,12 @@ void AEnemyBase::ThinkAction()
 	if (dis < NO_TARGET)
 		return;
 
+	if (dis < ValidSightDis && IsCorwd())
+	{
+		bCorwd = IsCorwd();
+		UpdateState();
+	}
+		
 	if (dis < CombatDis)
 	{
 		SetActorTickEnabled(false);
@@ -135,7 +147,8 @@ void AEnemyBase::BehaviorMode(ENPCState enemyState)
 		SetActorTickEnabled(true);
 		break;
 	case ENPCState::SideStep:
-		SideStep();
+		LookAtTarget(Target->GetActorLocation());
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::SideStep, DELAY4, false);
 		break;
 	case ENPCState::Death:
 		MySpawnArea->EnemyDeathCount();
@@ -150,6 +163,7 @@ void AEnemyBase::InitBehaviorState()
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->MaxWalkSpeed = 630.f;
 	SetActorTickEnabled(false);
+	bCorwd = false;
 	StopMove();
 }
 
@@ -209,14 +223,16 @@ void AEnemyBase::Patrol()
 
 void AEnemyBase::SideStep()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 90.f;
+	GetCharacterMovement()->MaxWalkSpeed = 170.f;
+	FVector rightVector = GetActorRightVector().GetSafeNormal();
 
-	FVector side = GetActorLocation();
 	int32 randomDir = FMath::RandRange(-1, 0);
-	int32 dir = randomDir == -1 ? -1 : 1;
-	side.X = side.X + (300.f * dir);
+	float dir = randomDir == -1 ? -1.f : 1.f;
+	NPCAnimInstance->Angle = dir;
 
-	MoveToLocation(side); 
+	FVector sideVector = GetActorLocation() + (rightVector * dir * 300.f);
+
+	MoveSide(sideVector);
 }
 
 void AEnemyBase::Combat()
@@ -229,11 +245,6 @@ void AEnemyBase::Combat()
 		// юс╫ц
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::UpdateState, animLength, false);
 	}
-}
-
-void AEnemyBase::ApproachToTarget()
-{
-
 }
 
 bool AEnemyBase::IsCorwd()
@@ -256,12 +267,12 @@ bool AEnemyBase::IsCorwd()
 		sphere,
 		Params);
 
-	DrawDebugLine(GetWorld(), start, end, FColor::Red, true, 5.f);
+	//DrawDebugLine(GetWorld(), start, end, FColor::Red, true, 5.f);
 
 	AEnemyBase* actor = Cast<AEnemyBase>(hit.GetActor());
 
-	if(ishit)
-		WARNINGLOG(TEXT("%s actor hit: %s"), *this->GetName(), *actor->GetName())
+	/*if(ishit)
+		WARNINGLOG(TEXT("%s actor hit: %s"), *this->GetName(), *actor->GetName())*/
 
 	return actor != nullptr;
 }
@@ -269,7 +280,6 @@ bool AEnemyBase::IsCorwd()
 void AEnemyBase::ChaseTarget()
 {
 	MoveToActor(Target);
-
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 

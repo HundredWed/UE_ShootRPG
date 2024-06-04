@@ -36,6 +36,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 		class UAnimMontage* CombatActionMontage;
 
+	bool bTurningLoop = false;
+
+public:
+	FORCEINLINE ENPCState GetNPCState() { return NPCState; }
+
 protected:
 	
 	/**states*/
@@ -61,7 +66,7 @@ protected:
 		class ACPP_Character* Target = nullptr;
 
 	UPROPERTY()
-		class AAIController* NPCController;
+		class ACPP_NPCcontroller* NPCController;
 
 	FVector HitDir = FVector::Zero();
 	float CurrentHP = 0;
@@ -79,9 +84,11 @@ protected:
 	void SetStateDeath();
 	void MoveToActor(const AActor* actor, const int acceptanceRadius = 3.f);
 	void MoveToLocation(const FVector& pos, const int acceptanceRadius = 3.f);
+	void MoveSide(const FVector& pos);
 	float PlayNPCMontage(UAnimMontage* montageToPlay);
 	float CheckDist();
-	void LookAtTarget(const FVector& targetpos);
+	UFUNCTION()
+		void LookAtTarget(const FVector& targetpos);
 	void TurnRight();
 	void TurnLeft();
 	void ClearTargetInfo();
@@ -98,7 +105,7 @@ protected:
 private:
 
 	float CurrentTurningValue = 0.f;
-	float TurnSpeed = 5.f;
+	float TurnSpeed = 1.5f;
 	float TurningValue = 0.f;
 
 };

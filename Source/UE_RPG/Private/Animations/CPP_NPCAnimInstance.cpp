@@ -29,7 +29,8 @@ void UCPP_NPCAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	if (IsValid(MyCharacterMovement))
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(MyCharacterMovement->Velocity);
-		Angle = GetAngle2();
+		//Angle = GetAngle2();
+		NPCState = TypEnemy->GetNPCState();
 	}
 }
 

@@ -24,6 +24,7 @@ public:
 	void Encounter();
 	void TargetIsNotValid();
 	void EnemyDeathCount();
+	void CreateEnemy();
 
 protected:
 
@@ -54,16 +55,21 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Area Info")
 		float ValidDis = 300.f;
 
-	UPROPERTY(EditAnywhere, Category = "Area Info")
-		TArray<AEnemyBase*> Enemys;
-
+	
 private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Area Info")
 		ACPP_Character* Target;
 
+	UPROPERTY(EditAnywhere, Category = "Area Info")
+		TArray<AEnemyBase*> Enemys;
+
+	UPROPERTY(VisibleAnywhere, Category = "Area Info")
+		TArray<TSubclassOf<AEnemyBase>> EnemyClass;
+
+	UPROPERTY(VisibleAnywhere, Category = "Area Info")
+		TArray<AActor*> SpawnPoint;
+
 	FVector CenterPos;
-
 	int32 EnemysNum;
-
 };

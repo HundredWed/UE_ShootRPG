@@ -1,13 +1,13 @@
 #include "NPC/NonPlayerCharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "AIController.h"
 
 #include "NPC/HealthBarComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Animations/CPP_NPCAnimInstance.h"
 #include "Object/Mover.h"
 #include "CPP_Character.h"
+#include "NPC/CPP_NPCcontroller.h"
 
 ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 {
@@ -47,11 +47,10 @@ void ANonPlayerCharacterBase::BeginPlay()
 		DISPLAYLOG(TEXT("NPCAnimInstance is nvalid!!"))
 	}
 
-	NPCController = Cast<AAIController>(GetController());
+	NPCController = Cast<ACPP_NPCcontroller>(GetController());
 	if (!IsValid(NPCController))
 	{
-		WARNINGLOG(TEXT("Enemy EnemyController is not Valid!!"));
-		return;
+		WARNINGLOG(TEXT("NPCController is not Valid!! Please Check 'AI controller class'"));
 	}
 
 	if (IsValid(HealthBarComponent))
@@ -140,6 +139,21 @@ void ANonPlayerCharacterBase::MoveToLocation(const FVector& pos, const int accep
 	LookAtTarget(pos);
 }
 
+void ANonPlayerCharacterBase::MoveSide(const FVector& pos)
+{
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalLocation(pos);
+	MoveRequest.SetAcceptanceRadius(3.f);
+	NPCController->MoveTo(MoveRequest);
+	NPCController->CanUpdateState(true);
+
+	if (IsValid(Target))
+	{
+		bTurningLoop = true;
+		LookAtTarget(Target->GetActorLocation());
+	}
+}
+
 float ANonPlayerCharacterBase::PlayNPCMontage(UAnimMontage* montageToPlay)
 {
 	if (!IsValid(montageToPlay) || !IsValid(NPCAnimInstance))
@@ -150,7 +164,7 @@ float ANonPlayerCharacterBase::PlayNPCMontage(UAnimMontage* montageToPlay)
 		
 	NPCAnimInstance->Montage_Play(montageToPlay);
 	
-	return montageToPlay->GetPlayLength() + 0.05f;/**0.05f delay*/
+	return montageToPlay->GetPlayLength() + DELAY1;
 }
 
 float ANonPlayerCharacterBase::CheckDist()
@@ -174,7 +188,6 @@ void ANonPlayerCharacterBase::LookAtTarget(const FVector& targetpos)
 	TurningValue = theta;
 
 	const FVector CrossProduct = FVector::CrossProduct(forward, targetDir);
-	//WARNINGLOG(TEXT("CrossProduct: %f"), CrossProduct.Z)
 	if (CrossProduct.Z < 0)
 	{
 		//WARNINGLOG(TEXT("Rotation: %f"), GetActorRotation().Yaw)
@@ -184,6 +197,14 @@ void ANonPlayerCharacterBase::LookAtTarget(const FVector& targetpos)
 	{
 		//WARNINGLOG(TEXT("Rotation: %f"), GetActorRotation().Yaw)
 		TurnRight();
+	}
+
+	if (bTurningLoop && IsValid(Target))
+	{
+		FTimerHandle timerHandle;
+		FTimerDelegate TimerDel;
+		TimerDel.BindUFunction(this, FName("LookAtTarget"), Target->GetActorLocation());
+		GetWorld()->GetTimerManager().SetTimer(timerHandle, TimerDel, DELAY5, false);
 	}
 }
 
@@ -200,10 +221,9 @@ void ANonPlayerCharacterBase::TurnRight()
 		CurrentTurningValue = 0;
 		return;
 	}
-	SetActorRotation(newRot);
 
-	
-	GetWorld()->GetTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnRight, 0.01f, false);
+	SetActorRotation(newRot);
+	GetWorld()->GetTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnRight, SPEED3, false);
 }
 
 void ANonPlayerCharacterBase::TurnLeft()
@@ -212,16 +232,16 @@ void ANonPlayerCharacterBase::TurnLeft()
 	newRot.Yaw -= TurnSpeed;
 	CurrentTurningValue += TurnSpeed;
 	//WARNINGLOG(TEXT("Left TurnDest: %f"), newRot.Yaw)
-
+	
 	if ((CurrentTurningValue >= TurningValue) ||
 		(NPCState == ENPCState::Death))
 	{
 		CurrentTurningValue = 0;
 		return;
 	}
-	SetActorRotation(newRot);
 
-	GetWorld()->GetTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnLeft, 0.01f, false);
+	SetActorRotation(newRot);
+	GetWorld()->GetTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnLeft, SPEED3, false);
 }
 
 void ANonPlayerCharacterBase::ClearTargetInfo()
@@ -252,8 +272,3 @@ void ANonPlayerCharacterBase::MoveDown()
 
 	Mover->MoveDown();
 }
-
-
-
-
-
