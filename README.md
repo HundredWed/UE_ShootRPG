@@ -7,7 +7,7 @@
 ## 업데이트 정보
 
 ### 2024/06/04   
-[몬스터 Side Step 구현(영상)](https://youtu.be/A7mOwiHCFLU).   
+[몬스터 Side Step 구현(영상)](https://youtu.be/Et24etPFmmU?si=OrWUDGnsjEMkv-tN).   
 기존에는 몬스터가 몰리면 뒤 늦게 온 몬스터가 앞서 도착한 몬스터에 막혀 공격을 하지 못하는 현상이 있었다.   
 해당 현상을 해결하기 위해 앞에 먼저 도착한 몬스터를 확인하고 몬스터가 있으면 side step을 실행시켜 빈 공간으로 유도하도록 했다.   
 
