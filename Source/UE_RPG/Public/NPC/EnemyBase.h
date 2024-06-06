@@ -31,7 +31,6 @@ public:
 	void SetTarget(ACPP_Character* target);
 	void WeaponReady();
 	FORCEINLINE void IsOrderfromSpawnArea(bool order) { bOrderfromSpawnArea = order; }
-	FORCEINLINE void SetEnemyID(int32 id) { MyID = id; }
 
 	/**ai*/
 	void NoDamaged(const FVector& targetLocation);
@@ -89,9 +88,7 @@ private:
 
 
 	FVector SpawnPos;
-	int8 PrevRandomTarget = -1;
 	bool bOrderfromSpawnArea = false;
 	bool bCorwd = false;
 	float CorwdTraceRadius = 0.f;
-	int32 MyID;
 };

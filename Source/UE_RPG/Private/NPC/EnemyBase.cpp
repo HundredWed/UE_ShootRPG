@@ -11,7 +11,6 @@
 #include "CPP_Character.h"
 #include "NPC/CPP_EnemyCombatBox.h"
 #include "NPC/CPP_EnemySpawnArea.h"
-#include "NPC/CPP_NPCcontroller.h"
 #include "Animations/CPP_NPCAnimInstance.h"
 
 #define NO_TARGET 0
@@ -38,7 +37,7 @@ void AEnemyBase::BeginPlay()
 	CharaterType = ECharacterTypes::NPC_Monster;
 	WeaponReady();
 	SpawnPos = GetActorLocation();
-	NPCController->SetControlOwner(this);
+	SetControlOwner(this);
 }
 
 void AEnemyBase::Tick(float DeltaTime)
@@ -55,6 +54,8 @@ void AEnemyBase::SetActionStateNormal()
 
 void AEnemyBase::UpdateState()
 {	
+	Super::UpdateState();
+
 	if (NPCState == ENPCState::Death)
 	{
 		BehaviorMode(NPCState = ENPCState::Death);
@@ -161,7 +162,7 @@ void AEnemyBase::BehaviorMode(ENPCState enemyState)
 void AEnemyBase::InitBehaviorState()
 {
 	GetCharacterMovement()->bOrientRotationToMovement = false;
-	GetCharacterMovement()->MaxWalkSpeed = 630.f;
+	GetCharacterMovement()->MaxWalkSpeed = DelfaultSpeed;
 	SetActorTickEnabled(false);
 	bCorwd = false;
 	StopMove();
@@ -187,6 +188,9 @@ bool AEnemyBase::CanUpdateState()
 
 void AEnemyBase::SetTarget(ACPP_Character* target)
 {
+	if (!IsValid(target))
+		return;
+
 	Target = target;
 	UpdateState();
 }
@@ -223,7 +227,7 @@ void AEnemyBase::Patrol()
 
 void AEnemyBase::SideStep()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 170.f;
+	GetCharacterMovement()->MaxWalkSpeed = SidStepSpeed;
 	FVector rightVector = GetActorRightVector().GetSafeNormal();
 
 	int32 randomDir = FMath::RandRange(-1, 0);

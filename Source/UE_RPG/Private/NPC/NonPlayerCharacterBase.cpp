@@ -30,6 +30,9 @@ ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 	GetCharacterMovement()->RotationRate.Yaw = 180;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
+
+	DelfaultSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	SidStepSpeed = 170.f;
 }
 
 
@@ -101,7 +104,7 @@ void ANonPlayerCharacterBase::DieNPC()
 	SetStateDeath();
 	NPCAnimInstance->Montage_Play(DeathActionMontage);
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle,this, &ANonPlayerCharacterBase::MoveDown, 
+	GetWorldTimerManager().SetTimer(TimerHandle,this, &ANonPlayerCharacterBase::MoveDown,
 		DeathActionMontage->GetPlayLength() * 2.f, false);
 }
 
@@ -204,7 +207,7 @@ void ANonPlayerCharacterBase::LookAtTarget(const FVector& targetpos)
 		FTimerHandle timerHandle;
 		FTimerDelegate TimerDel;
 		TimerDel.BindUFunction(this, FName("LookAtTarget"), Target->GetActorLocation());
-		GetWorld()->GetTimerManager().SetTimer(timerHandle, TimerDel, DELAY5, false);
+		GetWorldTimerManager().SetTimer(timerHandle, TimerDel, DELAY5, false);
 	}
 }
 
@@ -223,7 +226,7 @@ void ANonPlayerCharacterBase::TurnRight()
 	}
 
 	SetActorRotation(newRot);
-	GetWorld()->GetTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnRight, SPEED3, false);
+	GetWorldTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnRight, SPEED3, false);
 }
 
 void ANonPlayerCharacterBase::TurnLeft()
@@ -241,7 +244,7 @@ void ANonPlayerCharacterBase::TurnLeft()
 	}
 
 	SetActorRotation(newRot);
-	GetWorld()->GetTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnLeft, SPEED3, false);
+	GetWorldTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnLeft, SPEED3, false);
 }
 
 void ANonPlayerCharacterBase::ClearTargetInfo()
@@ -263,6 +266,14 @@ void ANonPlayerCharacterBase::SetHPMAX()
 void ANonPlayerCharacterBase::StopMove()
 {
 	NPCController->StopMovement();
+}
+
+void ANonPlayerCharacterBase::SetControlOwner(ANonPlayerCharacterBase* owner)
+{
+	if (!IsValid(owner))
+		return;
+
+	NPCController->SetControlOwner(owner);
 }
 
 void ANonPlayerCharacterBase::MoveDown()

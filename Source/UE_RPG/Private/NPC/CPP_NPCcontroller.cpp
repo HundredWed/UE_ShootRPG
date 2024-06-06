@@ -2,7 +2,7 @@
 
 
 #include "NPC/CPP_NPCcontroller.h"
-#include "NPC/EnemyBase.h"
+#include "NPC/NonPlayerCharacterBase.h"
 
 void ACPP_NPCcontroller::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
@@ -14,10 +14,10 @@ void ACPP_NPCcontroller::OnMoveCompleted(FAIRequestID RequestID, const FPathFoll
 
 void ACPP_NPCcontroller::UpdateState()
 {
-	if (!IsValid(Enemy))
+	if (!IsValid(NPC))
 		return;
-	Enemy->UpdateState();
-	Enemy->bTurningLoop = false;
+	NPC->UpdateState();
+	NPC->bTurningLoop = false;
 	bUpdateState = false;
 }
 

@@ -67,7 +67,7 @@ void ACPP_EnemySpawnArea::FocusTarget()
 {
 	if (!IsValid(Target) || EnemysNum <= 0)
 	{
-		WARNINGLOG(TEXT("stop"))
+		WARNINGLOG(TEXT("can not work FocusTarget please check valid Target or EnemysNum"))
 		return;
 	}
 		

@@ -7,7 +7,7 @@
 #include "UE_RPG/UtilityMecro.h"
 #include "CPP_NPCcontroller.generated.h"
 
-class AEnemyBase;
+class ANonPlayerCharacterBase;
 
 UCLASS()
 class UE_RPG_API ACPP_NPCcontroller : public AAIController
@@ -18,12 +18,12 @@ public:
 	virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
 	void UpdateState();
 
-	FORCEINLINE void SetControlOwner(AEnemyBase* owner) { Enemy = owner; }
+	FORCEINLINE void SetControlOwner(ANonPlayerCharacterBase* owner) { NPC = owner; }
 	FORCEINLINE void CanUpdateState(bool bupdate) { bUpdateState = bupdate; }
 
 	
 private:
 	
-	AEnemyBase* Enemy;
+	ANonPlayerCharacterBase* NPC;
 	bool bUpdateState;
 };

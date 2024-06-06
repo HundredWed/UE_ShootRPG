@@ -40,7 +40,7 @@ public:
 
 public:
 	FORCEINLINE ENPCState GetNPCState() { return NPCState; }
-
+	virtual	void UpdateState();
 protected:
 	
 	/**states*/
@@ -70,14 +70,14 @@ protected:
 
 	FVector HitDir = FVector::Zero();
 	float CurrentHP = 0;
+	float DelfaultSpeed = 0.f;
+	float SidStepSpeed = 0.f;
 
 	FTimerHandle TimerHandle;
 	FTimerHandle TurningHandle;
 
 	virtual void BeginPlay() override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-	
-	virtual	void UpdateState();
 
 	void UpdateHealthPercent(float currentAmount);
 	void DieNPC();
@@ -95,13 +95,11 @@ protected:
 	void SetHealthBarWidget(bool bvisibility);
 	void SetHPMAX();
 	void StopMove();
+	void SetControlOwner(ANonPlayerCharacterBase* owner);
 	
-
-
 	UFUNCTION()
 		void MoveDown();
 
-	
 private:
 
 	float CurrentTurningValue = 0.f;

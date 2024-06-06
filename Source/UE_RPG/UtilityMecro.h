@@ -2,16 +2,16 @@
 #include "CoreMinimal.h"
 
 // value
-#define SPEED1 0.1
-#define SPEED2 0.01
-#define SPEED3 0.001
-#define SPEED4 0.0001
+#define SPEED1 0.1f
+#define SPEED2 0.01f
+#define SPEED3 0.001f
+#define SPEED4 0.0001f
 
-#define DELAY1 0.1
-#define DELAY2 0.2
-#define DELAY3 0.3
-#define DELAY4 0.4
-#define DELAY5 0.4
+#define DELAY1 0.1f
+#define DELAY2 0.2f
+#define DELAY3 0.3f
+#define DELAY4 0.4f
+#define DELAY5 0.5f
 
 
 // debug
