@@ -157,17 +157,26 @@ void ANonPlayerCharacterBase::MoveSide(const FVector& pos)
 	}
 }
 
-float ANonPlayerCharacterBase::PlayNPCMontage(UAnimMontage* montageToPlay)
+float ANonPlayerCharacterBase::PlayNPCMontage(UAnimMontage* montageToPlay, const FName& section)
 {
 	if (!IsValid(montageToPlay) || !IsValid(NPCAnimInstance))
 	{
 		WARNINGLOG(TEXT("is not valid montage or NPCAnimInstance!!"))
 		return 0.f;
 	}
-		
-	NPCAnimInstance->Montage_Play(montageToPlay);
 	
-	return montageToPlay->GetPlayLength() + DELAY1;
+	if (section == "null")
+	{
+		return NPCAnimInstance->Montage_Play(montageToPlay) + DELAY1;
+	}
+	else
+	{
+		NPCAnimInstance->Montage_Play(montageToPlay);
+		NPCAnimInstance->Montage_JumpToSection(section, montageToPlay);
+		int32 index = montageToPlay->GetSectionIndex(section);
+
+		return montageToPlay->GetSectionLength(index) + DELAY1;
+	}
 }
 
 float ANonPlayerCharacterBase::CheckDist()

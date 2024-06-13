@@ -85,7 +85,7 @@ protected:
 	void MoveToActor(const AActor* actor, const int acceptanceRadius = 3.f);
 	void MoveToLocation(const FVector& pos, const int acceptanceRadius = 3.f);
 	void MoveSide(const FVector& pos);
-	float PlayNPCMontage(UAnimMontage* montageToPlay);
+	float PlayNPCMontage(UAnimMontage* montageToPlay, const FName& section = "null");
 	float CheckDist();
 	UFUNCTION()
 		void LookAtTarget(const FVector& targetpos);

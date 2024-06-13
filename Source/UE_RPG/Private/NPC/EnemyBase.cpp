@@ -33,7 +33,8 @@ void AEnemyBase::BeginPlay()
 	{
 		WARNINGLOG(TEXT("Please set CombatType!!"));
 	}
-		
+
+	InitEnenmyInfo();
 	CharaterType = ECharacterTypes::NPC_Monster;
 	WeaponReady();
 	SpawnPos = GetActorLocation();
@@ -118,7 +119,8 @@ void AEnemyBase::ThinkAction()
 
 	if (dis < ValidSightDis && IsCorwd())
 	{
-		bCorwd = IsCorwd();
+		SetActorTickEnabled(false);
+		bCorwd = true;
 		UpdateState();
 	}
 		
@@ -216,6 +218,26 @@ void AEnemyBase::WeaponReady()
 	}
 }
 
+void AEnemyBase::InitEnenmyInfo()
+{
+	if (IsValid(EnemyDataTable))
+	{
+		const FEnemyInfoTable* info = EnemyDataTable->FindRow<FEnemyInfoTable>(EnemyID,TEXT(""));
+		if (info == nullptr)
+		{
+			WARNINGLOG(TEXT("[%s] was not found!!Please check the ID."), *EnemyID.ToString())
+				return;
+		}
+
+		CombatTypes = info->CombatTypes;
+		PlaySection = info->PlaySection;
+		SocketNames = info->SocketNames;
+		NoDamagedDistance = info->NoDamagedDistance;
+		CombatDis = info->CombatDis;
+		ValidSightDis = info->ValidSightDis;
+	}
+}
+
 void AEnemyBase::Patrol()
 {
 	SetHealthBarWidget(true);
@@ -241,7 +263,24 @@ void AEnemyBase::SideStep()
 
 void AEnemyBase::Combat()
 {
-	float animLength = PlayNPCMontage(CombatActionMontage);
+	float animLength;
+
+	if (PlaySection.Num() > 0)
+	{
+		int32 random = FMath::RandRange(0, PlaySection.Num());
+		if (random == PlaySection.Num())
+		{
+			BehaviorMode(NPCState = ENPCState::SideStep);
+			return;
+		}
+		else
+			animLength = PlayNPCMontage(CombatActionMontage, PlaySection[random]);
+	}
+	else
+	{
+		animLength = PlayNPCMontage(CombatActionMontage);
+	}
+
 	LookAtTarget(Target->GetActorLocation());
 
 	if (CanUpdateState() && animLength > 0)

@@ -61,7 +61,6 @@ void ACPP_EnemyCombatBox::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent,
 		}
 	}
 
-	
 }
 
 void ACPP_EnemyCombatBox::SetCombatBoxCollisionEnabled(ECollisionEnabled::Type newType)
