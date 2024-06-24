@@ -29,7 +29,6 @@ void UCPP_NPCAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	if (IsValid(MyCharacterMovement))
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(MyCharacterMovement->Velocity);
-		//Angle = GetAngle2();
 		NPCState = TypEnemy->GetNPCState();
 	}
 }
@@ -44,22 +43,44 @@ float UCPP_NPCAnimInstance::GetAngle2()
 
 void UCPP_NPCAnimInstance::AnimNotify_ActivateCombatBox_0(UAnimNotify* Notify)
 {
+	if (!IsValid(TypEnemy))
+		return;
 	TypEnemy->ActivateCombatBox(BoxIndex0);
 }
 
 void UCPP_NPCAnimInstance::AnimNotify_DeactivateCombatBox_0(UAnimNotify* Notify)
 {
+	if (!IsValid(TypEnemy))
+		return;
 	TypEnemy->DeactivateCombatBox(BoxIndex0);
 }
 
 void UCPP_NPCAnimInstance::AnimNotify_ActivateCombatBox_1(UAnimNotify* Notify)
 {
+	if (!IsValid(TypEnemy))
+		return;
 	TypEnemy->ActivateCombatBox(BoxIndex1);
 }
 
 void UCPP_NPCAnimInstance::AnimNotify_DeactivateCombatBox_1(UAnimNotify* Notify)
 {
+	if (!IsValid(TypEnemy))
+		return;
 	TypEnemy->DeactivateCombatBox(BoxIndex1);
+}
+
+void UCPP_NPCAnimInstance::AnimNotify_TriggerIsDirectly(UAnimNotify* Notify)
+{
+	if (!IsValid(TypEnemy))
+		return;
+	TypEnemy->bDirectly = true;
+}
+
+void UCPP_NPCAnimInstance::AnimNotify_ShootProjectile(UAnimNotify* Notify)
+{
+	if (!IsValid(TypEnemy))
+		return;
+	TypEnemy->ShootProjectile();
 }
 
 

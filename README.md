@@ -4,7 +4,12 @@
 ### 개발기간: 2023/07/01 ~
 ### README최초 작성일: 2023/10/11 
 
-## 업데이트 정보
+## 업데이트 정보   
+
+### 2024/06/25   
+[몬스터 Gunner 추가(영상)](https://youtu.be/KbMwz-B4yj0).   
+[몬스터 Cannon추가(영상)](https://youtu.be/KsBltQEAws0).   
+
 
 ### 2024/06/13   
 [몬스터 콤보와 무빙(영상)](https://youtu.be/nbt6eRGjTrw).   

@@ -197,6 +197,7 @@ void ANonPlayerCharacterBase::LookAtTarget(const FVector& targetpos)
 	const float dtheta = FVector::DotProduct(GetActorForwardVector(), targetDir);
 	double theta = FMath::Acos(dtheta);
 	theta = FMath::RadiansToDegrees(theta);
+
 	TurningValue = theta;
 
 	const FVector CrossProduct = FVector::CrossProduct(forward, targetDir);
@@ -227,6 +228,7 @@ void ANonPlayerCharacterBase::TurnRight()
 	CurrentTurningValue += TurnSpeed;
 	//WARNINGLOG(TEXT("Right TurnDest: %f"), newRot.Yaw)
 
+	SetActorRotation(newRot);
 	if ((CurrentTurningValue >= TurningValue) ||
 		(NPCState == ENPCState::Death))
 	{
@@ -234,7 +236,6 @@ void ANonPlayerCharacterBase::TurnRight()
 		return;
 	}
 
-	SetActorRotation(newRot);
 	GetWorldTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnRight, SPEED3, false);
 }
 
@@ -245,6 +246,7 @@ void ANonPlayerCharacterBase::TurnLeft()
 	CurrentTurningValue += TurnSpeed;
 	//WARNINGLOG(TEXT("Left TurnDest: %f"), newRot.Yaw)
 	
+	SetActorRotation(newRot);
 	if ((CurrentTurningValue >= TurningValue) ||
 		(NPCState == ENPCState::Death))
 	{
@@ -252,7 +254,6 @@ void ANonPlayerCharacterBase::TurnLeft()
 		return;
 	}
 
-	SetActorRotation(newRot);
 	GetWorldTimerManager().SetTimer(TurningHandle, this, &ANonPlayerCharacterBase::TurnLeft, SPEED3, false);
 }
 

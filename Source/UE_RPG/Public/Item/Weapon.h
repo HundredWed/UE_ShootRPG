@@ -49,7 +49,7 @@ protected:
 		int32 OtherBodyIndex) override;
 
 	/**damage ui*/
-	void SpawnDamageUI(const FVector pos, float damage);
+	void SpawnDamageUI(const FVector pos, float damage = 0.f);
 
 	/**weapon states*/
 	bool bActiveWeapon = true;

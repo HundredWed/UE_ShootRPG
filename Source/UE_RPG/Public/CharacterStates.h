@@ -61,5 +61,5 @@ enum class EEnemyCombatTypes : uint8
 {
 	Dummy,
 	One_Hand,
-	Two_Hand	
+	Two_Hand
 };

@@ -31,4 +31,31 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
 		float ValidSightDis = 500.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+		float DelfaultSpeed = 630.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+		float SidStepSpeed = 170.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+		float SidStepDis = 300.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+		int32 MaxHealth = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+		int32 MaxMana = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+		int32 MaxStamina = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+		int32 ATK = 15;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+		int32 DEF = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
+		ECharacterTypes CharaterType = ECharacterTypes::Type_None;
 };

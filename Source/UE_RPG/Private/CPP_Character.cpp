@@ -25,10 +25,6 @@ ACPP_Character::ACPP_Character()
 {
  	PrimaryActorTick.bCanEverTick = true;
 
-	CurrentHealth = MaxHealth;
-	CurrentMana = MaxMana;
-	CurrentStamina = MaxStamina;
-
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
@@ -64,6 +60,10 @@ ACPP_Character::ACPP_Character()
 void ACPP_Character::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CurrentHealth = MaxHealth;
+	CurrentMana = MaxMana;
+	CurrentStamina = MaxStamina;
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -160,7 +160,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 float ACPP_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	PlayMontage(DamagedMontage);
-	//DecreasePlayerHP(DamageAmount);
+	DecreasePlayerHP(DamageAmount);
 	return DamageAmount;
 }
 

@@ -19,6 +19,7 @@ public:
 
 	AEnemyBase();
 
+	bool bDirectly = false;
 
 public:
 
@@ -45,8 +46,10 @@ public:
 	void Patrol();
 	void ChaseTarget();
 	void SideStep();
-	void Combat();
+	virtual void Combat();
 	bool IsCorwd();
+	void ShootProjectile();
+	void LookatTargetByTick();
 
 	/**notify triggered*/
 	void ActivateCombatBox(const uint8 index);
@@ -60,21 +63,18 @@ public:
 
 protected:
 
-	
-
-private:
-
-	
-
 	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<class ACPP_EnemyCombatBox> CombatBoxClass;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class ACPP_Projectile> PTClass;
 
 	UPROPERTY()
 		TArray<class ACPP_EnemyCombatBox*> CombatBoxes;
 
 	UPROPERTY()
 		class ACPP_EnemySpawnArea* MySpawnArea;
-	
+
 	/**data table info*/
 	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		UDataTable* EnemyDataTable;
@@ -82,24 +82,28 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		FName EnemyID;/**same name*/
 
-	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		EEnemyCombatTypes CombatTypes = EEnemyCombatTypes::Dummy;
 
-	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		TArray<FName> PlaySection;
 
-	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		TArray<FName> SocketNames;
 
 	float NoDamagedDistance = 0.f;
 	float CombatDis = 0.f;
 	float ValidSightDis = 0.f;
 
-	
-
-
 	FVector SpawnPos;
 	bool bOrderfromSpawnArea = false;
 	bool bCorwd = false;
+	bool bRotatOnly = false;
 	float CorwdTraceRadius = 0.f;
+
+private:
+
+	
+
+	
 };

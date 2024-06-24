@@ -70,6 +70,12 @@ public:
 	UFUNCTION()
 		void AnimNotify_DeactivateCombatBox_1(UAnimNotify* Notify);
 
+	UFUNCTION()
+		void AnimNotify_TriggerIsDirectly(UAnimNotify* Notify);
+
+	UFUNCTION()
+		void AnimNotify_ShootProjectile(UAnimNotify* Notify);
+
 private:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

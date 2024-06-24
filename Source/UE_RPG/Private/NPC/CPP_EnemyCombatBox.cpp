@@ -11,7 +11,7 @@ ACPP_EnemyCombatBox::ACPP_EnemyCombatBox()
 	CombatBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Combat Box"));
 	SetRootComponent(CombatBox);
 
-	/**ECC_GameTraceChannel4 = PlayerMesh*/
+	/**ECC_GameTraceChannel4 = Player*/
 	CombatBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CombatBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CombatBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel4, ECollisionResponse::ECR_Overlap);

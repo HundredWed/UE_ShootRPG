@@ -118,6 +118,10 @@ void ARifle::TakeHit(FHitResult& hitresult, const FVector& shootpoint)
 		UGameplayStatics::ApplyDamage(enemy, FinalDamage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
 		SpawnDamageUI(hitresult.ImpactPoint, FinalDamage);
 	}
+	else
+	{
+		SpawnDamageUI(hitresult.ImpactPoint);
+	}
 }
 
 void ARifle::SpreadBulletRandomRange(FRotator& randDir)

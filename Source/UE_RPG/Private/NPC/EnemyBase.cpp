@@ -12,6 +12,7 @@
 #include "NPC/CPP_EnemyCombatBox.h"
 #include "NPC/CPP_EnemySpawnArea.h"
 #include "Animations/CPP_NPCAnimInstance.h"
+#include "Object/CPP_Projectile.h"
 
 #define NO_TARGET 0
 
@@ -35,16 +36,11 @@ void AEnemyBase::BeginPlay()
 	}
 
 	InitEnenmyInfo();
-	CharaterType = ECharacterTypes::NPC_Monster;
-	WeaponReady();
-	SpawnPos = GetActorLocation();
-	SetControlOwner(this);
 }
 
 void AEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	ThinkAction();
 }
 
@@ -112,22 +108,33 @@ void AEnemyBase::NoDamaged(const FVector& targetLocation)
 
 void AEnemyBase::ThinkAction()
 {
-	float dis = CheckDist();
-
-	if (dis < NO_TARGET)
-		return;
-
-	if (dis < ValidSightDis && IsCorwd())
+	if (bRotatOnly)
 	{
-		SetActorTickEnabled(false);
-		bCorwd = true;
-		UpdateState();
-	}
+		if (!IsValid(Target))
+			return;
 		
-	if (dis < CombatDis)
+		FRotator newRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Target->GetActorLocation());
+		SetActorRotation(newRot);
+	}
+	else
 	{
-		SetActorTickEnabled(false);
-		UpdateState();
+		float dis = CheckDist();
+
+		if (dis < NO_TARGET)
+			return;
+
+		if ((ValidSightDis > 0) && (dis < ValidSightDis) && IsCorwd())
+		{
+			SetActorTickEnabled(false);
+			bCorwd = true;
+			UpdateState();
+		}
+
+		if (dis < CombatDis)
+		{
+			SetActorTickEnabled(false);
+			UpdateState();
+		}
 	}
 }
 
@@ -138,7 +145,6 @@ void AEnemyBase::BehaviorMode(ENPCState enemyState)
 	switch (enemyState)
 	{
 	case ENPCState::Patrol:
-		ClearTargetInfo();
 		Patrol();
 		break;
 	case ENPCState::Combat:
@@ -167,6 +173,7 @@ void AEnemyBase::InitBehaviorState()
 	GetCharacterMovement()->MaxWalkSpeed = DelfaultSpeed;
 	SetActorTickEnabled(false);
 	bCorwd = false;
+	bRotatOnly = false;
 	StopMove();
 }
 
@@ -191,7 +198,11 @@ bool AEnemyBase::CanUpdateState()
 void AEnemyBase::SetTarget(ACPP_Character* target)
 {
 	if (!IsValid(target))
+	{
+		ClearTargetInfo();
+		UpdateState();
 		return;
+	}
 
 	Target = target;
 	UpdateState();
@@ -235,12 +246,29 @@ void AEnemyBase::InitEnenmyInfo()
 		NoDamagedDistance = info->NoDamagedDistance;
 		CombatDis = info->CombatDis;
 		ValidSightDis = info->ValidSightDis;
+		SidStepSpeed = info->SidStepSpeed;
+		DelfaultSpeed = info->DelfaultSpeed;
+		SidStepDis = info->SidStepDis;
+
+		MaxHealth = info->MaxHealth;
+		MaxMana = info->MaxMana;
+		ATK = info->ATK;
+		DEF = info->DEF;
+		CharaterType = info->CharaterType;
 	}
+
+	WeaponReady();
+	SpawnPos = GetActorLocation();
+	SetControlOwner(this);
+	SetActorTickEnabled(false);
 }
 
 void AEnemyBase::Patrol()
 {
-	SetHealthBarWidget(true);
+	if (Target != nullptr)
+		ClearTargetInfo();
+
+	SetHealthBarWidget(false);
 	bOrderfromSpawnArea = false;
 
 	MoveToLocation(SpawnPos);
@@ -250,20 +278,21 @@ void AEnemyBase::Patrol()
 void AEnemyBase::SideStep()
 {
 	GetCharacterMovement()->MaxWalkSpeed = SidStepSpeed;
+	
 	FVector rightVector = GetActorRightVector().GetSafeNormal();
 
 	int32 randomDir = FMath::RandRange(-1, 0);
 	float dir = randomDir == -1 ? -1.f : 1.f;
 	NPCAnimInstance->Angle = dir;
 
-	FVector sideVector = GetActorLocation() + (rightVector * dir * 300.f);
+	FVector sideVector = GetActorLocation() + (rightVector * dir * SidStepDis);
 
 	MoveSide(sideVector);
 }
 
 void AEnemyBase::Combat()
 {
-	float animLength;
+	float animLength = 0.f;
 
 	if (PlaySection.Num() > 0)
 	{
@@ -280,6 +309,7 @@ void AEnemyBase::Combat()
 	{
 		animLength = PlayNPCMontage(CombatActionMontage);
 	}
+
 
 	LookAtTarget(Target->GetActorLocation());
 
@@ -318,6 +348,33 @@ bool AEnemyBase::IsCorwd()
 		WARNINGLOG(TEXT("%s actor hit: %s"), *this->GetName(), *actor->GetName())*/
 
 	return actor != nullptr;
+}
+
+void AEnemyBase::ShootProjectile()
+{
+	UWorld* world = GetWorld();
+
+	bool socket = GetMesh()->DoesSocketExist("Muzzle_Front");
+
+	if (socket)
+	{
+		FVector loc = GetMesh()->GetSocketLocation("Muzzle_Front");
+		FRotator rot = GetMesh()->GetSocketRotation("Muzzle_Front");
+
+		const float dis = CheckDist();
+		if (dis < CombatDis)
+		{
+			rot.Pitch += ((CombatDis  - dis) / 40.f);
+		}
+
+		world->SpawnActor<ACPP_Projectile>(PTClass, loc , rot);
+	}
+}
+
+void AEnemyBase::LookatTargetByTick()
+{
+	bRotatOnly = true;
+	SetActorTickEnabled(true);
 }
 
 void AEnemyBase::ChaseTarget()
