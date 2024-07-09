@@ -2,6 +2,9 @@
 #include "CPP_Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Particles/ParticleSystemComponent.h"
+
+#include "Object/CPP_Projectile.h"
 
 #define ATTACK1 0  
 #define ATTACK2 1  
@@ -18,8 +21,43 @@ void ACPP_Enemy_Cannon::BeginPlay()
 
 void ACPP_Enemy_Cannon::Combat()
 {
-	LookAtTarget(Target->GetActorLocation());
+	bool overTurn = Target->GetPlayerMoveState();
+	LookAtTarget(Target->GetActorLocation(), overTurn);
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Enemy_Cannon::AttackFunc, (DELAY5 * 2.f), false);
+}
+
+void ACPP_Enemy_Cannon::ShootProjectile(bool bAEO, int32 index)
+{
+	UWorld* world = GetWorld();
+
+	bool socket = GetMesh()->DoesSocketExist("Muzzle_Front");
+
+	if (socket && PTClassse.Num() > 0 && IsValid(Target))
+	{
+		FVector loc = GetMesh()->GetSocketLocation("Muzzle_Front");
+		FRotator rot = UKismetMathLibrary::FindLookAtRotation(loc, Target->GetActorLocation());
+
+		if (IsValid(FireParticle))
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, loc, FRotator::ZeroRotator, ParticleSize);
+		}
+
+		if (bAEO)
+		{
+			rot = GetMesh()->GetSocketRotation("Muzzle_Front");
+
+			const float dis = CheckDist();
+			if (dis < CombatDis)
+			{
+				rot.Pitch += ((CombatDis - dis) / 40.f);
+			}
+		}
+
+		ACPP_Projectile* pt = world->SpawnActor<ACPP_Projectile>(PTClassse[index], loc, rot);
+		pt->ShootProjectile(bAEO);
+		pt->SetOwner(this);
+		pt->UpdateDamage(ATK);
+	}
 }
 
 void ACPP_Enemy_Cannon::AttackFunc()
@@ -39,6 +77,7 @@ void ACPP_Enemy_Cannon::AttackFunc()
 	}
 	else if (dis < middle && dis > near)
 	{
+		ShootProjectile(false, ATTACK2);
 		animLength = PlayNPCMontage(CombatActionMontage, PlaySection[ATTACK2]);
 	}
 	else if (dis < near)

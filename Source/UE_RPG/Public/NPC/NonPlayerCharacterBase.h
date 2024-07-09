@@ -77,6 +77,7 @@ protected:
 	float CurrentTurningValue = 0.f;
 	float TurnSpeed = 1.5f;
 	float TurningValue = 0.f;
+	float OverTurnValue = 35.f;
 
 	FTimerHandle TimerHandle;
 	FTimerHandle TurningHandle;
@@ -93,7 +94,7 @@ protected:
 	float PlayNPCMontage(UAnimMontage* montageToPlay, const FName& section = "null");
 	float CheckDist();
 	UFUNCTION()
-		void LookAtTarget(const FVector& targetpos);
+		void LookAtTarget(const FVector& targetpos, bool boverTurn = false);
 	void TurnRight();
 	void TurnLeft();
 	void ClearTargetInfo();

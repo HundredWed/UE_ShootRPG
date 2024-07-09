@@ -1,6 +1,8 @@
 #include "Item/Gun/Rifle.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
+
 #include "CPP_Character.h"
 #include "NPC/EnemyBase.h"
 
@@ -21,7 +23,7 @@ void ARifle::PullTrigger()
 {
 	if (IsValid(ShootSound))
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, ShootSound, GetActorLocation());
+		UGameplayStatics::PlaySound2D(this, ShootSound);
 	}
 	
 	FHitResult hitresult;
@@ -113,12 +115,16 @@ void ARifle::ShootEffect(const FVector& shootpoint)
 void ARifle::TakeHit(FHitResult& hitresult, const FVector& shootpoint)
 {
 	AEnemyBase* enemy = Cast<AEnemyBase>(hitresult.GetActor());
-	if (IsValid(enemy) && enemy->GetHit(shootpoint))
+	if (!IsValid(enemy))
+		return;
+
+	bool damaged = enemy->GetHit(shootpoint);
+	if (damaged)
 	{
 		UGameplayStatics::ApplyDamage(enemy, FinalDamage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
 		SpawnDamageUI(hitresult.ImpactPoint, FinalDamage);
 	}
-	else
+	else if(!damaged)
 	{
 		SpawnDamageUI(hitresult.ImpactPoint);
 	}

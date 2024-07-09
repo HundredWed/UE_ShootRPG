@@ -188,17 +188,26 @@ float ANonPlayerCharacterBase::CheckDist()
 	return (targetPos - GetActorLocation()).Length();
 }
 
-void ANonPlayerCharacterBase::LookAtTarget(const FVector& targetpos)
+void ANonPlayerCharacterBase::LookAtTarget(const FVector& targetpos, bool boverTurn)
 {
 	const FVector forward = FVector(GetActorForwardVector().X, GetActorForwardVector().Y, 0.f);
 	const FVector target = FVector(targetpos.X, targetpos.Y, 0.f);
 	const FVector targetDir = (targetpos - GetActorLocation()).GetSafeNormal();
 
 	const float dtheta = FVector::DotProduct(GetActorForwardVector(), targetDir);
-	double theta = FMath::Acos(dtheta);
+	float theta = FMath::Acos(dtheta);
 	theta = FMath::RadiansToDegrees(theta);
 
-	TurningValue = theta;
+	const float overAmount = 50.f;
+	if (boverTurn && (theta > overAmount))
+	{
+		TurningValue = theta + OverTurnValue;
+	}
+	else
+	{
+		TurningValue = theta;
+	}
+	
 
 	const FVector CrossProduct = FVector::CrossProduct(forward, targetDir);
 	if (CrossProduct.Z < 0)

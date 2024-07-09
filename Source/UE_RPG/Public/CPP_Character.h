@@ -117,6 +117,7 @@ public:
 	void SetCrouch(const FInputActionValue& Value);
 	void Dodge(const FInputActionValue& Value);
 	void InventoryVisibility(const FInputActionValue& Value);
+	void KnockBack(const FVector& velocity);
 
 	/**trace*/
 	void GetViewPointVector(FVector& Location, FRotator& Rotation);
@@ -164,7 +165,7 @@ public:
 		void EquippingEnd();
 
 	UFUNCTION(BlueprintCallable)
-		void DodgeEnd();
+		void SuperActionEnd();
 
 	/**mouse*/
 	void SetMouseRate();

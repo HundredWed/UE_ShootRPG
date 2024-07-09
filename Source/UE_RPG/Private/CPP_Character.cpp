@@ -159,7 +159,12 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 float ACPP_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	PlayMontage(DamagedMontage);
+	if (ActionState == ECharacterActionState::SuperAction)
+		return 0.0f;
+
+	if(ActionState != ECharacterActionState::Action)
+		PlayMontage(DamagedMontage);
+
 	DecreasePlayerHP(DamageAmount);
 	return DamageAmount;
 }
@@ -260,8 +265,6 @@ void ACPP_Character::Move(const FInputActionValue& Value)
 		float speed = GetCharacterMovement()->Velocity.Length();
 		bMoving = (Value.Get<FVector>().Length()) != 0 && (speed >= 3.f);
 	}
-
-	
 }
 
 void ACPP_Character::Look(const FInputActionValue& Value)
@@ -434,6 +437,15 @@ void ACPP_Character::InventoryVisibility(const FInputActionValue& Value)
 		}
 	}
 }
+void ACPP_Character::KnockBack(const FVector& velocity)
+{
+	ActionState = ECharacterActionState::SuperAction;
+	LaunchCharacter(velocity, true, false);
+
+	FTimerHandle th;
+	GetWorldTimerManager().SetTimer(th, this, &ACPP_Character::SuperActionEnd, DELAY3, false);
+}
+
 void ACPP_Character::GetViewPointVector(FVector& Location, FRotator& Rotation)
 {
 	AController* MyController = GetController();
@@ -713,7 +725,7 @@ void ACPP_Character::EquippingEnd()
 	ActionState = ECharacterActionState::Normal;
 }
 
-void ACPP_Character::DodgeEnd()
+void ACPP_Character::SuperActionEnd()
 {
 	ActionState = ECharacterActionState::Normal;
 	//DISPLAYLOG(TEXT("bOrientRotationToMovement is true"))

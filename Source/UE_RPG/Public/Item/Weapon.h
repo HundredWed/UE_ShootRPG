@@ -20,7 +20,7 @@ public:
 		class USoundCue* EquipSound;
 
 	UPROPERTY(EditAnywhere, Category = "FireEffect")
-		class USoundBase* ShootSound;
+		class USoundCue* ShootSound;
 
 	UPROPERTY(EditAnywhere, Category = "FireEffect")
 		class UParticleSystem* BeamParticle;

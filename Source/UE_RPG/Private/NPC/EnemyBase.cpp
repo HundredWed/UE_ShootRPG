@@ -12,7 +12,6 @@
 #include "NPC/CPP_EnemyCombatBox.h"
 #include "NPC/CPP_EnemySpawnArea.h"
 #include "Animations/CPP_NPCAnimInstance.h"
-#include "Object/CPP_Projectile.h"
 
 #define NO_TARGET 0
 
@@ -226,6 +225,9 @@ void AEnemyBase::WeaponReady()
 		CombatBoxes.Push(weapon);
 		FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 		CombatBoxes[i]->AttachToComponent(GetMesh(), TransformRules, SocketNames[i]);
+		CombatBoxes[i]->SetOwner(this);
+
+		DISPLAYLOG(TEXT("WeaponReady!!"))
 	}
 }
 
@@ -251,6 +253,7 @@ void AEnemyBase::InitEnenmyInfo()
 		SidStepDis = info->SidStepDis;
 
 		MaxHealth = info->MaxHealth;
+		CurrentHP = MaxHealth;
 		MaxMana = info->MaxMana;
 		ATK = info->ATK;
 		DEF = info->DEF;
@@ -350,27 +353,6 @@ bool AEnemyBase::IsCorwd()
 	return actor != nullptr;
 }
 
-void AEnemyBase::ShootProjectile()
-{
-	UWorld* world = GetWorld();
-
-	bool socket = GetMesh()->DoesSocketExist("Muzzle_Front");
-
-	if (socket)
-	{
-		FVector loc = GetMesh()->GetSocketLocation("Muzzle_Front");
-		FRotator rot = GetMesh()->GetSocketRotation("Muzzle_Front");
-
-		const float dis = CheckDist();
-		if (dis < CombatDis)
-		{
-			rot.Pitch += ((CombatDis  - dis) / 40.f);
-		}
-
-		world->SpawnActor<ACPP_Projectile>(PTClass, loc , rot);
-	}
-}
-
 void AEnemyBase::LookatTargetByTick()
 {
 	bRotatOnly = true;
@@ -383,14 +365,16 @@ void AEnemyBase::ChaseTarget()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
-void AEnemyBase::ActivateCombatBox(const uint8 index)
+void AEnemyBase::ActivateCombatBox(const uint8 index, bool knockBack)
 {
+	CombatBoxes[index]->bKnockBack = knockBack;
 	CombatBoxes[index]->SetCombatBoxCollisionEnabled(ECollisionEnabled::QueryOnly);
 	//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("ActiveCombatBox"));
 }
 
-void AEnemyBase::DeactivateCombatBox(const uint8 index)
+void AEnemyBase::DeactivateCombatBox(const uint8 index, bool knockBack)
 {
+	CombatBoxes[index]->bKnockBack = knockBack;
 	CombatBoxes[index]->SetCombatBoxCollisionEnabled(ECollisionEnabled::NoCollision);
 	//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("InactiveCombatBox"));
 }

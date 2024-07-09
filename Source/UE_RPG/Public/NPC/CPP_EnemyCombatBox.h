@@ -25,6 +25,8 @@ public:
 	UPROPERTY()
 		class ACPP_Character* Player;
 
+	bool bKnockBack = false;
+
 	void SetCombatBoxCollisionEnabled(ECollisionEnabled::Type newType);
 	FORCEINLINE void SetDamage(const float damage) { Damage = damage; }
 protected:
@@ -42,6 +44,9 @@ protected:
 
 private:
 	
+	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+		float KnockBackVelocity = 1500.f;
+
 	float Damage = 0.f;
 	int8 Hicount  = 0;
 

@@ -1,6 +1,7 @@
 #include "NPC/CPP_EnemyCombatBox.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "CPP_Character.h"
 
@@ -43,7 +44,7 @@ void ACPP_EnemyCombatBox::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent,
 
 		if (Hicount > OVERHIT)
 		{
-			WARNINGLOG(TEXT("OverHit!!!"))
+			//WARNINGLOG(TEXT("OverHit!!!"))
 			return;
 		}
 		FTimerHandle TimeHandle;
@@ -54,10 +55,24 @@ void ACPP_EnemyCombatBox::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent,
 	
 	if (IsValid(Player))
 	{
-		UGameplayStatics::ApplyDamage(Player, Damage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
+		
 		if (IsValid(HitSound))
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+		}
+
+		if (bKnockBack)
+		{
+			FVector knockBackDir = GetOwner()->GetActorForwardVector();
+			knockBackDir *= KnockBackVelocity;
+			Player->KnockBack(knockBackDir);
+
+			UGameplayStatics::ApplyDamage(Player, Damage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
+		}
+		else
+		{
+			const float damage = 1.f;
+			UGameplayStatics::ApplyDamage(Player, damage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
 		}
 	}
 

@@ -48,12 +48,12 @@ public:
 	void SideStep();
 	virtual void Combat();
 	bool IsCorwd();
-	void ShootProjectile();
+	virtual void ShootProjectile(bool bAEO = true, int32 index = 0) {};
 	void LookatTargetByTick();
 
 	/**notify triggered*/
-	void ActivateCombatBox(const uint8 index);
-	void DeactivateCombatBox(const uint8 index);
+	void ActivateCombatBox(const uint8 index, bool knockBack = false);
+	void DeactivateCombatBox(const uint8 index, bool knockBack = false);
 
 	UFUNCTION(BlueprintCallable)
 		void SetActionStateNormal();
@@ -65,9 +65,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<class ACPP_EnemyCombatBox> CombatBoxClass;
-
-	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class ACPP_Projectile> PTClass;
 
 	UPROPERTY()
 		TArray<class ACPP_EnemyCombatBox*> CombatBoxes;

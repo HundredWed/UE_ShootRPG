@@ -76,6 +76,9 @@ public:
 	UFUNCTION()
 		void AnimNotify_ShootProjectile(UAnimNotify* Notify);
 
+	UFUNCTION()
+		void AnimNotify_KnockBackCharacter(UAnimNotify* Notify);
+
 private:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

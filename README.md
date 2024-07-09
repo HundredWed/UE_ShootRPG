@@ -6,6 +6,10 @@
 
 ## 업데이트 정보   
 
+###2024/07/09   
+[몬스터 Cannon & Gunner 디테일 추가(영상)](https://youtu.be/GvwdrbI7uVQ).   
+[테스트 플레이(영상)](https://youtu.be/F-Rz4HYntBU).   
+
 ### 2024/06/25   
 [몬스터 Gunner 추가(영상)](https://youtu.be/KbMwz-B4yj0).   
 [몬스터 Cannon추가(영상)](https://youtu.be/KsBltQEAws0).   

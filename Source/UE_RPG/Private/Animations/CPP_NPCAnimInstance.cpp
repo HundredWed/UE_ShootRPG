@@ -83,5 +83,12 @@ void UCPP_NPCAnimInstance::AnimNotify_ShootProjectile(UAnimNotify* Notify)
 	TypEnemy->ShootProjectile();
 }
 
+void UCPP_NPCAnimInstance::AnimNotify_KnockBackCharacter(UAnimNotify* Notify)
+{
+	if (!IsValid(TypEnemy))
+		return;
+	TypEnemy->ActivateCombatBox(BoxIndex0, true);
+}
+
 
 

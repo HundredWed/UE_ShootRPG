@@ -1,28 +1,41 @@
 #include "Object/CPP_Projectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 #include "Object/CPP_AOE.h"
+#include "CPP_Character.h"
 
 ACPP_Projectile::ACPP_Projectile()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	Projectile = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Projectile Mesh"));
 	SetRootComponent(Projectile);
 
 	PTComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("PT Component"));
+	
+	ProjectileTrail = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Trail"));
+	ProjectileTrail->SetupAttachment(GetRootComponent());
 
 	PTComponent->InitialSpeed = 1300.f;
 	PTComponent->MaxSpeed = 2000.f;
+
+	SetActorTickEnabled(false);
 }
 
 void ACPP_Projectile::BeginPlay()
 {
 	Super::BeginPlay();
-
-	ShootProjectile();
 }
 
-void ACPP_Projectile::ShootProjectile()
+void ACPP_Projectile::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void ACPP_Projectile::ShootProjectile(bool bAEO)
 {
 	const float velocity = PTComponent->InitialSpeed;
 	const float projectileRadius = 1.f;
@@ -53,8 +66,8 @@ void ACPP_Projectile::ShootProjectile()
 	const float ActualHitTime = PredictResult.LastTraceDestination.Time + (PredictResult.LastTraceDestination.Time - PredictResult.PathData.Last().Time) * hitResult.Time;
 	//DISPLAYLOG(TEXT("%f"), ActualHitTime)
 
-
 	FVector location = PredictResult.HitResult.ImpactPoint;
+	ExplosionLocation = location;
 	//WARNINGLOG(TEXT("%s"), *location.ToString())
 	//WARNINGLOG(TEXT("%s"), *PredictResult.HitResult.Location.ToString())
 
@@ -62,6 +75,46 @@ void ACPP_Projectile::ShootProjectile()
 	location.Z += fixZ;
 
 	UWorld* world = GetWorld();
-	AOE = world->SpawnActor<ACPP_AOE>(AOEclass, location, PredictResult.HitResult.ImpactPoint.Rotation());
-	AOE->SetAreaSpeed(ActualHitTime);
+	if (bAEO && IsValid(AOEclass) && IsValid(world))
+	{		
+		AOE = world->SpawnActor<ACPP_AOE>(AOEclass, location, PredictResult.HitResult.ImpactPoint.Rotation());
+		AOE->SetAreaSpeed(ActualHitTime);
+
+		FTimerHandle TimerHandle;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Projectile::Explosion, ActualHitTime, false);
+	}
+}
+
+void ACPP_Projectile::Explosion()
+{
+	FHitResult hitresult;
+	TArray<AActor*> actorsToIgnore;
+	actorsToIgnore.Add(this);
+
+	bool hit = UKismetSystemLibrary::SphereTraceSingle(this, ExplosionLocation, ExplosionLocation, ExplosionRadius, UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel5), false,
+		actorsToIgnore, EDrawDebugTrace::ForDuration, hitresult, true, FLinearColor::Red, FLinearColor::Green, -1.f);
+	
+	ACPP_Character* player = Cast<ACPP_Character>(hitresult.GetActor());
+
+	if (HitParticles.Num() > 0)
+	{
+		for (int32 i = 0; i < HitParticles.Num(); i++)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(this, HitParticles[i], GetActorLocation(), FRotator::ZeroRotator, HitParticleSize);
+		}
+	}
+
+	if (IsValid(HitSound))
+	{
+		UGameplayStatics::PlaySound2D(this, HitSound);
+	}
+
+	if (hit && IsValid(player))
+	{		
+		UGameplayStatics::ApplyDamage(player, Damage, nullptr, GetOwner(), UDamageType::StaticClass());
+
+		FVector knockBackDir = (player->GetActorLocation() - ExplosionLocation).GetSafeNormal();
+		knockBackDir *= KnockBackVelocity;
+		player->KnockBack(knockBackDir);
+	}
 }

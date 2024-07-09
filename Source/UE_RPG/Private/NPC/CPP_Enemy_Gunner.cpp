@@ -1,6 +1,7 @@
 #include "NPC/CPP_Enemy_Gunner.h"
 #include "CPP_Character.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 ACPP_Enemy_Gunner::ACPP_Enemy_Gunner()
 {
@@ -54,7 +55,7 @@ void ACPP_Enemy_Gunner::GunTrace()
 	FVector StartLocation = GetMesh()->GetSocketLocation("Muzzle_Front");
 	//FVector end = StartLocation + GetActorForwardVector().GetSafeNormal() * ValidSightDis;
 	FVector end = StartLocation + (Target->GetActorLocation() - StartLocation).GetSafeNormal() * ValidSightDis;
-	DISPLAYLOG(TEXT("!!!"))
+
 	float spreadrange = 100.f;
 	float randPich = FMath::FRandRange(-spreadrange, spreadrange);
 	float randYaw = FMath::FRandRange(-spreadrange, spreadrange);
@@ -73,5 +74,26 @@ void ACPP_Enemy_Gunner::GunTrace()
 	if (onhit)
 	{
 		UGameplayStatics::ApplyDamage(hitresult_gunTrace.GetActor(), ATK, GetController(), GetOwner(), UDamageType::StaticClass());
+
+		FVector beamspawnpoint = StartLocation;
+		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
+		if (IsValid(Beam))
+		{
+			Beam->SetVectorParameter(FName("Target"), hitresult_gunTrace.ImpactPoint);
+		}
+	}
+	else
+	{
+		FVector beamspawnpoint = StartLocation;
+		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
+		if (IsValid(Beam))
+		{
+			Beam->SetVectorParameter(FName("Target"), (fixEnd - StartLocation) * 1000.f);
+		}
+	}
+
+	if (IsValid(FireParticle))
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, StartLocation, FRotator::ZeroRotator, ParticleSize);
 	}
 }

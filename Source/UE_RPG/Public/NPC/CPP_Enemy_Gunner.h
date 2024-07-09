@@ -17,4 +17,13 @@ public:
 	virtual void Combat() override;
 
 	void GunTrace();
+
+	UPROPERTY(EditAnywhere, Category = "Eenemy Info")
+		class UParticleSystem* BeamParticle;
+
+	UPROPERTY(EditAnywhere, Category = "Eenemy Info")
+		class UParticleSystem* FireParticle;
+
+	UPROPERTY(EditAnywhere, Category = "Eenemy Info")
+		FVector ParticleSize {1.f,1.f,1.f};
 };
