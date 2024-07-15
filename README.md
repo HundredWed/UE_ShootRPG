@@ -6,6 +6,9 @@
 
 ## 업데이트 정보   
 
+###2024/7/15   
+버그 픽스 및 닷지 무적 간단 구현   
+
 ###2024/07/09   
 [몬스터 Cannon & Gunner 디테일 추가(영상)](https://youtu.be/GvwdrbI7uVQ).   
 [테스트 플레이(영상)](https://youtu.be/F-Rz4HYntBU).   

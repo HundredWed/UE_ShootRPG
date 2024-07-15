@@ -175,6 +175,7 @@ public:
 		float GetCrosshairSpreadMultiplier() const;
 
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
+	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
 	FORCEINLINE void SetHitResultObject(class APickUpItem* hitresultobject);
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }

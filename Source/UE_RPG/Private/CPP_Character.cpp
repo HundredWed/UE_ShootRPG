@@ -437,8 +437,12 @@ void ACPP_Character::InventoryVisibility(const FInputActionValue& Value)
 		}
 	}
 }
+
 void ACPP_Character::KnockBack(const FVector& velocity)
 {
+	if (ActionState == ECharacterActionState::SuperAction)
+		return;
+
 	ActionState = ECharacterActionState::SuperAction;
 	LaunchCharacter(velocity, true, false);
 
@@ -615,6 +619,7 @@ void ACPP_Character::SetStateUnEquipped()
 
 	PlayEquipMontage("UnEquip");
 	SmoothSpringArmOffset(0);
+	SetMovementRotate(true, DefaultMRR);
 
 	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
 	playercontroller->SetHUDVisibility(false);
@@ -662,9 +667,9 @@ bool ACPP_Character::CanEquipState()
 
 bool ACPP_Character::CanUnEquipState()
 {
-	return CharacterState == ECharacterStateTypes::Equiped
+	return (CharacterState == ECharacterStateTypes::Equiped || CharacterState == ECharacterStateTypes::Aim)
 		&& !GetCharacterMovement()->IsFalling()
-		&& ActionState == ECharacterActionState::Normal;;
+		&& ActionState == ECharacterActionState::Normal;
 }
 
 bool ACPP_Character::IsValidEquipWeapon()

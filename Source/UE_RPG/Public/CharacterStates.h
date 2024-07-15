@@ -26,7 +26,7 @@ enum class ECharacterActionState : uint8
 {
 	Normal,
 	Action,/*can working**/
-	SuperAction,/*can't working**/
+	SuperAction,/*can't all action**/
 };
 //====================================================================
 

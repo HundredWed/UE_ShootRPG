@@ -56,7 +56,7 @@ void ACPP_EnemyCombatBox::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent,
 	if (IsValid(Player))
 	{
 		
-		if (IsValid(HitSound))
+		if (IsValid(HitSound) && (Player->GetActionState() != ECharacterActionState::SuperAction))
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 		}
