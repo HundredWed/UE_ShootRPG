@@ -12,12 +12,16 @@
 #include "NPC/CPP_EnemyCombatBox.h"
 #include "NPC/CPP_EnemySpawnArea.h"
 #include "Animations/CPP_NPCAnimInstance.h"
+#include "Object/Mover.h"
 
 #define NO_TARGET 0
 
 AEnemyBase::AEnemyBase()
 {
 	CorwdTraceRadius = GetCapsuleComponent()->GetUnscaledCapsuleRadius();
+
+	Mover->FinishDown.BindUFunction(this, FName("FinishMoveDownEvent"));
+	Mover->FinishUp.BindUFunction(this, FName("FinishMoveUpEvent"));
 }
 
 void AEnemyBase::BeginPlay()
@@ -83,7 +87,7 @@ void AEnemyBase::UpdateState()
 
 bool AEnemyBase::GetHit(const FVector& targetLocation)
 {
-	if (NPCState == ENPCState::Death)
+	if (NPCState == ENPCState::Death || NPCState == ENPCState::Normal)
 		return false;
 
 	float dis = (GetActorLocation() - targetLocation).Length();
@@ -97,6 +101,16 @@ bool AEnemyBase::GetHit(const FVector& targetLocation)
 
 	PlayNPCMontage(HitActionMontage);
 	return true;
+}
+
+float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if(NPCState == ENPCState::Death)
+		BehaviorMode(NPCState = ENPCState::Death);
+
+	return 0.0f;
 }
 
 void AEnemyBase::NoDamaged(const FVector& targetLocation)
@@ -143,6 +157,8 @@ void AEnemyBase::BehaviorMode(ENPCState enemyState)
 
 	switch (enemyState)
 	{
+	case ENPCState::Normal:
+		break;
 	case ENPCState::Patrol:
 		Patrol();
 		break;
@@ -159,7 +175,8 @@ void AEnemyBase::BehaviorMode(ENPCState enemyState)
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::SideStep, DELAY4, false);
 		break;
 	case ENPCState::Death:
-		MySpawnArea->EnemyDeathCount();
+		if(!bOrderfromSpawnArea)
+			MySpawnArea->EnemyDeathCount(SpawnArrNum);
 		break;
 	default:
 		break;
@@ -176,15 +193,23 @@ void AEnemyBase::InitBehaviorState()
 	StopMove();
 }
 
-void AEnemyBase::Spawn(ACPP_EnemySpawnArea* spawnarea)
+void AEnemyBase::Spawn(ACPP_EnemySpawnArea* spawnarea, const int32 arrNum)
 {
 	MySpawnArea = spawnarea;
+	SpawnArrNum = arrNum;
 	SetActorHiddenInGame(false);
 }
 
-void AEnemyBase::UnSpawn()
+void AEnemyBase::ReSpawn()
 {
-	SetActorHiddenInGame(true);
+	CurrentHP = MaxHealth;
+	UpdateHealthPercent(CurrentHP);
+	SetHealthBarWidget(false);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	Target = MySpawnArea->GetTarget();
+	MySpawnArea->EnemySpawnCount(SpawnArrNum);
+	UpdateState();
 }
 
 bool AEnemyBase::CanUpdateState()
@@ -258,12 +283,14 @@ void AEnemyBase::InitEnenmyInfo()
 		ATK = info->ATK;
 		DEF = info->DEF;
 		CharaterType = info->CharaterType;
+
+		WeaponReady();
+		SpawnPos = GetActorLocation();
+		SetControlOwner(this);
+		SetActorTickEnabled(false);
 	}
 
-	WeaponReady();
-	SpawnPos = GetActorLocation();
-	SetControlOwner(this);
-	SetActorTickEnabled(false);
+	
 }
 
 void AEnemyBase::Patrol()
@@ -377,4 +404,15 @@ void AEnemyBase::DeactivateCombatBox(const uint8 index, bool knockBack)
 	CombatBoxes[index]->bKnockBack = knockBack;
 	CombatBoxes[index]->SetCombatBoxCollisionEnabled(ECollisionEnabled::NoCollision);
 	//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("InactiveCombatBox"));
+}
+
+void AEnemyBase::FinishMoveDownEvent()
+{
+	BehaviorMode(NPCState = ENPCState::Normal);
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::MoveUp, RespawnDelay, false);
+}
+
+void AEnemyBase::FinishMoveUpEvent()
+{
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::ReSpawn, DELAY5, false);
 }

@@ -20,11 +20,14 @@ public:
 
 	void SpawnEnemy();
 	void FocusTarget();
-	void SetStateNormal();
 	void Encounter();
 	void TargetIsNotValid();
-	void EnemyDeathCount();
+	void EnemyDeathCount(const int32 arrNum);
+	void EnemySpawnCount(const int32 arrNum);
 	void CreateEnemy();
+
+	UFUNCTION()
+		ACPP_Character* GetTarget() { return Target; }
 
 protected:
 
@@ -38,11 +41,11 @@ protected:
 			bool bFromSweep,
 			const FHitResult& SweepResult);
 
-	/*UFUNCTION()
+	UFUNCTION()
 		virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
 			AActor* OtherActor,
 			UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex);*/
+			int32 OtherBodyIndex);
 
 public:
 
@@ -54,6 +57,10 @@ public:
 	//Area Info
 	UPROPERTY(EditAnywhere, Category = "Area Info")
 		float ValidDis = 300.f;
+	UPROPERTY(EditAnywhere, Category = "Area Info")
+		float SearchAreaRadius = 2000.f;
+	UPROPERTY(EditAnywhere, Category = "Area Info")
+		float RespawnTime = 10.f;
 
 	
 private:
@@ -70,6 +77,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Area Info")
 		TArray<AActor*> SpawnPoint;
 
+	UPROPERTY(VisibleAnywhere, Category = "Area Info")
+		int32 EnemysNum;
+
 	FVector CenterPos;
-	int32 EnemysNum;
+	
 };

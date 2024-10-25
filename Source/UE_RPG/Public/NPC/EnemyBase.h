@@ -24,12 +24,12 @@ public:
 public:
 
 	virtual bool GetHit(const FVector& targetLocation = FVector::Zero()) override;
-
+    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	void Spawn(class ACPP_EnemySpawnArea* spawnarea);
-	void UnSpawn();
+	void Spawn(class ACPP_EnemySpawnArea* spawnarea, const int32 arrNum);
+	void ReSpawn();
 	void SetTarget(ACPP_Character* target);
 	void WeaponReady();
 	void InitEnenmyInfo();
@@ -60,6 +60,10 @@ public:
 	
 	UFUNCTION()
 		virtual	void UpdateState() override;
+	UFUNCTION()
+		void FinishMoveDownEvent();
+	UFUNCTION()
+		void FinishMoveUpEvent();
 
 protected:
 
@@ -88,11 +92,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		TArray<FName> SocketNames;
 
+	int32 SpawnArrNum = 0;
 	float NoDamagedDistance = 0.f;
 	float CombatDis = 0.f;
 	float ValidSightDis = 0.f;
 
-	FVector SpawnPos;
 	bool bOrderfromSpawnArea = false;
 	bool bCorwd = false;
 	bool bRotatOnly = false;

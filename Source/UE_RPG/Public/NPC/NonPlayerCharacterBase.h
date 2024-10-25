@@ -25,22 +25,23 @@ public:
 		class UMover* Mover;
 
 	/**montage*/
-	UPROPERTY(VisibleAnywhere, Category = Montages)
+	UPROPERTY(VisibleAnywhere, Category = "NPC Info|Montage")
 		class UCPP_NPCAnimInstance* NPCAnimInstance;
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UPROPERTY(EditDefaultsOnly, Category = "NPC Info|Montage")
 		class UAnimMontage* HitActionMontage_NoDamaged;
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UPROPERTY(EditDefaultsOnly, Category = "NPC Info|Montage")
 		class UAnimMontage* HitActionMontage;
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UPROPERTY(EditDefaultsOnly, Category = "NPC Info|Montage")
 		class UAnimMontage* DeathActionMontage;
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UPROPERTY(EditDefaultsOnly, Category = "NPC Info|Montage")
 		class UAnimMontage* CombatActionMontage;
 
 	bool bTurningLoop = false;
 
 public:
 	FORCEINLINE ENPCState GetNPCState() { return NPCState; }
-	virtual	void UpdateState();
+	//FORCEINLINE ECharacterTypes GetCharacterTypes() { return CharaterType; }
+	virtual	void UpdateState() {};
 protected:
 	
 	/**states*/
@@ -56,6 +57,8 @@ protected:
 		int32 DEF = 10;
 	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
 		ECharacterTypes CharaterType = ECharacterTypes::Type_None;
+	UPROPERTY(EditDefaultsOnly, Category = "NPC Info")
+		float RespawnDelay = 6.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC Info")
 		ENPCActionState ENPCActionState = ENPCActionState::Normal;
@@ -69,6 +72,7 @@ protected:
 		class ACPP_NPCcontroller* NPCController;
 
 	FVector HitDir = FVector::Zero();
+	FVector SpawnPos = FVector::Zero();
 	float CurrentHP = 0;
 	float DelfaultSpeed = 0.f;
 	float SidStepSpeed = 0.f;
@@ -105,6 +109,8 @@ protected:
 	
 	UFUNCTION()
 		void MoveDown();
+	UFUNCTION()
+		void MoveUp();
 
 private:
 

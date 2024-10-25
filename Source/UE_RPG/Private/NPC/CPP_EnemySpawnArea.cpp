@@ -15,6 +15,8 @@ ACPP_EnemySpawnArea::ACPP_EnemySpawnArea()
 
 	SpawnArea->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SpawnArea->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+	SpawnArea->SetSphereRadius(SearchAreaRadius);
 }
 
 // Called when the game starts or when spawned
@@ -25,7 +27,7 @@ void ACPP_EnemySpawnArea::BeginPlay()
 	if (IsValid(SpawnArea))
 	{
 		SpawnArea->OnComponentBeginOverlap.AddDynamic(this, &ACPP_EnemySpawnArea::OnSphereOverlap);
-		//SpawnArea->OnComponentEndOverlap.AddDynamic(this, &ACPP_EnemySpawnArea::OnSphereEndOverlap);
+		SpawnArea->OnComponentEndOverlap.AddDynamic(this, &ACPP_EnemySpawnArea::OnSphereEndOverlap);
 
 		CenterPos = GetActorLocation();
 	}
@@ -47,6 +49,12 @@ void ACPP_EnemySpawnArea::OnSphereOverlap(UPrimitiveComponent* OverlappedCompone
 	}
 }
 
+void ACPP_EnemySpawnArea::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (EnemysNum <= 0)
+		TargetIsNotValid();
+}
+
 void ACPP_EnemySpawnArea::SpawnEnemy()
 {
 	if (Enemys.Num() <= 0)
@@ -59,15 +67,15 @@ void ACPP_EnemySpawnArea::SpawnEnemy()
 		if (!IsValid(Enemys[i]))
 			return;
 
-		Enemys[i]->Spawn(this);
+		Enemys[i]->Spawn(this,i);
 	}
 }
 
 void ACPP_EnemySpawnArea::FocusTarget()
 {
-	if (!IsValid(Target) || EnemysNum <= 0)
+	if (!IsValid(Target) || Enemys.Num() <= 0)
 	{
-		WARNINGLOG(TEXT("can not work FocusTarget please check valid Target or EnemysNum"))
+		//WARNINGLOG(TEXT("can not work FocusTarget please check valid Target or EnemysNum"))
 		return;
 	}
 		
@@ -80,7 +88,6 @@ void ACPP_EnemySpawnArea::FocusTarget()
 	{
 		WARNINGLOG(TEXT("stop"))
 		TargetIsNotValid();
-		SetStateNormal();
 		return;
 	}
 
@@ -92,11 +99,6 @@ void ACPP_EnemySpawnArea::FocusTarget()
 		FTimerHandle TimerHandle;
 		world->GetTimerManager().SetTimer(TimerHandle, this, &ACPP_EnemySpawnArea::FocusTarget, SPEED1, false);
 	}
-}
-
-void ACPP_EnemySpawnArea::SetStateNormal()
-{
-	Target = nullptr;
 }
 
 void ACPP_EnemySpawnArea::Encounter()
@@ -122,14 +124,29 @@ void ACPP_EnemySpawnArea::TargetIsNotValid()
 		Enemys[i]->IsOrderfromSpawnArea(true);
 		Enemys[i]->SetTarget(nullptr);
 	}
+
+	Target = nullptr;
 }
 
-void ACPP_EnemySpawnArea::EnemyDeathCount()
+void ACPP_EnemySpawnArea::EnemyDeathCount(const int32 arrNum)
 {
 	EnemysNum--;
-	WARNINGLOG(TEXT("EnemysNum"))
-	//TODO
-	/**respawn enemy after a few seconds*/
+	if (EnemysNum <= 0)
+	{
+		FVector targetPos = Target->GetActorLocation();
+		float dis = (CenterPos - targetPos).Length();
+
+		if (dis > SearchAreaRadius)
+		{
+			TargetIsNotValid();
+			WARNINGLOG(TEXT("TargetIsNotValid"))
+		}
+	}
+}
+
+void ACPP_EnemySpawnArea::EnemySpawnCount(const int32 arrNum)
+{
+	EnemysNum++;
 }
 
 void ACPP_EnemySpawnArea::CreateEnemy()
@@ -138,8 +155,8 @@ void ACPP_EnemySpawnArea::CreateEnemy()
 	for (int32 i = 0; i < EnemyClass.Num(); i++)
 	{
 		AEnemyBase* enemy = world->SpawnActor<AEnemyBase>(EnemyClass[i]);
-		//enemy->SetEnemyID(i);
 		Enemys.Push(enemy);
 	}
 }
+
 

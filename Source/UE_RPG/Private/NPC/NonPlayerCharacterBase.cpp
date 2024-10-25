@@ -35,7 +35,6 @@ ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 	SidStepSpeed = 170.f;
 }
 
-
 void ANonPlayerCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
@@ -79,10 +78,6 @@ float ANonPlayerCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const
 	return DamageAmount;
 }
 
-void ANonPlayerCharacterBase::UpdateState()
-{
-}
-
 void ANonPlayerCharacterBase::UpdateHealthPercent(float currentAmount)
 {
 	if (!IsValid(HealthBarComponent))
@@ -111,15 +106,18 @@ void ANonPlayerCharacterBase::DieNPC()
 void ANonPlayerCharacterBase::SetStateDeath()
 {
 	StopMove();
+	ClearTargetInfo();
 	SetHealthBarWidget(false);
 	NPCState = ENPCState::Death;
 	NPCAnimInstance->SetNPCState(NPCState);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
+	//GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel4, ECollisionResponse::ECR_Ignore);
 }
 
 void ANonPlayerCharacterBase::MoveToActor(const AActor* actor, const int acceptanceRadius)
 {
-	if (!IsValid(actor))
+	if (!IsValid(actor)) 
 	{
 		WARNINGLOG(TEXT("is not valid actor of MoveToActor Func!!"))
 		return;
@@ -301,4 +299,12 @@ void ANonPlayerCharacterBase::MoveDown()
 		return;
 
 	Mover->MoveDown();
+}
+
+void ANonPlayerCharacterBase::MoveUp()
+{
+	if (!IsValid(Mover))
+		return;
+
+	Mover->MoveUp();
 }
