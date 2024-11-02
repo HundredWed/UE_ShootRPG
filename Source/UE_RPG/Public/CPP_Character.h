@@ -22,6 +22,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		class USpringArmComponent* CameraBoom;
 
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+		class ACPP_WeaponBaes* WeaponActor;
+
 	/**Input*/
 	UPROPERTY(EditAnywhere, Category = Input)
 		class UInputMappingContext* DefaultMappingContext;
@@ -268,6 +271,8 @@ private:
 		class UGrabber* GraberComponent;
 
 	/**check 'is EquipedWeapon?' for  HoldWeapon& UnHoldWeapon Func*/
+	UPROPERTY()
+		class ACPP_WeaponBaes* EquippedWeapon = nullptr;
 	UPROPERTY()
 		class AWeapon* EquippedWeapon = nullptr;
 

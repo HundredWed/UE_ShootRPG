@@ -16,7 +16,7 @@ public:
 	ARifle();
 
 	UPROPERTY(EditAnywhere)
-		float MaxDir = 500.f;
+		float MaxDis = 500.f;
 
 	UPROPERTY(VisibleAnywhere)
 		USceneComponent* SpawnPoint;

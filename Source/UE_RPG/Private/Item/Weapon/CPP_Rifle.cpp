@@ -1,48 +1,42 @@
-#include "Item/Gun/Rifle.h"
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Item/Weapon/CPP_Rifle.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
-#include "CPP_Character.h"
 #include "NPC/EnemyBase.h"
+#include "CPP_Character.h"
 
-
-ARifle::ARifle()
+ACPP_Rifle::ACPP_Rifle()
 {
-	PrimaryActorTick.bCanEverTick = true;
-	SpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnPoint"));
-	SpawnPoint->SetupAttachment(WeaponMesh);
 }
 
-void ARifle::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void ARifle::PullTrigger()
+void ACPP_Rifle::Attack()
 {
 	if (IsValid(ShootSound))
 	{
 		UGameplayStatics::PlaySound2D(this, ShootSound);
 	}
-	
+
 	FHitResult hitresult;
-	FVector shootpoint;
+	FVector hitpotin;
 
-	ViewPointTrace(hitresult, shootpoint);
-	GunTrace(hitresult, shootpoint);
+	ViewPointTrace(hitresult, hitpotin);
+	GunTrace(hitresult, hitpotin);
 
-	TakeHit(hitresult, SpawnPoint->GetComponentLocation());
-	
-	ShootEffect(shootpoint);
+	TakeHit(hitresult, FirePoint);
+
+	ShootEffect(hitpotin);
 }
 
-void ARifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
+void ACPP_Rifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
 {
 	AController* OwnerController = GetOwnerController();
 	if (IsValid(OwnerController) == false)
 	{
-		return ;
+		return;
 	}
 	FVector  location;
 	FRotator rotation;
@@ -72,12 +66,11 @@ void ARifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
 	{
 		endpoint = end;
 	}
-
 }
 
-void ARifle::GunTrace(FHitResult& hitresult, FVector& endpoint)
+void ACPP_Rifle::GunTrace(FHitResult& hitresult, FVector& endpoint)
 {
-	FVector StartLocation = SpawnPoint->GetComponentLocation();
+	FVector StartLocation = FirePoint;
 	FVector end = endpoint;
 
 	FCollisionQueryParams Params;
@@ -97,14 +90,14 @@ void ARifle::GunTrace(FHitResult& hitresult, FVector& endpoint)
 	}
 }
 
-void ARifle::ShootEffect(const FVector& shootpoint)
+void ACPP_Rifle::ShootEffect(const FVector& shootpoint)
 {
 	if (IsValid(FireParticle))
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, shootpoint, FRotator::ZeroRotator, ParticleSize);
 	}
 
-	FVector beamspawnpoint = SpawnPoint->GetComponentLocation();
+	FVector beamspawnpoint = FirePoint;
 	UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
 	if (IsValid(Beam))
 	{
@@ -112,7 +105,7 @@ void ARifle::ShootEffect(const FVector& shootpoint)
 	}
 }
 
-void ARifle::TakeHit(FHitResult& hitresult, const FVector& shootpoint)
+void ACPP_Rifle::TakeHit(FHitResult& hitresult, const FVector& shootpoint)
 {
 	AEnemyBase* enemy = Cast<AEnemyBase>(hitresult.GetActor());
 	if (!IsValid(enemy))
@@ -124,13 +117,13 @@ void ARifle::TakeHit(FHitResult& hitresult, const FVector& shootpoint)
 		UGameplayStatics::ApplyDamage(enemy, FinalDamage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
 		SpawnDamageUI(hitresult.ImpactPoint, FinalDamage);
 	}
-	else if(!damaged)
+	else if (!damaged)
 	{
 		SpawnDamageUI(hitresult.ImpactPoint);
 	}
 }
 
-void ARifle::SpreadBulletRandomRange(FRotator& randDir)
+void ACPP_Rifle::SpreadBulletRandomRange(FRotator& randDir)
 {
 	float spreadrange = 1.f;
 
@@ -148,10 +141,7 @@ void ARifle::SpreadBulletRandomRange(FRotator& randDir)
 	randDir += FRotator(randPich, randYaw, randRoll);
 }
 
-
-
-
-AController* ARifle::GetOwnerController()
+AController* ACPP_Rifle::GetOwnerController()
 {
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (IsValid(OwnerPawn) == false)
@@ -159,8 +149,14 @@ AController* ARifle::GetOwnerController()
 		UE_LOG(LogTemp, Warning, TEXT("OwnerPawn null!!"));
 		return nullptr;
 	}
-		
+
 
 	return OwnerPawn->GetController();
-	
+}
+
+void ACPP_Rifle::BeginPlay()
+{
+	Super::BeginPlay();
+
+	FirePoint = WeaponMesh->GetSocketLocation("FirePoint");
 }

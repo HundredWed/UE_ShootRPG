@@ -114,7 +114,7 @@ public:
 		{
 			ItemClass = other->ItemClass;
 		}
-
+		WeaponAbilityID = other->WeaponAbilityID;
 
 		/**asset data*/
 		ItemMesh = other->ItemMesh;

@@ -12,6 +12,7 @@
 
 #include "Grabber.h"
 #include "Item/Item.h"
+#include "Item/Weapon/CPP_WeaponBaes.h"
 #include "Item/Weapon.h"
 #include "Item/Gun/Rifle.h"
 #include "Item/PickUpItem.h"
@@ -54,6 +55,8 @@ ACPP_Character::ACPP_Character()
 	CameraManager = CreateDefaultSubobject<UCameraManager>(TEXT("Camera Manager"));
 
 	GameInventory = CreateDefaultSubobject<UInventory>(TEXT("Inventory"));
+
+	WeaponActor = CreateDefaultSubobject<ACPP_WeaponBaes>(TEXT("Weapon"));
 }
 
 
@@ -114,7 +117,9 @@ void ACPP_Character::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Inventory component not found!!"));
 	}
 
+	/**weapon*/
 	StoreDamageUI();
+	WeaponActor->Equip(GetMesh(), "weapon_socket_back");
 
 	/**ignore from item trace*/
 	Params.AddIgnoredActor(this);
@@ -487,7 +492,6 @@ bool ACPP_Character::PickUpWeapon()
 		{
 			if (IsInActivePrevEquippedWeapon())
 			{
-				EquippedWeapon->Destroy();
 				SetEquippedWeapon(weapon);
 				return true;
 			}
@@ -538,6 +542,7 @@ void ACPP_Character::FireWeapon()
 			PlayMontage(FireMontage);
 		}
 
+		//인스턴스화
 		Rifle->PullTrigger();
 		ActionWeaponAbility();
 
