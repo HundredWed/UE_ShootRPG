@@ -631,7 +631,7 @@ void UInventory::EquipWeaponToPlayer(UItem* item)
 	playerWeapon->InitializeWeapon();
 		
 	PlayerRef->SetStateEquipped();
-	PlayerRef->SetWeaponAbility((uint8)item->WeaponAbilityID);
+	//PlayerRef->SetWeaponAbility((uint8)item->WeaponAbilityID);
 }
 
 void UInventory::UpdateEquipmentInventory(UItem* item)

@@ -15,6 +15,7 @@ ACPP_Rifle::ACPP_Rifle()
 
 void ACPP_Rifle::Attack()
 {
+	SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Boom!!!!!!!"));
 	if (IsValid(ShootSound))
 	{
 		UGameplayStatics::PlaySound2D(this, ShootSound);
@@ -26,15 +27,16 @@ void ACPP_Rifle::Attack()
 	ViewPointTrace(hitresult, hitpotin);
 	GunTrace(hitresult, hitpotin);
 
-	TakeHit(hitresult, FirePoint);
+	TakeHit(hitresult, WeaponMesh->GetSocketLocation("FirePoint"));
 
 	ShootEffect(hitpotin);
+
 }
 
 void ACPP_Rifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
 {
 	AController* OwnerController = GetOwnerController();
-	if (IsValid(OwnerController) == false)
+	if (!IsValid(OwnerController))
 	{
 		return;
 	}
@@ -70,14 +72,14 @@ void ACPP_Rifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
 
 void ACPP_Rifle::GunTrace(FHitResult& hitresult, FVector& endpoint)
 {
-	FVector StartLocation = FirePoint;
+	FVector StartLocation = WeaponMesh->GetSocketLocation("FirePoint");
 	FVector end = endpoint;
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
 
-	//DrawDebugLine(GetWorld(), StartLocation, end, FColor::Red, false, 5);
+	DrawDebugLine(GetWorld(), StartLocation, end, FColor::Red, false, 5);
 
 
 	FHitResult hitresult_gunTrace;
@@ -97,7 +99,7 @@ void ACPP_Rifle::ShootEffect(const FVector& shootpoint)
 		UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, shootpoint, FRotator::ZeroRotator, ParticleSize);
 	}
 
-	FVector beamspawnpoint = FirePoint;
+	FVector beamspawnpoint = WeaponMesh->GetSocketLocation("FirePoint");
 	UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);
 	if (IsValid(Beam))
 	{
@@ -157,6 +159,4 @@ AController* ACPP_Rifle::GetOwnerController()
 void ACPP_Rifle::BeginPlay()
 {
 	Super::BeginPlay();
-
-	FirePoint = WeaponMesh->GetSocketLocation("FirePoint");
 }

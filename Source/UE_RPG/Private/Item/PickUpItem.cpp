@@ -5,6 +5,7 @@
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Inventory.h"
+#include "Item/Weapon/CPP_WeaponBase.h"
 
 
 APickUpItem::APickUpItem()
@@ -124,7 +125,7 @@ void APickUpItem::InitializePickUpItem()
 				
 		ItemRef = NewObject<UItem>(this, UItem::StaticClass());
 
-		//ItemRef->ItemInfoTable = thisItemInfo;
+		ItemRef->ItemInfoTable = thisItemInfo;
 
 		/**item data*/
 		ItemRef->ItemInfoID = thisItemInfo->ItemInfoID;
@@ -146,7 +147,8 @@ void APickUpItem::InitializePickUpItem()
 		{
 			ItemRef->ItemClass = thisItemInfo->ItemClass;
 		}
-		ItemRef->WeaponAbilityID = thisItemInfo->WeaponAbilityID;
+		ItemRef->WeaponActor = thisItemInfo->WeaponActor;
+		
 
 
 		/**asset data*/

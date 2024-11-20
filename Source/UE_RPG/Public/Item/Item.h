@@ -62,7 +62,7 @@ public:
 		int32 ATK;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Data")
-		EWeaponAbilityID WeaponAbilityID;
+		TSubclassOf<ACPP_WeaponBase> WeaponActor;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		UStaticMesh* ItemMesh;

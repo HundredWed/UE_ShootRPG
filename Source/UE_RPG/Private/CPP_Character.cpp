@@ -12,15 +12,15 @@
 
 #include "Grabber.h"
 #include "Item/Item.h"
-#include "Item/Weapon/CPP_WeaponBaes.h"
+#include "Item/Weapon/CPP_WeaponBase.h"
 #include "Item/Weapon.h"
-#include "Item/Gun/Rifle.h"
 #include "Item/PickUpItem.h"
 #include "Camera/CameraManager.h"
 #include "Widget/MainPanelWidget.h"
 #include "Widget/NPC/CPP_DamageActor.h"
 #include "Inventory.h"
-#include "Item/WeaponAbiliys/WeaponAbilityBase.h"
+#include "Item/Weapon/CPP_WeaponManager.h"
+
 
 ACPP_Character::ACPP_Character()
 {
@@ -56,7 +56,7 @@ ACPP_Character::ACPP_Character()
 
 	GameInventory = CreateDefaultSubobject<UInventory>(TEXT("Inventory"));
 
-	WeaponActor = CreateDefaultSubobject<ACPP_WeaponBaes>(TEXT("Weapon"));
+	WeaponManager = CreateDefaultSubobject<UCPP_WeaponManager>(TEXT("WeaponManager"));
 }
 
 
@@ -116,10 +116,6 @@ void ACPP_Character::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Inventory component not found!!"));
 	}
-
-	/**weapon*/
-	StoreDamageUI();
-	WeaponActor->Equip(GetMesh(), "weapon_socket_back");
 
 	/**ignore from item trace*/
 	Params.AddIgnoredActor(this);
@@ -317,19 +313,17 @@ void ACPP_Character::GrabItem(const FInputActionValue& Value)
 
 void ACPP_Character::PickUp(const FInputActionValue& Value)
 {
-	if (IsValid(HitResultObject) == false)
+	if (!IsValid(HitResultObject))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("no item!!"));
 		return;
 	}
 	else
 	{
-		if (PickUpWeapon())
-			return;
+		bool equipWeapon = PickUpWeapon();
+		if (!equipWeapon)
+			HitResultObject->TakePickUp(this);/**inventory pick up*/
 
-		//else item
-		//UE_LOG(LogTemp, Display, TEXT("PickUp!!"));
-		HitResultObject->TakePickUp(this);
 		RemoveHitResultObject();
 	}
 	
@@ -337,13 +331,13 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 
 void ACPP_Character::Equip(const FInputActionValue& Value)
 {
-	bool bEquipedWeapon = IsValidEquipWeapon();
-	if (CanEquipState() && bEquipedWeapon)
+	//bool bEquipedWeapon = IsValidEquipWeapon();
+	if (CanEquipState())
 	{
 		SCREENLOG(INDEX_NONE, 5.f, FColor::Blue, TEXT("Equipped!!"));
 		SetStateEquipped();
 	}
-	else if(CanUnEquipState() && bEquipedWeapon)
+	else if(CanUnEquipState())
 	{
 		SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("UnEquipped!!"));
 		SetStateUnEquipped();
@@ -352,15 +346,14 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 
 void ACPP_Character::Attack(const FInputActionValue& Value)
 {
-	Rifle = Cast<ARifle>(EquippedWeapon);
-	if(!IsValid(Rifle) || CharacterState == ECharacterStateTypes::UnEquiped)
+	if(CharacterState == ECharacterStateTypes::UnEquiped)
 		return;
 	
 	PressFireKey = PressKey(Value);
 	
 	if (bTrigger)
 	{
-		FireWeapon();
+		AttackWeapon();
 		CharacterState = ECharacterStateTypes::Aim;
 	}
 }
@@ -484,50 +477,21 @@ AWeapon* ACPP_Character::isWeapon(AActor* hitobject) const
 
 bool ACPP_Character::PickUpWeapon()
 {
-	AWeapon* weapon = isWeapon(HitResultObject);
-
-	if (IsValid(weapon))
+	if (CurrentWeapon == nullptr)
 	{
-		if (EquippedWeapon)
-		{
-			if (IsInActivePrevEquippedWeapon())
-			{
-				SetEquippedWeapon(weapon);
-				return true;
-			}
-
-			return false;
-		}
-		else
-		{
-			SetEquippedWeapon(weapon);
-			return true;
-		}
+		WeaponManager->EquipWeapon(HitResultObject->GetItemInfoID(), HitResultObject->GetPickUpItemRef()->WeaponActor);
+		CurrentWeapon = WeaponManager->GetCurrntWeapon();
+		CurrentWeapon->SetOwner(this);
+		UItem* weaponRef = CurrentWeapon->GetItemRef();
+		GameInventory->UpdateEquipmentInventory(weaponRef);
+		//SetEquippedWeapon();
+		return true;
 	}
-
-	return false;
 	
-}
-
-bool ACPP_Character::IsInActivePrevEquippedWeapon()
-{
-	if(IsValid(EquippedWeapon))
-	{
-		return !EquippedWeapon->IsActiveWaepon();
-	}
 	return false;
 }
 
-void ACPP_Character::ActionWeaponAbility()
-{
-	
-	if (WeaponAbilityStorage.Find(AbilityId) == nullptr)
-		return;
-
-	WeaponAbility[AbilityId]->WeaponAbility();
-}
-
-void ACPP_Character::FireWeapon()
+void ACPP_Character::AttackWeapon()
 {
 	if (CanAttackState())
 	{
@@ -542,9 +506,7 @@ void ACPP_Character::FireWeapon()
 			PlayMontage(FireMontage);
 		}
 
-		//인스턴스화
-		Rifle->PullTrigger();
-		ActionWeaponAbility();
+		CurrentWeapon->Attack();
 
 		bTrigger = false;
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Character::CanTrigger, TriggerRate, false);
@@ -601,6 +563,7 @@ void ACPP_Character::ResetHitResultState()
 
 void ACPP_Character::RemoveHitResultObject()
 {
+	//HitResultObject->Destroy();
 	HitResultObject = nullptr;
 }
 
@@ -631,29 +594,21 @@ void ACPP_Character::SetStateUnEquipped()
 	UE_LOG(LogTemp, Display, TEXT("UnEquiped"));
 }
 
-void ACPP_Character::SetEquippedWeapon(AWeapon* equippedWeapon)
+void ACPP_Character::SetEquippedWeapon()
 {
-	UItem* weaponRef = equippedWeapon->GetPickUpItemRef();
+	CurrentWeapon->UpdateWeaponInfo(HitResultObject->GetItemInfoID());
+	CurrentWeapon->Equip(GetMesh(), "weapon_socket_back");
+
+	UItem* weaponRef = CurrentWeapon->GetItemRef();
 	if (!IsValid(weaponRef))
 		return;
 
-	EquippedWeapon = equippedWeapon;
-	SetWeaponAbility((uint8)weaponRef->WeaponAbilityID);
-
-	equippedWeapon->SetOwner(this);
-
-	/**equip weapon after SetOwner,TakePlayerATk*/
-	equippedWeapon->Equip(GetMesh(), "weapon_socket_back");
-	
-	/**search trace ignor*/
-	Params.AddIgnoredActor(equippedWeapon);
-
-	GameInventory->UpdateEquipmentInventory(equippedWeapon->GetPickUpItemRef());
+	GameInventory->UpdateEquipmentInventory(weaponRef);
 }
 
 AWeapon* ACPP_Character::GetEquippedWeapon()
 {
-	return EquippedWeapon;
+	return nullptr;
 }
 
 bool ACPP_Character::CanAttackState()
@@ -675,11 +630,6 @@ bool ACPP_Character::CanUnEquipState()
 	return (CharacterState == ECharacterStateTypes::Equiped || CharacterState == ECharacterStateTypes::Aim)
 		&& !GetCharacterMovement()->IsFalling()
 		&& ActionState == ECharacterActionState::Normal;
-}
-
-bool ACPP_Character::IsValidEquipWeapon()
-{
-	return IsValid(EquippedWeapon) && EquippedWeapon->IsActiveWaepon();
 }
 
 void ACPP_Character::PlayEquipMontage(FName NotifyName)
@@ -715,17 +665,17 @@ void ACPP_Character::PlayMontage(UAnimMontage* montage)
 
 void ACPP_Character::HoldWeapon()
 {
-	if (IsValid(EquippedWeapon))
+	if (IsValid(CurrentWeapon))
 	{
-		EquippedWeapon->AttachFunc(GetMesh(), "weapon_socket_r");
+		CurrentWeapon->Equip(GetMesh(), "weapon_socket_r");
 	}
 }
 
 void ACPP_Character::UnHoldWeapon()
 {
-	if (IsValid(EquippedWeapon))
+	if (IsValid(CurrentWeapon))
 	{
-		EquippedWeapon->AttachFunc(GetMesh(), "weapon_socket_back");
+		CurrentWeapon->Equip(GetMesh(), "weapon_socket_back");
 	}
 }
 
@@ -838,26 +788,20 @@ void ACPP_Character::ShowGameInventory()
 	GameInventory->ShowInventory();
 }
 
-
-void ACPP_Character::SetWeaponAbility(const uint8 id)
-{
-	AbilityId = id;
-
-	UWeaponAbilityBase* ability = UWeaponAbilityBase::GetAbility(id);
-	if (!IsValid(ability))
-		return;
-
-	WeaponAbilityStorage.Add(id);
-	WeaponAbility.Add(id, ability);
-}
-
 void ACPP_Character::SetFireRate(float rate)
 {
 	FireRate = rate;
 }
 
+void ACPP_Character::SpawnWeaponBase()
+{
+	//FString path = TEXT("/Script/Engine.DataTable'/Game/ShootGame/Data/DT_ItemTable.DT_ItemTable'");
+	//UDataTable* dataTable = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *path));
+}
+
 void ACPP_Character::StoreDamageUI()
 {
+	//제거
 	UWorld* world = GetWorld();
 	const int32 amount = 50;
 

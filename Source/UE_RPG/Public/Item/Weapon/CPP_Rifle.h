@@ -3,21 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Item/Weapon/CPP_WeaponBaes.h"
+#include "Item/Weapon/CPP_WeaponBase.h"
 #include "CPP_Rifle.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class UE_RPG_API ACPP_Rifle : public ACPP_WeaponBaes
+class UE_RPG_API ACPP_Rifle : public ACPP_WeaponBase
 {
 	GENERATED_BODY()
 
 public:
 	ACPP_Rifle();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "WeaponInfo|Effect")
 		float MaxDis = 500.f;
 
 	virtual void Attack() override;

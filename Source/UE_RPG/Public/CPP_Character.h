@@ -16,14 +16,15 @@ class UE_RPG_API ACPP_Character : public ACharacter
 public:
 	ACPP_Character();
 	
-	UPROPERTY(VisibleAnywhere, Category = Camera)
+	/**Component*/
+	UPROPERTY(VisibleAnywhere, Category = Compoenents)
 		class UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, Category = Camera)
+	UPROPERTY(VisibleAnywhere, Category = Compoenents)
 		class USpringArmComponent* CameraBoom;
 
-	UPROPERTY(VisibleAnywhere, Category = Camera)
-		class ACPP_WeaponBaes* WeaponActor;
+	UPROPERTY(VisibleAnywhere, Category = Compoenents)
+		class UCPP_WeaponManager* WeaponManager;
 
 	/**Input*/
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -131,9 +132,7 @@ public:
 	bool PressKey(const FInputActionValue& Value);
 	class AWeapon* isWeapon(AActor* hitobject) const;
 	bool PickUpWeapon();
-	bool IsInActivePrevEquippedWeapon();
-	void ActionWeaponAbility();
-	void FireWeapon();
+	void AttackWeapon();
 	void CanTrigger();
 	void SetMovementRotate(bool bORT, float rotationRate);
 	void LookAt();
@@ -142,17 +141,16 @@ public:
 	void ResetHitResultState();
 	void RemoveHitResultObject();
 
-	/**CharacterState*/
+	/**Character Setting*/
     void SetStateEquipped();
 	void SetStateUnEquipped();
-	void SetEquippedWeapon(class AWeapon* equippedWeapon);
+	void SetEquippedWeapon();
 	class AWeapon* GetEquippedWeapon();
 	bool CanAttackState();
 	bool CanEquipState();
 	bool CanUnEquipState();
-	bool IsValidEquipWeapon();
-	void SetWeaponAbility(const uint8 id);
 	void SetFireRate(float rate);
+	void SpawnWeaponBase();
 
 	/**Montage*/
 	void PlayEquipMontage(FName NotifyName);
@@ -256,25 +254,16 @@ private:
 	FTimerHandle TimerHandle;
 
 
-	/**weapon*/
-	int16 AbilityId = -1;
-
 	UPROPERTY()
 		class APickUpItem* HitResultObject;
 	UPROPERTY()
 		class APickUpItem* PrevHitResultObject;
 	UPROPERTY()
-		class ARifle* Rifle;
+		class ACPP_WeaponBase* CurrentWeapon;
 
 	/**For get Grab& Release Func*/
 	UPROPERTY()
 		class UGrabber* GraberComponent;
-
-	/**check 'is EquipedWeapon?' for  HoldWeapon& UnHoldWeapon Func*/
-	UPROPERTY()
-		class ACPP_WeaponBaes* EquippedWeapon = nullptr;
-	UPROPERTY()
-		class AWeapon* EquippedWeapon = nullptr;
 
 	/**item trace*/
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
@@ -338,10 +327,5 @@ private:
 		float InventoryMaxWeight = 250.f;
 
 	bool isVisible = true;
-
-	UPROPERTY()
-		TMap<uint8, class UWeaponAbilityBase*> WeaponAbility;
-	UPROPERTY()
-		TSet<uint8> WeaponAbilityStorage;
 
 };

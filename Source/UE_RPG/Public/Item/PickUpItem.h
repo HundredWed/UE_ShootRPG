@@ -20,6 +20,7 @@ public:
 	FORCEINLINE bool IsValidWidget() { return bValidWidget; }
 	FORCEINLINE class UWidgetComponent* GetWidgetComponent() { return ItemStateWidjet; }
 	FORCEINLINE	void SetItemInfoID(FName itemid) { ItemInfoID = itemid; }
+	FORCEINLINE	FName GetItemInfoID() {  return ItemInfoID; }
 	FORCEINLINE	class UItem* GetPickUpItemRef() { return ItemRef; }
 
 

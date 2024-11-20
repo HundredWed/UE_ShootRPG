@@ -77,10 +77,10 @@ public:
 		int32 ConsumeValue;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
 		int32 ATK;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
-		EWeaponAbilityID WeaponAbilityID;
 	
-
+	/**무기 클래스*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
+		TSubclassOf<class ACPP_WeaponBase> WeaponActor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		UStaticMesh* ItemMesh; 
@@ -114,7 +114,7 @@ public:
 		{
 			ItemClass = other->ItemClass;
 		}
-		WeaponAbilityID = other->WeaponAbilityID;
+		WeaponActor = other->WeaponActor;
 
 		/**asset data*/
 		ItemMesh = other->ItemMesh;
