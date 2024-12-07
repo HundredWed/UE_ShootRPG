@@ -193,7 +193,6 @@ int32 UInventory::GetAmountAtIndex(const int16 index)
 }
 
 
-
 void UInventory::RemoveItemAtIndex(const int16 index, const int32 removeAmount)
 {
 	if (!IsSlotEmpty(index) && (removeAmount > 0))
@@ -595,15 +594,15 @@ void UInventory::SetEquipWeapon(UItem* item, const int16 index)
 		/**set Inventory item to EquipmentInventory item*/
 		if (IsValid(equipRef))
 		{
-			UpdateInventory(index, equipRef, 1);
+			UpdateInventory(index, equipRef, 1);//item amount 1
 		}
 		else
 		{
-			UpdateInventory(index, equipRef, 0);
+			UpdateInventory(index, equipRef, 0);//item amount 0
 		}
 
 		/**set EquipmentInventory item to Inventory item*/
-		UpdateEquipmentInventory(item);
+		//UpdateEquipmentInventory(item);
 		EquipWeaponToPlayer(item);
 	}
 	
@@ -614,24 +613,7 @@ void UInventory::EquipWeaponToPlayer(UItem* item)
 	if(!IsValid(PlayerRef))
 		return;
 	
-	AWeapon* playerWeapon = PlayerRef->GetEquippedWeapon();
-	if (!IsValid(playerWeapon))
-		return;
-	
-	APickUpItem* pickUpItem = Cast<APickUpItem>(PlayerRef->GetEquippedWeapon());
-	if (!IsValid(pickUpItem))
-		return;
-
-	/**1. set active weapon
-	   2. change weapon info(need set new itemid before 'InitializeWeapon')
-	   3. set player weapon*/
-	playerWeapon->SetActiveWeapon(true);
-
-	pickUpItem->SetItemInfoID(item->ItemInfoID);
-	playerWeapon->InitializeWeapon();
-		
-	PlayerRef->SetStateEquipped();
-	//PlayerRef->SetWeaponAbility((uint8)item->WeaponAbilityID);
+	PlayerRef->SetEquipWeapon(item);
 }
 
 void UInventory::UpdateEquipmentInventory(UItem* item)
@@ -654,7 +636,7 @@ void UInventory::UnEquipWeaponAndAddItem(const int16 index)
 	UCPP_EquipSlot* equipSlot = InventoryWidget->EquipmentInventory->EquipSlot;
 	UItem* equipRef = equipSlot->GetItemRef();
 	UpdateInventory(index, equipRef, 1);
-	equipSlot->UnEquipWeapon();
+	equipSlot->TakeOffWeapon();
 }
 
 AActor* UInventory::GetAbilityActor(FName itemId)

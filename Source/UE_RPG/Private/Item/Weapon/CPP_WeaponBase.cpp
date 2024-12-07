@@ -62,7 +62,7 @@ void ACPP_WeaponBase::UpdateWeaponInfo(FName itemInfoID)
 void ACPP_WeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
-	UpdateWeaponInfo(ItemInfoID);
+	//UpdateWeaponInfo(ItemInfoID);
 	StoreDamageUI();
 }
 

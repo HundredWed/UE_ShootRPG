@@ -30,7 +30,7 @@ protected:
 public:
 
 	void UpdateEquipmentSlot(class UItem* weapon);
-	void UnEquipWeapon();
+	void TakeOffWeapon();
 
 private:
 

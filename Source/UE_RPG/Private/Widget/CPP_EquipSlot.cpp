@@ -82,7 +82,7 @@ FReply UCPP_EquipSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, cons
 		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
 		{
 			InventoryRef->AddItem(ItemRef);
-			UnEquipWeapon();
+			TakeOffWeapon();
 		}
 		FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
 		return reply.NativeReply;
@@ -97,16 +97,10 @@ void UCPP_EquipSlot::UpdateEquipmentSlot(UItem* weapon)
 	SetSlotToolTip();
 }
 
-void UCPP_EquipSlot::UnEquipWeapon()
+void UCPP_EquipSlot::TakeOffWeapon()
 {
 	InactiveSlot();
-	AWeapon* weapon = PlayerRef->GetEquippedWeapon();
-
-	if (IsValid(weapon))
-	{
-		weapon->SetActiveWeapon(false);
-		PlayerRef->SetStateUnEquipped();
-	}
+	PlayerRef->TakeOffWeapon();
 }
 
 

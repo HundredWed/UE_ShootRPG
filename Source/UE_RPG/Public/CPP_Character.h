@@ -130,7 +130,7 @@ public:
 	void SmoothSpringArmOffset(float NewYoffset);
 
 	bool PressKey(const FInputActionValue& Value);
-	class AWeapon* isWeapon(AActor* hitobject) const;
+	//class AWeapon* isWeapon(AActor* hitobject) const;
 	bool PickUpWeapon();
 	void AttackWeapon();
 	void CanTrigger();
@@ -144,8 +144,8 @@ public:
 	/**Character Setting*/
     void SetStateEquipped();
 	void SetStateUnEquipped();
-	void SetEquippedWeapon();
-	class AWeapon* GetEquippedWeapon();
+	void SetEquipWeapon(class UItem* item);
+	void TakeOffWeapon();
 	bool CanAttackState();
 	bool CanEquipState();
 	bool CanUnEquipState();

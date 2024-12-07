@@ -78,7 +78,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
 		int32 ATK;
 	
-	/**무기 클래스*/
+	/**무기 관련. 추후 데이터테이블 따로 만들예정*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
 		TSubclassOf<class ACPP_WeaponBase> WeaponActor;
 

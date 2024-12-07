@@ -464,27 +464,22 @@ bool ACPP_Character::PressKey(const FInputActionValue& Value)
 	return Value.Get<bool>();
 }
 
-AWeapon* ACPP_Character::isWeapon(AActor* hitobject) const
-{
-	AWeapon* weapon = Cast<AWeapon>(hitobject);
-	if (!IsValid(weapon))
-	{
-		return nullptr;
-	}
-
-	return weapon;
-}
+//AWeapon* ACPP_Character::isWeapon(AActor* hitobject) const
+//{
+//	AWeapon* weapon = Cast<AWeapon>(hitobject);
+//	if (!IsValid(weapon))
+//	{
+//		return nullptr;
+//	}
+//
+//	return weapon;
+//}
 
 bool ACPP_Character::PickUpWeapon()
 {
 	if (CurrentWeapon == nullptr)
 	{
-		WeaponManager->EquipWeapon(HitResultObject->GetItemInfoID(), HitResultObject->GetPickUpItemRef()->WeaponActor);
-		CurrentWeapon = WeaponManager->GetCurrntWeapon();
-		CurrentWeapon->SetOwner(this);
-		UItem* weaponRef = CurrentWeapon->GetItemRef();
-		GameInventory->UpdateEquipmentInventory(weaponRef);
-		//SetEquippedWeapon();
+		SetEquipWeapon(HitResultObject->GetPickUpItemRef());
 		return true;
 	}
 	
@@ -558,12 +553,15 @@ void ACPP_Character::ResetHitResultState()
 		PrevHitResultObject->SetWidgetVisibility(false);
 		PrevHitResultObject = nullptr;
 	}
-	RemoveHitResultObject();
+	HitResultObject = nullptr;
 }
 
 void ACPP_Character::RemoveHitResultObject()
 {
-	//HitResultObject->Destroy();
+	if (!IsValid(HitResultObject))
+		return;
+
+	HitResultObject->Destroy();
 	HitResultObject = nullptr;
 }
 
@@ -594,21 +592,19 @@ void ACPP_Character::SetStateUnEquipped()
 	UE_LOG(LogTemp, Display, TEXT("UnEquiped"));
 }
 
-void ACPP_Character::SetEquippedWeapon()
+void ACPP_Character::SetEquipWeapon(UItem* item)
 {
-	CurrentWeapon->UpdateWeaponInfo(HitResultObject->GetItemInfoID());
-	CurrentWeapon->Equip(GetMesh(), "weapon_socket_back");
+	WeaponManager->EquipWeapon(item->ItemInfoID, item->WeaponActor);
+	CurrentWeapon = WeaponManager->GetCurrntWeapon();
+	CurrentWeapon->SetOwner(this);
 
-	UItem* weaponRef = CurrentWeapon->GetItemRef();
-	if (!IsValid(weaponRef))
-		return;
-
-	GameInventory->UpdateEquipmentInventory(weaponRef);
+	GameInventory->UpdateEquipmentInventory(item);
 }
 
-AWeapon* ACPP_Character::GetEquippedWeapon()
+void ACPP_Character::TakeOffWeapon()
 {
-	return nullptr;
+	WeaponManager->TakeOffWeapon();
+	SetStateUnEquipped();
 }
 
 bool ACPP_Character::CanAttackState()
