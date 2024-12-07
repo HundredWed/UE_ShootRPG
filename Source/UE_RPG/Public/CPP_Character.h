@@ -217,7 +217,7 @@ private:
 	float ClampRnage(float value);
 
 	/**character states*/
-	ECharacterStateTypes CharacterState = ECharacterStateTypes::UnEquiped;
+	ECharacterStateTypes CharacterState = ECharacterStateTypes::Normal;
 	ECharacterActionState ActionState = ECharacterActionState::Normal;
 
 	/**character states - weapon*/

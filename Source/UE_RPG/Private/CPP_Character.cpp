@@ -334,19 +334,19 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 	//bool bEquipedWeapon = IsValidEquipWeapon();
 	if (CanEquipState())
 	{
-		SCREENLOG(INDEX_NONE, 5.f, FColor::Blue, TEXT("Equipped!!"));
+		//SCREENLOG(INDEX_NONE, 5.f, FColor::Blue, TEXT("Equipped!!"));
 		SetStateEquipped();
 	}
 	else if(CanUnEquipState())
 	{
-		SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("UnEquipped!!"));
+		//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("UnEquipped!!"));
 		SetStateUnEquipped();
 	}
 }
 
 void ACPP_Character::Attack(const FInputActionValue& Value)
 {
-	if(CharacterState == ECharacterStateTypes::UnEquiped)
+	if(CharacterState == ECharacterStateTypes::UnEquiped || CharacterState == ECharacterStateTypes::Death)
 		return;
 	
 	PressFireKey = PressKey(Value);
@@ -360,7 +360,7 @@ void ACPP_Character::Attack(const FInputActionValue& Value)
 
 void ACPP_Character::Aiming(const FInputActionValue& Value)
 {
-	if (PressKey(Value) && CharacterState != ECharacterStateTypes::UnEquiped && ActionState == ECharacterActionState::Normal)
+	if (PressKey(Value) && CharacterState > ECharacterStateTypes::Normal && ActionState == ECharacterActionState::Normal)
 	{
 		bAiming = true;	
 		CharacterState = ECharacterStateTypes::Aim;
@@ -377,10 +377,7 @@ void ACPP_Character::Aiming(const FInputActionValue& Value)
 	else
 	{
 		bAiming = false;
-		if (CharacterState != ECharacterStateTypes::UnEquiped)
-		{
-			CharacterState = ECharacterStateTypes::Equiped;
-		}
+		CharacterState = ECharacterStateTypes::Equiped;
 		
 		SetMovementRotate(true, DefaultMRR);
 		if (GetCharacterMovement()->IsCrouching())
@@ -599,6 +596,7 @@ void ACPP_Character::SetEquipWeapon(UItem* item)
 	CurrentWeapon->SetOwner(this);
 
 	GameInventory->UpdateEquipmentInventory(item);
+	CharacterState = ECharacterStateTypes::UnEquiped;
 }
 
 void ACPP_Character::TakeOffWeapon()
@@ -609,7 +607,7 @@ void ACPP_Character::TakeOffWeapon()
 
 bool ACPP_Character::CanAttackState()
 {
-	return CharacterState != ECharacterStateTypes::UnEquiped 
+	return (CharacterState == ECharacterStateTypes::Equiped || CharacterState == ECharacterStateTypes::Aim)
 		&& ActionState == ECharacterActionState::Normal
 		&& PressFireKey;
 }
@@ -623,7 +621,7 @@ bool ACPP_Character::CanEquipState()
 
 bool ACPP_Character::CanUnEquipState()
 {
-	return (CharacterState == ECharacterStateTypes::Equiped || CharacterState == ECharacterStateTypes::Aim)
+	return (CharacterState == ECharacterStateTypes::Equiped)
 		&& !GetCharacterMovement()->IsFalling()
 		&& ActionState == ECharacterActionState::Normal;
 }
@@ -701,10 +699,6 @@ void ACPP_Character::SetMouseRate()
 
 void ACPP_Character::CalculateCrosshairSpread(float DeltaTime)
 {
-
-	if (!bMoving)
-		return;
-
 	FVector2D WalkSpeedRange{ 0.f, 600.f };
 	FVector2D VelocityMultiplierRange{ 0.f, 1.f };
 	FVector Velocity{ GetVelocity() };
