@@ -96,6 +96,8 @@ public:
 
 	/**key down info*/
 	bool bShiftDown = false;/*for inventory splite*/
+	bool bMoveKeyDown = false;/*for dodge dir info*/
+	FRotator InputDir = FRotator::ZeroRotator;
 
 protected:
 	virtual void BeginPlay() override;
@@ -149,6 +151,7 @@ public:
 	bool CanAttackState();
 	bool CanEquipState();
 	bool CanUnEquipState();
+	bool IsUnderArm();
 	void SetFireRate(float rate);
 	void SpawnWeaponBase();
 

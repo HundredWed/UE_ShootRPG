@@ -245,11 +245,10 @@ bool ACPP_Character::SetShpereTrace(FHitResult& HitResult)
 
 void ACPP_Character::Move(const FInputActionValue& Value)
 {
-	if (ActionState == ECharacterActionState::SuperAction)
-		return;
-
 	const FVector MovementVector =  Value.Get<FVector>();
 	CameraBoom->bEnableCameraLag = false;
+	bMoveKeyDown = PressKey(Value);
+
 	if (IsValid(GetController()))
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -258,6 +257,16 @@ void ACPP_Character::Move(const FInputActionValue& Value)
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
 		const FVector RightVector = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		
+		FVector DesiredDirection = (ForwardDirection * MovementVector.Y) + (RightVector * MovementVector.X);
+		if (DesiredDirection.SizeSquared() > 0.0f)
+		{
+			InputDir = UKismetMathLibrary::MakeRotFromX(DesiredDirection);
+		}
+
+
+		if (ActionState == ECharacterActionState::SuperAction)
+			return;
 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightVector, MovementVector.X);
@@ -346,7 +355,7 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 
 void ACPP_Character::Attack(const FInputActionValue& Value)
 {
-	if(CharacterState == ECharacterStateTypes::UnEquiped || CharacterState == ECharacterStateTypes::Death)
+	if(!IsUnderArm())
 		return;
 	
 	PressFireKey = PressKey(Value);
@@ -360,7 +369,7 @@ void ACPP_Character::Attack(const FInputActionValue& Value)
 
 void ACPP_Character::Aiming(const FInputActionValue& Value)
 {
-	if (PressKey(Value) && CharacterState > ECharacterStateTypes::Normal && ActionState == ECharacterActionState::Normal)
+	if (PressKey(Value) && IsUnderArm() && ActionState == ECharacterActionState::Normal)
 	{
 		bAiming = true;	
 		CharacterState = ECharacterStateTypes::Aim;
@@ -377,7 +386,11 @@ void ACPP_Character::Aiming(const FInputActionValue& Value)
 	else
 	{
 		bAiming = false;
-		CharacterState = ECharacterStateTypes::Equiped;
+		
+		if (CharacterState == ECharacterStateTypes::Aim)
+		{
+			CharacterState = ECharacterStateTypes::Equiped;
+		}
 		
 		SetMovementRotate(true, DefaultMRR);
 		if (GetCharacterMovement()->IsCrouching())
@@ -410,7 +423,7 @@ void ACPP_Character::Dodge(const FInputActionValue& Value)
 {
 	if (ActionState != ECharacterActionState::SuperAction && CurrentStamina >= 10)
 	{
-		bMoving = false;
+		bMoving = false;//블프 애니메이션
 		LookAt();
 		PlayMontage(DodgeMontage);
 		CurrentStamina -= 10;
@@ -526,13 +539,39 @@ void ACPP_Character::LookAt()
 	FRotator currentRot = GetActorRotation();
 
 	FRotator AimRotation = GetBaseAimRotation();
-	FRotator newRot;
-	if (GetCharacterMovement()->Velocity.Length() == 0 || CharacterState != ECharacterStateTypes::Aim)
+	FRotator newRot = FRotator::ZeroRotator;
+
+	if (!bMoveKeyDown)
+	{
+		/**default dir is Back*/
+		const FRotator backBase = CameraBoom->GetTargetRotation();
+		const FRotator newBase = FRotator(0.f, backBase.Yaw, 0.f);
+		const FVector backVector = FRotationMatrix(newBase).GetUnitAxis(EAxis::X) * -1.f;
+
+		const FVector player = GetActorForwardVector();
+		
+		const float dtheta = FVector::DotProduct(player, backVector);
+		float theta = FMath::Acos(dtheta);
+		theta = FMath::RadiansToDegrees(theta);
+
+		const FVector crossProduct = FVector::CrossProduct(player, backVector);
+		if (crossProduct.Z < 0)
+		{
+			newRot.Yaw = currentRot.Yaw - theta;
+		}
+		else
+		{
+			newRot.Yaw = currentRot.Yaw + theta;
+		}
+		SetActorRotation(newRot);
+		return;
+	}
+	else if (CharacterState != ECharacterStateTypes::Aim)
 	{
 		return;
 	}
-	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(GetCharacterMovement()->Velocity);
-	newRot.Yaw = currentRot.Yaw + UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;;
+
+	newRot.Yaw = currentRot.Yaw + UKismetMathLibrary::NormalizedDeltaRotator(InputDir, AimRotation).Yaw;
 	SetActorRotation(newRot);
 }
 
@@ -624,6 +663,11 @@ bool ACPP_Character::CanUnEquipState()
 	return (CharacterState == ECharacterStateTypes::Equiped)
 		&& !GetCharacterMovement()->IsFalling()
 		&& ActionState == ECharacterActionState::Normal;
+}
+
+bool ACPP_Character::IsUnderArm()
+{
+	return (CharacterState == ECharacterStateTypes::Equiped) || (CharacterState == ECharacterStateTypes::Aim);
 }
 
 void ACPP_Character::PlayEquipMontage(FName NotifyName)
