@@ -72,7 +72,7 @@ void UCPP_SlotBase::ActiveSlot()
 {
 	/**set icon*/
 	ItemIcon->SetIsEnabled(true);
-	ItemIcon->SetBrushFromTexture(ItemRef->IconTexture);
+	ItemIcon->SetBrushFromTexture(ItemRef->ItemInfoTable.IconTexture);
 	ItemIcon->SetVisibility(ESlateVisibility::Visible);
 	/**set border*/
 	SlotBorder->SetBrushColor(FLinearColor::White);

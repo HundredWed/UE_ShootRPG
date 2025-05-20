@@ -11,10 +11,10 @@ void UCPP_DragSlotWidget::UpdataWidget(const UItem* item, uint32 amount)
 {
 	if (IsValid(item))
 	{
-		ItemIcon->SetBrushFromTexture(item->IconTexture);
+		ItemIcon->SetBrushFromTexture(item->ItemInfoTable.IconTexture);
 		ItemIcon->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 
-		if (item->bCanStacked && amount > 0)
+		if (item->ItemInfoTable.bCanStacked && amount > 0)
 		{
 			TextAmount->SetText(FText::Format(NSLOCTEXT("CPP_DragSlotWidget", "TextAmount", "x{0}"), amount));
 			TextAmount->SetVisibility(ESlateVisibility::SelfHitTestInvisible);

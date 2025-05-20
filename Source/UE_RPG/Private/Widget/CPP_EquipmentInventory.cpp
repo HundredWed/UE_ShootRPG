@@ -16,7 +16,7 @@ void UCPP_EquipmentInventory::UpdateEquipSlot(UItem* item)
 {
 	EquipSlot->UpdateEquipmentSlot(item);
 
-	const FString String = FString::Printf(TEXT("%d"), item->ATK);
+	const FString String = FString::Printf(TEXT("%d"), item->ItemInfoTable.ATK);
 	const FText text = FText::FromString(String);
 	ATKText->SetText(text);
 }

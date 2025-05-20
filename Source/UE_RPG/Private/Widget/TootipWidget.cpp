@@ -9,7 +9,7 @@
 
 void UTootipWidget::UpdateToolTip()
 {
-	EItemCategory itemtype = ItemRef->ItemType;
+	EItemCategory itemtype = ItemRef->ItemInfoTable.ItemType;
 
 	switch (itemtype)
 	{
@@ -46,10 +46,10 @@ void UTootipWidget::UpdateToolTip()
 		break;
 	}
 
-	ItemIcon->SetBrushFromTexture(ItemRef->IconTexture);
-	Name->SetText(ItemRef->Name);
-	DescriptionText->SetText(ItemRef->Description);
-	ATK->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), ItemRef->ATK));
-	Price->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Price", "가격: {0}"), ItemRef->ItemPrice));
-	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), ItemRef->Weight));
+	ItemIcon->SetBrushFromTexture(ItemRef->ItemInfoTable.IconTexture);
+	Name->SetText(ItemRef->ItemInfoTable.Name);
+	DescriptionText->SetText(ItemRef->ItemInfoTable.Description);
+	ATK->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), ItemRef->ItemInfoTable.ATK));
+	Price->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Price", "가격: {0}"), ItemRef->ItemInfoTable.ItemPrice));
+	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), ItemRef->ItemInfoTable.Weight));
 }

@@ -11,8 +11,6 @@
 #include "Widget/CPP_DragSlotWidget.h"
 #include "Widget/CPP_Slot.h"
 #include "Item/Item.h"
-#include "Item/Weapon.h"
-#include "Item/Gun/Rifle.h"
 
 
 
@@ -54,7 +52,7 @@ bool UCPP_EquipSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEv
 
 	if (IsValid(dragSlot) 
 		&& dragSlot->WidgetRef
-		&& dragSlot->WidgetRef->GetItemRef()->ItemType == EItemCategory::EIS_Equipment)
+		&& dragSlot->WidgetRef->GetItemRef()->ItemInfoTable.ItemType == EItemCategory::EIS_Equipment)
 	{
 		dragSlot->WidgetRef->EquipSlotItem();
 		return true;

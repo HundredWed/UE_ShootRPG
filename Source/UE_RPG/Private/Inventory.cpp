@@ -4,7 +4,6 @@
 #include "Widget/CPP_Slot.h"
 #include "Widget/CPP_EquipmentInventory.h"
 #include "Widget/CPP_EquipSlot.h"
-#include "Item/Weapon.h"
 #include "Item/PickUpItem.h"
 
 UInventory::UInventory()
@@ -57,7 +56,7 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 	}
 
 	/**item is Stacked?*/
-	if (item->bCanStacked)
+	if (item->ItemInfoTable.bCanStacked)
 	{
 		/**can Stacked item*/
 
@@ -73,7 +72,7 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 
 				/**update widget*/
 				UpdateInventory(canStackedSlotIndex, item, MaxStackSize);
-				AddWeight(item->Weight * restWeight);
+				AddWeight(item->ItemInfoTable.Weight * restWeight);
 
 				const uint32 restAmountOver = amountOver - MaxStackSize;
 				AddItem(item, restAmountOver);
@@ -84,7 +83,7 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 			{
 				/**update widget*/
 				UpdateInventory(canStackedSlotIndex, item, amountOver);
-				AddWeight(item->Weight * amount);
+				AddWeight(item->ItemInfoTable.Weight * amount);
 				return;
 
 			}
@@ -99,7 +98,7 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 				{
 					/**update widget*/
 					UpdateInventory(emptySlotToStack, item, MaxStackSize);
-					AddWeight(item->Weight * MaxStackSize);
+					AddWeight(item->ItemInfoTable.Weight * MaxStackSize);
 
 					const uint32 restAmount = amount - MaxStackSize;
 					AddItem(item, restAmount);
@@ -110,7 +109,7 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 				{
 					/**update widget*/
 					UpdateInventory(emptySlotToStack, item, amount);
-					AddWeight(item->Weight * amount);
+					AddWeight(item->ItemInfoTable.Weight * amount);
 
 					return;
 				}
@@ -130,7 +129,7 @@ void UInventory::AddItem(UItem* item, const uint32 amount)
 		{
 			/**update widget*/
 			UpdateInventory(emptySlot, item, defaultAmount);
-			AddWeight(item->Weight);
+			AddWeight(item->ItemInfoTable.Weight);
 		}
 		else
 		{
@@ -175,7 +174,7 @@ bool UInventory::SearchFreeStackSlot(class UItem* item, int16& canStackedSlotInd
 		const uint8 slotItemAmount = SlotsArray[index].ItemAmount;
 		if (slotItem != nullptr)
 		{
-			if ((slotItem->ItemInfoID == item->ItemInfoID) && (slotItemAmount < MaxStackSize))
+			if ((slotItem->ItemInfoTable.ItemInfoID == item->ItemInfoTable.ItemInfoID) && (slotItemAmount < MaxStackSize))
 			{
 				canStackedSlotIndex = index;
 				return true;
@@ -198,7 +197,7 @@ void UInventory::RemoveItemAtIndex(const int16 index, const int32 removeAmount)
 	if (!IsSlotEmpty(index) && (removeAmount > 0))
 	{
 		const int32 amount = GetAmountAtIndex(index);
-		const float weight = SlotsArray[index].Item->Weight;
+		const float weight = SlotsArray[index].Item->ItemInfoTable.Weight;
 		if (removeAmount >= amount)
 		{ 
 			UpdateInventory(index, nullptr, 0);			
@@ -249,7 +248,7 @@ void UInventory::SwapSlot(const int16 fromIndex, const int16 toIndex)
 void UInventory::CheckItemType(const int16 fromIndex, const int16 toIndex)
 {
 	if (SlotsArray[toIndex].Item 
-		&& SlotsArray[toIndex].Item->ItemType == EItemCategory::EIS_Combinables)
+		&& SlotsArray[toIndex].Item->ItemInfoTable.ItemType == EItemCategory::EIS_Combinables)
 	{
 		InventoryWidget->SlotWidgetArray[toIndex]->CheckCombinability(fromIndex);
 	}
@@ -297,11 +296,11 @@ bool UInventory::CanAddToIndex(const int16 fromIndex, const int16 toIndex)
 		return false;
 	}
 
-	FName fromIndexItemId = SlotsArray[fromIndex].Item->ItemInfoID;
-	FName toIndexItemId = SlotsArray[toIndex].Item->ItemInfoID;
+	FName fromIndexItemId = SlotsArray[fromIndex].Item->ItemInfoTable.ItemInfoID;
+	FName toIndexItemId = SlotsArray[toIndex].Item->ItemInfoTable.ItemInfoID;
 
 	bool brestAmount = SlotsArray[toIndex].ItemAmount < MaxStackSize;
-	bool bstacked = SlotsArray[toIndex].Item->bCanStacked;
+	bool bstacked = SlotsArray[toIndex].Item->ItemInfoTable.bCanStacked;
 
 	return (fromIndexItemId == toIndexItemId) && brestAmount && bstacked;
 }
@@ -337,7 +336,7 @@ void UInventory::SplitStackToIndex(const int16 fromIndex, const int16 toIndex, c
 bool UInventory::CanSplitStakable(const int16 fromIndex, const int16 toIndex, const int32 splitAmount)
 {
 	return IsSlotEmpty(toIndex)
-		&& (SlotsArray[fromIndex].Item->bCanStacked) 
+		&& (SlotsArray[fromIndex].Item->ItemInfoTable.bCanStacked)
 		&& (SlotsArray[fromIndex].ItemAmount > 1) 
 		&& (SlotsArray[fromIndex].ItemAmount > splitAmount);
 }
@@ -432,7 +431,7 @@ bool UInventory::CompaireID(const int16 slot1, const int16 slot2)
 		return false;
 	}
 
-	return SlotsArray[slot1].Item->ItemInfoID == SlotsArray[slot2].Item->ItemInfoID;
+	return SlotsArray[slot1].Item->ItemInfoTable.ItemInfoID == SlotsArray[slot2].Item->ItemInfoTable.ItemInfoID;
 }
 
 void UInventory::ClearConectArray()
@@ -507,29 +506,31 @@ void UInventory::ChangeItemInfo(FName itemInfoID, const int16 index)
 	}
 	UItem* item = SlotsArray[index].Item;
 
-	/**item data*/
-	item->ItemInfoID = itemInfo->ItemInfoID;
-	item->Name = itemInfo->Name;
-	item->Description = itemInfo->Description;
-	item->bCanBeUsed = itemInfo->bCanBeUsed;
-	item->bCanStacked = itemInfo->bCanStacked;
-	item->UseText = itemInfo->UseText;
-	item->Interaction = itemInfo->Interaction;
-	item->ItemPrice = itemInfo->ItemPrice;
-	item->Weight = itemInfo->Weight;
-	item->ATK = itemInfo->ATK;
+	item->ItemInfoTable = *itemInfo;
 
-	/**itemtype data*/
-	item->ItemType = itemInfo->ItemType;
-	item->ConsumeValue = itemInfo->ConsumeValue;
-	if (itemInfo->ItemClass)
-	{
-		item->ItemClass = itemInfo->ItemClass;
-	}
+	///**item data*/
+	//item->ItemInfoTable.ItemInfoID = itemInfo->ItemInfoID;
+	//item->ItemInfoTable.Name = itemInfo->Name;
+	//item->ItemInfoTable.Description = itemInfo->Description;
+	//item->ItemInfoTable.bCanBeUsed = itemInfo->bCanBeUsed;
+	//item->ItemInfoTable.bCanStacked = itemInfo->bCanStacked;
+	//item->ItemInfoTable.UseText = itemInfo->UseText;
+	//item->ItemInfoTable.Interaction = itemInfo->Interaction;
+	//item->ItemInfoTable.ItemPrice = itemInfo->ItemPrice;
+	//item->ItemInfoTable.Weight = itemInfo->Weight;
+	//item->ItemInfoTable.ATK = itemInfo->ATK;
 
-	/**asset data*/
-	item->ItemMesh = itemInfo->ItemMesh;
-	item->IconTexture = itemInfo->IconTexture;
+	///**itemtype data*/
+	//item->ItemType = itemInfo->ItemType;
+	//item->ConsumeValue = itemInfo->ConsumeValue;
+	//if (itemInfo->ItemClass)
+	//{
+	//	item->ItemClass = itemInfo->ItemClass;
+	//}
+
+	///**asset data*/
+	//item->ItemMesh = itemInfo->ItemMesh;
+	//item->IconTexture = itemInfo->IconTexture;
 
 	UpdateSlotAtIndex(index);
 }
@@ -578,7 +579,7 @@ uint8 UInventory::GetCompaireValue(int16 index)
 		return (uint8)EItemCategory::EIS_None;
 	}
 
-	return (uint8)SlotsArray[index].Item->ItemType;
+	return (uint8)SlotsArray[index].Item->ItemInfoTable.ItemType;
 }
 
 void UInventory::SetEquipWeapon(UItem* item, const int16 index)

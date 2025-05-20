@@ -41,7 +41,7 @@ void UCPP_Slot::UpdateSlot(const int16 index)
 			InitSlotInfo();
 			ActiveSlot();
 
-			if (ItemRef->bCanStacked && MyAmount > 0)
+			if (ItemRef->ItemInfoTable.bCanStacked && MyAmount > 0)
 			{
 				TextAmount->SetText(FText::Format(NSLOCTEXT("CPP_Slot", "TextAmount", "x{0}"), MyAmount));
 				TextAmount->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
@@ -160,12 +160,12 @@ FReply UCPP_Slot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPo
 		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
 		{
 			if (IsValid(InventoryRef) 
-				&& ItemRef->ItemType != EItemCategory::EIS_Equipment)
+				&& ItemRef->ItemInfoTable.ItemType != EItemCategory::EIS_Equipment)
 			{
 				OnUseItem();
 			}
 			else if(IsValid(InventoryRef)
-				&& ItemRef->ItemType == EItemCategory::EIS_Equipment)
+				&& ItemRef->ItemInfoTable.ItemType == EItemCategory::EIS_Equipment)
 			{
 				EquipSlotItem();
 			}
@@ -190,7 +190,7 @@ FReply UCPP_Slot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, co
 		//icon
 		if (ItemIcon->GetIsEnabled())
 		{
-			if (IsValid(InventoryRef) && ItemRef->ItemType != EItemCategory::EIS_Equipment)
+			if (IsValid(InventoryRef) && ItemRef->ItemInfoTable.ItemType != EItemCategory::EIS_Equipment)
 			{
 				OnUseItem();
 			}
@@ -209,13 +209,13 @@ void UCPP_Slot::OnUseItem()
 {
 	
 
-	AActor* abilityActor = InventoryRef->GetAbilityActor(InventorySlotinfo.Item->ItemInfoID);
+	AActor* abilityActor = InventoryRef->GetAbilityActor(InventorySlotinfo.Item->ItemInfoTable.ItemInfoID);
 	if (abilityActor)
 	{
 		IItemAbility* itemAbility = Cast<IItemAbility>(abilityActor);
 		if (itemAbility)
 		{
-			const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ConsumeValue;
+			const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ItemInfoTable.ConsumeValue;
 			itemAbility->UseItem(PlayerRef, value);
 			InventoryRef->RemoveItemAtIndex(MyArrayNumber, 1);
 
@@ -228,20 +228,20 @@ void UCPP_Slot::OnUseItem()
 	}
 	else
 	{
-		TSubclassOf<AActor> itemClass = InventoryRef->SlotsArray[MyArrayNumber].Item->ItemClass;
+		TSubclassOf<AActor> itemClass = InventoryRef->SlotsArray[MyArrayNumber].Item->ItemInfoTable.ItemClass;
 		if (IsValid(itemClass))
 		{
-			AActor* itemActor = GetWorld()->SpawnActor(InventoryRef->SlotsArray[MyArrayNumber].Item->ItemClass);
+			AActor* itemActor = GetWorld()->SpawnActor(InventoryRef->SlotsArray[MyArrayNumber].Item->ItemInfoTable.ItemClass);
 
 			IItemAbility* itemAbility = Cast<IItemAbility>(itemActor);
 			if (itemAbility)
 			{
-				const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ConsumeValue;
+				const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ItemInfoTable.ConsumeValue;
 				itemAbility->UseItem(PlayerRef, value);
 
-				InventoryRef->AddItemManage(InventorySlotinfo.Item->ItemInfoID, itemActor);
+				InventoryRef->AddItemManage(InventorySlotinfo.Item->ItemInfoTable.ItemInfoID, itemActor);
 				InventoryRef->RemoveItemAtIndex(MyArrayNumber, 1);
-				InventoryRef->StartAbilityActorLife(InventorySlotinfo.Item->ItemInfoID);
+				InventoryRef->StartAbilityActorLife(InventorySlotinfo.Item->ItemInfoTable.ItemInfoID);
 			}
 
 
@@ -283,13 +283,13 @@ void UCPP_Slot::InitSlotInfo()
 	InventorySlotinfo = InventoryRef->GetSlotInfoIndex(MyArrayNumber);
 	ItemRef = InventorySlotinfo.Item;
 	MyAmount = InventorySlotinfo.ItemAmount;
-	bMyItemCanStacked = ItemRef->bCanStacked;
+	bMyItemCanStacked = ItemRef->ItemInfoTable.bCanStacked;
 }
 
 
 void UCPP_Slot::SearchCombinableSlot()
 {
-	if (ItemRef->ItemType == EItemCategory::EIS_Combinables)
+	if (ItemRef->ItemInfoTable.ItemType == EItemCategory::EIS_Combinables)
 	{
 		CombinableSlot = InventoryRef->FindCombinableSlot(MyArrayNumber);
 
@@ -317,7 +317,7 @@ void UCPP_Slot::ActiveCombinableSlot()
 void UCPP_Slot::CheckCombinability(const int16 fromIndex)
 {
 	UItem* item = InventoryRef->SlotsArray[fromIndex].Item;
-	bool bvalidItem = (item == nullptr) || (item->ItemType != EItemCategory::EIS_Combinables);
+	bool bvalidItem = (item == nullptr) || (item->ItemInfoTable.ItemType != EItemCategory::EIS_Combinables);
 
 	if (bvalidItem && LinkedCombinableSlot != -1)
 	{
@@ -330,7 +330,7 @@ void UCPP_Slot::CheckCombinability(const int16 fromIndex)
 
 void UCPP_Slot::CombineItem()
 {
-	InventoryRef->ChangeItemInfo(ItemRef->CombinResultID, MyArrayNumber);
+	InventoryRef->ChangeItemInfo(ItemRef->ItemInfoTable.CombinResultID, MyArrayNumber);
 	CombineButton->SetVisibility(ESlateVisibility::Hidden);
 	bActiveCombineButton = false;
 }
