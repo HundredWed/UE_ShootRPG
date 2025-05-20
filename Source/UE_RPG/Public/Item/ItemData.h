@@ -1,15 +1,8 @@
-#pragma once
+癤�#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "ItemData.generated.h"
-
-
-enum class EItemState : uint8
-{
-	EIS_UnEquipped,
-	EIS_Equipped
-};
 
 UENUM(BlueprintType)
 enum class EItemCategory : uint8
@@ -25,19 +18,6 @@ enum class EItemCategory : uint8
 	EIS_None UMETA(DisplayName = "NoneItem")
 };
 
-UENUM(BlueprintType)
-enum class EWeaponAbilityID : uint8
-{
-	EWA_Normal UMETA(DisplayName = "NormalRifle"),
-	EWA_Red UMETA(DisplayName = "RedRifle"),
-
-	EIS_AbilityNone UMETA(DisplayName = "NoneItem")
-};
-
-
-/**If there is a change in this structure, 
-the Item class's header file, CreateItemCopy() function, 
-and the PickUpItem class's InitializePickUpItem() function should also be updated accordingly.*/
 USTRUCT(BlueprintType)
 struct FItemInfoTable : public FTableRowBase
 {
@@ -78,7 +58,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
 		int32 ATK;
 	
-	/**무기 관련. 추후 데이터테이블 따로 만들예정*/
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
 		TSubclassOf<class ACPP_WeaponBase> WeaponActor;
 
@@ -88,41 +68,4 @@ public:
 		USkeletalMesh* ItemSkeletalMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
 		UTexture2D* IconTexture;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
-		class UParticleSystem* FireParticle;
-
-public:
-
-	FItemInfoTable& operator=(const FItemInfoTable* other)
-	{
-		ItemInfoID = other->ItemInfoID;
-		Name = other->Name;
-		Description = other->Description;
-		bCanBeUsed = other->bCanBeUsed;
-		bCanStacked = other->bCanStacked;
-		UseText = other->UseText;
-		Interaction = other->Interaction;
-		ItemPrice = other->ItemPrice;
-		Weight = other->Weight;
-		ATK = other->ATK;
-
-		/**itemtype data*/
-		ItemType = other->ItemType;
-		ConsumeValue = other->ConsumeValue;
-		CombinResultID = other->CombinResultID;
-		if (other->ItemClass)
-		{
-			ItemClass = other->ItemClass;
-		}
-		WeaponActor = other->WeaponActor;
-
-		/**asset data*/
-		ItemMesh = other->ItemMesh;
-		IconTexture = other->IconTexture;
-		ItemSkeletalMesh = other->ItemSkeletalMesh;
-		FireParticle = other->FireParticle;
-
-		return *this;
-	}
-
 };
