@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -30,16 +28,12 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	/**item states*/
-	EItemState ItemState = EItemState::EIS_UnEquipped;
-
-
 	/**component*/
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
 		class UStaticMeshComponent* PickUpMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
-		USkeletalMeshComponent* WeaponMesh;
+		class USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
 		class USphereComponent* SearchComponent;
@@ -56,7 +50,7 @@ protected:
 		FName ItemInfoID;/**same name*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item state")
-		int32 ItemAmount;
+		int32 ItemAmount = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item state")
 		class UItem* ItemRef = nullptr;
@@ -81,8 +75,6 @@ protected:
 			AActor* OtherActor,
 			UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex);
-
-	virtual void SetItemState(EItemState Stat);
 
 	bool bValidWidget = false;
 

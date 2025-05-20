@@ -15,7 +15,8 @@ APickUpItem::APickUpItem()
 	PickUpMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Pick Mesh"));
 	SetRootComponent(PickUpMesh);
 
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMeshComponent"));
+	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon Mesh"));
+	WeaponMesh->SetupAttachment(GetRootComponent());
 
 	SearchComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Respone item search trace"));
 	SearchComponent->SetupAttachment(GetRootComponent());
@@ -108,10 +109,6 @@ void APickUpItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 	}
 }
 
-void APickUpItem::SetItemState(EItemState Stat)
-{
-}
-
 void APickUpItem::InitializePickUpItem()
 {
 	if (IsValid(ItemDataTable))
@@ -125,45 +122,13 @@ void APickUpItem::InitializePickUpItem()
 				
 		ItemRef = NewObject<UItem>(this, UItem::StaticClass());
 
-		ItemRef->ItemInfoTable = thisItemInfo;
+		ItemRef->ItemInfoTable = *thisItemInfo;
 
-		/**item data*/
-		ItemRef->ItemInfoID = thisItemInfo->ItemInfoID;
-		ItemRef->Name = thisItemInfo->Name;
-		ItemRef->Description = thisItemInfo->Description;
-		ItemRef->bCanBeUsed = thisItemInfo->bCanBeUsed;
-		ItemRef->bCanStacked = thisItemInfo->bCanStacked;
-		ItemRef->UseText = thisItemInfo->UseText;
-		ItemRef->Interaction = thisItemInfo->Interaction;
-		ItemRef->ItemPrice = thisItemInfo->ItemPrice;
-		ItemRef->Weight = thisItemInfo->Weight;
-		ItemRef->ATK = thisItemInfo->ATK;
+		if(IsValid(thisItemInfo->ItemMesh))
+			PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh);
 
-		/**itemtype data*/
-		ItemRef->ItemType = thisItemInfo->ItemType;
-		ItemRef->ConsumeValue = thisItemInfo->ConsumeValue;
-		ItemRef->CombinResultID = thisItemInfo->CombinResultID;
-		if (thisItemInfo->ItemClass)
-		{
-			ItemRef->ItemClass = thisItemInfo->ItemClass;
-		}
-		ItemRef->WeaponActor = thisItemInfo->WeaponActor;
-		
-
-
-		/**asset data*/
-		ItemRef->ItemMesh = thisItemInfo->ItemMesh;
-		ItemRef->IconTexture = thisItemInfo->IconTexture;
-		ItemRef->ItemSkeletalMesh = thisItemInfo->ItemSkeletalMesh;
-		ItemRef->FireParticle = thisItemInfo->FireParticle;
-
-
-		/**set mesh*/
-		if(IsValid(ItemRef->ItemMesh))
-			PickUpMesh->SetStaticMesh(ItemRef->ItemMesh);
-
-		if (IsValid(ItemRef->ItemSkeletalMesh))
-			WeaponMesh->SetSkeletalMesh(ItemRef->ItemSkeletalMesh);
+		if (IsValid(thisItemInfo->ItemSkeletalMesh))
+			WeaponMesh->SetSkeletalMesh(thisItemInfo->ItemSkeletalMesh);
 	}
 
 }
@@ -174,18 +139,18 @@ void APickUpItem::TakePickUp(ACPP_Character* taker)
 
 	if (IsValid(playerinventory))
 	{
-		EItemCategory itemType = ItemRef->ItemType;
+		EItemCategory itemType = ItemRef->ItemInfoTable.ItemType;
 		switch (itemType)
 		{
 		case EItemCategory::EIS_Gabbable:
 			return;
 		case EItemCategory::EIS_Gold:
-			const int32 amountOver = (playerinventory->GetCurrentGold() + (ItemRef->ItemPrice * ItemAmount));
+			const int32 amountOver = (playerinventory->GetCurrentGold() + (ItemRef->ItemInfoTable.ItemPrice * ItemAmount));
 			if (playerinventory->IsOverGold(amountOver))
 			{
 				return;
 			}
-			playerinventory->AddGold(ItemRef->ItemPrice * ItemAmount);
+			playerinventory->AddGold(ItemRef->ItemInfoTable.ItemPrice * ItemAmount);
 			Destroy();
 			return;
 		}
