@@ -13,7 +13,6 @@
 #include "Grabber.h"
 #include "Item/Item.h"
 #include "Item/Weapon/CPP_WeaponBase.h"
-#include "Item/Weapon.h"
 #include "Item/PickUpItem.h"
 #include "Camera/CameraManager.h"
 #include "Widget/MainPanelWidget.h"
@@ -327,15 +326,18 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Warning, TEXT("no item!!"));
 		return;
 	}
-	else
-	{
-		bool equipWeapon = PickUpWeapon();
-		if (!equipWeapon)
-			HitResultObject->TakePickUp(this);/**inventory pick up*/
+	
+	
+	EItemCategory itemType = HitResultObject->GetPickUpItemRef()->ItemInfoTable.ItemType;
 
-		RemoveHitResultObject();
+	if (itemType == EItemCategory::EIS_Equipment)
+	{
+		PickUpWeapon();
 	}
 	
+	HitResultObject->TakePickUp(this);/**inventory pick up*/
+
+	RemoveHitResultObject();	
 }
 
 void ACPP_Character::Equip(const FInputActionValue& Value)
@@ -485,15 +487,14 @@ bool ACPP_Character::PressKey(const FInputActionValue& Value)
 //	return weapon;
 //}
 
-bool ACPP_Character::PickUpWeapon()
+void ACPP_Character::PickUpWeapon()
 {
-	if (CurrentWeapon == nullptr)
+	if (WeaponManager->GetCurrntWeapon() == nullptr)
 	{
 		SetEquipWeapon(HitResultObject->GetPickUpItemRef());
-		return true;
 	}
-	
-	return false;
+
+	HitResultObject->TakePickUp(this);
 }
 
 void ACPP_Character::AttackWeapon()
@@ -511,7 +512,7 @@ void ACPP_Character::AttackWeapon()
 			PlayMontage(FireMontage);
 		}
 
-		CurrentWeapon->Attack();
+		WeaponManager->GetCurrntWeapon()->Attack();
 
 		bTrigger = false;
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Character::CanTrigger, TriggerRate, false);
@@ -630,9 +631,7 @@ void ACPP_Character::SetStateUnEquipped()
 
 void ACPP_Character::SetEquipWeapon(UItem* item)
 {
-	WeaponManager->EquipWeapon(item->ItemInfoID, item->WeaponActor);
-	CurrentWeapon = WeaponManager->GetCurrntWeapon();
-	CurrentWeapon->SetOwner(this);
+	WeaponManager->EquipWeapon(item->ItemInfoTable.ItemInfoID, item->ItemInfoTable.WeaponActor);
 
 	GameInventory->UpdateEquipmentInventory(item);
 	CharacterState = ECharacterStateTypes::UnEquiped;
@@ -703,17 +702,17 @@ void ACPP_Character::PlayMontage(UAnimMontage* montage)
 
 void ACPP_Character::HoldWeapon()
 {
-	if (IsValid(CurrentWeapon))
+	if (IsValid(WeaponManager->GetCurrntWeapon()))
 	{
-		CurrentWeapon->Equip(GetMesh(), "weapon_socket_r");
+		WeaponManager->GetCurrntWeapon()->Equip(GetMesh(), "weapon_socket_r");
 	}
 }
 
 void ACPP_Character::UnHoldWeapon()
 {
-	if (IsValid(CurrentWeapon))
+	if (IsValid(WeaponManager->GetCurrntWeapon()))
 	{
-		CurrentWeapon->Equip(GetMesh(), "weapon_socket_back");
+		WeaponManager->GetCurrntWeapon()->Equip(GetMesh(), "weapon_socket_back");
 	}
 }
 

@@ -133,7 +133,7 @@ public:
 
 	bool PressKey(const FInputActionValue& Value);
 	//class AWeapon* isWeapon(AActor* hitobject) const;
-	bool PickUpWeapon();
+	void PickUpWeapon();
 	void AttackWeapon();
 	void CanTrigger();
 	void SetMovementRotate(bool bORT, float rotationRate);
@@ -261,8 +261,6 @@ private:
 		class APickUpItem* HitResultObject;
 	UPROPERTY()
 		class APickUpItem* PrevHitResultObject;
-	UPROPERTY()
-		class ACPP_WeaponBase* CurrentWeapon;
 
 	/**For get Grab& Release Func*/
 	UPROPERTY()
