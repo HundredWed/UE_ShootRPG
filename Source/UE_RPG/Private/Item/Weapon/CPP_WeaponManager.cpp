@@ -32,6 +32,7 @@ void UCPP_WeaponManager::EquipWeapon(const FName& weaponid, TSubclassOf<ACPP_Wea
 	else
 	{
 		ACPP_WeaponBase* equip = SpawnWeapon(weapon);
+		equip->SetOwner(GetOwner());
 		ACharacter* player = Cast<ACharacter>(GetOwner());
 		equip->Equip(player->GetMesh(), "weapon_socket_back");
 		AddWeapon(weaponid, equip);
