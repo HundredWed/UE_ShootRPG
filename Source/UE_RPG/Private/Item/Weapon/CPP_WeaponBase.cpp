@@ -11,50 +11,23 @@ ACPP_WeaponBase::ACPP_WeaponBase()
 	SetRootComponent(WeaponMesh);
 }
 
-void ACPP_WeaponBase::UpdateWeaponInfo(FName itemInfoID)
+void ACPP_WeaponBase::InitWeaponInfo()
 {
-	if (IsValid(ItemDataTable))
+	if (IsValid(ItemDataTable) && IsValid(EquipmentAssetTable))
 	{
-		const FItemInfoTable* thisItemInfo = ItemDataTable->FindRow<FItemInfoTable>(itemInfoID, TEXT(""));
+		const FItemInfoTable* thisItemInfo = ItemDataTable->FindRow<FItemInfoTable>(ItemInfoID, TEXT(""));
 		if (thisItemInfo == nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("[%s] was not found!! Please check the ID."), *itemInfoID.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("[%s] was not found!! Please check the ID."), *ItemInfoID.ToString());
 			return;
 		}
 
 		ItemRef = NewObject<UItem>(this, UItem::StaticClass());
 
-		ItemRef->ItemInfoTable = thisItemInfo;
+		ItemRef->ItemInfoTable = *thisItemInfo;
 
-		/**item data*/
-		ItemRef->ItemInfoID = thisItemInfo->ItemInfoID;
-		ItemRef->Name = thisItemInfo->Name;
-		ItemRef->Description = thisItemInfo->Description;
-		ItemRef->bCanBeUsed = thisItemInfo->bCanBeUsed;
-		ItemRef->bCanStacked = thisItemInfo->bCanStacked;
-		ItemRef->UseText = thisItemInfo->UseText;
-		ItemRef->Interaction = thisItemInfo->Interaction;
-		ItemRef->ItemPrice = thisItemInfo->ItemPrice;
-		ItemRef->Weight = thisItemInfo->Weight;
-		ItemRef->ATK = thisItemInfo->ATK;
-		FinalDamage = thisItemInfo->ATK;
-
-		/**itemtype data*/
-		ItemRef->ItemType = thisItemInfo->ItemType;
-		ItemRef->ConsumeValue = thisItemInfo->ConsumeValue;
-		ItemRef->CombinResultID = thisItemInfo->CombinResultID;
-		if (thisItemInfo->ItemClass)
-		{
-			ItemRef->ItemClass = thisItemInfo->ItemClass;
-		}
-
-		/**asset data*/
-		ItemRef->ItemMesh = thisItemInfo->ItemMesh;
-		ItemRef->IconTexture = thisItemInfo->IconTexture;
-		ItemRef->ItemSkeletalMesh = thisItemInfo->ItemSkeletalMesh;
-		ItemRef->FireParticle = thisItemInfo->FireParticle;
-
-		//WeaponMesh->SetSkeletalMesh(ItemRef->ItemSkeletalMesh);
+		if(thisItemInfo->ItemSkeletalMesh)
+			WeaponMesh->SetSkeletalMesh(thisItemInfo->ItemSkeletalMesh);
 	}
 }
 
@@ -62,7 +35,7 @@ void ACPP_WeaponBase::UpdateWeaponInfo(FName itemInfoID)
 void ACPP_WeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
-	//UpdateWeaponInfo(ItemInfoID);
+	InitWeaponInfo();
 	StoreDamageUI();
 }
 
@@ -76,9 +49,6 @@ void ACPP_WeaponBase::StoreDamageUI()
 {
 	UWorld* world = GetWorld();
 	const int32 amount = 50;
-
-	//FString path = TEXT("/Script/Engine.Blueprint'/Game/ShootGame/BP/Widget/NPC/BP_Damge.BP_Damge'");
-	//DamageUIActorClass = Cast<UClass>(StaticLoadObject(ACPP_DamageActor::StaticClass(), nullptr, *path));
 
 	if (IsValid(world) && IsValid(DamageUIActorClass))
 	{
@@ -106,10 +76,6 @@ ACPP_DamageActor* ACPP_WeaponBase::GetDamageActor()
 void ACPP_WeaponBase::Equip(USceneComponent* Inparent, const FName& SocketName)
 {
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-	if (IsValid(EquipSound))
-	{
-		UGameplayStatics::PlaySound2D(this, EquipSound);
-	}
 	WeaponMesh->AttachToComponent(Inparent, TransformRules, SocketName);
 }
 

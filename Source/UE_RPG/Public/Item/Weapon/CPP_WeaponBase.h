@@ -3,18 +3,20 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Item/ItemData.h"
+#include "Item/Weapon/EquipmentData.h"
 #include "Engine/DataTable.h"
 #include "UE_RPG/UtilityMecro.h"
 #include "CPP_WeaponBase.generated.h"
 
 class UItem;
 class UWeaponAbilityBase;
+class USoundCue;
 
-struct FWeaponInfo
-{
-	/**weapon states*/
-	float FinalDamage = 0;
-};
+//struct FWeaponInfo
+//{
+//	/**weapon states*/
+//	float FinalDamage = 0;
+//};
 
 UCLASS()
 class UE_RPG_API ACPP_WeaponBase : public AActor
@@ -25,16 +27,9 @@ class UE_RPG_API ACPP_WeaponBase : public AActor
 public:	
 	ACPP_WeaponBase();
 
-	UPROPERTY(EditAnywhere, Category = "WeaponInfo")
-		class USoundCue* EquipSound;
-
-	UPROPERTY(EditAnywhere, Category = "WeaponInfo")
-		class USoundCue* AttackSound;
-
-	UPROPERTY(EditAnywhere, Category = "WeaponInfo")
+	UPROPERTY()
 		USkeletalMeshComponent* WeaponMesh;
 
-	//µð¹ö±ë¿ë
 	UPROPERTY(EditAnywhere, Category = "WeaponInfo")
 		FName ItemInfoID;
 
@@ -46,14 +41,14 @@ public:
 	
 		int32 DamageUI = 0;
 
-		/**weapon states*/
-		float FinalDamage = 0;
+	/**weapon states*/
+	float FinalDamage = 0;
 
 public:
 	//virtual void Tick(float DeltaTime) override;
 	virtual void Attack() {};
-	void UpdateWeaponInfo(FName itemInfoID);
-	void Equip(USceneComponent* Inparent, const FName& SocketName);
+	virtual void InitWeaponInfo();
+	virtual void Equip(USceneComponent* Inparent, const FName& SocketName);
 	UItem* GetItemRef() { return ItemRef; }
 	void SetDataTable(UDataTable* dataTable) { ItemDataTable = dataTable; }
 	
@@ -67,9 +62,12 @@ protected:
 	class ACPP_DamageActor* GetDamageActor();
 
 	/**item state*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponInfo|ItemInfo")
+	UPROPERTY()
 		UItem* ItemRef = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "WeaponInfo|ItemInfo")
 		UDataTable* ItemDataTable;
+	UPROPERTY(EditAnywhere, Category = "WeaponInfo|ItemInfo")
+		UDataTable* EquipmentAssetTable;
+
 };

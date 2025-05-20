@@ -8,6 +8,7 @@
 
 #include "NPC/EnemyBase.h"
 #include "CPP_Character.h"
+#include "Item/Item.h"
 
 ACPP_Rifle::ACPP_Rifle()
 {
@@ -31,6 +32,32 @@ void ACPP_Rifle::Attack()
 
 	ShootEffect(hitpotin);
 
+}
+
+void ACPP_Rifle::InitWeaponInfo()
+{
+	Super::InitWeaponInfo();
+
+	const FEquipmentAssetTable* thisAssetInfo = EquipmentAssetTable->FindRow<FEquipmentAssetTable>(ItemInfoID, TEXT(""));
+	if (thisAssetInfo == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] was not found!! Please check the ID."), *ItemInfoID.ToString());
+		return;
+	}
+	
+	BeamParticle = thisAssetInfo->BeamParticle;
+	FireParticle = thisAssetInfo->FireParticle;
+	ShootSound = thisAssetInfo->AttackSound;
+	EquipSound = thisAssetInfo->EquipSound;
+}
+
+void ACPP_Rifle::Equip(USceneComponent* Inparent, const FName& SocketName)
+{
+	Super::Equip(Inparent, SocketName);
+	if (IsValid(EquipSound))
+	{
+		UGameplayStatics::PlaySound2D(this, EquipSound);
+	}
 }
 
 void ACPP_Rifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
@@ -79,7 +106,8 @@ void ACPP_Rifle::GunTrace(FHitResult& hitresult, FVector& endpoint)
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
 
-	DrawDebugLine(GetWorld(), StartLocation, end, FColor::Red, false, 5);
+	//µð¹ö±×
+	//DrawDebugLine(GetWorld(), StartLocation, end, FColor::Red, false, 5);
 
 
 	FHitResult hitresult_gunTrace;
