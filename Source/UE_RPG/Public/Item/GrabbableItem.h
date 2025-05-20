@@ -19,11 +19,4 @@ public:
 
 	virtual void BeginPlay() override;
 
-	UFUNCTION()
-		void SetStateEquiped() { SetItemState(EItemState::EIS_Equipped); }
-	UFUNCTION()
-		void SetStateUnEquiped() { SetItemState(EItemState::EIS_UnEquipped); }
-
-protected:
-	virtual void SetItemState(EItemState State) override;
 };

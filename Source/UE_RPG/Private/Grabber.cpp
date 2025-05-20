@@ -70,7 +70,7 @@ void UGrabber::Grab()
 			AGrabbableItem* Grabbeditem = Cast<AGrabbableItem>(HitActor);
 			if (IsValid(Grabbeditem))
 			{
-				Grabbeditem->SetStateEquiped();
+				//Grabbeditem->SetStateEquiped();
 			}
 
 		}
@@ -103,7 +103,7 @@ void UGrabber::Release()
 		AGrabbableItem* Grabbeditem = Cast<AGrabbableItem>(GrabbedActor);
 		if (IsValid(Grabbeditem))
 		{
-			Grabbeditem->SetStateUnEquiped();
+			//Grabbeditem->SetStateUnEquiped();
 		}
 	}
 }
