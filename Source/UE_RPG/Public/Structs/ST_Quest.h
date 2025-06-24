@@ -52,5 +52,5 @@ public:
 	EQusetState QusetState;
 
 	UPROPERTY(EditDefaultsOnly)
-	UItem* QusetState;
+	UItem* QusetItem;
 };

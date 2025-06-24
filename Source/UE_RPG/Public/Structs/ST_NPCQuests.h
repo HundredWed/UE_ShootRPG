@@ -6,12 +6,12 @@
 #include "ST_NPCQuests.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAnswerDialogue : public FTableRowBase
+struct FNPCQuests : public FTableRowBase
 {
 	GENERATED_BODY()
 
 public:
-	FAnswerDialogue() {};
+	FNPCQuests() {};
 
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FQuest> Quests;
