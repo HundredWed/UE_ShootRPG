@@ -14,7 +14,7 @@ public:
 	FTalkDialogue() {};
 
 	UPROPERTY(EditDefaultsOnly)
-	FName RowName;
+	FName NextRow;
 
 	UPROPERTY(EditDefaultsOnly)
 	FName QuestClearRow;

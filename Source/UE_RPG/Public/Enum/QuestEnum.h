@@ -1,7 +1,7 @@
 #pragma once
 
 UENUM(BlueprintType)
-enum class EQusetType : uint8
+enum class EQuestType : uint8
 {
 	EQT_GetItem UMETA(DisplayName = "GetItem"),
 	EQT_GoToNPC UMETA(DisplayName = "GoToNPC"),
@@ -11,7 +11,7 @@ enum class EQusetType : uint8
 };
 
 UENUM(BlueprintType)
-enum class EQusetState : uint8
+enum class EQuestState : uint8
 {
 	EQS_Normal UMETA(DisplayName = "Normal"),
 	EQS_InProgress UMETA(DisplayName = "InProgress"),

@@ -46,10 +46,10 @@ public:
 	float EXP;
 
 	UPROPERTY(EditDefaultsOnly)
-	EQusetType QusetType;
+	EQuestType QusetType;
 
 	UPROPERTY(EditDefaultsOnly)
-	EQusetState QusetState;
+	EQuestState QusetState;
 
 	UPROPERTY(EditDefaultsOnly)
 	UItem* QusetItem;
