@@ -5,11 +5,12 @@
 #include "InputActionValue.h"
 #include "CharacterStates.h"
 #include "UE_RPG/UtilityMecro.h"
+#include "Interface/CPP_InteractInterface.h"
 #include "CPP_Character.generated.h"
 
 
 UCLASS()
-class UE_RPG_API ACPP_Character : public ACharacter
+class UE_RPG_API ACPP_Character : public ACharacter, public ICPP_InteractInterface
 {
 	GENERATED_BODY()
 
@@ -27,8 +28,8 @@ public:
 		class UCPP_WeaponManager* WeaponManager;
 
 	/**Input*/
-	UPROPERTY(EditAnywhere, Category = Input)
-		class UInputMappingContext* DefaultMappingContext;
+	/*UPROPERTY(EditAnywhere, Category = Input)
+		class UInputMappingContext* DefaultMappingContext;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* MoveAction;
@@ -186,12 +187,13 @@ public:
 	FORCEINLINE int32 GetPlayerATK() { return PlayerATK; }
 	FORCEINLINE bool GetPlayerMoveState() { return bMoving; }
 
-	FORCEINLINE int32 GetPlayerHealth() { return CurrentHealth; }
-	FORCEINLINE int32 GetPlayerMaxHealth() { return MaxHealth; }
-	FORCEINLINE int32 GetPlayerMana() { return CurrentMana; }
-	FORCEINLINE int32 GetPlayerMaxMana() { return MaxMana; }
-	FORCEINLINE int32 GetPlayerStamina() { return CurrentStamina; }
-	FORCEINLINE int32 GetPlayerMaxStamina() { return MaxStamina; }
+	FORCEINLINE int32 GetPlayerLevel() { return Level; }
+	FORCEINLINE float GetPlayerHealth() { return CurrentHealth; }
+	FORCEINLINE float GetPlayerMaxHealth() { return MaxHealth; }
+	FORCEINLINE float GetPlayerMana() { return CurrentMana; }
+	FORCEINLINE float GetPlayerMaxMana() { return MaxMana; }
+	FORCEINLINE float GetPlayerStamina() { return CurrentStamina; }
+	FORCEINLINE float GetPlayerMaxStamina() { return MaxStamina; }
 
 	FORCEINLINE void IncreasePlayerHP(const float value) { 
 		CurrentHealth += value;
@@ -215,6 +217,10 @@ public:
 	void StoreDamageUI();
 	class ACPP_DamageActor* GetDamageActor();
 	int32 GetDamageUIArrayLength();
+
+	/**interface*/
+	virtual void EndInteract() override;
+
 private:
 
 	float ClampRnage(float value);
@@ -229,23 +235,23 @@ private:
 	bool bMoving = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
-		int32 MaxHealth = 100;
+	float MaxHealth = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
-		int32 MaxMana = 100;
+	float MaxMana = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
-		int32 MaxStamina = 150;
+	float MaxStamina = 150;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
-		int32 PlayerATK = 0;
+	float PlayerATK = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
-		float FireRate = 0.3f;
+	float FireRate = 0.3f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
-		float TriggerRate = 0.5f;
+	float TriggerRate = 0.5f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
-		float DefaultMRR = 500.f;//MovementRotationRate
+	float DefaultMRR = 500.f;//MovementRotationRate
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
-		float FocusingMRR = 3000.f;//MovementRotationRate
+	float FocusingMRR = 3000.f;//MovementRotationRate
 
-	float Level = 1;
+	int32 Level = 1;
 	float CurrentHealth = 0;
 	float CurrentMana = 0;
 	float CurrentStamina = 0;
