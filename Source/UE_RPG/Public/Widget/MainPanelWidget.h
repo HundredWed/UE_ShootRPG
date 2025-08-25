@@ -6,9 +6,8 @@
 #include "Widget/CustomUMGWidget.h"
 #include "MainPanelWidget.generated.h"
 
-/**
- * 
- */
+class ACPP_Character;
+
 UCLASS()
 class UE_RPG_API UMainPanelWidget : public UCustomUMGWidget
 {

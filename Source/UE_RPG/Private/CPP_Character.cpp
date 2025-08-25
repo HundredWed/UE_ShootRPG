@@ -67,13 +67,13 @@ void ACPP_Character::BeginPlay()
 	CurrentMana = MaxMana;
 	CurrentStamina = MaxStamina;
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	/*if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
-	}
+	}*/
 
 	if (IsValid(CameraManager))
 	{
@@ -864,6 +864,10 @@ ACPP_DamageActor* ACPP_Character::GetDamageActor()
 int32 ACPP_Character::GetDamageUIArrayLength()
 {
 	return DamageUIActors.Num();
+}
+
+void ACPP_Character::EndInteract()
+{
 }
 
 float ACPP_Character::ClampRnage(float value)

@@ -1,24 +1,57 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Structs/ST_NPC.h"
+#include "Structs/ST_DialogueAnswer.h"
 #include "CPP_Controller.generated.h"
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum class EPlayerIputMappingState : uint8
+{
+	Default,
+	NPCTalking
+};
+
+class UInputMappingContext;
+class AHUD;
+class UCPP_DialogueManager;
+class UCPP_UIManager;
+class UCPP_QuestMananger;
+class UMainPanelWidget;
+
 UCLASS()
 class UE_RPG_API ACPP_Controller : public APlayerController
 {
 	GENERATED_BODY()
 
 public:
+	ACPP_Controller();
 
 	virtual void BeginPlay() override;
 
-	class AHUD* CrosshairHUD;
+	void ChangeInteractionState(EPlayerIputMappingState newState);
+
+
+	//델리케이트 화
+	/////////////////////////////////////////////////////////////////////////
+	void RevertToPlayerWidget();
+
+	void SetDialogeWidget();
+	bool ActiveDialogueSubBox();
+	void ActivateAnswerBox(bool activate);
+	void UpdateDialogueText(const FText& text);
+	void SetAnswerBox(TArray<FAnswerDialogue> answers);
+
+	void SetQuest(const FName& npcID);
+	void SelectedQuest(const FName& npcID, const FName& questId);
+
+	void AddProgressQuest();
+	void QuestClear();
+	/////////////////////////////////////////////////////////////////////////
+
 
 	UFUNCTION()
 		void SetHUDVisibility(bool bshowHUD);
@@ -32,4 +65,26 @@ public:
 		SetInputMode(FInputModeGameOnly());
 		bShowMouseCursor = false;
 	}
+
+	UCPP_DialogueManager* GetDialogueManager() { return DialogueManager; }
+
+private:
+
+	/*UPROPERTY(EditDefaultsOnly, Category = "Config")
+	TArray<UInputMappingContext*> InputMappingContexts;*/
+
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	TMap<EPlayerIputMappingState, UInputMappingContext*> InputMappingContexts;
+
+	UPROPERTY()
+	TObjectPtr<UCPP_DialogueManager> DialogueManager;
+	UPROPERTY()
+	TObjectPtr<UCPP_UIManager> UIManager;
+	UPROPERTY()
+	TObjectPtr<UCPP_QuestMananger> QuestMananger;
+
+	EPlayerIputMappingState CurrentInteractionState = EPlayerIputMappingState::Default;
+
+	AHUD* CrosshairHUD;
+
 };
