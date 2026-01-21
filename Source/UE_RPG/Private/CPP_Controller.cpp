@@ -7,14 +7,12 @@
 #include "EnhancedInputComponent.h"
 
 #include "Component/CPP_UIManager.h"
-#include "Component/CPP_QuestMananger.h"
-#include "Component/CPP_DialogueManager.h"
+#include "Systems/CPP_QuestSubsystem.h"
+#include "Systems/CPP_DialogueSystem.h"
 
 ACPP_Controller::ACPP_Controller()
 {
     UIManager = CreateDefaultSubobject<UCPP_UIManager>(TEXT("UIManager"));
-    DialogueManager = CreateDefaultSubobject<UCPP_DialogueManager>(TEXT("DialogueManager"));
-    QuestMananger = CreateDefaultSubobject<UCPP_QuestMananger>(TEXT("QuestMananger"));
 }
 
 void ACPP_Controller::BeginPlay()
@@ -39,71 +37,48 @@ void ACPP_Controller::ChangeInteractionState(EPlayerIputMappingState newState)
     }
 
     Subsystem->ClearAllMappings();
+    Subsystem->AddMappingContext(InputMappingContexts[CurrentInteractionState], 0);
 
     switch (CurrentInteractionState)
     {
     case EPlayerIputMappingState::Default:
-        Subsystem->AddMappingContext(InputMappingContexts[CurrentInteractionState], 0);
+        bInteractEvent = false;
         break;
-
     case EPlayerIputMappingState::NPCTalking:
-        Subsystem->AddMappingContext(InputMappingContexts[CurrentInteractionState], 0);
         break;
     }
 }
 
-void ACPP_Controller::RevertToPlayerWidget()
+void ACPP_Controller::NPCInteract(const FName& npcID)
 {
-    UIManager->SetMainWidget(EWidgetType::Player);
-}
-
-void ACPP_Controller::SetDialogeWidget()
-{
-    UIManager->SetMainWidget(EWidgetType::NPCDialogue);
-}
-
-bool ACPP_Controller::ActiveDialogueSubBox()
-{
-    //UIManager->
-    return false;
-}
-
-void ACPP_Controller::ActivateAnswerBox(bool activate)
-{
-    //UIManager->
-}
-
-void ACPP_Controller::UpdateDialogueText(const FText& text)
-{
-    UIManager->UpdateDialogueText(text);
-}
-
-void ACPP_Controller::SetAnswerBox(TArray<FAnswerDialogue> answers)
-{
-    UIManager->SetAnswerBox(answers);
-}
-
-void ACPP_Controller::SetQuest(const FName& npcID)
-{
-    if (QuestMananger->GetQusetList(npcID).Num() > 0)
+    UGameInstance* GI = GetGameInstance();
+    if (!IsValid(GI))
     {
-        //UIManager->UpdateQuestList(QuestMananger->GetQusetList(npcID));
+        return;
     }
-}
 
-void ACPP_Controller::SelectedQuest(const FName& npcID, const FName& questId)
-{
-   QuestMananger->SelectedQuest(npcID, questId);
-}
-
-void ACPP_Controller::AddProgressQuest()
-{
-    QuestMananger->AddProgressQuest();
-}
-
-void ACPP_Controller::QuestClear()
-{
-    QuestMananger->QuestClear();
+    UCPP_DialogueSystem* dialogue = GI->GetSubsystem<UCPP_DialogueSystem>();
+    
+    if (!bInteractEvent)
+    {
+        //TODO
+        //상호작용 시 캐릭터 상태
+        //
+        // 
+        
+        if (dialogue)
+        {
+           dialogue->InitDialogue(npcID);
+        }
+        bInteractEvent = true;
+    }
+    else
+    {
+        if (dialogue)
+        {
+            dialogue->PrintDialogue();
+        }
+    }   
 }
 
 void ACPP_Controller::SetHUDVisibility(bool bshowHUD)
@@ -113,5 +88,3 @@ void ACPP_Controller::SetHUDVisibility(bool bshowHUD)
 		CrosshairHUD->bShowHUD = bshowHUD;
 	}
 }
-
-

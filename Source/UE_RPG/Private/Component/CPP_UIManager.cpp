@@ -2,7 +2,8 @@
 #include "Blueprint/UserWidget.h"
 
 #include "Widget/MainPanelWidget.h"
-#include "Component/CPP_DialogueManager.h"
+#include "Systems/CPP_DialogueSystem.h"
+#include "Widget/NPC/Dialogue/CPP_DialogueWidget.h"
 #include "CPP_Character.h"
 #include "CPP_Controller.h"
 
@@ -11,24 +12,34 @@ UCPP_UIManager::UCPP_UIManager()
 	//PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UCPP_UIManager::SetMainWidget(EWidgetType widgetType)
+void UCPP_UIManager::SetMainWidget(EWidgetType type)
 {
-	if (CurrentWidgetType != widgetType)
-	{
-		Widgets[CurrentWidgetType]->SetVisibility(ESlateVisibility::Hidden);
-	}
-	
-	switch (widgetType)
+	HideCurrentWidget();
+
+	switch (type)
 	{
 	case EWidgetType::Player:
 		SetMainWidgetToPlayer();
 		break;
 	case EWidgetType::NPCDialogue:
-		SetMainWidgetToDialogue(PlayerController->GetDialogueManager()->GetNPCStruct());
+		SetMainWidgetToDialogue();
 		break;
 	default:
 		break;
 	}
+}
+
+void UCPP_UIManager::HideCurrentWidget()
+{
+	if (CurrentWidget)
+	{
+		CurrentWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UCPP_UIManager::SwitchToPlayerWidget()
+{
+	SetMainWidget(EWidgetType::Player);
 }
 
 void UCPP_UIManager::SetMainWidgetToPlayer()
@@ -39,47 +50,23 @@ void UCPP_UIManager::SetMainWidgetToPlayer()
 		playerWG->SetVisibility(ESlateVisibility::Visible);
 		//playerWG->UpdatePlayerInfo();
 
+		ACPP_Character* player = Cast<ACPP_Character>(PlayerController->GetLocalPlayer());
+		//해당 구간 리펙토링 필요
+		playerWG->InitState(player->GetPlayerLevel(), player->GetPlayerHealth(), player->GetPlayerMaxHealth(), player->GetPlayerMaxMana(), player->GetPlayerStamina());
+
 		CurrentWidgetType = EWidgetType::Player;
+		CurrentWidget = (*wd);
 	}	
 }
 
-void UCPP_UIManager::SetMainWidgetToDialogue(const FNPCDialogue& npcDialogue)
+void UCPP_UIManager::SetMainWidgetToDialogue()
 {
 	if (TObjectPtr<UUserWidget>* wd = Widgets.Find(EWidgetType::NPCDialogue))
 	{		
-		/*UDialogueWidget* npcDialogueWidget = Cast<UDialogueWidget>((*wd));
-		*npcDialogueWidget로 초기화
-		mainWidget->SetVisibility(ESlateVisibility::Visible);*/
-
+		UCPP_DialogueWidget* npcDialogueWidget = Cast<UCPP_DialogueWidget>((*wd));
+		npcDialogueWidget->InitDialogueWidget();
 		CurrentWidgetType = EWidgetType::NPCDialogue;
-	}
-}
-
-void UCPP_UIManager::SetDialogueWidget()
-{
-}
-
-void UCPP_UIManager::SetAnswerBox(TArray<FAnswerDialogue> answers)
-{
-	if (CurrentWidgetType == EWidgetType::NPCDialogue)
-	{
-		if (TObjectPtr<UUserWidget>* wd = Widgets.Find(EWidgetType::NPCDialogue))
-		{
-			//UDialogueWidget* npcDialogueWidget = Cast<UDialogueWidget>((*wd));
-			//npcDialogueWidget->UpdateAnswerBox(answers);
-		}
-	}
-}
-
-void UCPP_UIManager::UpdateDialogueText(const FText& text)
-{
-	if (CurrentWidgetType == EWidgetType::NPCDialogue)
-	{
-		if (TObjectPtr<UUserWidget>* wd = Widgets.Find(EWidgetType::NPCDialogue))
-		{
-			//UDialogueWidget* npcDialogueWidget = Cast<UDialogueWidget>((*wd));
-			//npcDialogueWidget->UpdateSubText(text);
-		}
+		CurrentWidget = (*wd);
 	}
 }
 
@@ -100,14 +87,14 @@ void UCPP_UIManager::BeginPlay()
 		}
 	}
 
-	//메인 초기화
-	if (TObjectPtr<UUserWidget>* main = Widgets.Find(EWidgetType::Player))
-	{
-		UMainPanelWidget* mainWidget = Cast<UMainPanelWidget>((*main));
-		mainWidget->SetVisibility(ESlateVisibility::Visible);
+	SetMainWidgetToPlayer();
 
-		ACPP_Character* player = Cast<ACPP_Character>(PlayerController->GetLocalPlayer());
-		mainWidget->InitState(player->GetPlayerLevel(), player->GetPlayerHealth(), player->GetPlayerMaxHealth(), player->GetPlayerMaxMana(), player->GetPlayerStamina());
-	}
+
+	UGameInstance* GI = PlayerController->GetGameInstance();
+	if (IsValid(GI))
+	{
+		UCPP_DialogueSystem* dialogue = GI->GetSubsystem<UCPP_DialogueSystem>();
+		dialogue->OnQuitDialogue.BindUObject(this, &UCPP_UIManager::SwitchToPlayerWidget);
+	}	
 }
 

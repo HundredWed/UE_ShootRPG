@@ -4,6 +4,14 @@
 #include "Engine/DataTable.h"
 #include "ST_DialogueAnswer.generated.h"
 
+UENUM(BlueprintType)
+enum class EAnswerType : uint8
+{
+	Normal,
+	Positive,
+	Negative
+};
+
 USTRUCT(BlueprintType)
 struct FAnswerDialogue : public FTableRowBase
 {
@@ -19,6 +27,6 @@ public:
 	FName RowName;
 
 	UPROPERTY(EditDefaultsOnly)
-	bool bAccept;
+	EAnswerType AnswerType;
 
 };

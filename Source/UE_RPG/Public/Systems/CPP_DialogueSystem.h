@@ -1,67 +1,76 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
-#include "Structs/ST_Quest.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "Structs/ST_Talk.h"
 #include "Structs/ST_NPCQuests.h"
+#include "Structs/ST_NPC.h"
 #include "CPP_DialogueSystem.generated.h"
 
 class UCPP_CustomInstance;
 
+DECLARE_DELEGATE_OneParam(FUpdateDialogueTextDelegate, const FText&);
+DECLARE_DELEGATE_OneParam(FCreateAnswerBoxDelegate, TArray<FAnswerDialogue>);
+DECLARE_DELEGATE(FOnQuitDialogueDelegate);
+
 UCLASS(Blueprintable, BlueprintType)
-class UE_RPG_API UCPP_DialogueSystem : public UObject
+class UE_RPG_API UCPP_DialogueSystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
 public:
 	UCPP_DialogueSystem();
 
-	void AddProgressQuest(FQuest quest);
-	void QuestClear(const FName& questID);
-	FQuest CheckQuestContent(const FName& objectID, const int32 amount);
+	void InitDialogue(const FName& dialogueOwnerName);
 
-	//getter
-	TArray<FQuest> GetQusetList(const FName& npcID);
-	FTalkDialogue GetTalkStruct(const FName& npcID);
-	FTalkDialogue GetQuestDialogueStruct(const FName& npcID);
-	TArray<FQuest> GetProgrssQusetsOfPlayer();
-	FQuest GetQuestInfo(const FName& npcID, FName questID);
-
-private:
-
-	FQuest CheckProgress(const FName& questID);
-	bool CheckClear(const FName& questID);
-	int32 CastQuestIndex(FName questID);
-
-	void CheckProgressGetItmeType(FQuest& quest, const int32 amount, const int32 index);
-	void CheckProgressGoToNPCType(FQuest& quest, const FName& npcID, const int32 index);
-	void CheckProgressGoToSpaceType();
-	void CheckProgressComBatType();
-
-private:
+	void PrintDialogue();
+	void SelectedInteractType(EInteractType state);
+	void SelectedAnswer(const FName& rowName);
+	void SelectedQuest(const FQuest& quest);
 
 	//DataTable
-	UPROPERTY(EditDefaultsOnly, Category = "Config")
-	UDataTable* QuestDataTable;
+	FTalkDialogue GetTalkStruct();
+	FTalkDialogue GetQuestDialogueStruct();
+	FNPCDialogue GetNPCStruct();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	FUpdateDialogueTextDelegate UpdateDialogueText;
+	FCreateAnswerBoxDelegate CreateAnswerBox;
+	FOnQuitDialogueDelegate OnQuitDialogue;
+
+
+private:
+
+	void RevertDialogue();
+	//void RevertToMain(); ui동작시 컨트롤러에서 델리게이트 호출로
+	void SetQuestList();
+	//void SetAnswerBox(const FTalkDialogue& dialouge); ui 내에서
+
+	void PrintDialogueNormal();
+	void PrintDialogueJustTalk();
+	void PrintDialogueQuest();
+	void PrintDialogueLikeAbility();
+	void PrintDialogueQuit();
+
+private:
+
+	FName DialogueOwnerName;
+
+	//DataTable
+	FName DatatableRowName;
+
+	UPROPERTY()
 	UDataTable* TalkDataTable;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	UPROPERTY()
 	UDataTable* QuestDialogueDataTable;
 
 	UPROPERTY()
-	UCPP_CustomInstance* CustomGameInstance;
+	UDataTable* NPCDataTable;
 
-	//Player
-	UPROPERTY()
-	TArray<FQuest> InProgressQuests;
 
-	//NPC
-	/*UPROPERTY()
-	TMap<FName, FQuest> AcceptedQuests;*/
-	UPROPERTY()
-	TSet<FName> ClearQuests;
-	
+	EInteractType DialogueState = EInteractType::Normal;
+
+	bool bActivateAnswerBox;
+	bool bSelectedQuest;
+	bool bTalkEnd;
 };

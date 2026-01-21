@@ -4,6 +4,17 @@
 #include "Engine/DataTable.h"
 #include "ST_NPC.generated.h"
 
+UENUM(BlueprintType)
+enum class EInteractType : uint8
+{
+	Normal,
+	JustTalk,
+	Quest,
+	LikeAbility,
+	Revert,
+	Quit
+};
+
 USTRUCT(BlueprintType)
 struct FNPCDialogue : public FTableRowBase
 {
@@ -21,4 +32,10 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	FText BasicDialogue;
 
+	UPROPERTY(EditDefaultsOnly)
+	bool CanJustTalk;
+	UPROPERTY(EditDefaultsOnly)
+	bool CanQuest;
+	UPROPERTY(EditDefaultsOnly)
+	bool CanLikeAbility;
 };

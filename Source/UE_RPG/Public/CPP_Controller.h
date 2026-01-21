@@ -34,24 +34,7 @@ public:
 
 	void ChangeInteractionState(EPlayerIputMappingState newState);
 
-
-	//델리케이트 화
-	/////////////////////////////////////////////////////////////////////////
-	void RevertToPlayerWidget();
-
-	void SetDialogeWidget();
-	bool ActiveDialogueSubBox();
-	void ActivateAnswerBox(bool activate);
-	void UpdateDialogueText(const FText& text);
-	void SetAnswerBox(TArray<FAnswerDialogue> answers);
-
-	void SetQuest(const FName& npcID);
-	void SelectedQuest(const FName& npcID, const FName& questId);
-
-	void AddProgressQuest();
-	void QuestClear();
-	/////////////////////////////////////////////////////////////////////////
-
+	void NPCInteract(const FName& npcID);
 
 	UFUNCTION()
 		void SetHUDVisibility(bool bshowHUD);
@@ -66,8 +49,6 @@ public:
 		bShowMouseCursor = false;
 	}
 
-	UCPP_DialogueManager* GetDialogueManager() { return DialogueManager; }
-
 private:
 
 	/*UPROPERTY(EditDefaultsOnly, Category = "Config")
@@ -77,14 +58,12 @@ private:
 	TMap<EPlayerIputMappingState, UInputMappingContext*> InputMappingContexts;
 
 	UPROPERTY()
-	TObjectPtr<UCPP_DialogueManager> DialogueManager;
-	UPROPERTY()
 	TObjectPtr<UCPP_UIManager> UIManager;
-	UPROPERTY()
-	TObjectPtr<UCPP_QuestMananger> QuestMananger;
 
 	EPlayerIputMappingState CurrentInteractionState = EPlayerIputMappingState::Default;
 
 	AHUD* CrosshairHUD;
+
+	bool bInteractEvent = false;
 
 };

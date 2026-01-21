@@ -2,8 +2,26 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "Enum/QuestEnum.h"
 #include "ST_Quest.generated.h"
+
+UENUM(BlueprintType)
+enum class EQuestType : uint8
+{
+	EQT_GetItem UMETA(DisplayName = "GetItem"),
+	EQT_GoToNPC UMETA(DisplayName = "GoToNPC"),
+	EQT_GoToSpace UMETA(DisplayName = "GoToSpace"),
+	EQT_ComBat UMETA(DisplayName = "ComBat")
+
+};
+
+UENUM(BlueprintType)
+enum class EQuestState : uint8
+{
+	EQS_Normal UMETA(DisplayName = "Normal"),
+	EQS_InProgress UMETA(DisplayName = "InProgress"),
+	EQS_ConditionClear UMETA(DisplayName = "ConditionClear"),
+	EQS_Clear UMETA(DisplayName = "Clear")
+};
 
 class UItem;
 
@@ -31,13 +49,13 @@ public:
 	FName ChainQuestID;
 
 	UPROPERTY(EditDefaultsOnly)
-	FString QuestName;
+	FText QuestName;
 
 	UPROPERTY(EditDefaultsOnly)
-	FString QuestContent;
+	FText QuestContent;
 
 	UPROPERTY(EditDefaultsOnly)
-	FString NeedObjectName;
+	FText NeedObjectName;
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 NeedCount;
@@ -46,11 +64,11 @@ public:
 	float EXP;
 
 	UPROPERTY(EditDefaultsOnly)
-	EQuestType QusetType;
+	EQuestType QuestType;
 
 	UPROPERTY(EditDefaultsOnly)
-	EQuestState QusetState;
+	EQuestState QuestState;
 
 	UPROPERTY(EditDefaultsOnly)
-	UItem* QusetItem;
+	TSubclassOf<UItem> QuestItem;
 };

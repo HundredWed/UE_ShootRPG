@@ -9,204 +9,191 @@ UCPP_DialogueSystem::UCPP_DialogueSystem()
 	
 }
 
-void UCPP_DialogueSystem::AddProgressQuest(FQuest quest)
+void UCPP_DialogueSystem::InitDialogue(const FName& dialogueOwnerName)
 {
-	if (quest.QuestID.IsNone())
+	bActivateAnswerBox = false;
+	bSelectedQuest = false;
+	bTalkEnd = false;
+	DialogueState = EInteractType::Normal;
+
+	DialogueOwnerName = dialogueOwnerName;
+	DatatableRowName = dialogueOwnerName;
+}
+
+void UCPP_DialogueSystem::PrintDialogue()
+{
+	if (bActivateAnswerBox)
 	{
 		return;
 	}
 
-	quest.QusetState = EQuestState::EQS_InProgress;
-
-	InProgressQuests.Add(quest);
-	//AcceptedQuests.Add(quest.QuestID, quest);
-}
-
-void UCPP_DialogueSystem::QuestClear(const FName& questID)
-{
-	int32 index = 0;
-	for (FQuest quest : InProgressQuests)
+	switch (DialogueState)
 	{
-		if (quest.QuestID == questID)
-		{
-			ClearQuests.Add(questID);
-			InProgressQuests.RemoveAt(index);
-		}
-		index++;
+	case EInteractType::Normal:
+		PrintDialogueNormal();
+		break;
+	case EInteractType::JustTalk:
+		PrintDialogueJustTalk();
+		break;
+	case EInteractType::Quest:
+		PrintDialogueQuest();
+		break;
+	case EInteractType::LikeAbility:
+		PrintDialogueLikeAbility();
+		break;
+	case EInteractType::Revert:
+		break;
+	case EInteractType::Quit:
+		PrintDialogueQuit();
+		break;
+	default:
+		break;
 	}
 }
 
-FQuest UCPP_DialogueSystem::CheckQuestContent(const FName& objectID, const int32 amount)
+void UCPP_DialogueSystem::SelectedInteractType(EInteractType state)
 {
-	//해당 ID를 필요로 하는 퀘스트가 있는지 확인
-	//있다면 진행도 확인
-
-	int32 index = 0;
-	FQuest correspondQuest;
-	for (FQuest quest : InProgressQuests)
+	switch (state)
 	{
-		if (quest.NeedObjectID == objectID)
-		{
-			correspondQuest = quest;
-		}
-		index++;
+	case EInteractType::Normal:
+		break;
+	case EInteractType::JustTalk:
+		DialogueState = EInteractType::JustTalk;
+		break;
+	case EInteractType::Quest:
+		SetQuestList();
+		break;
+	case EInteractType::LikeAbility:
+		break;
+	case EInteractType::Revert:
+		RevertDialogue();
+		break;
+	case EInteractType::Quit:
+		OnQuitDialogue.Execute();
+		break;
+	default:
+		break;
 	}
+}
 
+void UCPP_DialogueSystem::SelectedAnswer(const FName& rowName)
+{
+	DatatableRowName = rowName;
+	bActivateAnswerBox = false;
+	PrintDialogue();
+}
 
-	if(index == InProgressQuests.Num()-1)
-		return FQuest();
+void UCPP_DialogueSystem::SelectedQuest(const FQuest& quest)
+{
+	bSelectedQuest = true;
 
-	//진행도 확인
-	EQuestType type = correspondQuest.QusetType;
+	EQuestState questState = quest.QuestState;
+	DatatableRowName = quest.QuestID;
 
-	switch (type)
+	switch (questState)
 	{
-	case EQuestType::EQT_GetItem:
-		CheckProgressGetItmeType(correspondQuest, amount, index);
+	case EQuestState::EQS_Normal:
+		DatatableRowName = quest.QuestID;
 		break;
-	case EQuestType::EQT_GoToNPC:
+	case EQuestState::EQS_InProgress:
+		DatatableRowName = GetQuestDialogueStruct().QuestProgressRow;
 		break;
-	case EQuestType::EQT_GoToSpace:
+	case EQuestState::EQS_ConditionClear:
+		DatatableRowName = GetQuestDialogueStruct().QuestClearRow;
 		break;
-	case EQuestType::EQT_ComBat:
-		
+	case EQuestState::EQS_Clear:
 		break;
 	default:
 		break;
 	}
 
-	return correspondQuest;
+	PrintDialogue();
 }
 
-TArray<FQuest> UCPP_DialogueSystem::GetQusetList(const FName& npcID)
+void UCPP_DialogueSystem::RevertDialogue()
 {
-	TArray<FQuest> qusetlists;
+	InitDialogue(DialogueOwnerName);
+}
 
-	FNPCQuests* qusets = QuestDataTable->FindRow<FNPCQuests>(npcID,"");
+void UCPP_DialogueSystem::SetQuestList()
+{
+	DialogueState = EInteractType::Quest;
+	//PlayerController->ActivateDialogueSubBox(true);->ui 내에서
+	//PlayerController->SetQuest(DialogueOwnerName);
+}
 
-	if (qusets == nullptr)
-		return TArray<FQuest>();
+void UCPP_DialogueSystem::PrintDialogueNormal()
+{
+}
 
-	for (FQuest quest : qusets->Quests)
+void UCPP_DialogueSystem::PrintDialogueJustTalk()
+{
+	if (bTalkEnd)
 	{
-		if (CheckClear(quest.QuestID))
-			continue;
-
-		//선행퀘스트 완료 유무
-		if (!quest.PrevQuestID.IsNone() && CheckClear(quest.PrevQuestID))
-		{
-			qusetlists.Add(CheckProgress(quest.QuestID));
-			continue;
-		}
-
-		FQuest progressQuest = CheckProgress(quest.QuestID);
-
-		if (progressQuest.QuestID.IsNone())
-		{
-			qusetlists.Add(quest);
-		}
-		else
-		{
-			qusetlists.Add(progressQuest);
-		}
+		RevertDialogue();
 	}
-
-
-	return qusetlists;
-}
-
-FTalkDialogue UCPP_DialogueSystem::GetTalkStruct(const FName& npcID)
-{
-	return *TalkDataTable->FindRow<FTalkDialogue>(npcID, "");
-}
-
-FTalkDialogue UCPP_DialogueSystem::GetQuestDialogueStruct(const FName& npcID)
-{
-	return *QuestDialogueDataTable->FindRow<FTalkDialogue>(npcID, "");
-}
-
-TArray<FQuest> UCPP_DialogueSystem::GetProgrssQusetsOfPlayer()
-{
-	return InProgressQuests;
-}
-
-FQuest UCPP_DialogueSystem::GetQuestInfo(const FName& npcID, FName questID)
-{
-	TArray<FQuest> quests = GetQusetList(npcID);
-	int32 questIndex = CastQuestIndex(questID);
-
-	if (quests.IsValidIndex(questIndex))
+	else
 	{
-		FQuest progress = CheckProgress(quests[questIndex].QuestID);
-		if (!progress.QuestID.IsNone())
+		//PlayerController->ActivateDialogueSubBox(true);->ui 내에서
+		FTalkDialogue talk = GetTalkStruct();
+		UpdateDialogueText.Execute(talk.Dialogue);
+
+		if (talk.Answers.Num() > 0)
 		{
-			return progress;
+			CreateAnswerBox.Execute(talk.Answers);
+			bActivateAnswerBox = true;
 		}
 		else
 		{
-			return quests[questIndex];
+			DatatableRowName = talk.NextRow;
+			bTalkEnd = talk.EndDialogue;
 		}
 	}
-
-	return FQuest();
 }
 
-FQuest UCPP_DialogueSystem::CheckProgress(const FName& questID)
+void UCPP_DialogueSystem::PrintDialogueQuest()
 {
-	for (FQuest progress : InProgressQuests)
+	if (bTalkEnd && !bSelectedQuest)
 	{
-		if (progress.QuestID == questID)
+		RevertDialogue();
+	}
+	else
+	{
+		FTalkDialogue quest = GetQuestDialogueStruct();
+		UpdateDialogueText.Execute(quest.Dialogue);
+
+		if (quest.Answers.Num() > 0)
 		{
-			return progress;
+			CreateAnswerBox.Execute(quest.Answers);
+			bActivateAnswerBox = true;
+		}
+		else
+		{
+			DatatableRowName = quest.NextRow;
+			bTalkEnd = quest.EndDialogue;
 		}
 	}
-
-	return FQuest();
 }
 
-bool UCPP_DialogueSystem::CheckClear(const FName& questID)
-{
-	for (FName id : ClearQuests)
-	{
-		if(id == questID)
-			return true;
-	}
-	return false;
-}
-
-int32 UCPP_DialogueSystem::CastQuestIndex(FName questID)
-{
-	FString rowNameToString = questID.ToString();
-
-	int32 index = UKismetStringLibrary::FindSubstring(rowNameToString, "N");
-
-	FString questIndex = UKismetStringLibrary::GetSubstring(rowNameToString, 0, index);
-
-	return FCString::Atoi(*questIndex);
-}
-
-void UCPP_DialogueSystem::CheckProgressGetItmeType(FQuest& quest, const int32 amount, const int32 index)
-{
-	if (quest.NeedCount == amount)
-	{
-		InProgressQuests[index].QusetState = EQuestState::EQS_ConditionClear;
-		quest = InProgressQuests[index];
-	}
-}
-
-void UCPP_DialogueSystem::CheckProgressGoToNPCType(FQuest& quest, const FName& npcID, const int32 index)
-{
-	if (quest.NeedObjectID == npcID)
-	{
-		InProgressQuests[index].QusetState = EQuestState::EQS_ConditionClear;
-		quest = InProgressQuests[index];
-	}
-}
-
-void UCPP_DialogueSystem::CheckProgressGoToSpaceType()
+void UCPP_DialogueSystem::PrintDialogueLikeAbility()
 {
 }
 
-void UCPP_DialogueSystem::CheckProgressComBatType()
+void UCPP_DialogueSystem::PrintDialogueQuit()
 {
+}
+
+FTalkDialogue UCPP_DialogueSystem::GetTalkStruct()
+{
+	return *TalkDataTable->FindRow<FTalkDialogue>(DatatableRowName, "");
+}
+
+FTalkDialogue UCPP_DialogueSystem::GetQuestDialogueStruct()
+{
+	return *QuestDialogueDataTable->FindRow<FTalkDialogue>(DatatableRowName, "");
+}
+
+FNPCDialogue UCPP_DialogueSystem::GetNPCStruct()
+{
+	return *NPCDataTable->FindRow<FNPCDialogue>(DialogueOwnerName, "");
 }

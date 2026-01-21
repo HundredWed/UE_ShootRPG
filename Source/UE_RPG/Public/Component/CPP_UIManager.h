@@ -26,20 +26,18 @@ public:
 	UCPP_UIManager();
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetMainWidget(EWidgetType widgetType);
-
-	void SetDialogueWidget();
-	void SetAnswerBox(TArray<FAnswerDialogue> answers);
-
-	void UpdateDialogueText(const FText& text);
+	void SetMainWidget(EWidgetType type);
 
 protected:
 	virtual void BeginPlay() override;
 
 private:	
 
+	void HideCurrentWidget();
+	void SwitchToPlayerWidget();
+
 	void SetMainWidgetToPlayer();
-	void SetMainWidgetToDialogue(const FNPCDialogue& npcDialogue);
+	void SetMainWidgetToDialogue();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	TMap<EWidgetType, TSubclassOf<UUserWidget>> WidgetClasses;
@@ -50,4 +48,9 @@ private:
 	ACPP_Controller* PlayerController;
 
 	EWidgetType CurrentWidgetType = EWidgetType::Player;
+
+	TObjectPtr<UUserWidget> CurrentWidget;
+	
+
+
 };
