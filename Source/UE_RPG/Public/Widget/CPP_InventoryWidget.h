@@ -57,13 +57,13 @@ public:
 public:	
 
 	UFUNCTION()
-		void GenerateSlotWidget(const int16 slotsParRow);
+	void GenerateSlotWidget(const int16 slotsParRow);
 
 	UFUNCTION()
-		void CloseWidget();
+	void CloseWidget();
 
 	UFUNCTION()
-		void SortInventory();
+	void SortInventory();
 
 	void SetPanelEnabled(bool enabled);
 	void SetSpliteWidget(const class UCPP_Slot* fromSlot,const class UCPP_Slot* toSlot);

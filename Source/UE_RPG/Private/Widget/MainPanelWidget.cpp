@@ -15,30 +15,20 @@
 void UMainPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	if (IsValid(PlayerRef))
-	{
-		if (IsValid(InventoryWidget))
-		{
-			InventoryWidget->GenerateSlotWidget(PlayerRef->GetInventoryRowSize());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("not Found InventoryWidget at MainPanel!!"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("not Found PlayerRef at MainPanel!!"));
-	}
 }
 
-void UMainPanelWidget::InitState(const int32 level, const float healt, const float maxHP, const float mana, const float stamina)
+void UMainPanelWidget::BindCharacterStat(ACPP_Character* player)
+{
+	player->OnUpdatePlayerState.BindUObject(this, &UMainPanelWidget::InitState);
+	player->OnUpdateHP.BindUObject(this, &UMainPanelWidget::UpdateHealthBarPercent);
+}
+
+void UMainPanelWidget::InitState(const FCharacterStats& stat)
 {
 	if (!IsValid(StateWidget))
 		return;
 
-	StateWidget->InitStateBar(level, healt, maxHP, mana, stamina);
+	StateWidget->InitStateBar(stat);
 }
 
 void UMainPanelWidget::UpdateHealthBarPercent(const float currentHp, const float max)

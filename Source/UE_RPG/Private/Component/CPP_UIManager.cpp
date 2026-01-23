@@ -29,6 +29,25 @@ void UCPP_UIManager::SetMainWidget(EWidgetType type)
 	}
 }
 
+void UCPP_UIManager::RegisterPlayerCharacterToWidget(ACPP_Character* player)
+{
+	if (TObjectPtr<UUserWidget>* wd = Widgets.Find(EWidgetType::Player))
+	{
+		UMainPanelWidget* playerWG = Cast<UMainPanelWidget>((*wd));
+		playerWG->BindCharacterStat(player);
+	}
+}
+
+UCPP_InventoryWidget* UCPP_UIManager::GetInventoryWidget()
+{
+	if (TObjectPtr<UUserWidget>* wd = Widgets.Find(EWidgetType::Player))
+	{
+		UMainPanelWidget* playerWG = Cast<UMainPanelWidget>((*wd));
+		return playerWG->GetInventoryWidget();
+	}
+	return nullptr;
+}
+
 void UCPP_UIManager::HideCurrentWidget()
 {
 	if (CurrentWidget)
@@ -48,11 +67,6 @@ void UCPP_UIManager::SetMainWidgetToPlayer()
 	{
 		UMainPanelWidget* playerWG = Cast<UMainPanelWidget>((*wd));
 		playerWG->SetVisibility(ESlateVisibility::Visible);
-		//playerWG->UpdatePlayerInfo();
-
-		ACPP_Character* player = Cast<ACPP_Character>(PlayerController->GetLocalPlayer());
-		//해당 구간 리펙토링 필요
-		playerWG->InitState(player->GetPlayerLevel(), player->GetPlayerHealth(), player->GetPlayerMaxHealth(), player->GetPlayerMaxMana(), player->GetPlayerStamina());
 
 		CurrentWidgetType = EWidgetType::Player;
 		CurrentWidget = (*wd);

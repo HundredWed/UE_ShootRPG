@@ -15,7 +15,6 @@
 #include "Item/Weapon/CPP_WeaponBase.h"
 #include "Item/PickUpItem.h"
 #include "Camera/CameraManager.h"
-#include "Widget/MainPanelWidget.h"
 #include "Widget/NPC/CPP_DamageActor.h"
 #include "Inventory.h"
 #include "Item/Weapon/CPP_WeaponManager.h"
@@ -63,17 +62,15 @@ void ACPP_Character::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CurrentHealth = MaxHealth;
-	CurrentMana = MaxMana;
-	CurrentStamina = MaxStamina;
+	CharacterStats.Initialize();
 
-	/*if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	if (OnUpdatePlayerState.IsBound())
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}*/
+		OnUpdatePlayerState.Execute(CharacterStats);
+	}
+
+	//위젯
+	HideGameInventory();
 
 	if (IsValid(CameraManager))
 	{
@@ -93,28 +90,6 @@ void ACPP_Character::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Graver component not found!!"));
 	}
 
-	if (IsValid(MainPanelclass))
-	{
-		MainPanelWidget = CreateWidget<UMainPanelWidget>(GetWorld(), MainPanelclass);
-
-		if (IsValid(MainPanelWidget))
-		{
-			MainPanelWidget->AddToViewport();
-			MainPanelWidget->InitState(Level, CurrentHealth, MaxHealth, MaxMana, CurrentStamina);
-		}
-	}
-
-	GameInventory = FindComponentByClass<UInventory>();
-	if (IsValid(GameInventory))
-	{
-		GameInventory->InventoryWidget = MainPanelWidget->GetInventoryWidget();
-		HideGameInventory();
-		UE_LOG(LogTemp, Display, TEXT("Found Inventory! "));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Inventory component not found!!"));
-	}
 
 	/**ignore from item trace*/
 	Params.AddIgnoredActor(this);
@@ -124,7 +99,7 @@ void ACPP_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	SreachItem();
+	SearchItem();
 
 	SetMouseRate();
 	CalculateCrosshairSpread(DeltaTime);
@@ -169,7 +144,7 @@ float ACPP_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	return DamageAmount;
 }
 
-void ACPP_Character::SreachItem()
+void ACPP_Character::SearchItem()
 {
 	if (bCanSearchObject)
 	{
@@ -187,7 +162,7 @@ void ACPP_Character::ObjectSearchTrace()
 {
 	FHitResult HitResult;
 
-	bool OnHit = SetShpereTrace(HitResult);
+	bool OnHit = SetSphereTrace(HitResult);
 
 	if (OnHit)
 	{
@@ -221,7 +196,7 @@ void ACPP_Character::ObjectSearchTrace()
 	}
 }
 
-bool ACPP_Character::SetShpereTrace(FHitResult& HitResult)
+bool ACPP_Character::SetSphereTrace(FHitResult& HitResult)
 {
 	FVector Location;
 	FRotator Rotation;
@@ -296,7 +271,7 @@ void ACPP_Character::SetSpeed(const FInputActionValue& Value)
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = MoveDelfaultSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = MoveDefaultSpeed;
 		bShiftDown = false;
 		//UE_LOG(LogTemp, Display, TEXT("walk"));
 	}
@@ -391,17 +366,17 @@ void ACPP_Character::Aiming(const FInputActionValue& Value)
 		
 		if (CharacterState == ECharacterStateTypes::Aim)
 		{
-			CharacterState = ECharacterStateTypes::Equiped;
+			CharacterState = ECharacterStateTypes::Equipped;
 		}
 		
 		SetMovementRotate(true, DefaultMRR);
 		if (GetCharacterMovement()->IsCrouching())
 		{
-			GetCharacterMovement()->MaxWalkSpeedCrouched = MoveDelfaultSpeed_Crouch;
+			GetCharacterMovement()->MaxWalkSpeedCrouched = MoveDefaultSpeed_Crouch;
 		}
 		else
 		{
-			GetCharacterMovement()->MaxWalkSpeed = MoveDelfaultSpeed;
+			GetCharacterMovement()->MaxWalkSpeed = MoveDefaultSpeed;
 		}
 	}
 }
@@ -423,12 +398,12 @@ void ACPP_Character::SetCrouch(const FInputActionValue& Value)
 
 void ACPP_Character::Dodge(const FInputActionValue& Value)
 {
-	if (ActionState != ECharacterActionState::SuperAction && CurrentStamina >= 10)
+	if (ActionState != ECharacterActionState::SuperAction && CharacterStats.CurrentStamina >= 10)
 	{
 		bMoving = false;//블프 애니메이션
 		LookAt();
 		PlayMontage(DodgeMontage);
-		CurrentStamina -= 10;
+		CharacterStats.CurrentStamina -= 10;
 		ActionState = ECharacterActionState::SuperAction;
 	}
 }
@@ -605,20 +580,20 @@ void ACPP_Character::RemoveHitResultObject()
 void ACPP_Character::SetStateEquipped()
 {
 	ActionState = ECharacterActionState::Action;
-	CharacterState = ECharacterStateTypes::Equiped;
+	CharacterState = ECharacterStateTypes::Equipped;
 
 	PlayEquipMontage("Equip");
 	SmoothSpringArmOffset(SpringArmSocketOffsetYValue);
 
 	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
 	playercontroller->SetHUDVisibility(true);
-	UE_LOG(LogTemp, Display, TEXT("Equiped"));
+	UE_LOG(LogTemp, Display, TEXT("Equipped"));
 }
 
 void ACPP_Character::SetStateUnEquipped()
 {
 	ActionState = ECharacterActionState::Action;
-	CharacterState = ECharacterStateTypes::UnEquiped;
+	CharacterState = ECharacterStateTypes::UnEquipped;
 
 	PlayEquipMontage("UnEquip");
 	SmoothSpringArmOffset(0);
@@ -626,7 +601,7 @@ void ACPP_Character::SetStateUnEquipped()
 
 	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
 	playercontroller->SetHUDVisibility(false);
-	UE_LOG(LogTemp, Display, TEXT("UnEquiped"));
+	UE_LOG(LogTemp, Display, TEXT("UnEquipped"));
 }
 
 void ACPP_Character::SetEquipWeapon(UItem* item)
@@ -634,7 +609,7 @@ void ACPP_Character::SetEquipWeapon(UItem* item)
 	WeaponManager->EquipWeapon(item->ItemInfoTable.ItemInfoID, item->ItemInfoTable.WeaponActor);
 
 	GameInventory->UpdateEquipmentInventory(item);
-	CharacterState = ECharacterStateTypes::UnEquiped;
+	CharacterState = ECharacterStateTypes::UnEquipped;
 }
 
 void ACPP_Character::TakeOffWeapon()
@@ -645,28 +620,28 @@ void ACPP_Character::TakeOffWeapon()
 
 bool ACPP_Character::CanAttackState()
 {
-	return (CharacterState == ECharacterStateTypes::Equiped || CharacterState == ECharacterStateTypes::Aim)
+	return (CharacterState == ECharacterStateTypes::Equipped || CharacterState == ECharacterStateTypes::Aim)
 		&& ActionState == ECharacterActionState::Normal
 		&& PressFireKey;
 }
 
 bool ACPP_Character::CanEquipState()
 {
-	return CharacterState == ECharacterStateTypes::UnEquiped 
+	return CharacterState == ECharacterStateTypes::UnEquipped 
 		&& !GetCharacterMovement()->IsFalling() 
 		&& ActionState == ECharacterActionState::Normal;
 }
 
 bool ACPP_Character::CanUnEquipState()
 {
-	return (CharacterState == ECharacterStateTypes::Equiped)
+	return (CharacterState == ECharacterStateTypes::Equipped)
 		&& !GetCharacterMovement()->IsFalling()
 		&& ActionState == ECharacterActionState::Normal;
 }
 
 bool ACPP_Character::IsUnderArm()
 {
-	return (CharacterState == ECharacterStateTypes::Equiped) || (CharacterState == ECharacterStateTypes::Aim);
+	return (CharacterState == ECharacterStateTypes::Equipped) || (CharacterState == ECharacterStateTypes::Aim);
 }
 
 void ACPP_Character::PlayEquipMontage(FName NotifyName)
@@ -732,11 +707,11 @@ void ACPP_Character::SetMouseRate()
 {
 	if (bAiming)
 	{
-		MouseRate = ClampRnage(AimingMouseRate);
+		MouseRate = ClampRange(AimingMouseRate);
 	}
 	else
 	{
-		MouseRate = ClampRnage(HipMouseRate);
+		MouseRate = ClampRange(HipMouseRate);
 	}
 }
 
@@ -782,15 +757,29 @@ void ACPP_Character::SetHitResultObject(APickUpItem* hitresultobject)
 	HitResultObject = hitresultobject;
 }
 
+void ACPP_Character::IncreasePlayerHP(const float value)
+{
+	CharacterStats.IncreaseHP(value);
+
+	if (OnUpdateHP.IsBound())
+	{
+		OnUpdateHP.Execute(CharacterStats.CurrentHealth, CharacterStats.MaxHealth);
+	}
+}
+
 void ACPP_Character::DecreasePlayerHP(const float value)
 {
-	CurrentHealth -= value;
-	CurrentHealth = CurrentHealth < 0 ? 0 : CurrentHealth;
+	float hp = CharacterStats.DecreaseHP(value);
 
-	MainPanelWidget->UpdateHealthBarPercent(CurrentHealth, MaxHealth);
-
-	if (CurrentHealth <= 0)
+	if (OnUpdateHP.IsBound())
+	{
+		OnUpdateHP.Execute(CharacterStats.CurrentHealth, CharacterStats.MaxHealth);
+	}
+	
+	if (hp <= 0)
+	{
 		CharacterState = ECharacterStateTypes::Death;
+	}		
 }
 
 void ACPP_Character::HideGameInventory()
@@ -824,12 +813,6 @@ void ACPP_Character::ShowGameInventory()
 void ACPP_Character::SetFireRate(float rate)
 {
 	FireRate = rate;
-}
-
-void ACPP_Character::SpawnWeaponBase()
-{
-	//FString path = TEXT("/Script/Engine.DataTable'/Game/ShootGame/Data/DT_ItemTable.DT_ItemTable'");
-	//UDataTable* dataTable = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *path));
 }
 
 void ACPP_Character::StoreDamageUI()
@@ -870,7 +853,7 @@ void ACPP_Character::EndInteract()
 {
 }
 
-float ACPP_Character::ClampRnage(float value)
+float ACPP_Character::ClampRange(float value)
 {
 	FVector2D Input(0.f, 100.f);
 	FVector2D Output(0.f, 1.f);

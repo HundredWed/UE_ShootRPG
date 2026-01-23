@@ -9,6 +9,8 @@
 #include "CPP_UIManager.generated.h"
 
 class ACPP_Controller;
+class ACPP_Character;
+class UCPP_InventoryWidget;
 
 UENUM()
 enum class EWidgetType : uint8
@@ -27,6 +29,10 @@ public:
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void SetMainWidget(EWidgetType type);
+	void RegisterPlayerCharacterToWidget(ACPP_Character* player);
+
+	//임시 리펙토링 필수
+	UCPP_InventoryWidget* GetInventoryWidget();
 
 protected:
 	virtual void BeginPlay() override;
@@ -42,7 +48,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	TMap<EWidgetType, TSubclassOf<UUserWidget>> WidgetClasses;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	UPROPERTY()
 	TMap<EWidgetType, TObjectPtr<UUserWidget>> Widgets;
 
 	ACPP_Controller* PlayerController;

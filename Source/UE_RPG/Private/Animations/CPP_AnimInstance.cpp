@@ -41,7 +41,7 @@ void UCPP_AnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 void UCPP_AnimInstance::TurnInplace()
 {
-	if (GroundSpeed > 0 || CharacterState == ECharacterStateTypes::UnEquiped)
+	if (GroundSpeed > 0 || CharacterState == ECharacterStateTypes::UnEquipped)
 	{
 		SetCurrentRotate();
 	}

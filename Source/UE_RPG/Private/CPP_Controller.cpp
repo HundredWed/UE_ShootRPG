@@ -9,6 +9,7 @@
 #include "Component/CPP_UIManager.h"
 #include "Systems/CPP_QuestSubsystem.h"
 #include "Systems/CPP_DialogueSystem.h"
+#include "CPP_Character.h"
 
 ACPP_Controller::ACPP_Controller()
 {
@@ -23,6 +24,18 @@ void ACPP_Controller::BeginPlay()
 	CrosshairHUD->bShowHUD = false;
 
     ChangeInteractionState(EPlayerIputMappingState::Default);
+
+    UpdatePlayerWidget();
+}
+
+void ACPP_Controller::UpdatePlayerWidget()
+{
+    ACPP_Character* player = Cast<ACPP_Character>(GetPawn());
+
+    if (UIManager && player)
+    {
+        UIManager->RegisterPlayerCharacterToWidget(player);
+    }
 }
 
 void ACPP_Controller::ChangeInteractionState(EPlayerIputMappingState newState)
@@ -88,3 +101,10 @@ void ACPP_Controller::SetHUDVisibility(bool bshowHUD)
 		CrosshairHUD->bShowHUD = bshowHUD;
 	}
 }
+
+UCPP_InventoryWidget* ACPP_Controller::GetInventoryWidget()
+{
+    return UIManager->GetInventoryWidget();
+}
+
+

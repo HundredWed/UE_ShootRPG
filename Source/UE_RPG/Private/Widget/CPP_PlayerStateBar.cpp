@@ -7,11 +7,11 @@
 
 #define MAX 1
 
-void UCPP_PlayerStateBar::InitStateBar(const int32 level, const float healt, const float maxHP, const float mana, const float stamina)
+void UCPP_PlayerStateBar::InitStateBar(const FCharacterStats& stat)
 {
-	UpdateLevel(level);
-	UpdateHealthBarPercent(healt, maxHP);
-	UpdateManaBarPercent(mana);
+	UpdateLevel(stat.Level);
+	UpdateHealthBarPercent(stat.CurrentHealth, stat.MaxHealth);
+	UpdateManaBarPercent(stat.CurrentMana);
 
 	if (IsValid(BackGroundBar))
 	{

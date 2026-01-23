@@ -17,8 +17,6 @@
 void UCPP_InventoryWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	UpdateWeightMaxAmount(InventoryRef->MaxWeight);
-	UpdateWeightText(0);
 
 	CloseButton->OnClicked.AddDynamic(this, &UCPP_InventoryWidget::CloseWidget);
 	SortButton->OnClicked.AddDynamic(this, &UCPP_InventoryWidget::SortInventory);

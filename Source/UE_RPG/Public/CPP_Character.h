@@ -8,6 +8,10 @@
 #include "Interface/CPP_InteractInterface.h"
 #include "CPP_Character.generated.h"
 
+DECLARE_DELEGATE_OneParam(FOnUpdatePlayerStateDelegate, const FCharacterStats&);
+DECLARE_DELEGATE_TwoParams(FOnUpdateHPDelegate, const float, const float);
+DECLARE_DELEGATE_OneParam(FOnUpdateManaDelegate, const float);
+DECLARE_DELEGATE_OneParam(FOnUpdateStaminaDelegate, const float);
 
 UCLASS()
 class UE_RPG_API ACPP_Character : public ACharacter, public ICPP_InteractInterface
@@ -108,9 +112,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	void SreachItem();
+	void SearchItem();
 	void ObjectSearchTrace();
-	bool SetShpereTrace(FHitResult& HitResult);
+	bool SetSphereTrace(FHitResult& HitResult);
 
 	/**Input*/
 	void Move(const FInputActionValue& Value);
@@ -154,7 +158,6 @@ public:
 	bool CanUnEquipState();
 	bool IsUnderArm();
 	void SetFireRate(float rate);
-	void SpawnWeaponBase();
 
 	/**Montage*/
 	void PlayEquipMontage(FName NotifyName);
@@ -184,21 +187,18 @@ public:
 	FORCEINLINE void SetHitResultObject(class APickUpItem* hitresultobject);
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
-	FORCEINLINE int32 GetPlayerATK() { return PlayerATK; }
+	FORCEINLINE int32 GetPlayerATK() { return CharacterStats.PlayerATK; }
 	FORCEINLINE bool GetPlayerMoveState() { return bMoving; }
 
-	FORCEINLINE int32 GetPlayerLevel() { return Level; }
-	FORCEINLINE float GetPlayerHealth() { return CurrentHealth; }
-	FORCEINLINE float GetPlayerMaxHealth() { return MaxHealth; }
-	FORCEINLINE float GetPlayerMana() { return CurrentMana; }
-	FORCEINLINE float GetPlayerMaxMana() { return MaxMana; }
-	FORCEINLINE float GetPlayerStamina() { return CurrentStamina; }
-	FORCEINLINE float GetPlayerMaxStamina() { return MaxStamina; }
+	FORCEINLINE int32 GetPlayerLevel() { return CharacterStats.Level; }
+	FORCEINLINE float GetPlayerHealth() { return CharacterStats.CurrentHealth; }
+	FORCEINLINE float GetPlayerMaxHealth() { return CharacterStats.MaxHealth; }
+	FORCEINLINE float GetPlayerMana() { return CharacterStats.CurrentMana; }
+	FORCEINLINE float GetPlayerMaxMana() { return CharacterStats.MaxMana; }
+	FORCEINLINE float GetPlayerStamina() { return CharacterStats.CurrentStamina; }
+	FORCEINLINE float GetPlayerMaxStamina() { return CharacterStats.MaxStamina; }
 
-	FORCEINLINE void IncreasePlayerHP(const float value) { 
-		CurrentHealth += value;
-		CurrentHealth = CurrentHealth > MaxHealth ? MaxHealth : CurrentHealth;
-	}
+	void IncreasePlayerHP(const float value);
 	void DecreasePlayerHP(const float value);
 
 	
@@ -221,9 +221,17 @@ public:
 	/**interface*/
 	virtual void EndInteract() override;
 
+
+	FOnUpdatePlayerStateDelegate OnUpdatePlayerState;
+	FOnUpdateHPDelegate OnUpdateHP;
+	FOnUpdateManaDelegate OnOnUpdateMana;
+	FOnUpdateStaminaDelegate OnUpdateStamina;
+
 private:
 
-	float ClampRnage(float value);
+	float ClampRange(float value);
+
+private:
 
 	/**character states*/
 	ECharacterStateTypes CharacterState = ECharacterStateTypes::Normal;
@@ -234,14 +242,9 @@ private:
 	bool bTrigger = true;
 	bool bMoving = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
-	float MaxHealth = 100;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
-	float MaxMana = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
-	float MaxStamina = 150;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states",  meta = (AllowPrivateAccess = "true"))
-	float PlayerATK = 0;
+	FCharacterStats CharacterStats;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
 	float FireRate = 0.3f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
@@ -251,14 +254,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
 	float FocusingMRR = 3000.f;//MovementRotationRate
 
-	int32 Level = 1;
-	float CurrentHealth = 0;
-	float CurrentMana = 0;
-	float CurrentStamina = 0;
-	float MoveDelfaultSpeed = 400.f;
+	float MoveDefaultSpeed = 400.f;
 	float MoveRunSpeed = 600.f;
 	float MoveAimingSpeed = 320.f;
-	float MoveDelfaultSpeed_Crouch = 250.f;
+	float MoveDefaultSpeed_Crouch = 250.f;
 	float MoveAimingSpeed_Crouch = 200.f;
 	FTimerHandle TimerHandle;
 

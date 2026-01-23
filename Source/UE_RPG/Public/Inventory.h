@@ -76,12 +76,12 @@ public:
 
 	/**split when drag slot*/
 	void SplitStackToIndex(const int16 fromIndex, const int16 toIndex, const int32 splitAmount);
-	bool CanSplitStakable(const int16 fromIndex, const int16 toIndex, const int32 splitAmount);
+	bool CanSplitStackable(const int16 fromIndex, const int16 toIndex, const int32 splitAmount);
 
 	/**FindCombinableSlot function*/
 	int16 FindCombinableSlot(const int16 slot);
-	bool CompaireID(const int16 slot1, const int16 slot2);
-    void ClearConectArray();
+	bool CompareID(const int16 slot1, const int16 slot2);
+    void ClearConnectArray();
 	void CombineItem(const int16 index);
 	bool SetLinkSlot(const int16 slot, const int16 newdir);
 	bool IsLineChange(const int16 slot);
@@ -90,7 +90,7 @@ public:
 	
 	void InventorySort(int16 left, int16 right);
 	int16 Partition(int16 left, int16 right);
-	uint8 GetCompaireValue(int16 index);
+	uint8 GetCompareValue(int16 index);
 
 	/**inventory widget function (FORCEINLINE) */
 	FORCEINLINE void ShowInventory() {
@@ -127,13 +127,13 @@ private:
 
 	/**inventory value*/
 	uint8 MaxStackSize = 99;
-	int16 InvetoryRow = 0;
-	float CurrnetWeight = 0.0f;
+	int16 InventoryRow = 0;
+	float CurrentWeight = 0.0f;
 	int32 CurrentGold = 0;
 
 	UPROPERTY()
 		TMap<FName, AActor*> ItemManageSystem;
 
 	/**for FindCombinableSlot function*/
-	TArray<bool> isConect;
+	TArray<bool> IsConnected;
 };

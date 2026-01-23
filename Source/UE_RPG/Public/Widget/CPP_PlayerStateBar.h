@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widget/CustomUMGWidget.h"
 #include "UE_RPG/UtilityMecro.h"
+#include "CharacterStates.h"
 #include "CPP_PlayerStateBar.generated.h"
 
 /**
@@ -33,7 +34,7 @@ public:
 		class UProgressBar* PlayerMana;
 
 	
-	void InitStateBar(const int32 level, const float healt, const float max, const float mana, const float stamina);
+	void InitStateBar(const FCharacterStats& stat);
 	void UpdateHealthBarPercent(const float currentHp, const float max);
 	void UpdateManaBarPercent(const float percent);
 	//void SetStaminaBarPercent(float Percent);

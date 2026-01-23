@@ -21,6 +21,7 @@ class UCPP_DialogueManager;
 class UCPP_UIManager;
 class UCPP_QuestMananger;
 class UMainPanelWidget;
+class UCPP_InventoryWidget;
 
 UCLASS()
 class UE_RPG_API ACPP_Controller : public APlayerController
@@ -31,7 +32,7 @@ public:
 	ACPP_Controller();
 
 	virtual void BeginPlay() override;
-
+	
 	void ChangeInteractionState(EPlayerIputMappingState newState);
 
 	void NPCInteract(const FName& npcID);
@@ -49,6 +50,13 @@ public:
 		bShowMouseCursor = false;
 	}
 
+	//임시. 리펙토링 필수
+	UCPP_InventoryWidget* GetInventoryWidget(); 
+
+private:
+
+	void UpdatePlayerWidget();
+
 private:
 
 	/*UPROPERTY(EditDefaultsOnly, Category = "Config")
@@ -57,7 +65,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	TMap<EPlayerIputMappingState, UInputMappingContext*> InputMappingContexts;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Category = "Config", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCPP_UIManager> UIManager;
 
 	EPlayerIputMappingState CurrentInteractionState = EPlayerIputMappingState::Default;

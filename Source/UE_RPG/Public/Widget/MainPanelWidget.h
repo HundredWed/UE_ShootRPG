@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Widget/CustomUMGWidget.h"
+#include "CharacterStates.h"
 #include "MainPanelWidget.generated.h"
 
 class ACPP_Character;
+class UCPP_PlayerStateBar;
 
 UCLASS()
 class UE_RPG_API UMainPanelWidget : public UCustomUMGWidget
@@ -30,12 +32,18 @@ public:
 	FORCEINLINE UCPP_PlayerStateBar* GetStateWidget() { return StateWidget; }
 
 	/**StateWidget*/
-	void InitState(const int32 level, const float healt, const float maxHP, const float mana, const float stamina);
-	void UpdateHealthBarPercent(const float currentHp, const float max);
-	void UpdateManaBarPercent(const float percent);
+	void BindCharacterStat(ACPP_Character* player);
+
+	void InitState(const FCharacterStats& stat);
+	
+
 	//void SetStaminaBarPercent(float Percent);
 	void UpdateLevel(int32 level);
 
 protected:
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override ;
+
+private:
+	void UpdateHealthBarPercent(const float currentHp, const float max);
+	void UpdateManaBarPercent(const float percent);
 };

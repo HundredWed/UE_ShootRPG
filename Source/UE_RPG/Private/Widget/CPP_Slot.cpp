@@ -298,7 +298,7 @@ void UCPP_Slot::SearchCombinableSlot()
 			InventoryRef->InventoryWidget->SlotWidgetArray[CombinableSlot]->ActiveCombinableSlot();
 		}
 
-		InventoryRef->ClearConectArray();
+		InventoryRef->ClearConnectArray();
 	}
 }
 
