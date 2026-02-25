@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "NPC/HitEventInterface.h"
+#include "Interface/CPP_InteractInterface.h"
 #include "UE_RPG/UtilityMecro.h"
 #include "CharacterStates.h"
 #include "NonPlayerCharacterBase.generated.h"
 
 UCLASS()
-class UE_RPG_API ANonPlayerCharacterBase : public ACharacter
+class UE_RPG_API ANonPlayerCharacterBase : public ACharacter, public ICPP_InteractInterface
 {
 	GENERATED_BODY()
 
@@ -42,6 +42,8 @@ public:
 	FORCEINLINE ENPCState GetNPCState() { return NPCState; }
 	//FORCEINLINE ECharacterTypes GetCharacterTypes() { return CharaterType; }
 	virtual	void UpdateState() {};
+	virtual void RequestInteract(AActor* interactor) override;
+
 protected:
 	
 	/**states*/
@@ -114,5 +116,6 @@ protected:
 
 private:
 
-
+	UPROPERTY(EditDefaultsOnly, Category = "NPC Info", meta = (AllowPrivateAccess = "true"))
+	FName NPCID;
 };

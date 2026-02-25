@@ -35,6 +35,14 @@ ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 	SidStepSpeed = 170.f;
 }
 
+void ANonPlayerCharacterBase::RequestInteract(AActor* interactor)
+{
+	if (ACPP_Character* character = Cast<ACPP_Character>(interactor))
+	{
+		character->SetDialogue(NPCID);
+	}
+}
+
 void ANonPlayerCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();

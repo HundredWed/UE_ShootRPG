@@ -4,25 +4,26 @@
 #include "GameFramework/Actor.h"
 #include "ItemData.h"
 #include "Engine/DataTable.h"
+#include "Interface/CPP_InteractInterface.h"
 #include "UE_RPG/UtilityMecro.h"
 #include "PickUpItem.generated.h"
 
+class ACPP_Character;
+
 UCLASS()
-class UE_RPG_API APickUpItem : public AActor
+class UE_RPG_API APickUpItem : public AActor, public ICPP_InteractInterface
 {
 	GENERATED_BODY()
 	
 public:	
 	APickUpItem();
-	
-	FORCEINLINE bool IsValidWidget() { return bValidWidget; }
-	FORCEINLINE class UWidgetComponent* GetWidgetComponent() { return ItemStateWidjet; }
-	FORCEINLINE	void SetItemInfoID(FName itemid) { ItemInfoID = itemid; }
-	FORCEINLINE	FName GetItemInfoID() {  return ItemInfoID; }
-	FORCEINLINE	class UItem* GetPickUpItemRef() { return ItemRef; }
-
 
 	void SetWidgetVisibility(bool Visible);
+	void InitializePickUpItem();
+
+	virtual void RequestInteract(AActor* interactor) override;
+	virtual void OnBeginLookAt() override;
+	virtual void OnEndLookAt() override;
 
 protected:
 
@@ -42,7 +43,7 @@ protected:
 		class USphereComponent* SphereComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item Widget")
-		class UWidgetComponent* ItemStateWidjet;
+		class UWidgetComponent* ItemStateWidget;
 
 	
 	/**item state*/
@@ -58,9 +59,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Item state")
 		UDataTable* ItemDataTable;
 
-	UPROPERTY()
-		class ACPP_Character* Player;
-
 
 	UFUNCTION()
 		virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
@@ -74,16 +72,5 @@ protected:
 		virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent,
 			AActor* OtherActor,
 			UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex);
-
-	bool bValidWidget = false;
-
-public:	
-	
-	void InitializePickUpItem();
-
-	UFUNCTION()
-		void TakePickUp(class ACPP_Character* taker);
-	
-
+			int32 OtherBodyIndex);	
 };

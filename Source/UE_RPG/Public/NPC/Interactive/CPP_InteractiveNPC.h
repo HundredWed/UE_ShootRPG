@@ -11,12 +11,11 @@
  * 
  */
 UCLASS()
-class UE_RPG_API ACPP_InteractiveNPC : public ANonPlayerCharacterBase , public ICPP_InteractInterface
+class UE_RPG_API ACPP_InteractiveNPC : public ANonPlayerCharacterBase
 {
 	GENERATED_BODY()
 
 public:
 
-	virtual void Interact(AActor* Interactor) override;
-	
+
 };

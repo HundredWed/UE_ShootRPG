@@ -8,13 +8,16 @@
 #include "Interface/CPP_InteractInterface.h"
 #include "CPP_Character.generated.h"
 
+class ANonPlayerCharacterBase;
+class UItem;
+
 DECLARE_DELEGATE_OneParam(FOnUpdatePlayerStateDelegate, const FCharacterStats&);
 DECLARE_DELEGATE_TwoParams(FOnUpdateHPDelegate, const float, const float);
 DECLARE_DELEGATE_OneParam(FOnUpdateManaDelegate, const float);
 DECLARE_DELEGATE_OneParam(FOnUpdateStaminaDelegate, const float);
 
 UCLASS()
-class UE_RPG_API ACPP_Character : public ACharacter, public ICPP_InteractInterface
+class UE_RPG_API ACPP_Character : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -68,6 +71,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* InventoryToggle;
 
+	
 
 	/**Montage*/
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
@@ -121,7 +125,7 @@ public:
 	void Look(const FInputActionValue& Value);
 	void SetSpeed(const FInputActionValue& Value);
 	void GrabItem(const FInputActionValue& Value);
-	void PickUp(const FInputActionValue& Value);
+	void Interact(const FInputActionValue& Value);
 	void Equip(const FInputActionValue& Value);
 	void Attack(const FInputActionValue& Value);
 	void Aiming(const FInputActionValue& Value);
@@ -138,7 +142,7 @@ public:
 
 	bool PressKey(const FInputActionValue& Value);
 	//class AWeapon* isWeapon(AActor* hitobject) const;
-	void PickUpWeapon();
+	void PickUpWeapon(UItem* itemRef);
 	void AttackWeapon();
 	void CanTrigger();
 	void SetMovementRotate(bool bORT, float rotationRate);
@@ -151,7 +155,7 @@ public:
 	/**Character Setting*/
     void SetStateEquipped();
 	void SetStateUnEquipped();
-	void SetEquipWeapon(class UItem* item);
+	void SetEquipWeapon(UItem* item);
 	void TakeOffWeapon();
 	bool CanAttackState();
 	bool CanEquipState();
@@ -184,7 +188,7 @@ public:
 
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
 	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
-	FORCEINLINE void SetHitResultObject(class APickUpItem* hitresultobject);
+	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
 	FORCEINLINE int32 GetPlayerATK() { return CharacterStats.PlayerATK; }
@@ -218,9 +222,10 @@ public:
 	class ACPP_DamageActor* GetDamageActor();
 	int32 GetDamageUIArrayLength();
 
-	/**interface*/
-	virtual void EndInteract() override;
 
+	/**interact*/
+	void AddInventory(UItem* itemRef, int32 amount = 1);
+	void SetDialogue(const FName& id);
 
 	FOnUpdatePlayerStateDelegate OnUpdatePlayerState;
 	FOnUpdateHPDelegate OnUpdateHP;
@@ -230,6 +235,8 @@ public:
 private:
 
 	float ClampRange(float value);
+	void LookAtObject(AActor* obj);
+	void EndLookAtObject(AActor* obj);
 
 private:
 
@@ -263,9 +270,12 @@ private:
 
 
 	UPROPERTY()
-		class APickUpItem* HitResultObject;
+	AActor* HitResultObject;
 	UPROPERTY()
-		class APickUpItem* PrevHitResultObject;
+	AActor* PrevHitResultObject;
+
+	UPROPERTY()
+	ANonPlayerCharacterBase* NonPlayerCharacter;
 
 	/**For get Grab& Release Func*/
 	UPROPERTY()

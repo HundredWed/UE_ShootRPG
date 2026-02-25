@@ -119,7 +119,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ACPP_Character::SetCrouch);
 		EnhancedInputComponent->BindAction(DodgeToggle, ETriggerEvent::Triggered, this, &ACPP_Character::Dodge);
 
- 		EnhancedInputComponent->BindAction(GrabAndPickupAction, ETriggerEvent::Canceled, this, &ACPP_Character::PickUp);
+ 		EnhancedInputComponent->BindAction(GrabAndPickupAction, ETriggerEvent::Canceled, this, &ACPP_Character::Interact);
 		EnhancedInputComponent->BindAction(GrabAndPickupAction, ETriggerEvent::Triggered, this, &ACPP_Character::GrabItem);
 		
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ACPP_Character::Equip);
@@ -169,31 +169,26 @@ void ACPP_Character::ObjectSearchTrace()
 		AActor* hitresult = HitResult.GetActor();
 		if (IsValid(hitresult))
 		{
-			//UE_LOG(LogTemp, Display, TEXT("%s"), *hitresult->GetActorNameOrLabel());
-
-			APickUpItem* item = Cast<APickUpItem>(hitresult);
-			if (IsValid(item) && item->GetWidgetComponent())
-			{
-				item->SetWidgetVisibility(true);
-			}
+			LookAtObject(hitresult);
 
 			if (IsValid(PrevHitResultObject))
 			{
-				if (PrevHitResultObject != item)
+				if (PrevHitResultObject != hitresult)
 				{
-					PrevHitResultObject->SetWidgetVisibility(false);
+					EndLookAtObject(PrevHitResultObject);
 				}
 			}
 
-			PrevHitResultObject = item;
-			SetHitResultObject(item);
+			PrevHitResultObject = hitresult;
+			SetHitResultObject(hitresult);
 		}
-		
 	}
 	else
 	{
 		ResetHitResultState();
 	}
+
+	
 }
 
 bool ACPP_Character::SetSphereTrace(FHitResult& HitResult)
@@ -294,7 +289,7 @@ void ACPP_Character::GrabItem(const FInputActionValue& Value)
 	}
 }
 
-void ACPP_Character::PickUp(const FInputActionValue& Value)
+void ACPP_Character::Interact(const FInputActionValue& Value)
 {
 	if (!IsValid(HitResultObject))
 	{
@@ -302,15 +297,10 @@ void ACPP_Character::PickUp(const FInputActionValue& Value)
 		return;
 	}
 	
-	
-	EItemCategory itemType = HitResultObject->GetPickUpItemRef()->ItemInfoTable.ItemType;
-
-	if (itemType == EItemCategory::EIS_Equipment)
+	if (ICPP_InteractInterface* interactObj = Cast<ICPP_InteractInterface>(HitResultObject))
 	{
-		PickUpWeapon();
+		interactObj->RequestInteract(this);
 	}
-	
-	HitResultObject->TakePickUp(this);/**inventory pick up*/
 
 	RemoveHitResultObject();	
 }
@@ -462,14 +452,16 @@ bool ACPP_Character::PressKey(const FInputActionValue& Value)
 //	return weapon;
 //}
 
-void ACPP_Character::PickUpWeapon()
+void ACPP_Character::PickUpWeapon(UItem* itemRef)
 {
 	if (WeaponManager->GetCurrntWeapon() == nullptr)
 	{
-		SetEquipWeapon(HitResultObject->GetPickUpItemRef());
+		SetEquipWeapon(itemRef);
 	}
-
-	HitResultObject->TakePickUp(this);
+	else
+	{
+		AddInventory(itemRef);
+	}
 }
 
 void ACPP_Character::AttackWeapon()
@@ -555,17 +547,18 @@ void ACPP_Character::ResetHitResultState()
 {
 	APickUpItem* item = Cast<APickUpItem>(HitResultObject);
 
-	if (IsValid(item) && item->IsValidWidget())
+	if (IsValid(HitResultObject))
 	{
-		item->SetWidgetVisibility(false);
+		EndLookAtObject(HitResultObject);
 	}
 
 	if (IsValid(PrevHitResultObject))
 	{
-		PrevHitResultObject->SetWidgetVisibility(false);
-		PrevHitResultObject = nullptr;
+		EndLookAtObject(PrevHitResultObject);
 	}
+
 	HitResultObject = nullptr;
+	PrevHitResultObject = nullptr;
 }
 
 void ACPP_Character::RemoveHitResultObject()
@@ -752,7 +745,7 @@ float ACPP_Character::GetCrosshairSpreadMultiplier() const
 	return CrosshairSpreadMultiplier;
 }
 
-void ACPP_Character::SetHitResultObject(APickUpItem* hitresultobject)
+void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
 {
 	HitResultObject = hitresultobject;
 }
@@ -849,8 +842,30 @@ int32 ACPP_Character::GetDamageUIArrayLength()
 	return DamageUIActors.Num();
 }
 
-void ACPP_Character::EndInteract()
+void ACPP_Character::AddInventory(UItem* itemRef, int32 amount)
 {
+	if (itemRef->ItemInfoTable.ItemType == EItemCategory::EIS_Gold)
+	{
+		const int32 amountOver = (GameInventory->GetCurrentGold() + (itemRef->ItemInfoTable.ItemPrice * amount));
+		if (GameInventory->IsOverGold(amountOver))
+		{
+			return;
+		}
+		GameInventory->AddGold(itemRef->ItemInfoTable.ItemPrice * amount);
+		return;
+	}
+	else
+	{
+		GameInventory->AddItem(itemRef, amount);
+	}	
+}
+
+void ACPP_Character::SetDialogue(const FName& id)
+{
+	if (ACPP_Controller* PC = Cast<ACPP_Controller>(GetController()))
+	{
+		PC->SetNPCInteract(id);
+	}
 }
 
 float ACPP_Character::ClampRange(float value)
@@ -859,6 +874,22 @@ float ACPP_Character::ClampRange(float value)
 	FVector2D Output(0.f, 1.f);
 
 	return  FMath::GetMappedRangeValueClamped(Input, Output, value);
+}
+
+void ACPP_Character::LookAtObject(AActor* obj)
+{
+	if (ICPP_InteractInterface* interactObj = Cast<ICPP_InteractInterface>(obj))
+	{
+		interactObj->OnBeginLookAt();
+	}
+}
+
+void ACPP_Character::EndLookAtObject(AActor* obj)
+{
+	if (ICPP_InteractInterface* interactObj = Cast<ICPP_InteractInterface>(obj))
+	{
+		interactObj->OnEndLookAt();
+	}
 }
 
 void ACPP_Character::SmoothSpringArmOffset(float NewYoffset)

@@ -24,6 +24,9 @@ class UE_RPG_API ICPP_InteractInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void Interact(AActor* Interactor) {}
+	virtual void RequestInteract(AActor* Interactor) {}
 	virtual void EndInteract() {}
+
+	virtual void OnBeginLookAt() {}
+	virtual void OnEndLookAt() {}
 };

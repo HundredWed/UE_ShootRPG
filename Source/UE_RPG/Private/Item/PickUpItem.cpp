@@ -25,8 +25,8 @@ APickUpItem::APickUpItem()
 	SphereComponent->SetupAttachment(GetRootComponent());
 	SphereComponent->SetSphereRadius(180.f);
 
-	ItemStateWidjet = CreateDefaultSubobject<UWidgetComponent>(TEXT("ItemState Widjet"));
-	ItemStateWidjet->SetupAttachment(GetRootComponent()); 
+	ItemStateWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("ItemState Widjet"));
+	ItemStateWidget->SetupAttachment(GetRootComponent()); 
 	
 
 	/**ECC_GameTraceChannel1 = Grab Trace*/
@@ -48,16 +48,16 @@ APickUpItem::APickUpItem()
 	SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
 	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	/**Widjet*/
-	ItemStateWidjet->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	ItemStateWidget->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
 }
 
 void APickUpItem::SetWidgetVisibility(bool Visible)
 {
-	if(!IsValid(ItemStateWidjet))
+	if(!IsValid(ItemStateWidget))
 		return;
 	
-	ItemStateWidjet->SetVisibility(Visible);
+	ItemStateWidget->SetVisibility(Visible);
 }
 
 void APickUpItem::BeginPlay()
@@ -70,10 +70,9 @@ void APickUpItem::BeginPlay()
 		SphereComponent->OnComponentEndOverlap.AddDynamic(this, &APickUpItem::OnSphereEndOverlap);
 	}
 
-	if (IsValid(ItemStateWidjet))
+	if (IsValid(ItemStateWidget))
 	{
-		ItemStateWidjet->SetVisibility(false);
-		bValidWidget = true;
+		ItemStateWidget->SetVisibility(false);
 	}
 
 	InitializePickUpItem();
@@ -133,32 +132,32 @@ void APickUpItem::InitializePickUpItem()
 
 }
 
-void APickUpItem::TakePickUp(ACPP_Character* taker)
+void APickUpItem::RequestInteract(AActor* interactor)
 {
-	UInventory* playerinventory = taker->GetInventory();
-
-	if (IsValid(playerinventory))
+	if (ACPP_Character* character = Cast<ACPP_Character>(interactor))
 	{
-		EItemCategory itemType = ItemRef->ItemInfoTable.ItemType;
-		switch (itemType)
+
+		if (ItemRef->ItemInfoTable.ItemType == EItemCategory::EIS_Equipment)
 		{
-		case EItemCategory::EIS_Gabbable:
-			return;
-		case EItemCategory::EIS_Gold:
-			const int32 amountOver = (playerinventory->GetCurrentGold() + (ItemRef->ItemInfoTable.ItemPrice * ItemAmount));
-			if (playerinventory->IsOverGold(amountOver))
-			{
-				return;
-			}
-			playerinventory->AddGold(ItemRef->ItemInfoTable.ItemPrice * ItemAmount);
-			Destroy();
-			return;
+			character->PickUpWeapon(ItemRef);
 		}
-		playerinventory->AddItem(ItemRef, ItemAmount);
-		Destroy();
+		else
+		{
+			character->AddInventory(ItemRef, ItemAmount);
+		}		
 	}
-	
 }
+
+void APickUpItem::OnBeginLookAt()
+{
+	ItemStateWidget->SetVisibility(true);
+}
+
+void APickUpItem::OnEndLookAt()
+{
+	ItemStateWidget->SetVisibility(false);
+}
+
 
 
 
