@@ -55,42 +55,42 @@ protected:
 public:
 
 	/**inventory function*/
-	bool IsSlotEmpty(const int16 index);
+	bool IsSlotEmpty(const int32 index);
 	void AddItem(class UItem* item, const uint32 amount = 1);
-	bool SearchEmptySlot(int16& emptySlotIndex);
-	bool SearchFreeStackSlot(class UItem* item, int16& canStackedSlotIndex);
-	int32 GetAmountAtIndex(const int16 index);
+	bool SearchEmptySlot(int32& emptySlotIndex);
+	bool SearchFreeStackSlot(class UItem* item, int32& canStackedSlotIndex);
+	int32 GetAmountAtIndex(const int32 index);
 
-	void RemoveItemAtIndex(const int16 index, const int32 removeAmount);
-	void SwapSlot(const int16 fromIndex, const int16 toIndex);
-	void CheckItemType(const int16 fromIndex, const int16 toIndex);
-	void AddToIndex(const int16 fromIndex, const int16 toIndex);
-	bool CanAddToIndex(const int16 fromIndex, const int16 toIndex);
-	void UpdateInventory(int16 index, class UItem* item, int32 amount);
-	void UpdateSlotAtIndex(const int16 index);
-	const FInventorySlot GetSlotInfoIndex(const int16 index);
+	void RemoveItemAtIndex(const int32 index, const int32 removeAmount);
+	void SwapSlot(const int32 fromIndex, const int32 toIndex);
+	void CheckItemType(const int32 fromIndex, const int32 toIndex);
+	void AddToIndex(const int32 fromIndex, const int32 toIndex);
+	bool CanAddToIndex(const int32 fromIndex, const int32 toIndex);
+	void UpdateInventory(int32 index, class UItem* item, int32 amount);
+	void UpdateSlotAtIndex(const int32 index);
+	const FInventorySlot GetSlotInfoIndex(const int32 index);
 	void AddWeight(const float amount);
 	void AddGold(const int32 amount);
 	const int32 GetCurrentGold() { return CurrentGold; }
 	bool IsOverGold(const int32 amount) { return (amount + CurrentGold) > MaxGold; }
 
 	/**split when drag slot*/
-	void SplitStackToIndex(const int16 fromIndex, const int16 toIndex, const int32 splitAmount);
-	bool CanSplitStackable(const int16 fromIndex, const int16 toIndex, const int32 splitAmount);
+	void SplitStackToIndex(const int32 fromIndex, const int32 toIndex, const int32 splitAmount);
+	bool CanSplitStackable(const int32 fromIndex, const int32 toIndex, const int32 splitAmount);
 
 	/**FindCombinableSlot function*/
-	int16 FindCombinableSlot(const int16 slot);
-	bool CompareID(const int16 slot1, const int16 slot2);
+	int32 FindCombinableSlot(const int32 slot);
+	bool CompareID(const int32 slot1, const int32 slot2);
     void ClearConnectArray();
-	void CombineItem(const int16 index);
-	bool SetLinkSlot(const int16 slot, const int16 newdir);
-	bool IsLineChange(const int16 slot);
-	class UCPP_Slot* GetSlotWidgetInfo(const int16 index);
-	void ChangeItemInfo(FName itemInfoID, const int16 index);
+	void CombineItem(const int32 index);
+	bool SetLinkSlot(const int32 slot, const int32 newdir);
+	bool IsLineChange(const int32 slot);
+	class UCPP_Slot* GetSlotWidgetInfo(const int32 index);
+	void ChangeItemInfo(FName itemInfoID, const int32 index);
 	
-	void InventorySort(int16 left, int16 right);
-	int16 Partition(int16 left, int16 right);
-	uint8 GetCompareValue(int16 index);
+	void InventorySort(int32 left, int32 right);
+	int32 Partition(int32 left, int32 right);
+	uint8 GetCompareValue(int32 index);
 
 	/**inventory widget function (FORCEINLINE) */
 	FORCEINLINE void ShowInventory() {
@@ -108,10 +108,10 @@ public:
 
 	/**equip weapon*/
 	/**this func set equipment and swap weapon*/
-	void SetEquipWeapon(class UItem* item, int16 index);
+	void SetEquipWeapon(class UItem* item, int32 index);
 	void EquipWeaponToPlayer(class UItem* item);
 	void UpdateEquipmentInventory(class UItem* item);
-	void UnEquipWeaponAndAddItem(const int16 index);
+	void UnEquipWeaponAndAddItem(const int32 index);
 
 	/**manage ability-actor*/
 	AActor* GetAbilityActor(FName itemId);
@@ -119,6 +119,10 @@ public:
 
 	UFUNCTION()
 		void DestroyAbilityActor(AActor* actor,FName itemId);
+
+private:
+
+	void CheckQuest(const FName& objectID, int32 amount);
 
 private:
 
