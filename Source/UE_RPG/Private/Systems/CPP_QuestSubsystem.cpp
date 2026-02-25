@@ -19,22 +19,13 @@ void UCPP_QuestSubsystem::AddProgressQuest()
 
 	CurrentQuest.QuestState = EQuestState::EQS_InProgress;
 
-	InProgressQuests.Add(CurrentQuest);
-	//AcceptedQuests.Add(quest.QuestID, quest);
+	InProgressQuests.Add(CurrentQuest.QuestID, CurrentQuest);
 }
 
 void UCPP_QuestSubsystem::QuestClear()
 {
-	int32 index = 0;
-	for (FQuest quest : InProgressQuests)
-	{
-		if (quest.QuestID == CurrentQuest.QuestID)
-		{
-			ClearQuests.Add(CurrentQuest.QuestID);
-			InProgressQuests.RemoveAt(index);
-		}
-		index++;
-	}
+	ClearQuests.Add(CurrentQuest.QuestID);
+	InProgressQuests.Remove(CurrentQuest.QuestID);
 }
 
 void UCPP_QuestSubsystem::QuestStateChange(EQuestState questState)
@@ -57,42 +48,42 @@ void UCPP_QuestSubsystem::QuestStateChange(EQuestState questState)
 	}
 }
 
-FQuest UCPP_QuestSubsystem::CheckQuestContent(const FName& objectID, const int32 amount)
+FQuest UCPP_QuestSubsystem::CheckQuestContent(const FName& objectID, int32 amount)
 {
 	//해당 ID를 필요로 하는 퀘스트가 있는지 확인
 	//있다면 진행도 확인
 
-	int32 index = 0;
 	FQuest correspondQuest;
-	for (FQuest quest : InProgressQuests)
+	for (auto quest : InProgressQuests)
 	{
-		if (quest.NeedObjectID == objectID)
+		if (quest.Value.NeedObjectID == objectID)
 		{
-			correspondQuest = quest;
+			correspondQuest = quest.Value;
 		}
-		index++;
 	}
 
 
-	if (index == InProgressQuests.Num() - 1)
+	if (correspondQuest.QuestID.IsNone())
+	{
 		return FQuest();
-
+	}
+		
 	//진행도 확인
 	EQuestType type = correspondQuest.QuestType;
 
 	switch (type)
 	{
 	case EQuestType::EQT_GetItem:
-		CheckProgressGetItemType(correspondQuest, amount, index);
-		break;
-	case EQuestType::EQT_GoToNPC:
-		break;
-	case EQuestType::EQT_GoToSpace:
+		CheckProgressAmountType(correspondQuest, amount);
 		break;
 	case EQuestType::EQT_ComBat:
-
+		CheckProgressAmountType(correspondQuest, amount);
 		break;
-	default:
+	case EQuestType::EQT_GoToNPC:
+		CheckProgressObjectType(correspondQuest, objectID);
+		break;
+	case EQuestType::EQT_GoToSpace:
+		CheckProgressObjectType(correspondQuest, objectID);
 		break;
 	}
 
@@ -138,7 +129,11 @@ TArray<FQuest> UCPP_QuestSubsystem::GetQuestList()
 
 TArray<FQuest> UCPP_QuestSubsystem::GetProgressQuestsOfPlayer()
 {
-	return InProgressQuests;
+	TArray<FQuest> resultArray;
+
+	InProgressQuests.GenerateValueArray(resultArray);
+
+	return resultArray;
 }
 
 FQuest UCPP_QuestSubsystem::GetQuestInfo(const FName& questID)
@@ -169,12 +164,9 @@ void UCPP_QuestSubsystem::SelectedQuest(const FName& questId)
 
 FQuest UCPP_QuestSubsystem::CheckProgress(const FName& questID)
 {
-	for (FQuest progress : InProgressQuests)
+	if (InProgressQuests.Find(questID))
 	{
-		if (progress.QuestID == questID)
-		{
-			return progress;
-		}
+		return *(InProgressQuests.Find(questID));
 	}
 
 	return FQuest();
@@ -201,28 +193,40 @@ int32 UCPP_QuestSubsystem::CastQuestIndex(FName questID)
 	return FCString::Atoi(*questIndex);
 }
 
-void UCPP_QuestSubsystem::CheckProgressGetItemType(FQuest& quest, const int32 amount, const int32 index)
+void UCPP_QuestSubsystem::CheckProgressAmountType(FQuest& quest,int32 amount)
 {
-	if (quest.NeedCount == amount)
+	if (quest.CurrentCount < quest.NeedCount)
 	{
-		InProgressQuests[index].QuestState = EQuestState::EQS_ConditionClear;
-		quest = InProgressQuests[index];
+		quest.CurrentCount += amount;
+	}
+	else
+	{
+		return;
+	}
+	
+	if (quest.NeedCount == quest.CurrentCount)
+	{
+		quest.QuestState = EQuestState::EQS_ConditionClear;
+
+		OnChangeQuestInfo.Execute(quest);
+	}
+	else
+	{
+		quest.QuestState = EQuestState::EQS_InProgress;
+		OnChangeQuestInfo.Execute(quest);
 	}
 }
 
-void UCPP_QuestSubsystem::CheckProgressGoToNPCType(FQuest& quest, const int32 index)
+void UCPP_QuestSubsystem::CheckProgressObjectType(FQuest& quest, const FName& objectID)
 {
-	if (quest.NeedObjectID == CurrentNPCID)
+	if (quest.QuestState == EQuestState::EQS_ConditionClear)
 	{
-		InProgressQuests[index].QuestState = EQuestState::EQS_ConditionClear;
-		quest = InProgressQuests[index];
+		return;
 	}
-}
 
-void UCPP_QuestSubsystem::CheckProgressGoToSpaceType()
-{
-}
-
-void UCPP_QuestSubsystem::CheckProgressComBatType()
-{
+	if (quest.NeedObjectID == objectID)
+	{
+		quest.QuestState = EQuestState::EQS_ConditionClear;
+		OnChangeQuestInfo.Execute(quest);
+	}
 }

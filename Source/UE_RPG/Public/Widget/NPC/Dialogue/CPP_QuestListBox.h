@@ -21,10 +21,15 @@ public:
 
 private:
 
+	UFUNCTION()
+	void SelectedQuest(const FQuest& quest);
+
+private:
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UScrollBox* QuestList;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UCPP_QuestListButton> QuestButtonClass;
 
 };

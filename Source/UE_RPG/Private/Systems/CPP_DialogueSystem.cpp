@@ -61,7 +61,7 @@ void UCPP_DialogueSystem::SelectedInteractType(EInteractType state)
 		DialogueState = EInteractType::JustTalk;
 		break;
 	case EInteractType::Quest:
-		SetQuestList();
+		DialogueState = EInteractType::Quest;
 		break;
 	case EInteractType::LikeAbility:
 		break;
@@ -113,13 +113,6 @@ void UCPP_DialogueSystem::SelectedQuest(const FQuest& quest)
 void UCPP_DialogueSystem::RevertDialogue()
 {
 	InitDialogue(DialogueOwnerName);
-}
-
-void UCPP_DialogueSystem::SetQuestList()
-{
-	DialogueState = EInteractType::Quest;
-	//PlayerController->ActivateDialogueSubBox(true);->ui ³»¿¡¼­
-	//PlayerController->SetQuest(DialogueOwnerName);
 }
 
 void UCPP_DialogueSystem::PrintDialogueNormal()

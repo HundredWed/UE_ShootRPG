@@ -28,22 +28,26 @@ public:
 	virtual void NativeConstruct() override;
 
 	void InitDialogueWidget();
-	void ActivateAnswerBox(bool bActivate);
 	
 	void UpdateDialogueText(const FText& text);
 	void UpdateAnswerBox(TArray<FAnswerDialogue> answers);
 
-	void SetVisibilityQuestListBox(ESlateVisibility visibility);
-
 	UFUNCTION(BlueprintImplementableEvent)
 	bool ActivateDialogueSubBox(ESlateVisibility Invisibility);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	bool ActivateDialogueMainBox(ESlateVisibility Invisibility);
 
 private:
 
 	void SetInteractButton(const FNPCDialogue& npcInfo);
+	void SetMainBox(const FNPCDialogue& npcInfo);
+	void SetSubBox(const FNPCDialogue& npcInfo);
 	void InteractButtonEvent(EInteractType interactType);
 	void InitQuestSystem();
+	void ActivateAnswerBox(bool bActivate);
 	void AnswerEvent();
+	void SetVisibilityQuestListBox(ESlateVisibility visibility);
 
 	bool HasAvailableQuest(const FNPCDialogue& npcInfo);
 
@@ -51,6 +55,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UHorizontalBox* InteractContentsBox;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UHorizontalBox* DialogueSubBox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UCPP_QuestListBox* QuestListBox;

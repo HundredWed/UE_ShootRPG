@@ -26,6 +26,27 @@ void ACPP_Controller::BeginPlay()
     ChangeInteractionState(EPlayerIputMappingState::Default);
 
     UpdatePlayerWidget();
+
+    UGameInstance* GI = GetGameInstance();
+    if (!IsValid(GI))
+    {
+        return;
+    }
+
+    DialogueSystem = GI->GetSubsystem<UCPP_DialogueSystem>();
+    check(DialogueSystem);
+}
+
+void ACPP_Controller::InteractEvent()
+{
+    switch (CurrentInteractionState)
+    {
+    case EPlayerIputMappingState::Default:
+        break;
+    case EPlayerIputMappingState::NPCTalking:
+        DialogueSystem->PrintDialogue();
+        break;
+    }   
 }
 
 void ACPP_Controller::UpdatePlayerWidget()
@@ -56,42 +77,29 @@ void ACPP_Controller::ChangeInteractionState(EPlayerIputMappingState newState)
     {
     case EPlayerIputMappingState::Default:
         bInteractEvent = false;
+        HideCursor();
         break;
     case EPlayerIputMappingState::NPCTalking:
+        ShowCursor();
         break;
     }
 }
 
-void ACPP_Controller::NPCInteract(const FName& npcID)
+void ACPP_Controller::SetupInputComponent()
 {
-    UGameInstance* GI = GetGameInstance();
-    if (!IsValid(GI))
-    {
-        return;
-    }
+    Super::SetupInputComponent();
 
-    UCPP_DialogueSystem* dialogue = GI->GetSubsystem<UCPP_DialogueSystem>();
-    
-    if (!bInteractEvent)
+    if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
     {
-        //TODO
-        //상호작용 시 캐릭터 상태
-        //
-        // 
-        
-        if (dialogue)
-        {
-           dialogue->InitDialogue(npcID);
-        }
-        bInteractEvent = true;
+        EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ACPP_Controller::InteractEvent);
     }
-    else
-    {
-        if (dialogue)
-        {
-            dialogue->PrintDialogue();
-        }
-    }   
+}
+
+void ACPP_Controller::SetNPCInteract(const FName& npcID)
+{
+    DialogueSystem->InitDialogue(npcID);
+    bInteractEvent = true;
+    ChangeInteractionState(EPlayerIputMappingState::NPCTalking);
 }
 
 void ACPP_Controller::SetHUDVisibility(bool bshowHUD)
@@ -102,9 +110,22 @@ void ACPP_Controller::SetHUDVisibility(bool bshowHUD)
 	}
 }
 
+void ACPP_Controller::ShowCursor()
+{
+    FInputModeGameAndUI InputMode;
+    InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+    InputMode.SetHideCursorDuringCapture(false);
+    SetInputMode(InputMode);
+    bShowMouseCursor = true;
+}
+
 UCPP_InventoryWidget* ACPP_Controller::GetInventoryWidget()
 {
     return UIManager->GetInventoryWidget();
 }
 
-
+void ACPP_Controller::HideCursor()
+{
+    SetInputMode(FInputModeGameOnly());
+    bShowMouseCursor = false;
+}

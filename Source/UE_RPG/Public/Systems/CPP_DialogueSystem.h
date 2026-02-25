@@ -41,9 +41,6 @@ public:
 private:
 
 	void RevertDialogue();
-	//void RevertToMain(); ui동작시 컨트롤러에서 델리게이트 호출로
-	void SetQuestList();
-	//void SetAnswerBox(const FTalkDialogue& dialouge); ui 내에서
 
 	void PrintDialogueNormal();
 	void PrintDialogueJustTalk();

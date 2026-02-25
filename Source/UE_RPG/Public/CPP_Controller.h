@@ -17,11 +17,11 @@ enum class EPlayerIputMappingState : uint8
 
 class UInputMappingContext;
 class AHUD;
-class UCPP_DialogueManager;
 class UCPP_UIManager;
-class UCPP_QuestMananger;
 class UMainPanelWidget;
 class UCPP_InventoryWidget;
+class UInputAction;
+class UCPP_DialogueSystem;
 
 UCLASS()
 class UE_RPG_API ACPP_Controller : public APlayerController
@@ -34,26 +34,25 @@ public:
 	virtual void BeginPlay() override;
 	
 	void ChangeInteractionState(EPlayerIputMappingState newState);
-
-	void NPCInteract(const FName& npcID);
+		
+	void SetNPCInteract(const FName& npcID);
 
 	UFUNCTION()
-		void SetHUDVisibility(bool bshowHUD);
+	void SetHUDVisibility(bool bshowHUD);
 
-	FORCEINLINE void ShowCursor(){
-		SetInputMode(FInputModeGameAndUI());
-		bShowMouseCursor = true;
-	}
-
-	FORCEINLINE void HideCursor() {
-		SetInputMode(FInputModeGameOnly());
-		bShowMouseCursor = false;
-	}
+	void ShowCursor();
+	void HideCursor(); 
 
 	//임시. 리펙토링 필수
 	UCPP_InventoryWidget* GetInventoryWidget(); 
 
+protected:
+
+	virtual void SetupInputComponent() override;
+
 private:
+	UFUNCTION()
+	void InteractEvent();
 
 	void UpdatePlayerWidget();
 
@@ -67,6 +66,14 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCPP_UIManager> UIManager;
+
+	UPROPERTY()
+	UCPP_DialogueSystem* DialogueSystem;
+
+	/**Input*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Config", meta = (AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
+
 
 	EPlayerIputMappingState CurrentInteractionState = EPlayerIputMappingState::Default;
 

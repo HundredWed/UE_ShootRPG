@@ -8,9 +8,9 @@
 #include "Structs/ST_NPCQuests.h"
 #include "CPP_QuestSubsystem.generated.h"
 
-/**
- * 
- */
+
+DECLARE_DELEGATE_OneParam(FOnChangeQuestInfoDelegate, const FQuest&);
+
 UCLASS()
 class UE_RPG_API UCPP_QuestSubsystem : public UGameInstanceSubsystem
 {
@@ -27,7 +27,7 @@ public:
 	void QuestClear();
 	void QuestStateChange(EQuestState questState);
 
-	FQuest CheckQuestContent(const FName& objectID, const int32 amount);
+	FQuest CheckQuestContent(const FName& objectID, int32 amount = 0);
 
 	TArray<FQuest> GetQuestList();
 	TArray<FQuest> GetProgressQuestsOfPlayer();
@@ -35,6 +35,7 @@ public:
 
 	void SelectedQuest(const FName& questId);
 
+	FOnChangeQuestInfoDelegate OnChangeQuestInfo;
 
 private:
 
@@ -42,11 +43,9 @@ private:
 	bool CheckClear(const FName& questID);
 	int32 CastQuestIndex(FName questID);
 
-	void CheckProgressGetItemType(FQuest& quest, const int32 amount, const int32 index);
-	void CheckProgressGoToNPCType(FQuest& quest, const int32 index);
-	void CheckProgressGoToSpaceType();
-	void CheckProgressComBatType();
-
+	void CheckProgressAmountType(FQuest& quest,int32 amount);
+	void CheckProgressObjectType(FQuest& quest, const FName& objectID);
+	
 private:
 
 	FQuest CurrentQuest;
@@ -58,7 +57,7 @@ private:
 
 	//Player
 	UPROPERTY()
-	TArray<FQuest> InProgressQuests;
+	TMap<FName, FQuest> InProgressQuests;
 
 	//NPC
 	/*UPROPERTY()

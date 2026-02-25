@@ -7,10 +7,13 @@
 UENUM(BlueprintType)
 enum class EQuestType : uint8
 {
+	//카운팅
 	EQT_GetItem UMETA(DisplayName = "GetItem"),
+	EQT_ComBat UMETA(DisplayName = "ComBat"),
+
+	//논 카운팅
 	EQT_GoToNPC UMETA(DisplayName = "GoToNPC"),
-	EQT_GoToSpace UMETA(DisplayName = "GoToSpace"),
-	EQT_ComBat UMETA(DisplayName = "ComBat")
+	EQT_GoToSpace UMETA(DisplayName = "GoToSpace")
 
 };
 
@@ -56,6 +59,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	FText NeedObjectName;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 CurrentCount;
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 NeedCount;

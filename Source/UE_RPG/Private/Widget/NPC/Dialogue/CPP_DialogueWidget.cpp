@@ -26,6 +26,9 @@ void UCPP_DialogueWidget::NativeConstruct()
 		DialogueSystem->UpdateDialogueText.BindUObject(this, &UCPP_DialogueWidget::UpdateDialogueText);
 		DialogueSystem->CreateAnswerBox.BindUObject(this, &UCPP_DialogueWidget::UpdateAnswerBox);
 	}
+
+	AnswerBox->SetVisibility(ESlateVisibility::Hidden);
+	SetVisibilityQuestListBox(ESlateVisibility::Hidden);
 }
 
 void UCPP_DialogueWidget::InitDialogueWidget()
@@ -60,6 +63,12 @@ void UCPP_DialogueWidget::ActivateAnswerBox(bool bActivate)
 
 void UCPP_DialogueWidget::SetInteractButton(const FNPCDialogue& npcInfo)
 {
+	SetMainBox(npcInfo);
+	SetSubBox(npcInfo);
+}
+
+void UCPP_DialogueWidget::SetMainBox(const FNPCDialogue& npcInfo)
+{
 	InteractContentsBox->ClearChildren();
 
 	TArray<UWidget*> allChildren;
@@ -88,7 +97,7 @@ void UCPP_DialogueWidget::SetInteractButton(const FNPCDialogue& npcInfo)
 
 			button->SetPadding(padding);
 			button->OnInteractButtonEvent.BindUObject(this, &UCPP_DialogueWidget::InteractButtonEvent);
-			
+
 			InteractContentsBox->AddChild(button);
 
 			UHorizontalBoxSlot* slotButton = UWidgetLayoutLibrary::SlotAsHorizontalBoxSlot(button);
@@ -105,9 +114,42 @@ void UCPP_DialogueWidget::SetInteractButton(const FNPCDialogue& npcInfo)
 	backSlot->SetSize(size);
 }
 
+void UCPP_DialogueWidget::SetSubBox(const FNPCDialogue& npcInfo)
+{
+	DialogueSubBox->ClearChildren();
+
+	TArray<UWidget*> allChildren;
+	USpacer* forwardSpace = WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass());
+	DialogueSubBox->AddChild(forwardSpace);
+
+	TSubclassOf<UCPP_DialogueButtonBase> buttonClass = *(InteractButtons.Find(EInteractType::Revert));
+
+	UCPP_DialogueCategoryButton* button = CreateWidget<UCPP_DialogueCategoryButton>(GetWorld(), buttonClass);
+	FMargin padding;
+	padding.Left = 50.f;
+	padding.Top = 30.f;
+	padding.Right = 50.f;
+	padding.Bottom = 0.f;
+
+	button->SetPadding(padding);
+	button->OnInteractButtonEvent.BindUObject(this, &UCPP_DialogueWidget::InteractButtonEvent);
+
+	DialogueSubBox->AddChild(button);
+
+	UHorizontalBoxSlot* slotButton = UWidgetLayoutLibrary::SlotAsHorizontalBoxSlot(button);
+	slotButton->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+	slotButton->SetVerticalAlignment(EVerticalAlignment::VAlign_Top);
+
+
+	USpacer* backSpace = WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass());
+	DialogueSubBox->AddChild(backSpace);
+}
+
 void UCPP_DialogueWidget::InteractButtonEvent(EInteractType interactType)
 {
 	ActivateDialogueSubBox(ESlateVisibility::Visible);
+	ActivateDialogueMainBox(ESlateVisibility::Hidden);
+
 
 	switch (interactType)
 	{
@@ -116,11 +158,14 @@ void UCPP_DialogueWidget::InteractButtonEvent(EInteractType interactType)
 	case EInteractType::JustTalk:
 		break;
 	case EInteractType::Quest:
+		SetVisibilityQuestListBox(ESlateVisibility::Visible);
 		break;
 	case EInteractType::LikeAbility:
 		break;
 	case EInteractType::Revert:
 		ActivateDialogueSubBox(ESlateVisibility::Hidden);
+		InitDialogueWidget();
+		ActivateDialogueMainBox(ESlateVisibility::Visible);
 		break;
 	case EInteractType::Quit:
 		this->SetVisibility(ESlateVisibility::Hidden);
@@ -142,7 +187,7 @@ void UCPP_DialogueWidget::InitQuestSystem()
 
 void UCPP_DialogueWidget::AnswerEvent()
 {
-	ActivateAnswerBox(false);
+	AnswerBox->SetVisibility(ESlateVisibility::Hidden);
 }
 
 bool UCPP_DialogueWidget::HasAvailableQuest(const FNPCDialogue& npcInfo)

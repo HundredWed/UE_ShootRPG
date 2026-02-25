@@ -11,14 +11,9 @@ void UCPP_DialogueCategoryButton::DialogueButtonEvent()
 	UGameInstance* GI = GetGameInstance();
 	if (!IsValid(GI))
 	{
-		return;
-	}
+		UCPP_DialogueSystem* dialogue = GI->GetSubsystem<UCPP_DialogueSystem>();
+		dialogue->SelectedInteractType(InteractType);
+	}	
 
-	UCPP_DialogueSystem* dialogue = GI->GetSubsystem<UCPP_DialogueSystem>();
-	if (!IsValid(dialogue))
-	{
-		return;
-	}
-
-	dialogue->SelectedInteractType(InteractType);
+	OnInteractButtonEvent.Execute(InteractType);
 }
