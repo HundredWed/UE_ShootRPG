@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widget/NPC/Dialogue/CPP_DialogueWidget.h"
@@ -16,6 +16,7 @@
 #include "Widget/NPC/Dialogue/CPP_QuestListBox.h"
 #include "Systems/CPP_DialogueSystem.h"
 #include "Systems/CPP_QuestSubsystem.h"
+#include "Inventory.h"
 
 void UCPP_DialogueWidget::NativeConstruct()
 {
@@ -23,12 +24,17 @@ void UCPP_DialogueWidget::NativeConstruct()
 	if (IsValid(GI))
 	{
 		DialogueSystem = GI->GetSubsystem<UCPP_DialogueSystem>();
-		DialogueSystem->UpdateDialogueText.BindUObject(this, &UCPP_DialogueWidget::UpdateDialogueText);
-		DialogueSystem->CreateAnswerBox.BindUObject(this, &UCPP_DialogueWidget::UpdateAnswerBox);
+		DialogueSystem->UpdateDialogueText.BindUObject(this, &UCPP_DialogueWidget::UpdateDialogueEvent);
+		DialogueSystem->OnUpdateAnswerBox.BindUObject(this, &UCPP_DialogueWidget::UpdateAnswerBox);
+		DialogueSystem->EndDialogue.BindUObject(this, &UCPP_DialogueWidget::RevertEvent);
+
+		QuestSubsystem = GI->GetSubsystem<UCPP_QuestSubsystem>();
+
+		check(DialogueSystem);
+		check(QuestSubsystem);
 	}
 
-	AnswerBox->SetVisibility(ESlateVisibility::Hidden);
-	SetVisibilityQuestListBox(ESlateVisibility::Hidden);
+	CreateAnswerButton();
 }
 
 void UCPP_DialogueWidget::InitDialogueWidget()
@@ -37,14 +43,13 @@ void UCPP_DialogueWidget::InitDialogueWidget()
 	{
 		FNPCDialogue npc = DialogueSystem->GetNPCStruct();
 
-		NPCID = npc.NPCID;
 		NPCName->SetText(npc.NPCName);
 		DialogueText->SetText(npc.BasicDialogue);
 
-		InitQuestSystem();
 		SetInteractButton(npc);
-
-		QuestListBox->UpdateQuestList();
+		
+		QuestListBox->InitQuestListBox();
+		SetVisibilityQuestListBox(ESlateVisibility::Hidden);
 	}	
 }
 
@@ -57,8 +62,21 @@ void UCPP_DialogueWidget::ActivateAnswerBox(bool bActivate)
 	else
 	{
 		AnswerBox->SetVisibility(ESlateVisibility::Hidden);
-	}
+	}	
+}
+
+void UCPP_DialogueWidget::CreateInteractButton()
+{
 	
+}
+
+void UCPP_DialogueWidget::ResetToInitialState()
+{
+	SetVisibilityQuestListBox(ESlateVisibility::Hidden);
+	FNPCDialogue npc = DialogueSystem->GetNPCStruct();
+	DialogueText->SetText(npc.BasicDialogue);
+	SetInteractButton(npc);
+	SetAllButtonToCollapsed();	
 }
 
 void UCPP_DialogueWidget::SetInteractButton(const FNPCDialogue& npcInfo)
@@ -79,31 +97,33 @@ void UCPP_DialogueWidget::SetMainBox(const FNPCDialogue& npcInfo)
 	UHorizontalBoxSlot* forwardSlot = UWidgetLayoutLibrary::SlotAsHorizontalBoxSlot(forwardSpace);
 	FSlateChildSize size;
 	forwardSlot->SetSize(size);
+	
 
-	for (auto interactButton : InteractButtons)
+
+	for (EInteractType interactType : npcInfo.CanInteractTypes)
 	{
-		if (interactButton.Value)
-		{
-			//Äù½ºÆ®°¡ ¾ø´Â npc¸é Äù½ºÆ® ¹öÆ° »ı¼ºx
-			if (!HasAvailableQuest(npcInfo) && interactButton.Key == EInteractType::Quest)
-				continue;
+		//í€˜ìŠ¤íŠ¸ê°€ ì—†ëŠ” npcë©´ í€˜ìŠ¤íŠ¸ ë²„íŠ¼ ìƒì„±x
+		//RevertëŠ” ë©”ì¸ì— ìƒì„±x
+		if ((!HasAvailableQuest(npcInfo) && interactType == EInteractType::Quest) 
+			|| interactType == EInteractType::Revert)
+			continue;
 
-			UCPP_DialogueCategoryButton* button = CreateWidget<UCPP_DialogueCategoryButton>(GetWorld(), interactButton.Value);
-			FMargin padding;
-			padding.Left = 50.f;
-			padding.Top = 30.f;
-			padding.Right = 50.f;
-			padding.Bottom = 0.f;
+		UCPP_DialogueCategoryButton* button = CreateWidget<UCPP_DialogueCategoryButton>(GetWorld(), InteractButtonsClass);
+		FMargin padding;
+		padding.Left = 50.f;
+		padding.Top = 30.f;
+		padding.Right = 50.f;
+		padding.Bottom = 0.f;
 
-			button->SetPadding(padding);
-			button->OnInteractButtonEvent.BindUObject(this, &UCPP_DialogueWidget::InteractButtonEvent);
+		button->SetPadding(padding);
+		button->InitType(interactType);
+		button->OnInteractButtonEvent.BindUObject(this, &UCPP_DialogueWidget::InteractButtonEvent);
 
-			InteractContentsBox->AddChild(button);
+		InteractContentsBox->AddChild(button);
 
-			UHorizontalBoxSlot* slotButton = UWidgetLayoutLibrary::SlotAsHorizontalBoxSlot(button);
-			slotButton->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
-			slotButton->SetVerticalAlignment(EVerticalAlignment::VAlign_Top);
-		}
+		UHorizontalBoxSlot* slotButton = UWidgetLayoutLibrary::SlotAsHorizontalBoxSlot(button);
+		slotButton->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+		slotButton->SetVerticalAlignment(EVerticalAlignment::VAlign_Top);
 	}
 
 
@@ -122,9 +142,11 @@ void UCPP_DialogueWidget::SetSubBox(const FNPCDialogue& npcInfo)
 	USpacer* forwardSpace = WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass());
 	DialogueSubBox->AddChild(forwardSpace);
 
-	TSubclassOf<UCPP_DialogueButtonBase> buttonClass = *(InteractButtons.Find(EInteractType::Revert));
+	UHorizontalBoxSlot* forwardSlot = UWidgetLayoutLibrary::SlotAsHorizontalBoxSlot(forwardSpace);
+	FSlateChildSize size;
+	forwardSlot->SetSize(size);
 
-	UCPP_DialogueCategoryButton* button = CreateWidget<UCPP_DialogueCategoryButton>(GetWorld(), buttonClass);
+	UCPP_DialogueCategoryButton* button = CreateWidget<UCPP_DialogueCategoryButton>(GetWorld(), InteractButtonsClass);
 	FMargin padding;
 	padding.Left = 50.f;
 	padding.Top = 30.f;
@@ -132,6 +154,7 @@ void UCPP_DialogueWidget::SetSubBox(const FNPCDialogue& npcInfo)
 	padding.Bottom = 0.f;
 
 	button->SetPadding(padding);
+	button->InitType(EInteractType::Revert);
 	button->OnInteractButtonEvent.BindUObject(this, &UCPP_DialogueWidget::InteractButtonEvent);
 
 	DialogueSubBox->AddChild(button);
@@ -143,6 +166,9 @@ void UCPP_DialogueWidget::SetSubBox(const FNPCDialogue& npcInfo)
 
 	USpacer* backSpace = WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass());
 	DialogueSubBox->AddChild(backSpace);
+
+	UHorizontalBoxSlot* backSlot = UWidgetLayoutLibrary::SlotAsHorizontalBoxSlot(backSpace);
+	backSlot->SetSize(size);
 }
 
 void UCPP_DialogueWidget::InteractButtonEvent(EInteractType interactType)
@@ -158,16 +184,17 @@ void UCPP_DialogueWidget::InteractButtonEvent(EInteractType interactType)
 	case EInteractType::JustTalk:
 		break;
 	case EInteractType::Quest:
+		QuestListBox->UpdateQuestList();
 		SetVisibilityQuestListBox(ESlateVisibility::Visible);
 		break;
 	case EInteractType::LikeAbility:
 		break;
 	case EInteractType::Revert:
-		ActivateDialogueSubBox(ESlateVisibility::Hidden);
-		InitDialogueWidget();
-		ActivateDialogueMainBox(ESlateVisibility::Visible);
+		RevertEvent();
 		break;
 	case EInteractType::Quit:
+		ActivateDialogueMainBox(ESlateVisibility::Visible);
+		ActivateDialogueSubBox(ESlateVisibility::Hidden);
 		this->SetVisibility(ESlateVisibility::Hidden);
 		break;
 	default:
@@ -175,24 +202,54 @@ void UCPP_DialogueWidget::InteractButtonEvent(EInteractType interactType)
 	}
 }
 
-void UCPP_DialogueWidget::InitQuestSystem()
+void UCPP_DialogueWidget::AnswerEvent(const FAnswerInfo& answerInfo)
 {
-	UGameInstance* GI = GetGameInstance();
-	if (IsValid(GI))
+	AnswerBox->SetVisibility(ESlateVisibility::Hidden);
+	DialogueSystem->SelectedAnswer(answerInfo.ReturnRowName);
+
+
+	if (answerInfo.bQuestAnswer && answerInfo.AnswerType == EAnswerType::Positive)
 	{
-		UCPP_QuestSubsystem* quest = GI->GetSubsystem<UCPP_QuestSubsystem>();
-		quest->InitQuestSubsystem(NPCID);
+		QuestSubsystem->AddProgressQuest();
+
+		UInventory* inventory = GetOwningPlayerPawn()->FindComponentByClass<UInventory>();
+		if (inventory)
+		{
+			int32 amount = inventory->GetTotalItemAmount(QuestSubsystem->GetCurrentQuest().NeedContentID);
+			QuestSubsystem->CheckQuestContent(QuestSubsystem->GetCurrentQuest().NeedContentID, amount);
+		}		
 	}
 }
 
-void UCPP_DialogueWidget::AnswerEvent()
+void UCPP_DialogueWidget::CreateAnswerButton()
 {
+	for (int32 i = 0; i < AnswerButtonCount; i++)
+	{
+		UCPP_AnswerButton* button = CreateWidget<UCPP_AnswerButton>(GetWorld(), AnswerButtonClass);
+		button->OnAnswerEvent.BindUObject(this, &UCPP_DialogueWidget::AnswerEvent);
+
+		button->SetVisibility(ESlateVisibility::Collapsed);
+		AnswerBox->AddAnswerList(button);
+		AnswerButtonStorage.Add(button);
+	}
+
 	AnswerBox->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UCPP_DialogueWidget::SetAllButtonToCollapsed()
+{
+	//ëŒ€ë‹µë²„íŠ¼
+	for (UUserWidget* wd : AnswerButtonStorage)
+	{
+		wd->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	//í€˜ìŠ¤íŠ¸ ë¦¬ìŠ¤íŠ¸
+	QuestListBox->SetButtonToCollapsed();
 }
 
 bool UCPP_DialogueWidget::HasAvailableQuest(const FNPCDialogue& npcInfo)
 {
-	bool canQuest = npcInfo.CanQuest;
 	bool hasQuest = false;
 
 	UGameInstance* GI = GetGameInstance();
@@ -207,28 +264,55 @@ bool UCPP_DialogueWidget::HasAvailableQuest(const FNPCDialogue& npcInfo)
 	}
 
 
-	return canQuest || hasQuest;
+	return !hasQuest;
 }
 
-void UCPP_DialogueWidget::UpdateDialogueText(const FText& text)
+void UCPP_DialogueWidget::UpdateDialogueEvent(const FText& text, EDialogueEventType dialogueEventType)
 {
+	
 	DialogueText->SetText(text);
+
+	switch (dialogueEventType)
+	{
+	case EDialogueEventType::None:		
+		break;
+	case EDialogueEventType::GiveQuestReward:
+		//ë³´ë¥˜
+		//RewardBox->ActivateRewardBox();
+		QuestSubsystem->QuestClear();
+		break;
+	case EDialogueEventType::ShowSpecificUI:
+		break;
+	case EDialogueEventType::TriggerCinematic:
+		break;
+	default:
+		break;
+	}	
 }
 
-void UCPP_DialogueWidget::UpdateAnswerBox(TArray<FAnswerDialogue> answers)
+void UCPP_DialogueWidget::UpdateAnswerBox(TArray<FAnswerDialogue> answers, bool questAnswer)
 {
-	for (FAnswerDialogue anwser : answers)
-	{
-		UCPP_AnswerButton* button = CreateWidget<UCPP_AnswerButton>(GetWorld(), AnswerButtonClass);
-		button->InitAnswerButton(anwser);
-		button->OnAnswerEvent.BindUObject(this, &UCPP_DialogueWidget::AnswerEvent);
+	int32 amount = 0;
 
-		AnswerBox->AddAnswerList(button);
+	for (FAnswerDialogue answer : answers)
+	{
+		AnswerButtonStorage[amount]->InitAnswerButton(answer, questAnswer);
+		AnswerButtonStorage[amount]->SetVisibility(ESlateVisibility::Visible);
+		amount++;
 	}
+
+	ActivateAnswerBox(true);
 }
 
 void UCPP_DialogueWidget::SetVisibilityQuestListBox(ESlateVisibility visibility)
 {
 	QuestListBox->SetVisibility(visibility);
+}
+
+void UCPP_DialogueWidget::RevertEvent()
+{
+	ActivateDialogueSubBox(ESlateVisibility::Hidden);
+	ResetToInitialState();
+	ActivateDialogueMainBox(ESlateVisibility::Visible);
 }
 

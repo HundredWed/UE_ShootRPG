@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,7 +7,15 @@
 #include "Structs/ST_DialogueAnswer.h"
 #include "CPP_AnswerButton.generated.h"
 
-DECLARE_DELEGATE(FOnAnswerEventDelegate);
+struct FAnswerInfo
+{
+	FName ReturnRowName;
+	EAnswerType AnswerType = EAnswerType::Normal;
+	bool bQuestAnswer;
+};
+
+
+DECLARE_DELEGATE_OneParam(FOnAnswerEventDelegate, const FAnswerInfo&);
 
 UCLASS()
 class UE_RPG_API UCPP_AnswerButton : public UCPP_DialogueButtonBase
@@ -24,9 +32,5 @@ protected:
 
 private:
 
-	FName ReturnRowName;
-	EAnswerType AnswerType = EAnswerType::Normal;
-
-	bool bQuestAnswer;
-	
+	FAnswerInfo AnswerInfo;
 };

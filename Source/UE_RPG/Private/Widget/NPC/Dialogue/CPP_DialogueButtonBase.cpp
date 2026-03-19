@@ -22,5 +22,5 @@ void UCPP_DialogueButtonBase::UpdateButtonText(const FText& buttonText)
 
 void UCPP_DialogueButtonBase::DialogueButtonEvent()
 {
-   
+   DISPLAYLOG(TEXT("클릭!!!!"))
 }

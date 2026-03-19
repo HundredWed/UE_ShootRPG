@@ -27,6 +27,8 @@ void UCPP_UIManager::SetMainWidget(EWidgetType type)
 	default:
 		break;
 	}
+
+	ShowCurrentWidget();
 }
 
 void UCPP_UIManager::RegisterPlayerCharacterToWidget(ACPP_Character* player)
@@ -38,6 +40,17 @@ void UCPP_UIManager::RegisterPlayerCharacterToWidget(ACPP_Character* player)
 	}
 }
 
+bool UCPP_UIManager::ToggleQuestListWindow()
+{
+	if (CurrentWidgetType == EWidgetType::Player)
+	{
+		UMainPanelWidget* playerWG = Cast<UMainPanelWidget>((CurrentWidget));
+		return playerWG->ToggleQuestList();
+	}
+
+	return false;
+}
+
 UCPP_InventoryWidget* UCPP_UIManager::GetInventoryWidget()
 {
 	if (TObjectPtr<UUserWidget>* wd = Widgets.Find(EWidgetType::Player))
@@ -46,6 +59,14 @@ UCPP_InventoryWidget* UCPP_UIManager::GetInventoryWidget()
 		return playerWG->GetInventoryWidget();
 	}
 	return nullptr;
+}
+
+void UCPP_UIManager::ShowCurrentWidget()
+{
+	if (CurrentWidget)
+	{
+		CurrentWidget->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void UCPP_UIManager::HideCurrentWidget()
@@ -59,6 +80,7 @@ void UCPP_UIManager::HideCurrentWidget()
 void UCPP_UIManager::SwitchToPlayerWidget()
 {
 	SetMainWidget(EWidgetType::Player);
+	RevertPlayerWidget.Execute();
 }
 
 void UCPP_UIManager::SetMainWidgetToPlayer()

@@ -13,6 +13,8 @@ void UCPP_InProgressQuestsWidget::NativeConstruct()
 	{
 		UCPP_QuestSubsystem* questSystem = GI->GetSubsystem<UCPP_QuestSubsystem>();
 		questSystem->OnChangeQuestInfo.BindUObject(this, &UCPP_InProgressQuestsWidget::UpdateQuestInfo);
+		questSystem->OnAddProgress.AddUObject(this, &UCPP_InProgressQuestsWidget::AddQuestList);
+		questSystem->OnQuestClear.AddUObject(this, &UCPP_InProgressQuestsWidget::RemoveQuestList);
 	}
 	
 	if (HiddenAnimation)
@@ -21,7 +23,10 @@ void UCPP_InProgressQuestsWidget::NativeConstruct()
 		AnimDelegate.BindDynamic(this, &UCPP_InProgressQuestsWidget::OnHiddenAnimationFinished);
 		BindToAnimationFinished(HiddenAnimation, AnimDelegate);
 	}
+
+	InitQuestList();
 	SetVisibility(ESlateVisibility::Hidden);
+
 }
 
 void UCPP_InProgressQuestsWidget::InitQuestList()
@@ -37,7 +42,6 @@ void UCPP_InProgressQuestsWidget::InitQuestList()
 			UCPP_QuestListButton* list = CreateWidget<UCPP_QuestListButton>(GetWorld(), QuestButtonListClass);
 			list->InitQuestListButton(quest);
 			list->OnButtonClicked.BindUObject(this, &UCPP_InProgressQuestsWidget::UpdateQuestText);
-			list->AddToViewport();
 			QuestListBox->AddChild(list);
 			AllChildrenOfListBox.Add(quest.QuestID, list);
 		}
@@ -48,14 +52,27 @@ void UCPP_InProgressQuestsWidget::AddQuestList(const FQuest& quest)
 {
 	UCPP_QuestListButton* list = CreateWidget<UCPP_QuestListButton>(GetWorld(), QuestButtonListClass);
 	list->InitQuestListButton(quest);
-	list->AddToViewport();
+	list->OnButtonClicked.BindUObject(this, &UCPP_InProgressQuestsWidget::UpdateQuestText);
 	QuestListBox->AddChild(list);
 	AllChildrenOfListBox.Add(quest.QuestID, list);
 }
 
-void UCPP_InProgressQuestsWidget::RemoveQuestList(const FName& questID)
+void UCPP_InProgressQuestsWidget::RemoveQuestList(const FQuest& quest)
 {
-	AllChildrenOfListBox.Remove(questID);
+	if (TObjectPtr<UCPP_QuestListButton>* list = AllChildrenOfListBox.Find(quest.QuestID))
+	{
+		if (*list != nullptr)
+		{
+			(*list)->RemoveFromParent();
+			AllChildrenOfListBox.Remove(quest.QuestID);
+		}		
+	}	
+
+	if (CurrentDescriptionID == quest.QuestID)
+	{
+		QuestDescription->SetText(FText::FromString(TEXT("")));
+		QuestObjective->SetText(FText::FromString(TEXT("")));
+	}
 }
 
 void UCPP_InProgressQuestsWidget::SetCustomVisibility(ESlateVisibility visibility)
@@ -84,6 +101,7 @@ void UCPP_InProgressQuestsWidget::UpdateQuestText(const FQuest& quest)
 	QuestDescription->SetText(quest.QuestContent);
 
 	UpdateQuestObjective(quest);
+	CurrentDescriptionID = quest.QuestID;
 }
 
 void UCPP_InProgressQuestsWidget::UpdateQuestObjective(const FQuest& quest)
@@ -91,7 +109,7 @@ void UCPP_InProgressQuestsWidget::UpdateQuestObjective(const FQuest& quest)
 	FText formatPattern;
 	FText resultText;
 
-	if (quest.QuestType >= EQuestType::EQT_ComBat)
+	if (quest.QuestType <= EQuestType::EQT_ComBat)
 	{
 		if (quest.QuestState == EQuestState::EQS_ConditionClear)
 		{
@@ -121,14 +139,22 @@ void UCPP_InProgressQuestsWidget::UpdateQuestObjective(const FQuest& quest)
 
 		resultText = FText::Format(formatPattern, quest.NeedObjectName);
 	}
-
+	   
 	QuestObjective->SetText(resultText);
 }
 
 void UCPP_InProgressQuestsWidget::UpdateQuestInfo(const FQuest& quest)
 {
 	UCPP_QuestListButton* button = *(AllChildrenOfListBox.Find(quest.QuestID));
-	button->InitQuestListButton(quest);
+	if (button)
+	{
+		button->InitQuestListButton(quest);
+	}
+	
+	if (CurrentDescriptionID == quest.QuestID)
+	{
+		UpdateQuestObjective(quest);
+	}	
 }
 
 void UCPP_InProgressQuestsWidget::OnHiddenAnimationFinished()

@@ -39,5 +39,5 @@ FText UCPP_QuestListButton::SetFormatText()
 		break;
 	}
 
-	return FText::FromString(TEXT("유효하지 않습니다."));
+	return questName;
 }

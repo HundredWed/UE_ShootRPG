@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -17,7 +17,9 @@ class UE_RPG_API UCPP_QuestListBox : public UUserWidget
 	
 public:
 
+	void InitQuestListBox();
 	void UpdateQuestList();
+	void SetButtonToCollapsed();
 
 private:
 
@@ -29,7 +31,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UScrollBox* QuestList;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Config", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UCPP_QuestListButton> QuestButtonClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	int32 QuestButtonCount = 6;
+
+	UPROPERTY()
+	TArray<UCPP_QuestListButton*> QuestListButtonStorage;
 
 };

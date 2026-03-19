@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -12,9 +12,12 @@ class ACPP_Controller;
 class ACPP_Character;
 class UCPP_InventoryWidget;
 
+DECLARE_DELEGATE(FOnRevertPlayerWidgetDelegate);
+
 UENUM()
 enum class EWidgetType : uint8
 {
+	None,
 	Player,
 	NPCDialogue
 };
@@ -31,15 +34,22 @@ public:
 	void SetMainWidget(EWidgetType type);
 	void RegisterPlayerCharacterToWidget(ACPP_Character* player);
 
-	//ÀÓ½Ã ¸®ÆåÅä¸µ ÇÊ¼ö
+	bool ToggleQuestListWindow();
+
+	//ì„ì‹œ ë¦¬í™í† ë§ í•„ìˆ˜
 	UCPP_InventoryWidget* GetInventoryWidget();
+
+	FOnRevertPlayerWidgetDelegate RevertPlayerWidget;
 
 protected:
 	virtual void BeginPlay() override;
 
 private:	
 
+	void ShowCurrentWidget();
 	void HideCurrentWidget();
+
+	UFUNCTION()
 	void SwitchToPlayerWidget();
 
 	void SetMainWidgetToPlayer();

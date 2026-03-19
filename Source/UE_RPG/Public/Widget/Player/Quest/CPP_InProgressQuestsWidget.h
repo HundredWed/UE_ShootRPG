@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -23,7 +23,7 @@ public:
 
 	void InitQuestList();
 	void AddQuestList(const FQuest& quest);
-	void RemoveQuestList(const FName& questID);
+	void RemoveQuestList(const FQuest& quest);
 
 	void SetCustomVisibility(ESlateVisibility visibility);
 
@@ -49,7 +49,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UTextBlock* QuestObjective;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Config", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UCPP_QuestListButton> QuestButtonListClass;
 
 	UPROPERTY(Transient, meta = (BindWidgetAnim, AllowPrivateAccess = "true"))
@@ -58,5 +58,8 @@ private:
 	UPROPERTY(Transient, meta = (BindWidgetAnim, AllowPrivateAccess = "true"))
 	UWidgetAnimation* HiddenAnimation;
 
+	UPROPERTY()
 	TMap<FName, TObjectPtr<UCPP_QuestListButton>> AllChildrenOfListBox;
+
+	FName CurrentDescriptionID;
 };

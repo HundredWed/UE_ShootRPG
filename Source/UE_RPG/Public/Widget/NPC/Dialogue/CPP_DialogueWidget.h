@@ -1,10 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Structs/ST_DialogueAnswer.h"
+#include "CPP_AnswerButton.h"
 #include "Structs/ST_NPC.h"
 #include "Structs/ST_Quest.h"
 #include "CPP_DialogueWidget.generated.h"
@@ -17,6 +17,8 @@ class UCPP_DialogueButtonBase;
 class UCPP_AnswerButton;
 class UCPP_AnswerBox;
 class UCPP_DialogueSystem;
+class UCPP_QuestSubsystem;
+class UCPP_QuestRewardBox;
 
 UCLASS()
 class UE_RPG_API UCPP_DialogueWidget : public UUserWidget
@@ -29,8 +31,10 @@ public:
 
 	void InitDialogueWidget();
 	
-	void UpdateDialogueText(const FText& text);
-	void UpdateAnswerBox(TArray<FAnswerDialogue> answers);
+	UFUNCTION()
+	void UpdateDialogueEvent(const FText& text, EDialogueEventType dialogueEventType);
+	UFUNCTION()
+	void UpdateAnswerBox(TArray<FAnswerDialogue> answers, bool questAnswer = false);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	bool ActivateDialogueSubBox(ESlateVisibility Invisibility);
@@ -40,16 +44,29 @@ public:
 
 private:
 
+	void CreateInteractButton();
+
+	void ResetToInitialState();
+
 	void SetInteractButton(const FNPCDialogue& npcInfo);
 	void SetMainBox(const FNPCDialogue& npcInfo);
 	void SetSubBox(const FNPCDialogue& npcInfo);
+
+	UFUNCTION()
 	void InteractButtonEvent(EInteractType interactType);
-	void InitQuestSystem();
+
 	void ActivateAnswerBox(bool bActivate);
-	void AnswerEvent();
+	void AnswerEvent(const FAnswerInfo& answerInfo);
+	void CreateAnswerButton();
+	void SetAllButtonToCollapsed();
+
 	void SetVisibilityQuestListBox(ESlateVisibility visibility);
 
+	UFUNCTION()
+	void RevertEvent();
+
 	bool HasAvailableQuest(const FNPCDialogue& npcInfo);
+
 
 private:
 
@@ -61,6 +78,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UCPP_QuestListBox* QuestListBox;
+	
+	//보류
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UCPP_QuestRewardBox* QuestRewardBox;*/
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UCPP_AnswerBox* AnswerBox;
@@ -72,14 +93,20 @@ private:
 	UTextBlock* DialogueText;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
-	TMap<EInteractType, TSubclassOf<UCPP_DialogueButtonBase>> InteractButtons;
+	TSubclassOf<UCPP_DialogueButtonBase> InteractButtonsClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	TSubclassOf<UCPP_AnswerButton> AnswerButtonClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	int32 AnswerButtonCount = 3;
 
+	UPROPERTY()
 	TObjectPtr<UCPP_DialogueSystem> DialogueSystem;
 
-	FName NPCID;
+	UPROPERTY()
+	TObjectPtr<UCPP_QuestSubsystem> QuestSubsystem;
 
+	UPROPERTY()
+	TArray<UCPP_AnswerButton*> AnswerButtonStorage;
 };

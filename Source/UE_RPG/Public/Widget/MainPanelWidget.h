@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -22,20 +22,12 @@ public:
 
 	virtual void NativeConstruct() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UCPP_InventoryWidget* InventoryWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	USetAmountWidget* ThrowWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UCPP_PlayerStateBar* StateWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UCPP_InProgressQuestsWidget* InProgressQuestsWidget;
-
 	FORCEINLINE UCPP_InventoryWidget* GetInventoryWidget() { return InventoryWidget; }
 	FORCEINLINE UCPP_PlayerStateBar* GetStateWidget() { return StateWidget; }
+
+	UFUNCTION(BlueprintImplementableEvent)
+	bool UpdatePopupText(const FText& text);
+
 
 	/**StateWidget*/
 	void BindCharacterStat(ACPP_Character* player);
@@ -46,10 +38,30 @@ public:
 	//void SetStaminaBarPercent(float Percent);
 	void UpdateLevel(int32 level);
 
+	bool ToggleQuestList();
+
 protected:
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override ;
 
 private:
 	void UpdateHealthBarPercent(const float currentHp, const float max);
 	void UpdateManaBarPercent(const float percent);
+
+
+	bool IsQuestListActivate = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UCPP_InventoryWidget* InventoryWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	USetAmountWidget* ThrowWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UCPP_PlayerStateBar* StateWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UCPP_InProgressQuestsWidget* InProgressQuestsWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UUserWidget* PopupWidget;
 };

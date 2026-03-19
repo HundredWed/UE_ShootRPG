@@ -4,7 +4,7 @@
 #include "Widget/NPC/Dialogue/CPP_AnswerBox.h"
 #include "Components/VerticalBox.h"
 
-void UCPP_AnswerBox::AddAnswerList(UUserWidget* answser)
+void UCPP_AnswerBox::AddAnswerList(UUserWidget* answer)
 {
-	AnswerListBox->AddChild(answser);
+	AnswerListBox->AddChild(answer);
 }

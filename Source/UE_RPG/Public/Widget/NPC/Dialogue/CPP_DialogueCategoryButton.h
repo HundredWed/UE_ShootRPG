@@ -15,6 +15,8 @@ class UE_RPG_API UCPP_DialogueCategoryButton : public UCPP_DialogueButtonBase
 
 public:
 
+	void InitType(EInteractType interactType);
+
 	FOnCategoryEventDelegate OnInteractButtonEvent;
 
 protected:
@@ -22,7 +24,7 @@ protected:
 
 private:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EInteractType InteractType = EInteractType::Normal;
 	
 };
