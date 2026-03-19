@@ -1,6 +1,7 @@
-#include "Item/Weapon/CPP_WeaponManager.h"
+﻿#include "Item/Weapon/CPP_WeaponManager.h"
 #include "Item/Weapon/CPP_WeaponBase.h"
 #include "GameFramework/Character.h"
+#include "Systems/CPP_AkashicSubsystem.h"
 
 UCPP_WeaponManager::UCPP_WeaponManager()
 {
@@ -12,36 +13,35 @@ void UCPP_WeaponManager::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UCPP_WeaponManager::EquipWeapon(const FName& weaponid, TSubclassOf<ACPP_WeaponBase> weapon)
+void UCPP_WeaponManager::EquipWeapon(const FName& weaponId)
 {
-	if (!IsValid(weapon))
-	{
-		WARNINGLOG(TEXT("is not valid weapon class in weaponmanager. please chack weapon subclass "))
-		return;
-	}
-		
-
-	if (!WeaponStorage.IsEmpty() && WeaponStorage[weaponid])
+	
+	if (WeaponStorage.Contains(weaponId))
 	{
 		PrevWeapon = CurrentWeapon;
 
-		CurrentWeapon->SetActorHiddenInGame(true);
-		WeaponStorage[weaponid]->SetActorHiddenInGame(false);
-		CurrentWeapon = WeaponStorage[weaponid];
+		PrevWeapon->SetActorHiddenInGame(true);
+
+		ACPP_WeaponBase* weapon = *(WeaponStorage.Find(weaponId));
+		weapon->SetActorHiddenInGame(false);
+		CurrentWeapon = weapon;
 	}
 	else
 	{
-		ACPP_WeaponBase* equip = SpawnWeapon(weapon);
-		equip->SetOwner(GetOwner());
-		ACharacter* player = Cast<ACharacter>(GetOwner());
-		equip->Equip(player->GetMesh(), "weapon_socket_back");
-		AddWeapon(weaponid, equip);
-
 		UWorld* world = GetWorld();
-		if (!bClearWeaponTick || !IsValid(world))
+		if (!IsValid(world))
+		{
+			return;
+		}
+
+		UCPP_AkashicSubsystem* AS = world->GetSubsystem<UCPP_AkashicSubsystem>();
+		AS->SpawnWeaponAsync(weaponId, GetOwner()->GetActorLocation(), FOnWeaponSpawnedCallback::CreateUObject(this, &UCPP_WeaponManager::OnWeaponReady));
+	
+
+		if (!bClearWeaponTick)
 		{
 			bClearWeaponTick = true;
-			world->GetTimerManager().SetTimer(ManagerTimer, this, &UCPP_WeaponManager::ClearWeaponGarbege, ClearWeaponTick);
+			world->GetTimerManager().SetTimer(ManagerTimer, this, &UCPP_WeaponManager::ClearWeaponGarbage, ClearWeaponTick);
 		}
 	}
 }
@@ -51,10 +51,12 @@ void UCPP_WeaponManager::TakeOffWeapon()
 	CurrentWeapon->SetActorHiddenInGame(true);
 }
 
-void UCPP_WeaponManager::AddWeapon(const FName& weaponid, ACPP_WeaponBase* weapon)
+void UCPP_WeaponManager::OnWeaponReady(ACPP_WeaponBase* weapon)
 {
-	WeaponStorage.Add(weaponid, weapon);
-	WeaponIds.Add(weaponid);
+	weapon->SetOwner(GetOwner());
+	ACharacter* player = Cast<ACharacter>(GetOwner());
+	weapon->Equip(player->GetMesh(), "weapon_socket_back");
+	WeaponStorage.Add(weapon->ItemInfoID, weapon);
 	CurrentWeapon = weapon;
 }
 
@@ -67,16 +69,21 @@ ACPP_WeaponBase* UCPP_WeaponManager::SpawnWeapon(TSubclassOf<ACPP_WeaponBase> we
 	return  world->SpawnActor<ACPP_WeaponBase>(weapon);
 }
 
-void UCPP_WeaponManager::ClearWeaponGarbege()
+void UCPP_WeaponManager::ClearWeaponGarbage()
 {
-	for (int32 i = 0; i < WeaponIds.Num(); i++)
+	for (auto weapon : WeaponStorage)
 	{
-		if (WeaponStorage[WeaponIds[i]] == CurrentWeapon ||
-			WeaponStorage[WeaponIds[i]] == PrevWeapon)
-			continue;
-
-		WeaponStorage[WeaponIds[i]]->Destroy();
-		WeaponStorage.Remove(WeaponIds[i]);
+		if (weapon.Value)
+		{
+			if (weapon.Key == CurrentWeapon->ItemInfoID
+				|| weapon.Key == PrevWeapon->ItemInfoID)
+			{
+				continue;
+			}
+			
+			weapon.Value->Destroy();
+			WeaponStorage.Remove(weapon.Key);
+		}
 	}
 
 	bClearWeaponTick = false;

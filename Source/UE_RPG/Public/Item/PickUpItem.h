@@ -1,9 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ItemData.h"
-#include "Engine/DataTable.h"
 #include "Interface/CPP_InteractInterface.h"
 #include "UE_RPG/UtilityMecro.h"
 #include "PickUpItem.generated.h"
@@ -17,6 +16,7 @@ class UE_RPG_API APickUpItem : public AActor, public ICPP_InteractInterface
 	
 public:	
 	APickUpItem();
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 	void SetWidgetVisibility(bool Visible);
 	void InitializePickUpItem();
@@ -32,9 +32,6 @@ protected:
 	/**component*/
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
 		class UStaticMeshComponent* PickUpMesh;
-
-	UPROPERTY(VisibleAnywhere, Category = "Item Component")
-		class USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
 		class USphereComponent* SearchComponent;
@@ -55,9 +52,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item state")
 		class UItem* ItemRef = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = "Item state")
-		UDataTable* ItemDataTable;
 
 
 	UFUNCTION()

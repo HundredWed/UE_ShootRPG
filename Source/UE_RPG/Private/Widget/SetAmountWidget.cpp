@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widget/SetAmountWidget.h"
@@ -12,7 +12,7 @@ void USetAmountWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	CancelButton->OnClicked.AddDynamic(this, &USetAmountWidget::ClickCancel);
-	ConfirmButton->OnClicked.AddDynamic(this, &USetAmountWidget::ClickConfirml);
+	ConfirmButton->OnClicked.AddDynamic(this, &USetAmountWidget::ClickConfirm);
 	MinusButton->OnClicked.AddDynamic(this, &USetAmountWidget::ClickMinus);
 	PlusButton->OnClicked.AddDynamic(this, &USetAmountWidget::ClickPlus);
 }
@@ -25,19 +25,19 @@ void USetAmountWidget::InitWidgetInfo(const int32 amount, const int16 index, boo
 	ToIndex = toIndex;
 
 	SetAmountCount = 1;
-	SetCnountText(SetAmountCount);
+	SetCountText(SetAmountCount);
 }
 
 void USetAmountWidget::IncreaseCount()
 {
 	SetAmountCount = FMath::Clamp(SetAmountCount + 1, 1, MaxAmountCount);
-	SetCnountText(SetAmountCount);
+	SetCountText(SetAmountCount);
 }
 
 void USetAmountWidget::DecreaseCount()
 {
 	SetAmountCount = FMath::Clamp(SetAmountCount - 1, 1, MaxAmountCount);
-	SetCnountText(SetAmountCount);
+	SetCountText(SetAmountCount);
 }
 
 void USetAmountWidget::ClickCancel()
@@ -46,7 +46,7 @@ void USetAmountWidget::ClickCancel()
 	this->SetVisibility(ESlateVisibility::Hidden);
 }
 
-void USetAmountWidget::ClickConfirml()
+void USetAmountWidget::ClickConfirm()
 {
 	if (bThrowWidget)
 	{
@@ -72,7 +72,7 @@ void USetAmountWidget::ClickMinus()
 	{
 		ResetCount(); 
 		SetAmountCount = 1;
-		SetCnountText(SetAmountCount);
+		SetCountText(SetAmountCount);
 	}
 	else
 	{
@@ -92,7 +92,7 @@ void USetAmountWidget::ClickPlus()
 	{
 		ResetCount();
 		SetAmountCount = MaxAmountCount;
-		SetCnountText(SetAmountCount);
+		SetCountText(SetAmountCount);
 	}
 	else
 	{
@@ -104,7 +104,7 @@ void USetAmountWidget::ResetCount()
 {
 	ClickCount = 0;
 }
-void USetAmountWidget::SetCnountText(const int32 count)
+void USetAmountWidget::SetCountText(const int32 count)
 {
 	FText textcount = FText::AsNumber(count);
 	TextCount->SetText(textcount);

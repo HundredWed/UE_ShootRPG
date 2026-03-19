@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -22,12 +22,8 @@ public:
 	bool bCopyItem;
 
 	UFUNCTION()
-		UItem* CreateItemCopy();
+		UItem* CreateItemCopy(UObject* outer);
 
-protected:
-
-	UPROPERTY()
-		class ACPP_Character* playerRef;
 
 private:
 

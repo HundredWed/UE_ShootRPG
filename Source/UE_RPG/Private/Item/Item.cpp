@@ -1,4 +1,4 @@
-#include "Item/Item.h"
+﻿#include "Item/Item.h"
 #include "CPP_Character.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
@@ -11,10 +11,10 @@ UItem::UItem()
 	bCopyItem = false;
 }
 
-UItem* UItem::CreateItemCopy()
+UItem* UItem::CreateItemCopy(UObject* outer)
 {
 	/**the case other get other inventory. not PickUp */
-	UItem* copy = NewObject<UItem>(StaticClass());
+	UItem* copy = NewObject<UItem>(outer, StaticClass());
 	copy->ItemInfoTable = this->ItemInfoTable;
 
 	return copy;

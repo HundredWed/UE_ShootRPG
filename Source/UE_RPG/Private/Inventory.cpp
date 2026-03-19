@@ -1,13 +1,15 @@
-#include "Inventory.h"
+﻿#include "Inventory.h"
 #include "Item/Item.h"
 #include "CPP_Character.h"
 #include "Widget/CPP_Slot.h"
 #include "Widget/CPP_EquipmentInventory.h"
 #include "Widget/CPP_EquipSlot.h"
 #include "Item/PickUpItem.h"
-#include "Systems/CPP_QuestSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "CPP_Controller.h"
+#include "DataAssets/CPP_ConsumptionItemDataAsset.h"
+#include "Systems/CPP_AkashicSubsystem.h"
+
 UInventory::UInventory()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -29,7 +31,7 @@ void UInventory::BeginPlay()
 		MaxWeight = PlayerRef->GetPlayerWeightInfo();
 
 
-		//�ӽ�
+		//임시
 		ACPP_Controller* controller = Cast<ACPP_Controller>(PlayerRef->GetController());
 		InventoryWidget = controller->GetInventoryWidget();
 		InventoryWidget->UpdateWeightMaxAmount(MaxWeight);
@@ -41,7 +43,6 @@ void UInventory::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("not found PlayerRef at Inventory!!"));
 	}
-	
 }
 
 bool UInventory::IsSlotEmpty(const int32 index)
@@ -57,108 +58,76 @@ bool UInventory::IsSlotEmpty(const int32 index)
 	
 }
 
-void UInventory::AddItem(UItem* item, const uint32 amount)
+int32 UInventory::AddItem(UItem* item, const uint32 amount)
 {
-	if (!IsValid(item))
+	if (!IsValid(item) || amount == 0)
 	{
-		return;
+		return 0;
 	}
 
-	/**item is Stacked?*/
+	uint32 remainAmount = amount;
+
 	if (item->ItemInfoTable.bCanStacked)
 	{
-		/**can Stacked item*/
-
-		int32 canStackedSlotIndex;
-		if (SearchFreeStackSlot(item, canStackedSlotIndex))
+		while (remainAmount > 0)
 		{
-			/**found can-stack slot*/
-
-			const uint32 amountOver = SlotsArray[canStackedSlotIndex].ItemAmount + amount;
-			if (amountOver > MaxStackSize)
+			int32 stackSlotIndex;
+			if (!SearchFreeStackSlot(item, stackSlotIndex))
 			{
-				const float restWeight = MaxStackSize - SlotsArray[canStackedSlotIndex].ItemAmount;
-
-				/**update widget*/
-				UpdateInventory(canStackedSlotIndex, item, MaxStackSize);
-				AddWeight(item->ItemInfoTable.Weight * restWeight);
-
-				const uint32 restAmountOver = amountOver - MaxStackSize;
-				AddItem(item, restAmountOver);
-
-				return;
+				break;
 			}
-			else
-			{
-				/**update widget*/
-				UpdateInventory(canStackedSlotIndex, item, amountOver);
-				AddWeight(item->ItemInfoTable.Weight * amount);
-				return;
 
-			}
+			uint32 addableAmount = MaxStackSize - SlotsArray[stackSlotIndex].ItemAmount;
+			uint32 amountToPut = FMath::Min(remainAmount, addableAmount);
+			UItem* itemToPut = SlotsArray[stackSlotIndex].Item;
+
+			UpdateInventory(stackSlotIndex, itemToPut, SlotsArray[stackSlotIndex].ItemAmount + amountToPut);
+			AddWeight(itemToPut->ItemInfoTable.Weight * amountToPut);
+
+			remainAmount -= amountToPut;
 		}
-		else
+
+		while (remainAmount > 0)
 		{
-			/**not found can stack slot*/
-			int32 emptySlotToStack;
-			if (SearchEmptySlot(emptySlotToStack))
+			int32 emptySlotIndex;
+			
+			if (!SearchEmptySlot(emptySlotIndex))
 			{
-				if (amount > MaxStackSize)
-				{
-					/**update widget*/
-					UpdateInventory(emptySlotToStack, item, MaxStackSize);
-					AddWeight(item->ItemInfoTable.Weight * MaxStackSize);
-
-					const uint32 restAmount = amount - MaxStackSize;
-					AddItem(item, restAmount);
-
-					return;
-				}
-				else
-				{
-					/**update widget*/
-					UpdateInventory(emptySlotToStack, item, amount);
-					AddWeight(item->ItemInfoTable.Weight * amount);
-
-					return;
-				}
+				break;
 			}
-			else
-			{
-				return;
-			}
+
+			uint32 amountToPut = FMath::Min(remainAmount, (uint32)MaxStackSize);
+			UItem* itemToPut = item->CreateItemCopy(this);
+
+			UpdateInventory(emptySlotIndex, itemToPut, amountToPut);
+			AddWeight(itemToPut->ItemInfoTable.Weight * amountToPut);
+
+			remainAmount -= amountToPut;
 		}
-		
 	}
-	else /**can't Stacked item*/
+	else /** 스택 불가능한 아이템 (장비 등) */
 	{
-		int32 emptySlot;
-		const int32 defaultAmount = 1;
-		if (SearchEmptySlot(emptySlot))
+		while (remainAmount > 0)
 		{
-			/**update widget*/
-			UpdateInventory(emptySlot, item, defaultAmount);
-			AddWeight(item->ItemInfoTable.Weight);
-		}
-		else
-		{
-			return;
-		}
+			int32 emptySlotIndex;
 
-		/**In the case of acquiring multiple "can't Stacked items" */
-		if (amount > defaultAmount)
-		{
-			const int32 addRestItem = amount - 1;
-			UItem* copyItem = item->CreateItemCopy();
-			AddItem(copyItem, addRestItem);
-		}
-		else
-		{
-			return;
+			if (!SearchEmptySlot(emptySlotIndex))
+			{
+				break;
+			}
+
+			UItem* itemToPut = item->CreateItemCopy(this);
+
+			UpdateInventory(emptySlotIndex, itemToPut, 1);
+			AddWeight(itemToPut->ItemInfoTable.Weight * 1);
+
+			remainAmount -= 1;
 		}
 	}
 
-	CheckQuest(item->ItemInfoTable.ItemInfoID, amount);
+	const int32 storedAmount = amount - remainAmount;
+
+	return storedAmount;
 }
 
 bool UInventory::SearchEmptySlot(int32& emptySlotIndex)
@@ -202,15 +171,22 @@ int32 UInventory::GetAmountAtIndex(const int32 index)
 }
 
 
-void UInventory::RemoveItemAtIndex(const int32 index, const int32 removeAmount)
+bool UInventory::RemoveItemAtIndex(const int32 index, const int32 removeAmount)
 {
 	if (!IsSlotEmpty(index) && (removeAmount > 0))
 	{
+		if (SlotsArray[index].Item->ItemInfoTable.ItemType == EItemCategory::EIS_QuestItems)
+		{
+			return false;
+		}
+
 		const int32 amount = GetAmountAtIndex(index);
 		const float weight = SlotsArray[index].Item->ItemInfoTable.Weight;
+		const FName itemId = SlotsArray[index].Item->ItemInfoTable.ItemInfoID;
+
 		if (removeAmount >= amount)
 		{ 
-			UpdateInventory(index, nullptr, 0);			
+			UpdateInventory(index, nullptr, 0);
 		}
 		else
 		{
@@ -220,7 +196,32 @@ void UInventory::RemoveItemAtIndex(const int32 index, const int32 removeAmount)
 
 		AddWeight(-(weight * removeAmount));
 
-		CheckQuest(SlotsArray[index].Item->ItemInfoTable.ItemInfoID, -removeAmount);
+		OnItemRemoved.Execute(itemId, -removeAmount);
+	}
+
+	return true;
+}
+
+void UInventory::RemoveQuestItem(const FName& itemId, const int32 amount)
+{
+	int32 totalAmount = amount;
+
+	for (int32 i = 0; i < SlotsArray.Num(); ++i)
+	{
+		const FInventorySlot& slot = SlotsArray[i];
+
+		if (IsValid(slot.Item) && slot.Item->ItemInfoTable.ItemInfoID == itemId)
+		{
+			int32 removeAmount = FMath::Min(totalAmount, slot.ItemAmount);
+
+			RemoveItemAtIndex(i, removeAmount);
+			totalAmount -= removeAmount;
+
+			if (totalAmount == 0)
+			{
+				break;
+			}
+		}
 	}
 }
 
@@ -518,30 +519,6 @@ void UInventory::ChangeItemInfo(FName itemInfoID, const int32 index)
 
 	item->ItemInfoTable = *itemInfo;
 
-	///**item data*/
-	//item->ItemInfoTable.ItemInfoID = itemInfo->ItemInfoID;
-	//item->ItemInfoTable.Name = itemInfo->Name;
-	//item->ItemInfoTable.Description = itemInfo->Description;
-	//item->ItemInfoTable.bCanBeUsed = itemInfo->bCanBeUsed;
-	//item->ItemInfoTable.bCanStacked = itemInfo->bCanStacked;
-	//item->ItemInfoTable.UseText = itemInfo->UseText;
-	//item->ItemInfoTable.Interaction = itemInfo->Interaction;
-	//item->ItemInfoTable.ItemPrice = itemInfo->ItemPrice;
-	//item->ItemInfoTable.Weight = itemInfo->Weight;
-	//item->ItemInfoTable.ATK = itemInfo->ATK;
-
-	///**itemtype data*/
-	//item->ItemType = itemInfo->ItemType;
-	//item->ConsumeValue = itemInfo->ConsumeValue;
-	//if (itemInfo->ItemClass)
-	//{
-	//	item->ItemClass = itemInfo->ItemClass;
-	//}
-
-	///**asset data*/
-	//item->ItemMesh = itemInfo->ItemMesh;
-	//item->IconTexture = itemInfo->IconTexture;
-
 	UpdateSlotAtIndex(index);
 }
 
@@ -613,7 +590,7 @@ void UInventory::SetEquipWeapon(UItem* item, const int32 index)
 		}
 
 		/**set EquipmentInventory item to Inventory item*/
-		//UpdateEquipmentInventory(item);
+		UpdateEquipmentInventory(item);
 		EquipWeaponToPlayer(item);
 	}
 	
@@ -660,42 +637,55 @@ AActor* UInventory::GetAbilityActor(FName itemId)
 	return nullptr;
 }
 
-void UInventory::StartAbilityActorLife(FName itemId)
+int32 UInventory::GetTotalItemAmount(const FName& itemID)
 {
-	AActor** abilityActor = ItemManageSystem.Find(itemId);
-	if (abilityActor)
+	int32 amount = 0;
+
+	for (FInventorySlot slot : SlotsArray)
 	{
-		FTimerHandle TimerHandle;
-		FTimerDelegate TimerDel;
-		TimerDel.BindUFunction(this, FName("DestroyAbilityActor"),*abilityActor, itemId);
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 5.f, false);
+		if (slot.Item == nullptr)
+		{
+			continue;
+		}
+
+		if (slot.Item->ItemInfoTable.ItemInfoID == itemID)
+		{
+			amount += slot.ItemAmount;			
+		}
 	}
-	
+
+	return amount;
 }
 
-void UInventory::DestroyAbilityActor(AActor* actor, FName itemId)
+void UInventory::UseItem(const int32 index)
 {
-	if (actor)
+	if (UCPP_ConsumptionItemDataAsset* asset = SlotsArray[index].Item->ItemInfoTable.ItemLogicAsset)
 	{
-		actor->Destroy();
-		ItemManageSystem[itemId] = nullptr;
-
-		FString id = itemId.ToString();
-		GEngine->AddOnScreenDebugMessage(
-			INDEX_NONE,
-			30.f,
-			FColor::Yellow,
-			FString::Printf(TEXT("Destroy 'ID:%s ' from ItemManageSystem!"), *id));
+		asset->ExecuteLogic(GetOwner());
 	}
 }
 
-void UInventory::CheckQuest(const FName& objectID, int32 amount)
+void UInventory::ExchangeQuestItems(const FName& rewardItemID, const int32 rewardAmount, const FName& removeItemID, const int32 removeAmount)
 {
-	UCPP_QuestSubsystem* questSystem = Cast<UCPP_QuestSubsystem>(UGameplayStatics::GetGameInstance(this));
+	//먼저 삭제
+	RemoveQuestItem(removeItemID, removeAmount);
 
-	if (IsValid(questSystem))
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
 	{
-		questSystem->CheckQuestContent(objectID, amount);
+		return;
 	}
+
+	if (UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>())
+	{
+		const FItemInfoTable* itemInfo = AS->RequestItemInfo(rewardItemID);
+		if (itemInfo)
+		{
+			UItem* newItem = NewObject<UItem>(UItem::StaticClass());
+			newItem->ItemInfoTable = *itemInfo;
+			AddItem(newItem, rewardAmount);
+		}
+	}
+
 }
 

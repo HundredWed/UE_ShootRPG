@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
@@ -23,8 +23,8 @@ struct FNPCDialogue : public FTableRowBase
 public:
 	FNPCDialogue() {};
 
-	UPROPERTY(EditDefaultsOnly)
-	FName NPCID;
+	/*UPROPERTY(EditDefaultsOnly)
+	FName NPCID;*/
 
 	UPROPERTY(EditDefaultsOnly)
 	FText NPCName;
@@ -33,9 +33,5 @@ public:
 	FText BasicDialogue;
 
 	UPROPERTY(EditDefaultsOnly)
-	bool CanJustTalk;
-	UPROPERTY(EditDefaultsOnly)
-	bool CanQuest;
-	UPROPERTY(EditDefaultsOnly)
-	bool CanLikeAbility;
+	TArray<EInteractType> CanInteractTypes;
 };

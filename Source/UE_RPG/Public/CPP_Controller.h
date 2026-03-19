@@ -8,13 +8,6 @@
 #include "Structs/ST_DialogueAnswer.h"
 #include "CPP_Controller.generated.h"
 
-UENUM(BlueprintType)
-enum class EPlayerIputMappingState : uint8
-{
-	Default,
-	NPCTalking
-};
-
 class UInputMappingContext;
 class AHUD;
 class UCPP_UIManager;
@@ -22,6 +15,17 @@ class UMainPanelWidget;
 class UCPP_InventoryWidget;
 class UInputAction;
 class UCPP_DialogueSystem;
+
+
+
+
+UENUM(BlueprintType)
+enum class EPlayerIputMappingState : uint8
+{
+	None,
+	Default,
+	NPCTalking
+};
 
 UCLASS()
 class UE_RPG_API ACPP_Controller : public APlayerController
@@ -40,6 +44,8 @@ public:
 	UFUNCTION()
 	void SetHUDVisibility(bool bshowHUD);
 
+	bool ToggleQuestWindow();
+
 	void ShowCursor();
 	void HideCursor(); 
 
@@ -53,6 +59,9 @@ protected:
 private:
 	UFUNCTION()
 	void InteractEvent();
+
+	UFUNCTION()
+	void SetToDefaultInteractionState();
 
 	void UpdatePlayerWidget();
 

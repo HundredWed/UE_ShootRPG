@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
@@ -13,6 +13,7 @@ struct FNPCQuests : public FTableRowBase
 public:
 	FNPCQuests() {};
 
+	/**FName이 퀘스트 ID*/
 	UPROPERTY(EditDefaultsOnly)
-	TArray<FQuest> Quests;
+	TMap<FName, FQuest> Quests;
 };

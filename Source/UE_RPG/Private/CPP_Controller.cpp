@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CPP_Controller.h"
@@ -7,13 +7,13 @@
 #include "EnhancedInputComponent.h"
 
 #include "Component/CPP_UIManager.h"
-#include "Systems/CPP_QuestSubsystem.h"
 #include "Systems/CPP_DialogueSystem.h"
 #include "CPP_Character.h"
 
 ACPP_Controller::ACPP_Controller()
 {
     UIManager = CreateDefaultSubobject<UCPP_UIManager>(TEXT("UIManager"));
+    UIManager->RevertPlayerWidget.BindUObject(this, &ACPP_Controller::SetToDefaultInteractionState);
 }
 
 void ACPP_Controller::BeginPlay()
@@ -23,7 +23,7 @@ void ACPP_Controller::BeginPlay()
     CrosshairHUD = GetHUD();
 	CrosshairHUD->bShowHUD = false;
 
-    ChangeInteractionState(EPlayerIputMappingState::Default);
+    SetToDefaultInteractionState();
 
     UpdatePlayerWidget();
 
@@ -47,6 +47,11 @@ void ACPP_Controller::InteractEvent()
         DialogueSystem->PrintDialogue();
         break;
     }   
+}
+
+void ACPP_Controller::SetToDefaultInteractionState()
+{
+    ChangeInteractionState(EPlayerIputMappingState::Default);
 }
 
 void ACPP_Controller::UpdatePlayerWidget()
@@ -98,6 +103,7 @@ void ACPP_Controller::SetupInputComponent()
 void ACPP_Controller::SetNPCInteract(const FName& npcID)
 {
     DialogueSystem->InitDialogue(npcID);
+    UIManager->SetMainWidget(EWidgetType::NPCDialogue);
     bInteractEvent = true;
     ChangeInteractionState(EPlayerIputMappingState::NPCTalking);
 }
@@ -108,6 +114,22 @@ void ACPP_Controller::SetHUDVisibility(bool bshowHUD)
 	{
 		CrosshairHUD->bShowHUD = bshowHUD;
 	}
+}
+
+bool ACPP_Controller::ToggleQuestWindow()
+{
+    bool isActivate = UIManager->ToggleQuestListWindow();
+
+    if (isActivate)
+    {
+        ShowCursor();
+    }
+    else
+    {
+        HideCursor();
+    }
+
+    return isActivate;
 }
 
 void ACPP_Controller::ShowCursor()

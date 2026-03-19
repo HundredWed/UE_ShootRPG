@@ -1,10 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Engine/DataTable.h"
+#include "Structs/ST_Quest.h"
 #include "Widget/CPP_InventoryWidget.h"
 #include "Inventory.generated.h"
 
@@ -23,7 +24,7 @@ public:
 		int32 ItemAmount;
 };
 
-
+DECLARE_DELEGATE_TwoParams(FOnOnItemRemovedDelegate, const FName&, const int32);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UE_RPG_API UInventory : public UActorComponent
@@ -45,9 +46,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Item state")
 		UDataTable* ItemDataTable;
 
-	/**inventory value*/
-	float MaxWeight = 0.0f;
-	int32 MaxGold = 999999999;
+	
+	FOnOnItemRemovedDelegate OnItemRemoved;
+
 protected:
 	
 	virtual void BeginPlay() override;
@@ -56,12 +57,12 @@ public:
 
 	/**inventory function*/
 	bool IsSlotEmpty(const int32 index);
-	void AddItem(class UItem* item, const uint32 amount = 1);
+	int32 AddItem(class UItem* item, const uint32 amount = 1);
 	bool SearchEmptySlot(int32& emptySlotIndex);
 	bool SearchFreeStackSlot(class UItem* item, int32& canStackedSlotIndex);
 	int32 GetAmountAtIndex(const int32 index);
 
-	void RemoveItemAtIndex(const int32 index, const int32 removeAmount);
+	bool RemoveItemAtIndex(const int32 index, const int32 removeAmount);
 	void SwapSlot(const int32 fromIndex, const int32 toIndex);
 	void CheckItemType(const int32 fromIndex, const int32 toIndex);
 	void AddToIndex(const int32 fromIndex, const int32 toIndex);
@@ -115,14 +116,17 @@ public:
 
 	/**manage ability-actor*/
 	AActor* GetAbilityActor(FName itemId);
-	void StartAbilityActorLife(FName itemId);
 
-	UFUNCTION()
-		void DestroyAbilityActor(AActor* actor,FName itemId);
+	/**getter*/
+	int32  GetTotalItemAmount(const FName& itemID);
 
-private:
+	void UseItem(const int32 index);
 
-	void CheckQuest(const FName& objectID, int32 amount);
+	void ExchangeQuestItems(const FName& rewardItemID, const int32 rewardAmount, const FName& removeItemID, const int32 removeAmount);
+
+private:	
+
+	void RemoveQuestItem(const FName& itemId, const int32 amount);
 
 private:
 
@@ -134,6 +138,8 @@ private:
 	int16 InventoryRow = 0;
 	float CurrentWeight = 0.0f;
 	int32 CurrentGold = 0;
+	float MaxWeight = 0.0f;
+	int32 MaxGold = 999999999;
 
 	UPROPERTY()
 		TMap<FName, AActor*> ItemManageSystem;

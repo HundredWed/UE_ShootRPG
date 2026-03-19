@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -49,12 +49,12 @@ public:
 		/*when split*/const int16 toIndex = -1);
 	void IncreaseCount();
 	void DecreaseCount();
-	void SetCnountText(const int32 count);
+	void SetCountText(const int32 count);
 
 	UFUNCTION()
 		void ClickCancel();
 	UFUNCTION()
-		void ClickConfirml();
+		void ClickConfirm();
 	UFUNCTION()
 		void ClickMinus();
 	UFUNCTION()

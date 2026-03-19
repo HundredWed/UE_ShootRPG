@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Item/Weapon/CPP_Rifle.h"
@@ -6,6 +6,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
+#include "Systems/CPP_AkashicSubsystem.h"
 #include "NPC/EnemyBase.h"
 #include "CPP_Character.h"
 #include "Item/Item.h"
@@ -38,17 +39,22 @@ void ACPP_Rifle::InitWeaponInfo()
 {
 	Super::InitWeaponInfo();
 
-	const FEquipmentAssetTable* thisAssetInfo = EquipmentAssetTable->FindRow<FEquipmentAssetTable>(ItemInfoID, TEXT(""));
-	if (thisAssetInfo == nullptr)
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] was not found!! Please check the ID."), *ItemInfoID.ToString());
 		return;
 	}
+
+	UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>();
+	const FEquipmentInfoTable* thisWeaponInfo = AS->RequestWeaponInfo(ItemInfoID);
+
+	FinalDamage = thisWeaponInfo->ATK;
+
+	BeamParticle = thisWeaponInfo->BeamParticle.LoadSynchronous();
+	FireParticle = thisWeaponInfo->FireParticle.LoadSynchronous();
+	ShootSound = thisWeaponInfo->AttackSound.LoadSynchronous();
+	EquipSound = thisWeaponInfo->EquipSound.LoadSynchronous();
 	
-	BeamParticle = thisAssetInfo->BeamParticle;
-	FireParticle = thisAssetInfo->FireParticle;
-	ShootSound = thisAssetInfo->AttackSound;
-	EquipSound = thisAssetInfo->EquipSound;
 }
 
 void ACPP_Rifle::Equip(USceneComponent* Inparent, const FName& SocketName)
@@ -106,7 +112,7 @@ void ACPP_Rifle::GunTrace(FHitResult& hitresult, FVector& endpoint)
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
 
-	//µð¹ö±×
+	//ë””ë²„ê·¸
 	//DrawDebugLine(GetWorld(), StartLocation, end, FColor::Red, false, 5);
 
 

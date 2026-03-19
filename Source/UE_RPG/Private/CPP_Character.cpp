@@ -1,4 +1,4 @@
-#include "CPP_Character.h"
+﻿#include "CPP_Character.h"
 #include "CPP_Controller.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
@@ -18,6 +18,7 @@
 #include "Widget/NPC/CPP_DamageActor.h"
 #include "Inventory.h"
 #include "Item/Weapon/CPP_WeaponManager.h"
+#include "Systems/CPP_QuestSubsystem.h"
 
 
 ACPP_Character::ACPP_Character()
@@ -53,6 +54,7 @@ ACPP_Character::ACPP_Character()
 	CameraManager = CreateDefaultSubobject<UCameraManager>(TEXT("Camera Manager"));
 
 	GameInventory = CreateDefaultSubobject<UInventory>(TEXT("Inventory"));
+	GameInventory->OnItemRemoved.BindUObject(this, &ACPP_Character::OnRemoveItemEvent);
 
 	WeaponManager = CreateDefaultSubobject<UCPP_WeaponManager>(TEXT("WeaponManager"));
 }
@@ -69,7 +71,7 @@ void ACPP_Character::BeginPlay()
 		OnUpdatePlayerState.Execute(CharacterStats);
 	}
 
-	//����
+	//위젯
 	HideGameInventory();
 
 	if (IsValid(CameraManager))
@@ -89,6 +91,14 @@ void ACPP_Character::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Graver component not found!!"));
 	}
+
+	UGameInstance* GI = GetGameInstance();
+	if (!IsValid(GI))
+	{
+		return;
+	}
+	QuestSubsystem = GI->GetSubsystem<UCPP_QuestSubsystem>();
+	QuestSubsystem->OnQuestClear.AddUObject(this, &ACPP_Character::OnQuestClearEvent);
 
 
 	/**ignore from item trace*/
@@ -128,6 +138,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(AimingAction, ETriggerEvent::Triggered, this, &ACPP_Character::Aiming);
 
 		EnhancedInputComponent->BindAction(InventoryToggle, ETriggerEvent::Triggered, this, &ACPP_Character::InventoryVisibility);
+		EnhancedInputComponent->BindAction(QuestListToggle, ETriggerEvent::Triggered, this, &ACPP_Character::QuestListVisibility);
 	}
 
 }
@@ -187,7 +198,6 @@ void ACPP_Character::ObjectSearchTrace()
 	{
 		ResetHitResultState();
 	}
-
 	
 }
 
@@ -209,6 +219,7 @@ bool ACPP_Character::SetSphereTrace(FHitResult& HitResult)
 		ECollisionChannel::ECC_GameTraceChannel3,
 		Sphere,
 		Params);
+
 }
 
 
@@ -390,7 +401,7 @@ void ACPP_Character::Dodge(const FInputActionValue& Value)
 {
 	if (ActionState != ECharacterActionState::SuperAction && CharacterStats.CurrentStamina >= 10)
 	{
-		bMoving = false;//���� �ִϸ��̼�
+		bMoving = false;//블프 애니메이션
 		LookAt();
 		PlayMontage(DodgeMontage);
 		CharacterStats.CurrentStamina -= 10;
@@ -400,7 +411,7 @@ void ACPP_Character::Dodge(const FInputActionValue& Value)
 
 void ACPP_Character::InventoryVisibility(const FInputActionValue& Value)
 {
-	if (PressKey(Value))
+	if (PressKey(Value) && IsQuestListVisible == false)
 	{
 		if (isVisible)
 		{
@@ -410,6 +421,14 @@ void ACPP_Character::InventoryVisibility(const FInputActionValue& Value)
 		{
 			ShowGameInventory();
 		}
+	}
+}
+
+void ACPP_Character::QuestListVisibility(const FInputActionValue& Value)
+{
+	if (ACPP_Controller* PC = Cast<ACPP_Controller>(GetController()))
+	{
+		IsQuestListVisible = PC->ToggleQuestWindow();
 	}
 }
 
@@ -454,7 +473,7 @@ bool ACPP_Character::PressKey(const FInputActionValue& Value)
 
 void ACPP_Character::PickUpWeapon(UItem* itemRef)
 {
-	if (WeaponManager->GetCurrntWeapon() == nullptr)
+	if (WeaponManager->GetCurrentWeapon() == nullptr)
 	{
 		SetEquipWeapon(itemRef);
 	}
@@ -479,7 +498,7 @@ void ACPP_Character::AttackWeapon()
 			PlayMontage(FireMontage);
 		}
 
-		WeaponManager->GetCurrntWeapon()->Attack();
+		WeaponManager->GetCurrentWeapon()->Attack();
 
 		bTrigger = false;
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Character::CanTrigger, TriggerRate, false);
@@ -566,7 +585,6 @@ void ACPP_Character::RemoveHitResultObject()
 	if (!IsValid(HitResultObject))
 		return;
 
-	HitResultObject->Destroy();
 	HitResultObject = nullptr;
 }
 
@@ -599,10 +617,10 @@ void ACPP_Character::SetStateUnEquipped()
 
 void ACPP_Character::SetEquipWeapon(UItem* item)
 {
-	WeaponManager->EquipWeapon(item->ItemInfoTable.ItemInfoID, item->ItemInfoTable.WeaponActor);
+	WeaponManager->EquipWeapon(item->ItemInfoTable.ItemInfoID);
 
 	GameInventory->UpdateEquipmentInventory(item);
-	CharacterState = ECharacterStateTypes::UnEquipped;
+	CharacterState = ECharacterStateTypes::Equipped;
 }
 
 void ACPP_Character::TakeOffWeapon()
@@ -670,17 +688,17 @@ void ACPP_Character::PlayMontage(UAnimMontage* montage)
 
 void ACPP_Character::HoldWeapon()
 {
-	if (IsValid(WeaponManager->GetCurrntWeapon()))
+	if (IsValid(WeaponManager->GetCurrentWeapon()))
 	{
-		WeaponManager->GetCurrntWeapon()->Equip(GetMesh(), "weapon_socket_r");
+		WeaponManager->GetCurrentWeapon()->Equip(GetMesh(), "weapon_socket_r");
 	}
 }
 
 void ACPP_Character::UnHoldWeapon()
 {
-	if (IsValid(WeaponManager->GetCurrntWeapon()))
+	if (IsValid(WeaponManager->GetCurrentWeapon()))
 	{
-		WeaponManager->GetCurrntWeapon()->Equip(GetMesh(), "weapon_socket_back");
+		WeaponManager->GetCurrentWeapon()->Equip(GetMesh(), "weapon_socket_back");
 	}
 }
 
@@ -803,6 +821,13 @@ void ACPP_Character::ShowGameInventory()
 	GameInventory->ShowInventory();
 }
 
+void ACPP_Character::OnQuestClearEvent(const FQuest& quest)
+{
+	//퀘스트 보상
+	GameInventory->ExchangeQuestItems(quest.RewardItemID, quest.RewardItemAmount, quest.NeedContentID, quest.NeedCount);
+	CharacterStats.CurrentEXP = quest.EXP;	
+}
+
 void ACPP_Character::SetFireRate(float rate)
 {
 	FireRate = rate;
@@ -810,7 +835,7 @@ void ACPP_Character::SetFireRate(float rate)
 
 void ACPP_Character::StoreDamageUI()
 {
-	//����
+	//제거
 	UWorld* world = GetWorld();
 	const int32 amount = 50;
 
@@ -852,11 +877,22 @@ void ACPP_Character::AddInventory(UItem* itemRef, int32 amount)
 			return;
 		}
 		GameInventory->AddGold(itemRef->ItemInfoTable.ItemPrice * amount);
-		return;
 	}
 	else
 	{
-		GameInventory->AddItem(itemRef, amount);
+		//저장 성공한 갯수
+		int32 storedAmount = GameInventory->AddItem(itemRef, amount);
+
+		UGameInstance* GI = GetGameInstance();
+		if (IsValid(GI))
+		{
+			UCPP_QuestSubsystem* questSystem = GI->GetSubsystem<UCPP_QuestSubsystem>();
+			if (IsValid(questSystem))
+			{
+				//아이템이 들어온 갯수만큼만 퀘스트 체크
+				questSystem->CheckQuestContent(itemRef->ItemInfoTable.ItemInfoID, storedAmount);
+			}
+		}
 	}	
 }
 
@@ -890,6 +926,14 @@ void ACPP_Character::EndLookAtObject(AActor* obj)
 	{
 		interactObj->OnEndLookAt();
 	}
+}
+
+void ACPP_Character::OnRemoveItemEvent(const FName& itemId, const int32 amount)
+{
+	if (IsValid(QuestSubsystem))
+	{
+		QuestSubsystem->CheckQuestContent(itemId,amount);
+	}	
 }
 
 void ACPP_Character::SmoothSpringArmOffset(float NewYoffset)

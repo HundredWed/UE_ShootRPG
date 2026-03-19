@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widget/MainPanelWidget.h"
@@ -11,6 +11,7 @@
 #include "Widget/SlotDrag.h"
 #include "Widget/CPP_Slot.h"
 #include "Widget/CPP_PlayerStateBar.h"
+#include "Widget/Player/Quest/CPP_InProgressQuestsWidget.h"
 
 void UMainPanelWidget::NativeConstruct()
 {
@@ -44,6 +45,22 @@ void UMainPanelWidget::UpdateManaBarPercent(const float percent)
 void UMainPanelWidget::UpdateLevel(int32 level)
 {
 	StateWidget->UpdateLevel(level);
+}
+
+bool UMainPanelWidget::ToggleQuestList()
+{
+	if (IsQuestListActivate)
+	{
+		InProgressQuestsWidget->SetCustomVisibility(ESlateVisibility::Hidden);
+		IsQuestListActivate = false;
+	}
+	else
+	{
+		InProgressQuestsWidget->SetCustomVisibility(ESlateVisibility::Visible);
+		IsQuestListActivate = true;
+	}	
+
+	return IsQuestListActivate;
 }
 
 bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
@@ -83,8 +100,15 @@ bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDrop
 			}
 			else
 			{
-				InventoryRef->RemoveItemAtIndex(slotIndex, amount);
-				return true;
+				bool successRemove = InventoryRef->RemoveItemAtIndex(slotIndex, amount);
+				if (successRemove == false)
+				{
+					//TODO
+					//버리지 못하는 안내창 출력
+					UpdatePopupText(FText::FromString(TEXT("해당 아이템은 버릴 수 없습니다.")));
+					PopupWidget->SetVisibility(ESlateVisibility::Visible);
+				}
+				return successRemove;
 			}
 
 		}

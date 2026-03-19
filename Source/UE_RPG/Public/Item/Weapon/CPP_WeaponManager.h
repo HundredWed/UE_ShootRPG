@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -19,13 +19,13 @@ public:
 	virtual void BeginPlay() override;
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void EquipWeapon(const FName& weaponid,TSubclassOf<ACPP_WeaponBase> weapon);
+	void EquipWeapon(const FName& weaponid);
 	void TakeOffWeapon();
-	void AddWeapon(const FName& weaponid, ACPP_WeaponBase* weapon);
+	void OnWeaponReady(ACPP_WeaponBase* weapon);
 	ACPP_WeaponBase* SpawnWeapon(TSubclassOf<ACPP_WeaponBase> weapon);
-	ACPP_WeaponBase* GetCurrntWeapon() { return CurrentWeapon; }
+	ACPP_WeaponBase* GetCurrentWeapon() { return CurrentWeapon; }
 
-	void ClearWeaponGarbege();
+	void ClearWeaponGarbage();
 
 protected:
 
@@ -34,15 +34,14 @@ protected:
 
 
 	UPROPERTY()
-		TMap<FName, ACPP_WeaponBase*> WeaponStorage;
+	TMap<FName, ACPP_WeaponBase*> WeaponStorage;
 
 	UPROPERTY()
-		ACPP_WeaponBase* PrevWeapon = nullptr;
+	ACPP_WeaponBase* PrevWeapon = nullptr;
 	UPROPERTY()
-		ACPP_WeaponBase* CurrentWeapon = nullptr;
+	ACPP_WeaponBase* CurrentWeapon = nullptr;
 
 	FTimerHandle ManagerTimer;
 
-	TArray<FName> WeaponIds;
 	bool bClearWeaponTick = false;
 };

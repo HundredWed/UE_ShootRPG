@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -43,6 +43,11 @@ public:
 	//FORCEINLINE ECharacterTypes GetCharacterTypes() { return CharaterType; }
 	virtual	void UpdateState() {};
 	virtual void RequestInteract(AActor* interactor) override;
+
+private:
+
+	//npc전용
+	void InitQuestSystem();
 
 protected:
 	

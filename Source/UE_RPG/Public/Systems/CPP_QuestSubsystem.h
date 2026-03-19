@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,10 +6,13 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Structs/ST_Quest.h"
 #include "Structs/ST_NPCQuests.h"
+#include "UE_RPG/UtilityMecro.h"
 #include "CPP_QuestSubsystem.generated.h"
 
 
 DECLARE_DELEGATE_OneParam(FOnChangeQuestInfoDelegate, const FQuest&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAddProgressDelegate, const FQuest&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnOnQuestClearDelegate, const FQuest&);
 
 UCLASS()
 class UE_RPG_API UCPP_QuestSubsystem : public UGameInstanceSubsystem
@@ -18,7 +21,7 @@ class UE_RPG_API UCPP_QuestSubsystem : public UGameInstanceSubsystem
 
 public:
 	UCPP_QuestSubsystem();
-	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	void InitQuestSubsystem(const FName& currentNpcID);
 
@@ -27,15 +30,18 @@ public:
 	void QuestClear();
 	void QuestStateChange(EQuestState questState);
 
-	FQuest CheckQuestContent(const FName& objectID, int32 amount = 0);
+	void CheckQuestContent(const FName& objectID, int32 amount = 0);
 
 	TArray<FQuest> GetQuestList();
 	TArray<FQuest> GetProgressQuestsOfPlayer();
 	FQuest GetQuestInfo(const FName& questID);
+	FQuest GetCurrentQuest() { return CurrentQuest; }
 
 	void SelectedQuest(const FName& questId);
 
 	FOnChangeQuestInfoDelegate OnChangeQuestInfo;
+	FOnAddProgressDelegate OnAddProgress;
+	FOnOnQuestClearDelegate OnQuestClear;
 
 private:
 

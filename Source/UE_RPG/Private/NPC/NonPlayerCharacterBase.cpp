@@ -1,4 +1,4 @@
-#include "NPC/NonPlayerCharacterBase.h"
+﻿#include "NPC/NonPlayerCharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -8,6 +8,7 @@
 #include "Object/Mover.h"
 #include "CPP_Character.h"
 #include "NPC/CPP_NPCcontroller.h"
+#include "Systems/CPP_QuestSubsystem.h"
 
 ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 {
@@ -39,7 +40,18 @@ void ANonPlayerCharacterBase::RequestInteract(AActor* interactor)
 {
 	if (ACPP_Character* character = Cast<ACPP_Character>(interactor))
 	{
+		InitQuestSystem();
 		character->SetDialogue(NPCID);
+	}
+}
+
+void ANonPlayerCharacterBase::InitQuestSystem()
+{
+	UGameInstance* GI = GetGameInstance();
+	if (IsValid(GI))
+	{
+		UCPP_QuestSubsystem* quest = GI->GetSubsystem<UCPP_QuestSubsystem>();
+		quest->InitQuestSubsystem(NPCID);
 	}
 }
 

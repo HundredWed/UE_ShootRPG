@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "CoreMinimal.h"
 #include "CharacterStates.generated.h"
 
@@ -12,6 +12,16 @@ enum class ECharacterTypes : uint8
 	Type_None
 };
 
+UENUM(BlueprintType)
+enum class ERestoreTypes : uint8
+{
+	Type_None,
+
+	Health,
+	Mana,
+	Stamina,
+};
+
 //Player
 //====================================================================
 UENUM(BlueprintType)
@@ -19,10 +29,10 @@ enum class ECharacterStateTypes : uint8
 {
 	Death,
 
-	Normal,/**±âº»(¹«±âx)*/
-	Equipped,/**¹«±â ÀåÂø(¹«±âo)*/
-	Aim,/**¹«±â Á¶ÁØ(¹«±âo)*/
-	UnEquipped,/**¹«±â ¼ö³³(¹«±âo)*/
+	Normal,/**ê¸°ë³¸(ë¬´ê¸°x)*/
+	Equipped,/**ë¬´ê¸° ìž¥ì°©(ë¬´ê¸°o)*/
+	Aim,/**ë¬´ê¸° ì¡°ì¤€(ë¬´ê¸°o)*/
+	UnEquipped,/**ë¬´ê¸° ìˆ˜ë‚©(ë¬´ê¸°o)*/
 };
 
 UENUM(BlueprintType)
@@ -77,6 +87,10 @@ public:
 	FCharacterStats() {};
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 Level = 1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 CurrentEXP = 0;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 MaxEXP = 0;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxHealth = 100.f;

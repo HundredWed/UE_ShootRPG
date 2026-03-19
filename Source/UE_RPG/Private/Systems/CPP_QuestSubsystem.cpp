@@ -1,8 +1,18 @@
-#include "Systems/CPP_QuestSubsystem.h"
+ï»¿#include "Systems/CPP_QuestSubsystem.h"
 #include "Kismet/KismetStringLibrary.h"
+#include "Systems/CPP_MyGameSettings.h"
 
 UCPP_QuestSubsystem::UCPP_QuestSubsystem()
 {
+}
+
+void UCPP_QuestSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	const UCPP_MyGameSettings* Settings = GetDefault<UCPP_MyGameSettings>();
+
+	QuestDataTable = UCPP_MyGameSettings::LoadDataTableSafely(Settings->QuestData);
 }
 
 void UCPP_QuestSubsystem::InitQuestSubsystem(const FName& currentNpcID)
@@ -20,12 +30,15 @@ void UCPP_QuestSubsystem::AddProgressQuest()
 	CurrentQuest.QuestState = EQuestState::EQS_InProgress;
 
 	InProgressQuests.Add(CurrentQuest.QuestID, CurrentQuest);
+	OnAddProgress.Broadcast(CurrentQuest);
 }
 
 void UCPP_QuestSubsystem::QuestClear()
 {
 	ClearQuests.Add(CurrentQuest.QuestID);
 	InProgressQuests.Remove(CurrentQuest.QuestID);
+	OnQuestClear.Broadcast(CurrentQuest);
+	DISPLAYLOG(TEXT("%s: í€˜ìŠ¤í´ë¦¬ì–´!"), *CurrentQuest.QuestName.ToString());
 }
 
 void UCPP_QuestSubsystem::QuestStateChange(EQuestState questState)
@@ -48,74 +61,68 @@ void UCPP_QuestSubsystem::QuestStateChange(EQuestState questState)
 	}
 }
 
-FQuest UCPP_QuestSubsystem::CheckQuestContent(const FName& objectID, int32 amount)
+void UCPP_QuestSubsystem::CheckQuestContent(const FName& objectID, int32 amount)
 {
-	//ÇØ´ç ID¸¦ ÇÊ¿ä·Î ÇÏ´Â Äù½ºÆ®°¡ ÀÖ´ÂÁö È®ÀÎ
-	//ÀÖ´Ù¸é ÁøÇàµµ È®ÀÎ
+	//í•´ë‹¹ IDë¥¼ í•„ìš”ë¡œ í•˜ëŠ” í€˜ìŠ¤íŠ¸ê°€ ìˆëŠ”ì§€ í™•ì¸
+	//ìˆë‹¤ë©´ ì§„í–‰ë„ í™•ì¸
+
+	if (!objectID.IsValid())
+	{
+		WARNINGLOG(TEXT("UCPP_QuestSubsystem::CheckQuestContent : ìœ íš¨í•˜ì§€ ì•Šì€ ì˜¤ë¸Œì íŠ¸ ID ì…ë‹ˆë‹¤!"))
+		return;
+	}
 
 	FQuest correspondQuest;
-	for (auto quest : InProgressQuests)
+	for (auto& quest : InProgressQuests)
 	{
-		if (quest.Value.NeedObjectID == objectID)
+		FQuest& targetQuest = quest.Value;
+
+		if (targetQuest.NeedContentID == objectID)
 		{
-			correspondQuest = quest.Value;
+			switch (targetQuest.QuestType)
+			{
+			case EQuestType::EQT_GetItem:
+				CheckProgressAmountType(targetQuest, amount);
+			case EQuestType::EQT_ComBat:
+				CheckProgressAmountType(targetQuest, amount);
+				break;
+			case EQuestType::EQT_GoToNPC:
+				CheckProgressObjectType(targetQuest, objectID);
+			case EQuestType::EQT_GoToSpace:
+				CheckProgressObjectType(targetQuest, objectID);
+				break;
+			}
 		}
 	}
-
-
-	if (correspondQuest.QuestID.IsNone())
-	{
-		return FQuest();
-	}
-		
-	//ÁøÇàµµ È®ÀÎ
-	EQuestType type = correspondQuest.QuestType;
-
-	switch (type)
-	{
-	case EQuestType::EQT_GetItem:
-		CheckProgressAmountType(correspondQuest, amount);
-		break;
-	case EQuestType::EQT_ComBat:
-		CheckProgressAmountType(correspondQuest, amount);
-		break;
-	case EQuestType::EQT_GoToNPC:
-		CheckProgressObjectType(correspondQuest, objectID);
-		break;
-	case EQuestType::EQT_GoToSpace:
-		CheckProgressObjectType(correspondQuest, objectID);
-		break;
-	}
-
-	return correspondQuest;
 }
 
 TArray<FQuest> UCPP_QuestSubsystem::GetQuestList()
 {
-	TArray<FQuest> questLists;
-
 	FNPCQuests* quests = QuestDataTable->FindRow<FNPCQuests>(CurrentNPCID, "");
 
 	if (quests == nullptr)
 		return TArray<FQuest>();
 
-	for (FQuest quest : quests->Quests)
+	TArray<FQuest> questLists;
+	questLists.Reserve(quests->Quests.Num());
+
+	for (const auto& quest : quests->Quests)
 	{
-		if (CheckClear(quest.QuestID))
+		if (CheckClear(quest.Value.QuestID))
 			continue;
 
-		//¼±ÇàÄù½ºÆ® ¿Ï·á À¯¹«
-		if (!quest.PrevQuestID.IsNone() && CheckClear(quest.PrevQuestID))
+		//ì„ í–‰í€˜ìŠ¤íŠ¸ ì™„ë£Œ ìœ ë¬´
+		if (!quest.Value.PrevQuestID.IsNone() && CheckClear(quest.Value.PrevQuestID))
 		{
-			questLists.Add(CheckProgress(quest.QuestID));
+			questLists.Add(CheckProgress(quest.Value.QuestID));
 			continue;
 		}
 
-		FQuest progressQuest = CheckProgress(quest.QuestID);
+		FQuest progressQuest = CheckProgress(quest.Value.QuestID);
 
 		if (progressQuest.QuestID.IsNone())
 		{
-			questLists.Add(quest);
+			questLists.Add(quest.Value);
 		}
 		else
 		{
@@ -138,20 +145,11 @@ TArray<FQuest> UCPP_QuestSubsystem::GetProgressQuestsOfPlayer()
 
 FQuest UCPP_QuestSubsystem::GetQuestInfo(const FName& questID)
 {
-	TArray<FQuest> quests = GetQuestList();
-	int32 questIndex = CastQuestIndex(questID);
+	FNPCQuests* quests = QuestDataTable->FindRow<FNPCQuests>(CurrentNPCID, "");
 
-	if (quests.IsValidIndex(questIndex))
+	if (quests)
 	{
-		FQuest progress = CheckProgress(quests[questIndex].QuestID);
-		if (!progress.QuestID.IsNone())
-		{
-			return progress;
-		}
-		else
-		{
-			return quests[questIndex];
-		}
+		return *(quests->Quests.Find(questID));
 	}
 
 	return FQuest();
@@ -174,12 +172,7 @@ FQuest UCPP_QuestSubsystem::CheckProgress(const FName& questID)
 
 bool UCPP_QuestSubsystem::CheckClear(const FName& questID)
 {
-	for (FName id : ClearQuests)
-	{
-		if (id == questID)
-			return true;
-	}
-	return false;
+	return ClearQuests.Contains(questID);
 }
 
 int32 UCPP_QuestSubsystem::CastQuestIndex(FName questID)
@@ -195,26 +188,18 @@ int32 UCPP_QuestSubsystem::CastQuestIndex(FName questID)
 
 void UCPP_QuestSubsystem::CheckProgressAmountType(FQuest& quest,int32 amount)
 {
-	if (quest.CurrentCount < quest.NeedCount)
-	{
-		quest.CurrentCount += amount;
-	}
-	else
-	{
-		return;
-	}
-	
+	quest.CurrentCount = FMath::Min(quest.CurrentCount + amount, quest.NeedCount);
+
 	if (quest.NeedCount == quest.CurrentCount)
 	{
 		quest.QuestState = EQuestState::EQS_ConditionClear;
-
-		OnChangeQuestInfo.Execute(quest);
 	}
 	else
 	{
 		quest.QuestState = EQuestState::EQS_InProgress;
-		OnChangeQuestInfo.Execute(quest);
 	}
+
+	OnChangeQuestInfo.Execute(quest);
 }
 
 void UCPP_QuestSubsystem::CheckProgressObjectType(FQuest& quest, const FName& objectID)
@@ -224,7 +209,7 @@ void UCPP_QuestSubsystem::CheckProgressObjectType(FQuest& quest, const FName& ob
 		return;
 	}
 
-	if (quest.NeedObjectID == objectID)
+	if (quest.NeedContentID == objectID)
 	{
 		quest.QuestState = EQuestState::EQS_ConditionClear;
 		OnChangeQuestInfo.Execute(quest);

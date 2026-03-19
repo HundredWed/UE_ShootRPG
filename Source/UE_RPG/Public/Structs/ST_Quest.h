@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
@@ -7,11 +7,11 @@
 UENUM(BlueprintType)
 enum class EQuestType : uint8
 {
-	//Ä«¿îÆÃ
+	//ì¹´ìš´íŒ…
 	EQT_GetItem UMETA(DisplayName = "GetItem"),
 	EQT_ComBat UMETA(DisplayName = "ComBat"),
 
-	//³í Ä«¿îÆÃ
+	//ë…¼ ì¹´ìš´íŒ…
 	EQT_GoToNPC UMETA(DisplayName = "GoToNPC"),
 	EQT_GoToSpace UMETA(DisplayName = "GoToSpace")
 
@@ -42,11 +42,18 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	FName PrevQuestID;
 
-	UPROPERTY(EditDefaultsOnly)
-	FName DialogueID;
+	////í˜„ìž¬ ì‚¬ìš©x
+	//UPROPERTY(VisibleAnywhere)
+	//FName DialogueID;
 
 	UPROPERTY(EditDefaultsOnly)
-	FName NeedObjectID;
+	FName QuestProgressRow;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName QuestClearRow;
+	
+	UPROPERTY(EditDefaultsOnly)
+	FName NeedContentID;
 
 	UPROPERTY(EditDefaultsOnly)
 	FName ChainQuestID;
@@ -60,7 +67,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	FText NeedObjectName;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(VisibleAnywhere)
 	int32 CurrentCount;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -76,5 +83,7 @@ public:
 	EQuestState QuestState;
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UItem> QuestItem;
+	FName RewardItemID;
+	UPROPERTY(EditDefaultsOnly)
+	int32 RewardItemAmount = 1;
 };

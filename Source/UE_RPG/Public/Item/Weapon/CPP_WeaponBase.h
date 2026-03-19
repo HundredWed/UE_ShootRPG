@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -28,18 +28,18 @@ public:
 	ACPP_WeaponBase();
 
 	UPROPERTY()
-		USkeletalMeshComponent* WeaponMesh;
+	USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(EditAnywhere, Category = "WeaponInfo")
-		FName ItemInfoID;
+	FName ItemInfoID;
 
 	/**widget*/
 	UPROPERTY(EditAnywhere, Category = "WeaponInfo")
-		TSubclassOf<class ACPP_DamageActor> DamageUIActorClass;
+	TSubclassOf<class ACPP_DamageActor> DamageUIActorClass;
 	UPROPERTY()
-		TArray<class ACPP_DamageActor*> DamageUIActors;
+	TArray<class ACPP_DamageActor*> DamageUIActors;
 	
-		int32 DamageUI = 0;
+	int32 DamageUI = 0;
 
 	/**weapon states*/
 	float FinalDamage = 0;
@@ -50,7 +50,6 @@ public:
 	virtual void InitWeaponInfo();
 	virtual void Equip(USceneComponent* Inparent, const FName& SocketName);
 	UItem* GetItemRef() { return ItemRef; }
-	void SetDataTable(UDataTable* dataTable) { ItemDataTable = dataTable; }
 	
 protected:
 	// Called when the game starts or when spawned
@@ -63,11 +62,5 @@ protected:
 
 	/**item state*/
 	UPROPERTY()
-		UItem* ItemRef = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = "WeaponInfo|ItemInfo")
-		UDataTable* ItemDataTable;
-	UPROPERTY(EditAnywhere, Category = "WeaponInfo|ItemInfo")
-		UDataTable* EquipmentAssetTable;
-
+	UItem* ItemRef = nullptr;
 };

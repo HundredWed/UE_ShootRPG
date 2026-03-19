@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widget/CPP_Slot.h"
@@ -207,55 +207,7 @@ FReply UCPP_Slot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, co
 
 void UCPP_Slot::OnUseItem()
 {
-	
-
-	AActor* abilityActor = InventoryRef->GetAbilityActor(InventorySlotinfo.Item->ItemInfoTable.ItemInfoID);
-	if (abilityActor)
-	{
-		IItemAbility* itemAbility = Cast<IItemAbility>(abilityActor);
-		if (itemAbility)
-		{
-			const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ItemInfoTable.ConsumeValue;
-			itemAbility->UseItem(PlayerRef, value);
-			InventoryRef->RemoveItemAtIndex(MyArrayNumber, 1);
-
-			GEngine->AddOnScreenDebugMessage(
-				INDEX_NONE,
-				30.f,
-				FColor::Blue,
-				FString::Printf(TEXT("get from Tmap")));
-		}
-	}
-	else
-	{
-		TSubclassOf<AActor> itemClass = InventoryRef->SlotsArray[MyArrayNumber].Item->ItemInfoTable.ItemClass;
-		if (IsValid(itemClass))
-		{
-			AActor* itemActor = GetWorld()->SpawnActor(InventoryRef->SlotsArray[MyArrayNumber].Item->ItemInfoTable.ItemClass);
-
-			IItemAbility* itemAbility = Cast<IItemAbility>(itemActor);
-			if (itemAbility)
-			{
-				const uint32 value = InventoryRef->SlotsArray[MyArrayNumber].Item->ItemInfoTable.ConsumeValue;
-				itemAbility->UseItem(PlayerRef, value);
-
-				InventoryRef->AddItemManage(InventorySlotinfo.Item->ItemInfoTable.ItemInfoID, itemActor);
-				InventoryRef->RemoveItemAtIndex(MyArrayNumber, 1);
-				InventoryRef->StartAbilityActorLife(InventorySlotinfo.Item->ItemInfoTable.ItemInfoID);
-			}
-
-
-			GEngine->AddOnScreenDebugMessage(
-				INDEX_NONE,
-				30.f,
-				FColor::Red,
-				FString::Printf(TEXT("get from SpawnActor")));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("not valid ItemClass to UesItem"));
-		}
-	}
+	InventoryRef->UseItem(MyArrayNumber);
 }
 
 void UCPP_Slot::EquipSlotItem()
@@ -330,7 +282,7 @@ void UCPP_Slot::CheckCombinability(const int16 fromIndex)
 
 void UCPP_Slot::CombineItem()
 {
-	InventoryRef->ChangeItemInfo(ItemRef->ItemInfoTable.CombinResultID, MyArrayNumber);
+	InventoryRef->ChangeItemInfo(ItemRef->ItemInfoTable.CombineResultID, MyArrayNumber);
 	CombineButton->SetVisibility(ESlateVisibility::Hidden);
 	bActiveCombineButton = false;
 }

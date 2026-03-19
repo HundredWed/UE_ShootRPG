@@ -1,11 +1,11 @@
-#include "Item/PickUpItem.h"
+﻿#include "Item/PickUpItem.h"
 #include "Item/Item.h"
 #include "CPP_Character.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Inventory.h"
 #include "Item/Weapon/CPP_WeaponBase.h"
+#include "Systems/CPP_AkashicSubsystem.h"
 
 
 APickUpItem::APickUpItem()
@@ -15,9 +15,6 @@ APickUpItem::APickUpItem()
 	PickUpMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Pick Mesh"));
 	SetRootComponent(PickUpMesh);
 
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon Mesh"));
-	WeaponMesh->SetupAttachment(GetRootComponent());
-
 	SearchComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Respone item search trace"));
 	SearchComponent->SetupAttachment(GetRootComponent());
 
@@ -25,7 +22,7 @@ APickUpItem::APickUpItem()
 	SphereComponent->SetupAttachment(GetRootComponent());
 	SphereComponent->SetSphereRadius(180.f);
 
-	ItemStateWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("ItemState Widjet"));
+	ItemStateWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("ItemState Widget"));
 	ItemStateWidget->SetupAttachment(GetRootComponent()); 
 	
 
@@ -47,9 +44,32 @@ APickUpItem::APickUpItem()
 	SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
 	SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
 	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	/**Widjet*/
+	/**Widget*/
 	ItemStateWidget->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
+}
+
+void APickUpItem::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if (ItemInfoID != NAME_None)
+	{
+		UWorld* World = GetWorld();
+		if (!IsValid(World))
+		{
+			return;
+		}
+
+		UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>();
+		const FItemInfoTable* thisItemInfo = AS->RequestItemInfo(ItemInfoID);
+		if (thisItemInfo != nullptr && !thisItemInfo->ItemMesh.IsNull())
+			PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh.LoadSynchronous());
+	}
+	else
+	{
+		PickUpMesh->SetStaticMesh(nullptr);
+	}
 }
 
 void APickUpItem::SetWidgetVisibility(bool Visible)
@@ -110,26 +130,24 @@ void APickUpItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void APickUpItem::InitializePickUpItem()
 {
-	if (IsValid(ItemDataTable))
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
 	{
-		const FItemInfoTable* thisItemInfo = ItemDataTable->FindRow<FItemInfoTable>(ItemInfoID, TEXT(""));
-		if (thisItemInfo == nullptr)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("[%s] was not found!! Please check the ID."), *ItemInfoID.ToString());
-			return;
-		}
-				
-		ItemRef = NewObject<UItem>(this, UItem::StaticClass());
-
-		ItemRef->ItemInfoTable = *thisItemInfo;
-
-		if(IsValid(thisItemInfo->ItemMesh))
-			PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh);
-
-		if (IsValid(thisItemInfo->ItemSkeletalMesh))
-			WeaponMesh->SetSkeletalMesh(thisItemInfo->ItemSkeletalMesh);
+		return;
 	}
 
+	if (UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>())
+	{
+		const FItemInfoTable* thisItemInfo = AS->RequestItemInfo(ItemInfoID);
+		if (thisItemInfo)
+		{
+			ItemRef = NewObject<UItem>(this, UItem::StaticClass());
+			ItemRef->ItemInfoTable = *thisItemInfo;
+
+			if (!thisItemInfo->ItemMesh.IsNull())
+				PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh.LoadSynchronous());
+		}
+	}
 }
 
 void APickUpItem::RequestInteract(AActor* interactor)
@@ -146,6 +164,8 @@ void APickUpItem::RequestInteract(AActor* interactor)
 			character->AddInventory(ItemRef, ItemAmount);
 		}		
 	}
+
+	Destroy();
 }
 
 void APickUpItem::OnBeginLookAt()

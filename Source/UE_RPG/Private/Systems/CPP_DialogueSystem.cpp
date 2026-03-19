@@ -1,12 +1,24 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Systems/CPP_DialogueSystem.h"
 #include "Kismet/KismetStringLibrary.h"
+#include "Systems/CPP_MyGameSettings.h"
 
 UCPP_DialogueSystem::UCPP_DialogueSystem()
 {
 	
+}
+
+void UCPP_DialogueSystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	const UCPP_MyGameSettings* Settings = GetDefault<UCPP_MyGameSettings>();
+
+	TalkDataTable = UCPP_MyGameSettings::LoadDataTableSafely(Settings->TalkData);
+	QuestDialogueDataTable = UCPP_MyGameSettings::LoadDataTableSafely(Settings->QuestDialogueData);
+	NPCDataTable = UCPP_MyGameSettings::LoadDataTableSafely(Settings->NPCData);
 }
 
 void UCPP_DialogueSystem::InitDialogue(const FName& dialogueOwnerName)
@@ -59,6 +71,7 @@ void UCPP_DialogueSystem::SelectedInteractType(EInteractType state)
 		break;
 	case EInteractType::JustTalk:
 		DialogueState = EInteractType::JustTalk;
+		PrintDialogue();
 		break;
 	case EInteractType::Quest:
 		DialogueState = EInteractType::Quest;
@@ -67,6 +80,7 @@ void UCPP_DialogueSystem::SelectedInteractType(EInteractType state)
 		break;
 	case EInteractType::Revert:
 		RevertDialogue();
+		PrintDialogue();
 		break;
 	case EInteractType::Quit:
 		OnQuitDialogue.Execute();
@@ -74,6 +88,7 @@ void UCPP_DialogueSystem::SelectedInteractType(EInteractType state)
 	default:
 		break;
 	}
+
 }
 
 void UCPP_DialogueSystem::SelectedAnswer(const FName& rowName)
@@ -96,10 +111,10 @@ void UCPP_DialogueSystem::SelectedQuest(const FQuest& quest)
 		DatatableRowName = quest.QuestID;
 		break;
 	case EQuestState::EQS_InProgress:
-		DatatableRowName = GetQuestDialogueStruct().QuestProgressRow;
+		DatatableRowName = quest.QuestProgressRow;
 		break;
 	case EQuestState::EQS_ConditionClear:
-		DatatableRowName = GetQuestDialogueStruct().QuestClearRow;
+		DatatableRowName = quest.QuestClearRow;
 		break;
 	case EQuestState::EQS_Clear:
 		break;
@@ -113,6 +128,7 @@ void UCPP_DialogueSystem::SelectedQuest(const FQuest& quest)
 void UCPP_DialogueSystem::RevertDialogue()
 {
 	InitDialogue(DialogueOwnerName);
+	EndDialogue.Execute();
 }
 
 void UCPP_DialogueSystem::PrintDialogueNormal()
@@ -127,43 +143,54 @@ void UCPP_DialogueSystem::PrintDialogueJustTalk()
 	}
 	else
 	{
-		//PlayerController->ActivateDialogueSubBox(true);->ui ������
 		FTalkDialogue talk = GetTalkStruct();
-		UpdateDialogueText.Execute(talk.Dialogue);
+
+		if (talk.Dialogue.IsEmpty())
+		{
+			return;
+		}
+
+		UpdateDialogueText.Execute(talk.Dialogue, talk.DialogueEventType);
 
 		if (talk.Answers.Num() > 0)
 		{
-			CreateAnswerBox.Execute(talk.Answers);
+			OnUpdateAnswerBox.Execute(talk.Answers, false);
 			bActivateAnswerBox = true;
 		}
 		else
 		{
 			DatatableRowName = talk.NextRow;
-			bTalkEnd = talk.EndDialogue;
+			bTalkEnd = (talk.NextRow.IsNone()) && (talk.Answers.IsEmpty());
 		}
 	}
 }
 
 void UCPP_DialogueSystem::PrintDialogueQuest()
 {
-	if (bTalkEnd && !bSelectedQuest)
+	if (bTalkEnd && bSelectedQuest)
 	{
 		RevertDialogue();
 	}
 	else
 	{
 		FTalkDialogue quest = GetQuestDialogueStruct();
-		UpdateDialogueText.Execute(quest.Dialogue);
+
+		if (quest.Dialogue.IsEmpty())
+		{
+			return;
+		}
+
+		UpdateDialogueText.Execute(quest.Dialogue, quest.DialogueEventType);
 
 		if (quest.Answers.Num() > 0)
 		{
-			CreateAnswerBox.Execute(quest.Answers);
+			OnUpdateAnswerBox.Execute(quest.Answers, true);
 			bActivateAnswerBox = true;
 		}
 		else
 		{
 			DatatableRowName = quest.NextRow;
-			bTalkEnd = quest.EndDialogue;
+			bTalkEnd = (quest.NextRow.IsNone()) && (quest.Answers.IsEmpty());
 		}
 	}
 }
@@ -176,17 +203,46 @@ void UCPP_DialogueSystem::PrintDialogueQuit()
 {
 }
 
+bool UCPP_DialogueSystem::IsEndDialogue()
+{
+	return false;
+}
+
 FTalkDialogue UCPP_DialogueSystem::GetTalkStruct()
 {
-	return *TalkDataTable->FindRow<FTalkDialogue>(DatatableRowName, "");
+	if (FTalkDialogue* data = TalkDataTable->FindRow<FTalkDialogue>(DatatableRowName, ""))
+	{
+		return *data;
+	}
+	else
+	{
+		WARNINGLOG(TEXT("TalkDataTable의 ID가 유효하지 않습니다!"));
+		return FTalkDialogue();
+	}
 }
 
 FTalkDialogue UCPP_DialogueSystem::GetQuestDialogueStruct()
 {
-	return *QuestDialogueDataTable->FindRow<FTalkDialogue>(DatatableRowName, "");
+	if (FTalkDialogue* data = QuestDialogueDataTable->FindRow<FTalkDialogue>(DatatableRowName, ""))
+	{
+		return *data;
+	}
+	else
+	{
+		WARNINGLOG(TEXT("QuestDialogueDataTable의 ID가 유효하지 않습니다!"));
+		return FTalkDialogue();
+	}
 }
 
 FNPCDialogue UCPP_DialogueSystem::GetNPCStruct()
 {
-	return *NPCDataTable->FindRow<FNPCDialogue>(DialogueOwnerName, "");
+	if (FNPCDialogue* data = NPCDataTable->FindRow<FNPCDialogue>(DatatableRowName, ""))
+	{
+		return *data;
+	}
+	else
+	{
+		WARNINGLOG(TEXT("NPCDataTable의 ID가 유효하지 않습니다!"));
+		return FNPCDialogue();
+	}
 }

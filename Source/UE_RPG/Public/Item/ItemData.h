@@ -4,13 +4,15 @@
 #include "Engine/DataTable.h"
 #include "ItemData.generated.h"
 
+class UCPP_ConsumptionItemDataAsset;
+
 UENUM(BlueprintType)
 enum class EItemCategory : uint8
 {
-	EIS_Consumeable UMETA(DisplayName = "Consumeable"),
+	EIS_Consumable UMETA(DisplayName = "Consumable"),
 	EIS_Equipment UMETA(DisplayName = "Equipment"),
 	EIS_QuestItems UMETA(DisplayName = "Quest Items"),
-	EIS_Readables UMETA(DisplayName = "Readables"),
+	EIS_ReadItem UMETA(DisplayName = "Read Item"),
 	EIS_Combinables UMETA(DisplayName = "Combinable"),
 	EIS_Gabbable UMETA(DisplayName = "Grab Item"),
 	EIS_Gold UMETA(DisplayName = "Gold"),
@@ -27,45 +29,37 @@ public:
 	FItemInfoTable() {};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-		FName ItemInfoID;
+	FName ItemInfoID;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-		FText Name;
+	FText Name;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-		FText Description;
+	FText Description;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-		bool bCanBeUsed;
+	bool bCanBeUsed;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-		bool bCanStacked;
+	bool bCanStacked;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-		FText UseText;
+	FText UseText;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-		FText Interaction;
+	FText Interaction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-		int32 ItemPrice;
+	int32 ItemPrice;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-		float Weight;
+	float Weight;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data")
-		TSubclassOf<AActor> ItemClass;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data")
-		EItemCategory ItemType;
+	EItemCategory ItemType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Combinables", EditConditionHides))
-		FName CombinResultID;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Consumeable", EditConditionHides))
-		int32 ConsumeValue;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
-		int32 ATK;
+	FName CombineResultID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Consumable", EditConditionHides))
+	TObjectPtr<UCPP_ConsumptionItemDataAsset> ItemLogicAsset;
 	
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Equipment", EditConditionHides))
-		TSubclassOf<class ACPP_WeaponBase> WeaponActor;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
-		UStaticMesh* ItemMesh; 
+	TSoftObjectPtr<UStaticMesh> ItemMesh; 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
-		USkeletalMesh* ItemSkeletalMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
-		UTexture2D* IconTexture;
+	UTexture2D* IconTexture;
 };

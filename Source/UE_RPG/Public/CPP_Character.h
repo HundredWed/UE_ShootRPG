@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -9,7 +9,21 @@
 #include "CPP_Character.generated.h"
 
 class ANonPlayerCharacterBase;
+class ACPP_DamageActor;
 class UItem;
+class UCameraManager;
+class UCameraComponent;
+class USpringArmComponent;
+class UCPP_WeaponManager;
+class UInputComponent;
+class UInputAction;
+class UAnimMontage;
+class UMainPanelWidget;
+class UGrabber;
+class UInventory;
+class UCPP_QuestSubsystem;
+
+struct FQuest;
 
 DECLARE_DELEGATE_OneParam(FOnUpdatePlayerStateDelegate, const FCharacterStats&);
 DECLARE_DELEGATE_TwoParams(FOnUpdateHPDelegate, const float, const float);
@@ -26,79 +40,82 @@ public:
 	
 	/**Component*/
 	UPROPERTY(VisibleAnywhere, Category = Compoenents)
-		class UCameraComponent* FollowCamera;
+	UCameraComponent* FollowCamera;
 
 	UPROPERTY(VisibleAnywhere, Category = Compoenents)
-		class USpringArmComponent* CameraBoom;
+	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, Category = Compoenents)
-		class UCPP_WeaponManager* WeaponManager;
+	UCPP_WeaponManager* WeaponManager;
 
 	/**Input*/
 	/*UPROPERTY(EditAnywhere, Category = Input)
 		class UInputMappingContext* DefaultMappingContext;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* MoveAction;
+	UInputAction* MoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* LookAction;
+	UInputAction* LookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)	
+	UInputAction* SpeedAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* SpeedAction;
+	UInputAction* GrabAndPickupAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* GrabAndPickupAction;
+	UInputAction* EquipAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* EquipAction;
+	UInputAction* JumpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* JumpAction;
+	UInputAction* CrouchAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* CrouchAction;
+	UInputAction* DodgeToggle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* DodgeToggle;
+	UInputAction* AttackAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* AttackAction;
+	UInputAction* AimingAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* AimingAction;
+	UInputAction* InventoryToggle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		class UInputAction* InventoryToggle;
+	UInputAction* QuestListToggle;
 
 	
 
 	/**Montage*/
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-		class UAnimMontage* EquipMontage;
+	UAnimMontage* EquipMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-		class UAnimMontage* FireMontage;
+	UAnimMontage* FireMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-		class UAnimMontage* AimingFireMontage;
+	UAnimMontage* AimingFireMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-		class UAnimMontage* DodgeMontage;
+	UAnimMontage* DodgeMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-		class UAnimMontage* DamagedMontage;
+	UAnimMontage* DamagedMontage;
 
 	/**widget*/
 	UPROPERTY(EditAnywhere, Category = "Player Widget")
-		TSubclassOf< class UMainPanelWidget> MainPanelclass;
+	TSubclassOf<UMainPanelWidget> MainPanelclass;
 
 	UPROPERTY(EditAnywhere, Category = "Player Widget")
-		TSubclassOf<class ACPP_DamageActor> DamageUIActorClass;
+	TSubclassOf<ACPP_DamageActor> DamageUIActorClass;
 
 	/**spring arm*/
 	UPROPERTY(EditAnywhere, Category = "EditValue")
-		float SpringArmSocketOffsetYValue = 100.f;
+	float SpringArmSocketOffsetYValue = 100.f;
 
 	/**Item search issue overlap counting*/
 	uint8 OverlapCount = 0;
@@ -113,7 +130,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void SearchItem();
@@ -132,6 +149,7 @@ public:
 	void SetCrouch(const FInputActionValue& Value);
 	void Dodge(const FInputActionValue& Value);
 	void InventoryVisibility(const FInputActionValue& Value);
+	void QuestListVisibility(const FInputActionValue& Value);
 	void KnockBack(const FVector& velocity);
 
 	/**trace*/
@@ -168,23 +186,23 @@ public:
 	void PlayMontage(UAnimMontage* montage);
 
 	UFUNCTION(BlueprintCallable)
-		void HoldWeapon();
+	void HoldWeapon();
 
 	UFUNCTION(BlueprintCallable)
-		void UnHoldWeapon();
+	void UnHoldWeapon();
 
 	UFUNCTION(BlueprintCallable)
-		void EquippingEnd();
+	void EquippingEnd();
 
 	UFUNCTION(BlueprintCallable)
-		void SuperActionEnd();
+	void SuperActionEnd();
 
 	/**mouse*/
 	void SetMouseRate();
 	void CalculateCrosshairSpread(float DeltaTime);
 
 	UFUNCTION(BlueprintCallable)
-		float GetCrosshairSpreadMultiplier() const;
+	float GetCrosshairSpreadMultiplier() const;
 
 	FORCEINLINE ECharacterStateTypes GetCharacterState() const { return CharacterState; }
 	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
@@ -211,6 +229,7 @@ public:
 	void HideGameInventory();
 	void ShowGameInventory();
 	const float GetPlayerWeightInfo() { return InventoryMaxWeight; }
+	void OnQuestClearEvent(const FQuest& quest);
 
 	FORCEINLINE class UInventory* GetInventory() { return GameInventory; }
 	FORCEINLINE const int16 GetInventorySize() { return InventoryAmountOfSlot; }
@@ -237,6 +256,9 @@ private:
 	float ClampRange(float value);
 	void LookAtObject(AActor* obj);
 	void EndLookAtObject(AActor* obj);
+
+	UFUNCTION()
+	void OnRemoveItemEvent(const FName& itemId, const int32 amount);
 
 private:
 
@@ -277,16 +299,19 @@ private:
 	UPROPERTY()
 	ANonPlayerCharacterBase* NonPlayerCharacter;
 
+	UPROPERTY()
+	UCPP_QuestSubsystem* QuestSubsystem;
+
 	/**For get Grab& Release Func*/
 	UPROPERTY()
-		class UGrabber* GraberComponent;
+	UGrabber* GraberComponent;
 
 	/**item trace*/
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
-		float ShowItemDistance = 100.f;
+	float ShowItemDistance = 100.f;
 
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
-		float ShowItemRadius = 100.f;
+	float ShowItemRadius = 100.f;
 
 	bool bCanSearchObject = false;
 
@@ -294,54 +319,55 @@ private:
 
 	/**camera*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
-		float MouseRate = 50;
+	float MouseRate = 50;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
-		float AimingMouseRate = 50;
+	float AimingMouseRate = 50;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
-		float HipMouseRate = 50;
+	float HipMouseRate = 50;
 
 	bool bAiming = false;
 
 	/**crosshair*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
-		float CrosshairSpreadMultiplier;
+	float CrosshairSpreadMultiplier;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
-		float CrosshairVelocityFactor;
+	float CrosshairVelocityFactor;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
-		float CrosshairInAirFactor;
+	float CrosshairInAirFactor;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
-		float CrosshairAimFactor;
+	float CrosshairAimFactor;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
-		float CrosshairShootingFactor;
+	float CrosshairShootingFactor;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		class UCameraManager* CameraManager;
+	UCameraManager* CameraManager;
 
 	/**widget*/
 	UPROPERTY()
-		class UMainPanelWidget* MainPanelWidget;
+	UMainPanelWidget* MainPanelWidget;
 	UPROPERTY()
-		TArray<class ACPP_DamageActor*> DamageUIActors;
+	TArray<ACPP_DamageActor*> DamageUIActors;
 	int32 NextUI = 0;
 
 
 	/**inventory*/
 	UPROPERTY(VisibleAnywhere)
-		class UInventory* GameInventory;
+	UInventory* GameInventory;
 
 	UPROPERTY(EditAnywhere, Category = "InventoryComponent", meta = (AllowPrivateAccess = "true"))
-		uint8 InventoryAmountOfSlot = 20;
+	uint8 InventoryAmountOfSlot = 20;
 	UPROPERTY(EditAnywhere, Category = "InventoryComponent", meta = (AllowPrivateAccess = "true"))
-		uint8 InventoryRowSize = 5;
+	uint8 InventoryRowSize = 5;
 	UPROPERTY(EditAnywhere, Category = "InventoryComponent", meta = (AllowPrivateAccess = "true"))
-		float InventoryMaxWeight = 250.f;
+	float InventoryMaxWeight = 250.f;
 
 	bool isVisible = true;
+	bool IsQuestListVisible = false;
 
 };

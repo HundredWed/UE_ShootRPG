@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
@@ -9,18 +9,25 @@ class USoundCue;
 class UParticleSystem;
 
 USTRUCT(BlueprintType)
-struct FEquipmentAssetTable : public FTableRowBase
+struct FEquipmentInfoTable : public FTableRowBase
 {
 	GENERATED_BODY()
 
 public:
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+	FName EquipmentID;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+	int32 ATK;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
-	UParticleSystem* FireParticle;
+	TSoftObjectPtr<USkeletalMesh> ItemSkeletalMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
-	UParticleSystem* BeamParticle;
+	TSoftObjectPtr<UParticleSystem> FireParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
-	USoundCue* EquipSound;
+	TSoftObjectPtr<UParticleSystem> BeamParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
-	USoundCue* AttackSound;
+	TSoftObjectPtr<USoundCue> EquipSound;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
+	TSoftObjectPtr<USoundCue> AttackSound;
 };

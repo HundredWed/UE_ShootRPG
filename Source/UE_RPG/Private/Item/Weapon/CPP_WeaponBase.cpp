@@ -1,9 +1,10 @@
-#include "Item/Weapon/CPP_WeaponBase.h"
+﻿#include "Item/Weapon/CPP_WeaponBase.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Widget/NPC/CPP_DamageActor.h"
 #include "Item/Item.h"
 #include "Sound/SoundCue.h"
+#include "Systems/CPP_AkashicSubsystem.h"
 
 ACPP_WeaponBase::ACPP_WeaponBase()
 {
@@ -13,22 +14,17 @@ ACPP_WeaponBase::ACPP_WeaponBase()
 
 void ACPP_WeaponBase::InitWeaponInfo()
 {
-	if (IsValid(ItemDataTable) && IsValid(EquipmentAssetTable))
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
 	{
-		const FItemInfoTable* thisItemInfo = ItemDataTable->FindRow<FItemInfoTable>(ItemInfoID, TEXT(""));
-		if (thisItemInfo == nullptr)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("[%s] was not found!! Please check the ID."), *ItemInfoID.ToString());
-			return;
-		}
-
-		ItemRef = NewObject<UItem>(this, UItem::StaticClass());
-
-		ItemRef->ItemInfoTable = *thisItemInfo;
-
-		if(thisItemInfo->ItemSkeletalMesh)
-			WeaponMesh->SetSkeletalMesh(thisItemInfo->ItemSkeletalMesh);
+		return;
 	}
+
+	UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>();
+	const FItemInfoTable* thisItemInfo = AS->RequestItemInfo(ItemInfoID);
+
+	ItemRef = NewObject<UItem>(this, UItem::StaticClass());
+	ItemRef->ItemInfoTable = *thisItemInfo;
 }
 
 // Called when the game starts or when spawned
