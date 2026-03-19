@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widget/CPP_EquipmentInventory.h"
@@ -16,7 +16,7 @@ void UCPP_EquipmentInventory::UpdateEquipSlot(UItem* item)
 {
 	EquipSlot->UpdateEquipmentSlot(item);
 
-	const FString String = FString::Printf(TEXT("%d"), item->ItemInfoTable.ATK);
-	const FText text = FText::FromString(String);
-	ATKText->SetText(text);
+	//const FString String = FString::Printf(TEXT("%d"), item->ItemInfoTable.ATK);
+	//const FText text = FText::FromString(String);
+	ATKText->SetText(FText::FromString(TEXT("9999")));
 }

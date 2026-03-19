@@ -13,7 +13,7 @@ void UTootipWidget::UpdateToolTip()
 
 	switch (itemtype)
 	{
-	case EItemCategory::EIS_Consumeable:
+	case EItemCategory::EIS_Consumable:
 		Category->SetText(FText::FromString(TEXT("소모품")));
 		ATK->SetVisibility(ESlateVisibility::Collapsed);
 		BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
@@ -27,7 +27,7 @@ void UTootipWidget::UpdateToolTip()
 		BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
 		Price->SetVisibility(ESlateVisibility::Collapsed);
 		break;
-	case EItemCategory::EIS_Readables:
+	case EItemCategory::EIS_ReadItem:
 		Category->SetText(FText::FromString(TEXT("스크롤")));
 		ATK->SetVisibility(ESlateVisibility::Collapsed);
 		BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
@@ -49,7 +49,7 @@ void UTootipWidget::UpdateToolTip()
 	ItemIcon->SetBrushFromTexture(ItemRef->ItemInfoTable.IconTexture);
 	Name->SetText(ItemRef->ItemInfoTable.Name);
 	DescriptionText->SetText(ItemRef->ItemInfoTable.Description);
-	ATK->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), ItemRef->ItemInfoTable.ATK));
+	//ATK->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), ItemRef->ItemInfoTable.ATK));
 	Price->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Price", "가격: {0}"), ItemRef->ItemInfoTable.ItemPrice));
 	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), ItemRef->ItemInfoTable.Weight));
 }
