@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,9 +7,11 @@
 #include "Item/ItemData.h"
 #include "TootipWidget.generated.h"
 
-/**
- * 
- */
+class UImage;
+class UTextBlock;
+class USizeBox;
+
+
 UCLASS()
 class UE_RPG_API UTootipWidget : public UCustomUMGWidget
 {
@@ -18,37 +20,32 @@ class UE_RPG_API UTootipWidget : public UCustomUMGWidget
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UImage* ItemIcon;
+	UImage* ItemIcon;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UTextBlock* Name;
+	UTextBlock* Name;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UTextBlock* Category;
+	UTextBlock* Category;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UTextBlock* ATK;
+	UTextBlock* ATK;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class USizeBox* BlankSpace;
+	USizeBox* BlankSpace;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UTextBlock* DescriptionText;
+	UTextBlock* DescriptionText;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UTextBlock* Price;
+	UTextBlock* Price;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UTextBlock* Weight;
-
-public:
+	UTextBlock* Weight;
 	
-	void UpdateToolTip();
 
-	FORCEINLINE void SetTootipItemRef(const class UItem* itemRef) { ItemRef = itemRef; };
+	void InitToolTip(const FItemInfoTable& itemInfo, const int32 itemATK = 0);
 
 private:
-	UPROPERTY()
-		const class UItem* ItemRef;
 
 };

@@ -12,11 +12,11 @@ bool UCPP_EquipmentInventory::NativeOnDrop(const FGeometry& InGeometry, const FD
 	return true;
 }
 
-void UCPP_EquipmentInventory::UpdateEquipSlot(UItem* item)
+void UCPP_EquipmentInventory::UpdateEquipSlot(const FEquipmentInfoTable& equipmentInfo)
 {
-	EquipSlot->UpdateEquipmentSlot(item);
+	//EquipSlot->UpdateEquipmentSlot(equipmentInfo.EquipmentID);
 
-	//const FString String = FString::Printf(TEXT("%d"), item->ItemInfoTable.ATK);
-	//const FText text = FText::FromString(String);
-	ATKText->SetText(FText::FromString(TEXT("9999")));
+	const FString String = FString::Printf(TEXT("%d"), equipmentInfo.ATK);
+	const FText text = FText::FromString(String);
+	ATKText->SetText(text);
 }

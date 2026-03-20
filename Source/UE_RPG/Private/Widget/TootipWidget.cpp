@@ -7,49 +7,42 @@
 #include "Components/SizeBox.h"
 #include "Item/Item.h"
 
-void UTootipWidget::UpdateToolTip()
+void UTootipWidget::InitToolTip(const FItemInfoTable& itemInfo, const int32 itemATK = 0)
 {
-	EItemCategory itemtype = ItemRef->ItemInfoTable.ItemType;
+	EItemCategory itemType = itemInfo.ItemType;
 
-	switch (itemtype)
+	ATK->SetVisibility(ESlateVisibility::Collapsed);
+	BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
+
+	switch (itemType)
 	{
 	case EItemCategory::EIS_Consumable:
 		Category->SetText(FText::FromString(TEXT("소모품")));
-		ATK->SetVisibility(ESlateVisibility::Collapsed);
-		BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
 		break;
 	case EItemCategory::EIS_Equipment:
 		Category->SetText(FText::FromString(TEXT("장비")));
 		break;
 	case EItemCategory::EIS_QuestItems:
 		Category->SetText(FText::FromString(TEXT("퀘스트 아이템")));
-		ATK->SetVisibility(ESlateVisibility::Collapsed);
-		BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
 		Price->SetVisibility(ESlateVisibility::Collapsed);
 		break;
 	case EItemCategory::EIS_ReadItem:
 		Category->SetText(FText::FromString(TEXT("스크롤")));
-		ATK->SetVisibility(ESlateVisibility::Collapsed);
-		BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
 		break;
 	case EItemCategory::EIS_Gabbable:
 		Category->SetText(FText::FromString(TEXT("열쇠")));
-		ATK->SetVisibility(ESlateVisibility::Collapsed);
-		BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
 		break;
 	case EItemCategory::EIS_Combinables:
 		Category->SetText(FText::FromString(TEXT("조합 재료")));
-		ATK->SetVisibility(ESlateVisibility::Collapsed);
-		BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
 		break;
 	default:
 		break;
 	}
 
-	ItemIcon->SetBrushFromTexture(ItemRef->ItemInfoTable.IconTexture);
-	Name->SetText(ItemRef->ItemInfoTable.Name);
-	DescriptionText->SetText(ItemRef->ItemInfoTable.Description);
-	//ATK->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), ItemRef->ItemInfoTable.ATK));
-	Price->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Price", "가격: {0}"), ItemRef->ItemInfoTable.ItemPrice));
-	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), ItemRef->ItemInfoTable.Weight));
+	ItemIcon->SetBrushFromTexture(itemInfo.IconTexture);
+	Name->SetText(itemInfo.Name);
+	DescriptionText->SetText(itemInfo.Description);
+	ATK->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), ATK));
+	Price->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Price", "가격: {0}"), itemInfo.ItemPrice));
+	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), itemInfo.Weight));
 }
