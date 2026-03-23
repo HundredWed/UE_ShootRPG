@@ -8,7 +8,6 @@
 #include "UE_RPG/UtilityMecro.h"
 #include "CPP_WeaponBase.generated.h"
 
-class UItem;
 class UWeaponAbilityBase;
 class USoundCue;
 
@@ -49,7 +48,6 @@ public:
 	virtual void Attack() {};
 	virtual void InitWeaponInfo();
 	virtual void Equip(USceneComponent* Inparent, const FName& SocketName);
-	UItem* GetItemRef() { return ItemRef; }
 	
 protected:
 	// Called when the game starts or when spawned
@@ -59,8 +57,4 @@ protected:
 	void SpawnDamageUI(const FVector pos, float damage = 0.f);
 	void StoreDamageUI();
 	class ACPP_DamageActor* GetDamageActor();
-
-	/**item state*/
-	UPROPERTY()
-	UItem* ItemRef = nullptr;
 };

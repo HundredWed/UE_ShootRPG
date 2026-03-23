@@ -2,7 +2,6 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Widget/NPC/CPP_DamageActor.h"
-#include "Item/Item.h"
 #include "Sound/SoundCue.h"
 #include "Systems/CPP_AkashicSubsystem.h"
 
@@ -14,17 +13,7 @@ ACPP_WeaponBase::ACPP_WeaponBase()
 
 void ACPP_WeaponBase::InitWeaponInfo()
 {
-	UWorld* World = GetWorld();
-	if (!IsValid(World))
-	{
-		return;
-	}
-
-	UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>();
-	const FItemInfoTable* thisItemInfo = AS->RequestItemInfo(ItemInfoID);
-
-	ItemRef = NewObject<UItem>(this, UItem::StaticClass());
-	ItemRef->ItemInfoTable = *thisItemInfo;
+	
 }
 
 // Called when the game starts or when spawned

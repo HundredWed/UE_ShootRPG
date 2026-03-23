@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widget/CPP_EquipSlot.h"
@@ -52,7 +52,7 @@ bool UCPP_EquipSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEv
 
 	if (IsValid(dragSlot) 
 		&& dragSlot->WidgetRef
-		&& dragSlot->WidgetRef->GetItemRef()->ItemInfoTable.ItemType == EItemCategory::EIS_Equipment)
+		&& dragSlot->WidgetRef->GetItemRef()->ItemInfoTable.ItemType == EItemCategory::EIC_Equipment)
 	{
 		dragSlot->WidgetRef->EquipSlotItem();
 		return true;
@@ -90,7 +90,6 @@ FReply UCPP_EquipSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, cons
 
 void UCPP_EquipSlot::UpdateEquipmentSlot(UItem* weapon)
 {
-	ItemRef = weapon;
 	ActiveSlot();
 	SetSlotToolTip();
 }

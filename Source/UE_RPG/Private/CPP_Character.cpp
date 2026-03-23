@@ -11,7 +11,6 @@
 #include "Kismet/KismetMathLibrary.h"
 
 #include "Grabber.h"
-#include "Item/Item.h"
 #include "Item/Weapon/CPP_WeaponBase.h"
 #include "Item/PickUpItem.h"
 #include "Camera/CameraManager.h"
@@ -471,15 +470,16 @@ bool ACPP_Character::PressKey(const FInputActionValue& Value)
 //	return weapon;
 //}
 
-void ACPP_Character::PickUpWeapon(UItem* itemRef)
+bool ACPP_Character::PickUpWeapon(const FName& itemID)
 {
 	if (WeaponManager->GetCurrentWeapon() == nullptr)
 	{
-		SetEquipWeapon(itemRef);
+		return SetEquipWeapon(itemID);
 	}
 	else
 	{
-		AddInventory(itemRef);
+		const int32 storedAmount = AddInventory(itemID);
+		return storedAmount > 0;
 	}
 }
 
@@ -615,12 +615,17 @@ void ACPP_Character::SetStateUnEquipped()
 	UE_LOG(LogTemp, Display, TEXT("UnEquipped"));
 }
 
-void ACPP_Character::SetEquipWeapon(UItem* item)
+bool ACPP_Character::SetEquipWeapon(const FName& itemID)
 {
-	WeaponManager->EquipWeapon(item->ItemInfoTable.ItemInfoID);
+	if (WeaponManager->EquipWeapon(itemID))
+	{
+		GameInventory->UpdateEquipmentInventory(itemID);
+		CharacterState = ECharacterStateTypes::Equipped;
+		
+		return true;
+	}
 
-	GameInventory->UpdateEquipmentInventory(item);
-	CharacterState = ECharacterStateTypes::Equipped;
+	return false;
 }
 
 void ACPP_Character::TakeOffWeapon()
@@ -867,33 +872,34 @@ int32 ACPP_Character::GetDamageUIArrayLength()
 	return DamageUIActors.Num();
 }
 
-void ACPP_Character::AddInventory(UItem* itemRef, int32 amount)
+int32 ACPP_Character::AddInventory(const FName& itemID, const int32 amount)
 {
-	if (itemRef->ItemInfoTable.ItemType == EItemCategory::EIS_Gold)
-	{
-		const int32 amountOver = (GameInventory->GetCurrentGold() + (itemRef->ItemInfoTable.ItemPrice * amount));
-		if (GameInventory->IsOverGold(amountOver))
-		{
-			return;
-		}
-		GameInventory->AddGold(itemRef->ItemInfoTable.ItemPrice * amount);
-	}
-	else
-	{
-		//저장 성공한 갯수
-		int32 storedAmount = GameInventory->AddItem(itemRef, amount);
+	//저장 성공한 갯수
+	const int32 storedAmount = GameInventory->AddItem(itemID, amount);
 
-		UGameInstance* GI = GetGameInstance();
-		if (IsValid(GI))
+	if (storedAmount == 0)
+	{
+		return 0;
+	}
+
+	UGameInstance* GI = GetGameInstance();
+	if (IsValid(GI))
+	{
+		UCPP_QuestSubsystem* questSystem = GI->GetSubsystem<UCPP_QuestSubsystem>();
+
+		if (IsValid(questSystem))
 		{
-			UCPP_QuestSubsystem* questSystem = GI->GetSubsystem<UCPP_QuestSubsystem>();
-			if (IsValid(questSystem))
-			{
-				//아이템이 들어온 갯수만큼만 퀘스트 체크
-				questSystem->CheckQuestContent(itemRef->ItemInfoTable.ItemInfoID, storedAmount);
-			}
+			//아이템이 들어온 갯수만큼만 퀘스트 체크
+			questSystem->CheckQuestContent(itemID, storedAmount);
 		}
-	}	
+	}
+
+	return storedAmount;
+}
+
+int32 ACPP_Character::PickUpGold(const int32 price, const int32 amount)
+{
+	return GameInventory->AddGold(price * amount);
 }
 
 void ACPP_Character::SetDialogue(const FName& id)

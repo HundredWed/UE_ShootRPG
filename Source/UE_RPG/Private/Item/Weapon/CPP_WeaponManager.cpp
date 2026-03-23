@@ -13,7 +13,7 @@ void UCPP_WeaponManager::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UCPP_WeaponManager::EquipWeapon(const FName& weaponId)
+bool UCPP_WeaponManager::EquipWeapon(const FName& weaponId)
 {
 	
 	if (WeaponStorage.Contains(weaponId))
@@ -25,24 +25,27 @@ void UCPP_WeaponManager::EquipWeapon(const FName& weaponId)
 		ACPP_WeaponBase* weapon = *(WeaponStorage.Find(weaponId));
 		weapon->SetActorHiddenInGame(false);
 		CurrentWeapon = weapon;
+
+		return true;
 	}
 	else
 	{
 		UWorld* world = GetWorld();
 		if (!IsValid(world))
 		{
-			return;
+			return false;
 		}
 
 		UCPP_AkashicSubsystem* AS = world->GetSubsystem<UCPP_AkashicSubsystem>();
-		AS->SpawnWeaponAsync(weaponId, GetOwner()->GetActorLocation(), FOnWeaponSpawnedCallback::CreateUObject(this, &UCPP_WeaponManager::OnWeaponReady));
+		bool IsValidWeaponId = AS->SpawnWeaponAsync(weaponId, GetOwner()->GetActorLocation(), FOnWeaponSpawnedCallback::CreateUObject(this, &UCPP_WeaponManager::OnWeaponReady));
 	
-
-		if (!bClearWeaponTick)
+		if (IsValidWeaponId && !bClearWeaponTick)
 		{
 			bClearWeaponTick = true;
 			world->GetTimerManager().SetTimer(ManagerTimer, this, &UCPP_WeaponManager::ClearWeaponGarbage, ClearWeaponTick);
 		}
+
+		return IsValidWeaponId;
 	}
 }
 

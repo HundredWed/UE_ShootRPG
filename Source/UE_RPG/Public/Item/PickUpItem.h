@@ -45,14 +45,12 @@ protected:
 	
 	/**item state*/
 	UPROPERTY(EditAnywhere, Category = "Item state")
-		FName ItemInfoID;/**same name*/
+	FName ItemInfoID;/**same name*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item state")
-		int32 ItemAmount = 1;
+	int32 ItemAmount = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item state")
-		class UItem* ItemRef = nullptr;
-
+	EItemCategory ItemCategory = EItemCategory::EIC_None;
 
 	UFUNCTION()
 		virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,

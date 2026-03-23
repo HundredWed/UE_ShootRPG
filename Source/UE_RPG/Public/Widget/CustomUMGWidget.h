@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,9 +7,8 @@
 #include "UE_RPG/UtilityMecro.h"
 #include "CustomUMGWidget.generated.h"
 
-/**
- * 
- */
+DECLARE_DELEGATE(FOnCloseEventDelegate);
+
 UCLASS()
 class UE_RPG_API UCustomUMGWidget : public UUserWidget
 {
@@ -18,9 +17,5 @@ class UE_RPG_API UCustomUMGWidget : public UUserWidget
 protected:
 	virtual void NativeConstruct() override;
 
-	UPROPERTY()
-		class ACPP_Character* PlayerRef;
-
-	UPROPERTY()
-		class UInventory* InventoryRef;
+	FOnCloseEventDelegate OnCloseEvent;
 };

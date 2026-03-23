@@ -87,7 +87,7 @@ bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDrop
 		USlotDrag* inSlotDragWidget = Cast<USlotDrag>(InOperation);
 		if (inSlotDragWidget)
 		{
-			const uint8 slotIndex = inSlotDragWidget->WidgetRef->MyArrayNumber;
+			const uint8 slotIndex = inSlotDragWidget->WidgetRef->MyIndex;
 			const int32 amount = inSlotDragWidget->WidgetRef->MyAmount;
 			bool bstackable = inSlotDragWidget->WidgetRef->bMyItemCanStacked;
 

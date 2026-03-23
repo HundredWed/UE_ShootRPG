@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,9 +6,24 @@
 #include "Widget/CustomUMGWidget.h"
 #include "CPP_SlotBase.generated.h"
 
-/**
- * 
- */
+class UCPP_DragSlotWidget;
+class UBorder;
+class UImage;
+class UTootipWidget;
+class UDragDropOperation;
+
+struct FGeometry;
+struct FPointerEvent;
+struct FDragDropEvent;
+struct FOnMouseButtonDownDelegate;
+struct FReply;
+
+
+DECLARE_DELEGATE_FourParams(FOnDragDetectedDelegate, const FGeometry&, const FPointerEvent&, UDragDropOperation*&, const int32);
+DECLARE_DELEGATE_RetVal_FourParams(bool, FOnDropDelegate, const FGeometry&, const FDragDropEvent&, UDragDropOperation*, const int32);
+DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FOnMouseButtonDownDelegate, const FGeometry&, const FPointerEvent&, const int32);
+DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FOnSlotMouseButtonDoubleClickDelegate, const FGeometry&, const FPointerEvent&, const int32);
+
 UCLASS()
 class UE_RPG_API UCPP_SlotBase : public UCustomUMGWidget
 {
@@ -16,16 +31,24 @@ class UE_RPG_API UCPP_SlotBase : public UCustomUMGWidget
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UBorder* SlotBorder;
+	UBorder* SlotBorder;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UImage* ItemIcon;
+	UImage* ItemIcon;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
-		TSubclassOf< class UCPP_DragSlotWidget> DragWidgetClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Component")
+	TSubclassOf<UCPP_DragSlotWidget> DragWidgetClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Compoenet")
-		TSubclassOf< class UTootipWidget> TootipWidgetClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Component")
+	TSubclassOf<UTootipWidget> TootipWidgetClass;
+
+	FOnDragDetectedDelegate OnSlotDragDetected;
+	FOnDropDelegate OnSlotDrop;
+	FOnMouseButtonDownDelegate OnSlotMouseButtonDown;
+	FOnSlotMouseButtonDoubleClickDelegate OnSlotMouseButtonDoubleClick;
+
+	/**for drag over event only once*/
+	bool bDraggedOver = false;
 	
 protected:
 
@@ -33,28 +56,18 @@ protected:
 	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
 	virtual void InactiveSlot();
-	virtual void ActiveSlot();
-	void SetSlotToolTip();
-
-public:
-
-	FORCEINLINE class UItem* GetItemRef() { return ItemRef; }
+	virtual void ActiveSlot(UTexture2D* icon);
+	void SetSlotToolTip(const FItemInfoTable* itemInfo, const int32 itemATK = 0);
 
 protected:
 
 	/**tooltip*/
 	UPROPERTY()
-		class UTootipWidget* ToolTip = nullptr;
-
-	/**item info*/
-	UPROPERTY()
-		class UItem* ItemRef = nullptr;
+	UTootipWidget* ToolTip = nullptr;
 
 	/**slot info*/
 	FLinearColor DefaultBorderColor;
 
-	/**for drag over event only once*/
-	bool bDraggedOver = false;
 private:
 
 };

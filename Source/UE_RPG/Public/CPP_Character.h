@@ -10,7 +10,6 @@
 
 class ANonPlayerCharacterBase;
 class ACPP_DamageActor;
-class UItem;
 class UCameraManager;
 class UCameraComponent;
 class USpringArmComponent;
@@ -160,7 +159,7 @@ public:
 
 	bool PressKey(const FInputActionValue& Value);
 	//class AWeapon* isWeapon(AActor* hitobject) const;
-	void PickUpWeapon(UItem* itemRef);
+	bool PickUpWeapon(const FName& itemID);
 	void AttackWeapon();
 	void CanTrigger();
 	void SetMovementRotate(bool bORT, float rotationRate);
@@ -173,7 +172,7 @@ public:
 	/**Character Setting*/
     void SetStateEquipped();
 	void SetStateUnEquipped();
-	void SetEquipWeapon(UItem* item);
+	bool SetEquipWeapon(const FName& itemID);
 	void TakeOffWeapon();
 	bool CanAttackState();
 	bool CanEquipState();
@@ -226,7 +225,9 @@ public:
 	
 	
 	/**inventory*/
+	UFUNCTION()
 	void HideGameInventory();
+
 	void ShowGameInventory();
 	const float GetPlayerWeightInfo() { return InventoryMaxWeight; }
 	void OnQuestClearEvent(const FQuest& quest);
@@ -243,7 +244,8 @@ public:
 
 
 	/**interact*/
-	void AddInventory(UItem* itemRef, int32 amount = 1);
+	int32 AddInventory(const FName& itemID, const int32 amount = 1);
+	int32 PickUpGold(const int32 price, const int32 amount = 1);
 	void SetDialogue(const FName& id);
 
 	FOnUpdatePlayerStateDelegate OnUpdatePlayerState;

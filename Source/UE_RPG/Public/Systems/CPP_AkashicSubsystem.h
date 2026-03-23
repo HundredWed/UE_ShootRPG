@@ -23,7 +23,7 @@ public:
 	virtual void Deinitialize() override;
 
 	void SpawnItemAsync(FName itemID, FVector spawnLocation);
-	void SpawnWeaponAsync(FName itemID, FVector spawnLocation, FOnWeaponSpawnedCallback onSpawnCompleted);
+	bool SpawnWeaponAsync(FName itemID, FVector spawnLocation, FOnWeaponSpawnedCallback onSpawnCompleted);
 
 	FItemInfoTable* RequestItemInfo(const FName& itemId);
 	FEquipmentInfoTable* RequestWeaponInfo(const FName& itemId);

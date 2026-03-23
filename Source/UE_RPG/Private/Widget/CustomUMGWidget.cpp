@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widget/CustomUMGWidget.h"
@@ -8,16 +8,4 @@
 void UCustomUMGWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	PlayerRef = Cast<ACPP_Character>(GetOwningPlayerPawn());
-	if (IsValid(PlayerRef))
-	{
-		InventoryRef = PlayerRef->GetInventory();
-		if (!IsValid(InventoryRef))
-			WARNINGLOG(TEXT("Found InventoryRef!!"))
-	}
-	else
-	{
-		WARNINGLOG(TEXT("Found PlayerRef!!"))
-	}
 }

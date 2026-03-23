@@ -1,5 +1,4 @@
 ﻿#include "Item/PickUpItem.h"
-#include "Item/Item.h"
 #include "CPP_Character.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
@@ -139,11 +138,10 @@ void APickUpItem::InitializePickUpItem()
 	if (UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>())
 	{
 		const FItemInfoTable* thisItemInfo = AS->RequestItemInfo(ItemInfoID);
+		ItemCategory = thisItemInfo->ItemType;
+
 		if (thisItemInfo)
 		{
-			ItemRef = NewObject<UItem>(this, UItem::StaticClass());
-			ItemRef->ItemInfoTable = *thisItemInfo;
-
 			if (!thisItemInfo->ItemMesh.IsNull())
 				PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh.LoadSynchronous());
 		}
@@ -154,15 +152,16 @@ void APickUpItem::RequestInteract(AActor* interactor)
 {
 	if (ACPP_Character* character = Cast<ACPP_Character>(interactor))
 	{
-
-		if (ItemRef->ItemInfoTable.ItemType == EItemCategory::EIS_Equipment)
+		switch (ItemCategory)
 		{
-			character->PickUpWeapon(ItemRef);
+		case EItemCategory::EIC_Equipment:
+			character->PickUpWeapon(ItemInfoID);
+			break;
+		case EItemCategory::EIC_Gold:
+			break;
 		}
-		else
-		{
-			character->AddInventory(ItemRef, ItemAmount);
-		}		
+
+		character->AddInventory(ItemInfoID, ItemAmount);
 	}
 
 	Destroy();

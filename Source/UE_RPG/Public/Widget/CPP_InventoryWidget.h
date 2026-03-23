@@ -1,14 +1,22 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Widget/CustomUMGWidget.h"
+#include "Item/ItemData.h"
 #include "CPP_InventoryWidget.generated.h"
 
-/**
- * 
- */
+class UInventory;
+class UCPP_Slot;
+class UCPP_DragSlotWidget;
+class UButton;
+class UUniformGridPanel;
+class USetAmountWidget;
+class UCPP_EquipmentInventory;
+class UScrollBox;
+class UTextBlock;
+
 UCLASS()
 class UE_RPG_API UCPP_InventoryWidget : public UCustomUMGWidget
 {
@@ -19,45 +27,48 @@ public:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UButton* CloseButton;
+	UButton* CloseButton;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UButton* SortButton;
+	UButton* SortButton;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UUniformGridPanel* SlotPanel;
+	UUniformGridPanel* SlotPanel;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class USetAmountWidget* SpliteWidget;
+	USetAmountWidget* SpliteWidget;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UCPP_EquipmentInventory* EquipmentInventory;
+	UCPP_EquipmentInventory* EquipmentInventory;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UScrollBox* InventoryScollBox;
+	UScrollBox* InventoryScollBox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UTextBlock* WeightText;
+	UTextBlock* WeightText;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UTextBlock* GoldText;
+	UTextBlock* GoldText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Widget")
-		TSubclassOf< class UCPP_Slot> SlotWidgetClass;
+	TSubclassOf<UCPP_Slot> SlotWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Widget")
+	TSubclassOf<UCPP_DragSlotWidget> DragWidgetClass;
 
 	/**the value for render transform SpliteWidget*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Widget")
-		int32 SlotBoxSize = 64;
+	int32 SlotBoxSize = 64;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Widget")
-		float InventoryBoxSize = 500;
+	float InventoryBoxSize = 500;
 
 	UPROPERTY()
-		TArray<class UCPP_Slot*> SlotWidgetArray;
+	TArray<UCPP_Slot*> SlotWidgetArray;
 
 public:	
 
 	UFUNCTION()
-	void GenerateSlotWidget(const int16 slotsParRow);
+	void GenerateSlotWidget(const int32 slotsParRow);
 
 	UFUNCTION()
 	void CloseWidget();
@@ -70,6 +81,8 @@ public:
 	void UpdateWeightText(const float amount);
 	void UpdateWeightMaxAmount(const float amount);
 	void UpdateGoldText(const int32 amount);
+	void UpdateSlot(const FItemInfoTable* itemData, const int32 index, const int32 amount);
+	void CheckCombinability(const int32 toIndex, const int32 fromIndex);
 
 protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -79,8 +92,29 @@ protected:
 
 private:
 
+	UFUNCTION();
+	void OnSlotDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation, const int32 index);
+
+	UFUNCTION();
+	bool OnSlotDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation, const int32 index);
+
+	UFUNCTION();
+	FReply OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index);
+
+	UFUNCTION();
+	FReply OnSlotMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index);
+
+	UFUNCTION()
+	void ChangeItem(const int32 index);
+
+	void OnUseItem(const int32 index);
+	void EquipSlotItem(const FName& equipmentID, const int32 index);
+	void SearchCombinableSlot(const int32 startIndex);
+
 	UPROPERTY()
-		class UCPP_Slot* SlotWidget;
+	UCPP_Slot* SlotWidget;
+
+	TWeakObjectPtr<UInventory> InventoryRef;
 
 	float MaxWeight = 0.0f;
 

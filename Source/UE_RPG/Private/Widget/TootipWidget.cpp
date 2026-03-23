@@ -5,44 +5,43 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/SizeBox.h"
-#include "Item/Item.h"
 
-void UTootipWidget::InitToolTip(const FItemInfoTable& itemInfo, const int32 itemATK = 0)
+void UTootipWidget::InitToolTip(const FItemInfoTable* itemInfo, const int32 itemATK = 0)
 {
-	EItemCategory itemType = itemInfo.ItemType;
+	EItemCategory itemType = itemInfo->ItemType;
 
 	ATK->SetVisibility(ESlateVisibility::Collapsed);
 	BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
 
 	switch (itemType)
 	{
-	case EItemCategory::EIS_Consumable:
+	case EItemCategory::EIC_Consumable:
 		Category->SetText(FText::FromString(TEXT("소모품")));
 		break;
-	case EItemCategory::EIS_Equipment:
+	case EItemCategory::EIC_Equipment:
 		Category->SetText(FText::FromString(TEXT("장비")));
 		break;
-	case EItemCategory::EIS_QuestItems:
+	case EItemCategory::EIC_QuestItems:
 		Category->SetText(FText::FromString(TEXT("퀘스트 아이템")));
 		Price->SetVisibility(ESlateVisibility::Collapsed);
 		break;
-	case EItemCategory::EIS_ReadItem:
+	case EItemCategory::EIC_ReadItem:
 		Category->SetText(FText::FromString(TEXT("스크롤")));
 		break;
-	case EItemCategory::EIS_Gabbable:
+	case EItemCategory::EIC_Gabbable:
 		Category->SetText(FText::FromString(TEXT("열쇠")));
 		break;
-	case EItemCategory::EIS_Combinables:
+	case EItemCategory::EIC_Combinables:
 		Category->SetText(FText::FromString(TEXT("조합 재료")));
 		break;
 	default:
 		break;
 	}
 
-	ItemIcon->SetBrushFromTexture(itemInfo.IconTexture);
-	Name->SetText(itemInfo.Name);
-	DescriptionText->SetText(itemInfo.Description);
+	ItemIcon->SetBrushFromTexture(itemInfo->IconTexture);
+	Name->SetText(itemInfo->Name);
+	DescriptionText->SetText(itemInfo->Description);
 	ATK->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), ATK));
-	Price->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Price", "가격: {0}"), itemInfo.ItemPrice));
-	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), itemInfo.Weight));
+	Price->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Price", "가격: {0}"), itemInfo->ItemPrice));
+	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), itemInfo->Weight));
 }

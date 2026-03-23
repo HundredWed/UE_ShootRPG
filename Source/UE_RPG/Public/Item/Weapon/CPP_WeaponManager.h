@@ -19,7 +19,7 @@ public:
 	virtual void BeginPlay() override;
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void EquipWeapon(const FName& weaponid);
+	bool EquipWeapon(const FName& weaponid);
 	void TakeOffWeapon();
 	void OnWeaponReady(ACPP_WeaponBase* weapon);
 	ACPP_WeaponBase* SpawnWeapon(TSubclassOf<ACPP_WeaponBase> weapon);

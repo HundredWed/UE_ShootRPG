@@ -1,15 +1,17 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Widget/CPP_SlotBase.h"
-#include "Inventory.h"
+#include "Item/ItemData.h"
 #include "CPP_Slot.generated.h"
 
-/**
- * Inevntory Slot
- */
+class UButton;
+class UTextBlock;
+
+DECLARE_DELEGATE_OneParam(FOnCombineDelegate, const int32);
+
 UCLASS()
 class UE_RPG_API UCPP_Slot : public UCPP_SlotBase
 {
@@ -18,37 +20,37 @@ class UE_RPG_API UCPP_Slot : public UCPP_SlotBase
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UButton* CombineButton;
+	UButton* CombineButton;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget)) 
-		class UTextBlock* TextAmount;
+	UTextBlock* TextAmount;
 
 
-	int16 MyArrayNumber = 0;
+	int32 MyIndex = 0;
 	int32 MyAmount = 0;
 	bool  bMyItemCanStacked = false;
 
 	/**CombinableSlot*/
-	int16 LinkedCombinableSlot = -1;
+	int32 LinkedCombinableSlot = -1;
+
+	FOnCombineDelegate OnCombineDelegate;
 
 public: 
 	virtual void InactiveSlot() override;
-	virtual void ActiveSlot() override;
+	virtual void ActiveSlot(UTexture2D* icon) override;
 
-	void UpdateSlot(const int16 index);
-	void OnUseItem();
-	void EquipSlotItem();
-	class UItem* GetItemInfoFromSlot() { return ItemRef; }
+	void UpdateSlot(const FItemInfoTable* itemData, const int32 index, const int32 amount);
 	
 
-	/**Combinae function*/
+	/**Combine function*/
 	void InactiveCombinableSlot();
 	void ActiveCombinableSlot();
-	void CheckCombinability(const int16 fromIndex);
 	bool GetIsActiveCombineButton() { return bActiveCombineButton; }
 	
 	UFUNCTION()
-		void CombineItem();
+	void CombineItem();
+
+	void SetBorder();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -65,21 +67,14 @@ protected:
 	
 private:
 
-	
-
 	/**you must init ItemRef this Func*/
 	 void InitSlotInfo();
-
-	void SearchCombinableSlot();
 
 	UPROPERTY()
 		class UCPP_DragSlotWidget* DragSlotWidget;
 
-	/**slot info*/
-	FInventorySlot InventorySlotinfo;
-
 	/**found CombinableSlot*/
-	int16 CombinableSlot = -1;
+	int32 CombinableSlot = -1;
 	bool bActiveCombineButton = false;
 
 };

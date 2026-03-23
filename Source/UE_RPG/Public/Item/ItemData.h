@@ -9,15 +9,15 @@ class UCPP_ConsumptionItemDataAsset;
 UENUM(BlueprintType)
 enum class EItemCategory : uint8
 {
-	EIS_Consumable UMETA(DisplayName = "Consumable"),
-	EIS_Equipment UMETA(DisplayName = "Equipment"),
-	EIS_QuestItems UMETA(DisplayName = "Quest Items"),
-	EIS_ReadItem UMETA(DisplayName = "Read Item"),
-	EIS_Combinables UMETA(DisplayName = "Combinable"),
-	EIS_Gabbable UMETA(DisplayName = "Grab Item"),
-	EIS_Gold UMETA(DisplayName = "Gold"),
+	EIC_Consumable UMETA(DisplayName = "Consumable"),
+	EIC_Equipment UMETA(DisplayName = "Equipment"),
+	EIC_QuestItems UMETA(DisplayName = "Quest Items"),
+	EIC_ReadItem UMETA(DisplayName = "Read Item"),
+	EIC_Combinables UMETA(DisplayName = "Combinable"),
+	EIC_Gabbable UMETA(DisplayName = "Grab Item"),
+	EIC_Gold UMETA(DisplayName = "Gold"),
 
-	EIS_None UMETA(DisplayName = "NoneItem")
+	EIC_None UMETA(DisplayName = "NoneItem")
 };
 
 USTRUCT(BlueprintType)
@@ -51,10 +51,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data")
 	EItemCategory ItemType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Combinables", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIC_Combinables", EditConditionHides))
 	FName CombineResultID;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIS_Consumable", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemType Data", meta = (EditCondition = "ItemType == EItemCategory::EIC_Consumable", EditConditionHides))
 	TObjectPtr<UCPP_ConsumptionItemDataAsset> ItemLogicAsset;
 	
 

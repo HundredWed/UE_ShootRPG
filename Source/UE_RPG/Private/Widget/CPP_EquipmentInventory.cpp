@@ -4,7 +4,6 @@
 #include "Widget/CPP_EquipmentInventory.h"
 #include "Widget/CPP_EquipSlot.h"
 #include "Components/TextBlock.h"
-#include "Item/Item.h"
 
 bool UCPP_EquipmentInventory::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {

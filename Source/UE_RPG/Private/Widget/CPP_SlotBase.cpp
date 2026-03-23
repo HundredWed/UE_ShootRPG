@@ -1,11 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widget/CPP_SlotBase.h"
 #include "Components/Border.h"
 #include "Widget/SlotDrag.h"
 #include "Components/Image.h"
-#include "Item/Item.h"
 #include "Widget/TootipWidget.h"
 
 
@@ -42,12 +41,12 @@ void UCPP_SlotBase::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDr
 	if (bDraggedOver)
 	{
 		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-		if (dragSlot && ItemRef == nullptr)
+		if (dragSlot)
 		{
 			bDraggedOver = false;
 			SlotBorder->SetBrushColor(DefaultBorderColor);
 		}
-		else if (dragSlot && ItemRef)
+		else
 		{
 			bDraggedOver = false;
 			SlotBorder->SetBrushColor(FLinearColor::White);
@@ -64,28 +63,24 @@ void UCPP_SlotBase::InactiveSlot()
 	/**set border*/
 	SlotBorder->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	SlotBorder->SetBrushColor(DefaultBorderColor);
-
-	ItemRef = nullptr;
 }
 
-void UCPP_SlotBase::ActiveSlot()
+void UCPP_SlotBase::ActiveSlot(UTexture2D* icon)
 {
 	/**set icon*/
 	ItemIcon->SetIsEnabled(true);
-	ItemIcon->SetBrushFromTexture(ItemRef->ItemInfoTable.IconTexture);
+	ItemIcon->SetBrushFromTexture(icon);
 	ItemIcon->SetVisibility(ESlateVisibility::Visible);
 	/**set border*/
 	SlotBorder->SetBrushColor(FLinearColor::White);
 }
 
-void UCPP_SlotBase::SetSlotToolTip()
+void UCPP_SlotBase::SetSlotToolTip(const FItemInfoTable* itemInfo, const int32 itemATK)
 {
 	if (IsValid(ToolTip))
 	{
 		/**if created tootip before, don't create widget and update that tootip*/
-		ToolTip->SetTootipItemRef(ItemRef);
-		ToolTip->UpdateToolTip();
-
+		ToolTip->InitToolTip(itemInfo, itemATK);
 		ItemIcon->SetToolTip(ToolTip);
 	}
 	else
@@ -94,8 +89,7 @@ void UCPP_SlotBase::SetSlotToolTip()
 		if (TootipWidgetClass)
 		{
 			ToolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
-			ToolTip->SetTootipItemRef(ItemRef);
-			ToolTip->UpdateToolTip();
+			ToolTip->InitToolTip(itemInfo, itemATK);
 			ItemIcon->SetToolTip(ToolTip);
 		}
 	}

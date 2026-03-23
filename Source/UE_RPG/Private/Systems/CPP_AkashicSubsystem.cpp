@@ -65,14 +65,14 @@ void UCPP_AkashicSubsystem::SpawnItemAsync(FName itemID, FVector spawnLocation)
     }
 }
 
-void UCPP_AkashicSubsystem::SpawnWeaponAsync(FName itemID, FVector spawnLocation, FOnWeaponSpawnedCallback onSpawnCompleted)
+bool UCPP_AkashicSubsystem::SpawnWeaponAsync(FName itemID, FVector spawnLocation, FOnWeaponSpawnedCallback onSpawnCompleted)
 {
     FItemInfoTable* itemInfo = RequestItemInfo(itemID);
     FEquipmentInfoTable* weaponInfo = RequestWeaponInfo(itemID);
 
     if (itemInfo == nullptr || weaponInfo == nullptr)
     {
-        return;
+        return false;
     }
 
     TArray<FSoftObjectPath> assetsToLoad;
@@ -108,6 +108,8 @@ void UCPP_AkashicSubsystem::SpawnWeaponAsync(FName itemID, FVector spawnLocation
     {
         OnWeaponAssetsLoaded(itemID, spawnLocation, onSpawnCompleted);
     }
+
+    return true;
 }
 
 void UCPP_AkashicSubsystem::OnItemAssetsLoaded(FName itemID, FVector spawnLocation)

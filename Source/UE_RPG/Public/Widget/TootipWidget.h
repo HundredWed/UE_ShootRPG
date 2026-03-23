@@ -44,7 +44,7 @@ public:
 	UTextBlock* Weight;
 	
 
-	void InitToolTip(const FItemInfoTable& itemInfo, const int32 itemATK = 0);
+	void InitToolTip(const FItemInfoTable* itemInfo, const int32 itemATK = 0);
 
 private:
 

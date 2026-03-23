@@ -9,7 +9,6 @@
 #include "Systems/CPP_AkashicSubsystem.h"
 #include "NPC/EnemyBase.h"
 #include "CPP_Character.h"
-#include "Item/Item.h"
 
 ACPP_Rifle::ACPP_Rifle()
 {
