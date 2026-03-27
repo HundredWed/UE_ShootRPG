@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,9 +6,10 @@
 #include "Widget/CPP_SlotBase.h"
 #include "CPP_EquipSlot.generated.h"
 
-/**
- * 
- */
+DECLARE_DELEGATE_FourParams(FOnEquipDragDetectedDelegate, const FGeometry&, const FPointerEvent&, UDragDropOperation*&, const FName&);
+DECLARE_DELEGATE_RetVal_FourParams(bool, FOnEquipDropDelegate, const FGeometry&, const FDragDropEvent&, UDragDropOperation*, const FName&);
+DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FOnEquipMouseButtonDownDelegate, const FGeometry&, const FPointerEvent&, const FName&);
+
 UCLASS()
 class UE_RPG_API UCPP_EquipSlot : public UCPP_SlotBase
 {
@@ -29,9 +30,18 @@ protected:
 
 public:
 
-	void UpdateEquipmentSlot(class UItem* weapon);
+	void UpdateEquipmentSlot(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
 	void TakeOffWeapon();
+	FName GetEquipmentID() { return EquipmentID; }
+	void SetEquipmentType(EEquipmentType type) { MyEquipmentType = type; }
+
+
+	FOnEquipDragDetectedDelegate OnEquipDragDetected;
+	FOnEquipDropDelegate OnEquipDrop;
+	FOnEquipMouseButtonDownDelegate OnEquipMouseButtonDown;
 
 private:
 
+	FName EquipmentID = NAME_None;
+	EEquipmentType MyEquipmentType;
 };

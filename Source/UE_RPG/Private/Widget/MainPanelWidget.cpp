@@ -100,7 +100,11 @@ bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDrop
 			}
 			else
 			{
-				bool successRemove = InventoryRef->RemoveItemAtIndex(slotIndex, amount);
+				//임시 로직
+				// ui매니저에 위젯을 등록하는 방법을 바꾸면서 리팩토링
+				//===================================================================================
+				ACPP_Character* player = Cast<ACPP_Character>(GetOwningPlayerPawn());
+				bool successRemove = player->GetInventory()->RemoveItemAtIndex(slotIndex, amount);
 				if (successRemove == false)
 				{
 					//TODO
@@ -108,6 +112,7 @@ bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDrop
 					UpdatePopupText(FText::FromString(TEXT("해당 아이템은 버릴 수 없습니다.")));
 					PopupWidget->SetVisibility(ESlateVisibility::Visible);
 				}
+				//===================================================================================
 				return successRemove;
 			}
 

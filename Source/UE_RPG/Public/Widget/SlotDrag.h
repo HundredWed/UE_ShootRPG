@@ -1,14 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/DragDropOperation.h"
+#include "Item/Weapon/EquipmentData.h"
 #include "SlotDrag.generated.h"
 
-/**
- * DragDropOperation class
- */
+class UCPP_Slot;
+
 UCLASS()
 class UE_RPG_API USlotDrag : public UDragDropOperation
 {
@@ -17,7 +17,10 @@ class UE_RPG_API USlotDrag : public UDragDropOperation
 public:
 
 	UPROPERTY()
-		class UCPP_Slot* WidgetRef = nullptr;
+	UCPP_Slot* WidgetRef = nullptr;
+
+	int32 GetIndex();
 
 	bool bFromEquipmentSlot = false;
+	EEquipmentType EquipmentType = EEquipmentType::None;
 };

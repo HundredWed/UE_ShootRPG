@@ -1,7 +1,6 @@
 ﻿#include "Inventory.h"
 #include "CPP_Character.h"
 #include "Widget/CPP_Slot.h"
-#include "Widget/CPP_EquipmentInventory.h"
 #include "Widget/CPP_EquipSlot.h"
 #include "Item/PickUpItem.h"
 #include "Kismet/GameplayStatics.h"
@@ -217,6 +216,14 @@ void UInventory::RemoveQuestItem(const FName& itemId, const int32 amount)
 	}
 }
 
+void UInventory::RequestTakeOffWeapon()
+{
+	if (IsValid(PlayerRef))
+	{
+		PlayerRef->TakeOffWeapon();
+	}
+}
+
 void UInventory::SwapSlot(const int32 fromIndex, const int32 toIndex)
 {
 	CheckItemType(fromIndex, toIndex);
@@ -314,7 +321,6 @@ void UInventory::UpdateInventory(int32 index, const FName& itemID, const int32 a
 	UpdateSlotAtIndex(index);
 }
 
-
 void UInventory::SplitStackToIndex(const int32 fromIndex, const int32 toIndex, const int32 splitAmount)
 {
 	if (CanSplitStackable(fromIndex, toIndex, splitAmount))
@@ -342,7 +348,7 @@ bool UInventory::CanSplitStackable(const int32 fromIndex, const int32 toIndex, c
 
 void UInventory::UpdateSlotAtIndex(const int32 index)
 {
-	FItemInfoTable* toIndexItemData = RequestItemData(SlotsArray[index].ItemID);
+	const FItemInfoTable* toIndexItemData = RequestItemData(SlotsArray[index].ItemID);
 
 	InventoryWidget->UpdateSlot(toIndexItemData, index, SlotsArray[index].ItemAmount);
 }
@@ -569,31 +575,36 @@ uint8 UInventory::GetCompareValue(int32 index)
 	return (uint8)itemData->ItemType;
 }
 
-void UInventory::SetEquipWeapon(const FName& itemId, const int32 index)
+void UInventory::SetEquipWeapon(const int32 fromIndex)
 {
-	UCPP_EquipSlot* equipSlot = InventoryWidget->EquipmentInventory->EquipSlot;
+	const FName inputEquipmentID = SlotsArray[fromIndex].ItemID;
+	const FEquipmentInfoTable* inputEquipmentData = RequestEquipmentData(inputEquipmentID);
 
-	/**swap Inventory item and EquipmentInventory item */
-	if (IsValid(equipSlot))
+	if (inputEquipmentData == nullptr)
+		return;
+
+	const FName currentEquipmentID = InventoryWidget->GetCurrentEquipmentID(inputEquipmentData->EquipmentType);
+
+	//장비칸에 장비가 있으면 스왑. 없으면 해당 index빈칸으로 초기화
+	if (!currentEquipmentID.IsNone())
 	{
-		const FName equipmentID = equipSlot->GetEquipmentID();
-		const FItemInfoTable* itemData = RequestItemData(equipmentID);
-
-		//장비칸에 장비가 있으면 스왑. 없으면 해당 index빈칸으로 초기화
-		if (!equipmentID.IsNone())
-		{
-			UpdateInventory(index, equipmentID, 1);//item amount 1
-		}
-		else
-		{
-			UpdateInventory(index, NAME_None, 0);//item amount 0
-		}
-
-		/**set EquipmentInventory item to Inventory item*/
-		UpdateEquipmentInventory(itemId);
-		EquipWeaponToPlayer(itemId);
+		UpdateInventory(fromIndex, currentEquipmentID, 1);//item amount 1
+	}
+	else
+	{
+		UpdateInventory(fromIndex, NAME_None, 0);//item amount 0
 	}
 	
+
+	if (FEquipmentSlot* slot = EquipmentSlots.Find(inputEquipmentData->EquipmentType))
+	{
+		slot->EquipmentID = inputEquipmentID;
+	}
+
+	/**set EquipmentInventory item to Inventory item*/
+	const FItemInfoTable* itemData = RequestItemData(inputEquipmentID);
+	InventoryWidget->UpdateEquipmentInventory(itemData, inputEquipmentData);
+	EquipWeaponToPlayer(inputEquipmentID);
 }
 
 void UInventory::EquipWeaponToPlayer(const FName& itemId)
@@ -606,24 +617,32 @@ void UInventory::EquipWeaponToPlayer(const FName& itemId)
 
 void UInventory::UpdateEquipmentInventory(const FName& itemID)
 {
-	if(!IsValid(InventoryWidget))
-		return;
+	const FItemInfoTable* itemData = RequestItemData(itemID);
+	const FEquipmentInfoTable* equipmentData = RequestEquipmentData(itemID);
 
-	UCPP_EquipmentInventory* EquipmentInventory = InventoryWidget->EquipmentInventory;
-	if(!IsValid(EquipmentInventory))
+	if (itemData == nullptr || equipmentData == nullptr)
+	{
 		return;
+	}
 
-	const FEquipmentInfoTable* itemData = RequestEquipmentData(itemID);
-	EquipmentInventory->UpdateEquipSlot(*itemData);
+	if (FEquipmentSlot* slot = EquipmentSlots.Find(equipmentData->EquipmentType))
+	{
+		slot->EquipmentID = equipmentData->EquipmentID;
+		InventoryWidget->UpdateEquipmentInventory(itemData, equipmentData);
+	}	
 }
 
-void UInventory::UnEquipWeaponAndAddItem(const int32 index)
+void UInventory::UnEquipWeaponAndAddToIndex(EEquipmentType equipmentType, const int32 index)
 {
-	UCPP_EquipSlot* equipSlot = InventoryWidget->EquipmentInventory->EquipSlot;
-	const FName equipmentID = equipSlot->GetEquipmentID();
-	const FItemInfoTable* itemData = RequestItemData(equipmentID);
-	UpdateInventory(index, equipmentID, 1);
-	equipSlot->TakeOffWeapon();
+	if (FEquipmentSlot* slot = EquipmentSlots.Find(equipmentType))
+	{
+		const FName currentEquipmentID = slot->EquipmentID;
+		const FItemInfoTable* itemData = RequestItemData(currentEquipmentID);
+		UpdateInventory(index, currentEquipmentID, 1);
+
+		RequestTakeOffWeapon();
+		slot->EquipmentID = NAME_None;
+	}	
 }
 
 int32 UInventory::GetTotalItemAmount(const FName& itemID)
@@ -684,6 +703,8 @@ FItemInfoTable* UInventory::RequestItemData(const FName& itemId)
 	{
 		return AS->RequestItemInfo(itemId);
 	}
+	
+	return nullptr;
 }
 
 FEquipmentInfoTable* UInventory::RequestEquipmentData(const FName& itemId)
@@ -698,6 +719,8 @@ FEquipmentInfoTable* UInventory::RequestEquipmentData(const FName& itemId)
 	{
 		return AS->RequestWeaponInfo(itemId);
 	}
+
+	return nullptr;
 }
 
 void UInventory::ShowInventory()

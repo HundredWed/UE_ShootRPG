@@ -7,9 +7,13 @@
 #include "Item/Weapon/EquipmentData.h"
 #include "CPP_EquipmentInventory.generated.h"
 
-/**
- * 
- */
+class UCPP_EquipSlot;
+class UTextBlock;
+class UCPP_DragSlotWidget;
+class UInventory;
+
+struct FItemInfoTable;
+
 UCLASS()
 class UE_RPG_API UCPP_EquipmentInventory : public UCustomUMGWidget
 {
@@ -17,15 +21,44 @@ class UE_RPG_API UCPP_EquipmentInventory : public UCustomUMGWidget
 
 public:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UCPP_EquipSlot* EquipSlot;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-		class UTextBlock* ATKText;
-
+	void UpdateEquipSlot(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
+	FName GetEquipmentID(EEquipmentType equipmentType);
+	void InitEquipmentInventory(TWeakObjectPtr<UInventory> inventory, TSubclassOf<UCPP_DragSlotWidget> dragWidgetClass);
+	
 protected:
+
+	virtual void NativeConstruct() override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)override;
 
-public:
-	void UpdateEquipSlot(const FEquipmentInfoTable& equipmentInfo);
+private:
+
+	void OnSlotDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation, const FName& equipmentID);
+	bool OnSlotDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation, const FName& equipmentID);
+	FReply OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const FName& equipmentID);
+
+private:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UCPP_EquipSlot* EquipSlot;
+
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UCPP_EquipSlot* OffensiveRigSlot;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UCPP_EquipSlot* DefensiveRingSlot;*/
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UTextBlock* ATKText;
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* DEFText;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* ManaDensityText;*/
+
+
+	UPROPERTY()
+	TSubclassOf<UCPP_DragSlotWidget> DragWidgetClass;
+
+	UPROPERTY()
+	TMap<EEquipmentType, UCPP_EquipSlot*> EquipSlots;
+
+	TWeakObjectPtr<UInventory> InventoryRef;
 };

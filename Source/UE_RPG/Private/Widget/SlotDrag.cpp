@@ -1,5 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widget/SlotDrag.h"
+#include "Widget/CPP_Slot.h"
 
+int32 USlotDrag::GetIndex()
+{
+	return WidgetRef->MyIndex;
+}

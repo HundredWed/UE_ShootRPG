@@ -6,14 +6,32 @@
 #include "Components/TextBlock.h"
 #include "Components/SizeBox.h"
 
-void UTootipWidget::InitToolTip(const FItemInfoTable* itemInfo, const int32 itemATK = 0)
+void UTootipWidget::InitToolTip(const FItemInfoTable* itemInfo)
 {
-	EItemCategory itemType = itemInfo->ItemType;
-
-	ATK->SetVisibility(ESlateVisibility::Collapsed);
+	ATKText->SetVisibility(ESlateVisibility::Collapsed);
 	BlankSpace->SetVisibility(ESlateVisibility::Collapsed);
 
-	switch (itemType)
+	SetItemType(itemInfo);
+	
+	Price->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Price", "가격: {0}"), itemInfo->ItemPrice));
+	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), itemInfo->Weight));
+}
+
+void UTootipWidget::InitToolTip(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo)
+{
+	SetItemType(itemInfo);
+
+	ATKText->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), equipmentInfo->ATK));
+	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), itemInfo->Weight));
+}
+
+void UTootipWidget::SetItemType(const FItemInfoTable* itemInfo)
+{
+	ItemIcon->SetBrushFromTexture(itemInfo->IconTexture);
+	Name->SetText(itemInfo->Name);
+	DescriptionText->SetText(itemInfo->Description);
+
+	switch (itemInfo->ItemType)
 	{
 	case EItemCategory::EIC_Consumable:
 		Category->SetText(FText::FromString(TEXT("소모품")));
@@ -37,11 +55,4 @@ void UTootipWidget::InitToolTip(const FItemInfoTable* itemInfo, const int32 item
 	default:
 		break;
 	}
-
-	ItemIcon->SetBrushFromTexture(itemInfo->IconTexture);
-	Name->SetText(itemInfo->Name);
-	DescriptionText->SetText(itemInfo->Description);
-	ATK->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), ATK));
-	Price->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Price", "가격: {0}"), itemInfo->ItemPrice));
-	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), itemInfo->Weight));
 }

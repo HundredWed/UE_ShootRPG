@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Widget/CustomUMGWidget.h"
+#include "Item/ItemData.h"
+#include "Item/Weapon/EquipmentData.h"
 #include "CPP_SlotBase.generated.h"
 
 class UCPP_DragSlotWidget;
@@ -14,9 +16,6 @@ class UDragDropOperation;
 
 struct FGeometry;
 struct FPointerEvent;
-struct FDragDropEvent;
-struct FOnMouseButtonDownDelegate;
-struct FReply;
 
 
 DECLARE_DELEGATE_FourParams(FOnDragDetectedDelegate, const FGeometry&, const FPointerEvent&, UDragDropOperation*&, const int32);
@@ -37,9 +36,6 @@ public:
 	UImage* ItemIcon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Component")
-	TSubclassOf<UCPP_DragSlotWidget> DragWidgetClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Component")
 	TSubclassOf<UTootipWidget> TootipWidgetClass;
 
 	FOnDragDetectedDelegate OnSlotDragDetected;
@@ -57,7 +53,8 @@ protected:
 
 	virtual void InactiveSlot();
 	virtual void ActiveSlot(UTexture2D* icon);
-	void SetSlotToolTip(const FItemInfoTable* itemInfo, const int32 itemATK = 0);
+	void SetSlotToolTip(const FItemInfoTable* itemInfo);
+	void SetSlotToolTip(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
 
 protected:
 

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widget/CustomUMGWidget.h"
 #include "Item/ItemData.h"
+#include "Item/Weapon/EquipmentData.h"
 #include "TootipWidget.generated.h"
 
 class UImage;
@@ -29,7 +30,14 @@ public:
 	UTextBlock* Category;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* ATK;
+	UTextBlock* ATKText;
+
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* DEFText;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* ManaCostText;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UTextBlock* ManaDensityText;*/
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	USizeBox* BlankSpace;
@@ -44,8 +52,11 @@ public:
 	UTextBlock* Weight;
 	
 
-	void InitToolTip(const FItemInfoTable* itemInfo, const int32 itemATK = 0);
+	void InitToolTip(const FItemInfoTable* itemInfo);
+	void InitToolTip(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
 
 private:
+
+	void SetItemType(const FItemInfoTable* itemInfo);
 
 };

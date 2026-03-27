@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widget/CustomUMGWidget.h"
 #include "Item/ItemData.h"
+#include "Item/Weapon/EquipmentData.h"
 #include "CPP_InventoryWidget.generated.h"
 
 class UInventory;
@@ -36,13 +37,13 @@ public:
 	UUniformGridPanel* SlotPanel;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	USetAmountWidget* SpliteWidget;
+	USetAmountWidget* SplitWidget;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UCPP_EquipmentInventory* EquipmentInventory;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UScrollBox* InventoryScollBox;
+	UScrollBox* InventoryScrollBox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* WeightText;
@@ -56,7 +57,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Widget")
 	TSubclassOf<UCPP_DragSlotWidget> DragWidgetClass;
 
-	/**the value for render transform SpliteWidget*/
+	/**the value for render transform SplitWidget*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Widget")
 	int32 SlotBoxSize = 64;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slot Widget")
@@ -77,12 +78,16 @@ public:
 	void SortInventory();
 
 	void SetPanelEnabled(bool enabled);
-	void SetSpliteWidget(const class UCPP_Slot* fromSlot,const class UCPP_Slot* toSlot);
+	void SetSplitWidget(const UCPP_Slot* fromSlot,const UCPP_Slot* toSlot);
 	void UpdateWeightText(const float amount);
 	void UpdateWeightMaxAmount(const float amount);
 	void UpdateGoldText(const int32 amount);
 	void UpdateSlot(const FItemInfoTable* itemData, const int32 index, const int32 amount);
+	void UpdateSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData, const int32 index);
 	void CheckCombinability(const int32 toIndex, const int32 fromIndex);
+
+	FName GetCurrentEquipmentID(EEquipmentType equipmentType);
+	void UpdateEquipmentInventory(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
 
 protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -92,27 +97,21 @@ protected:
 
 private:
 
-	UFUNCTION();
+	void SeSlotInfo(UCPP_Slot* slot, const int32 index );
+
+	//일반 슬롯
 	void OnSlotDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation, const int32 index);
-
-	UFUNCTION();
 	bool OnSlotDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation, const int32 index);
-
-	UFUNCTION();
 	FReply OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index);
-
-	UFUNCTION();
 	FReply OnSlotMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index);
+
 
 	UFUNCTION()
 	void ChangeItem(const int32 index);
 
 	void OnUseItem(const int32 index);
-	void EquipSlotItem(const FName& equipmentID, const int32 index);
-	void SearchCombinableSlot(const int32 startIndex);
-
-	UPROPERTY()
-	UCPP_Slot* SlotWidget;
+	void EquipSlotItem(const int32 fromIndex);
+	void SearchCombinableSlot(EItemCategory itemType, const int32 startIndex);
 
 	TWeakObjectPtr<UInventory> InventoryRef;
 

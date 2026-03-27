@@ -15,6 +15,7 @@
 #include "Widget/CPP_DragSlotWidget.h"
 #include "Widget/SlotDrag.h"
 #include "Widget/SetAmountWidget.h"
+#include "Widget/CPP_EquipmentInventory.h"
 
 void UCPP_InventoryWidget::NativeConstruct()
 {
@@ -27,6 +28,8 @@ void UCPP_InventoryWidget::NativeConstruct()
 	if (IsValid(player))
 	{
 		InventoryRef = player->GetInventory(); 
+		EquipmentInventory->InitEquipmentInventory(InventoryRef, DragWidgetClass);
+		SplitWidget->SetWeakInventoryRef(InventoryRef);
 	}
 }
 
@@ -44,48 +47,45 @@ void UCPP_InventoryWidget::GenerateSlotWidget(const int32 slotsParRow)
 					
 		for (int32 index = 0; index < InventoryRef->GetInventorySize(); index++)
 		{
-			SlotWidget = CreateWidget<UCPP_Slot>(this, SlotWidgetClass);
-			if (IsValid(SlotWidget))
+			UCPP_Slot* slotWidget = CreateWidget<UCPP_Slot>(this, SlotWidgetClass);
+			if (IsValid(slotWidget))
 			{
-				SlotWidgetArray.Add(SlotWidget);
+				SlotWidgetArray.Add(slotWidget);
 
 				const int32 row = index / slotsParRow;
 				const int32 column = index % slotsParRow;
-				SlotPanel->AddChildToUniformGrid(SlotWidget, row, column);
+				SlotPanel->AddChildToUniformGrid(slotWidget, row, column);
 
+				SeSlotInfo(slotWidget, index);
 
-				const FName slotItemID = InventoryRef->GetSlotInfoIndex(index).ItemID;
-				if (slotItemID.IsNone())
-				{
-					SlotWidget->InactiveSlot();
-				}
-				else
-				{
-					const FItemInfoTable* itemData = InventoryRef->RequestItemData(slotItemID);
-					const int32 amount = InventoryRef->GetSlotInfoIndex(index).ItemAmount;
-					SlotWidget->UpdateSlot(itemData, index, amount);
-					SearchCombinableSlot(index);
-				}
-
-				SlotWidget->OnSlotDragDetected.BindUObject(this, UCPP_InventoryWidget::OnSlotDragDetected);
-				SlotWidget->OnSlotDrop.BindUObject(this, UCPP_InventoryWidget::OnSlotDrop);
-				SlotWidget->OnSlotMouseButtonDown.BindUObject(this, UCPP_InventoryWidget::OnSlotMouseButtonDown);
-				SlotWidget->OnSlotMouseButtonDoubleClick.BindUObject(this, UCPP_InventoryWidget::OnSlotMouseButtonDoubleClick);
-				SlotWidget->OnCombineDelegate.BindUObject(this, UCPP_InventoryWidget::ChangeItem);
+				slotWidget->OnSlotDragDetected.BindUObject(this, &UCPP_InventoryWidget::OnSlotDragDetected);
+				slotWidget->OnSlotDrop.BindUObject(this, &UCPP_InventoryWidget::OnSlotDrop);
+				slotWidget->OnSlotMouseButtonDown.BindUObject(this, &UCPP_InventoryWidget::OnSlotMouseButtonDown);
+				slotWidget->OnSlotMouseButtonDoubleClick.BindUObject(this, &UCPP_InventoryWidget::OnSlotMouseButtonDoubleClick);
+				slotWidget->OnCombineDelegate.BindUObject(this, &UCPP_InventoryWidget::ChangeItem);
 			}
 
 		}
+
+		//장비슬롯 초기화
+
+
 	}
 }
 
 void UCPP_InventoryWidget::CloseWidget()
 {
 	//PlayerRef->HideGameInventory();
-	SpliteWidget->SetVisibility(ESlateVisibility::Hidden);
+	SplitWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UCPP_InventoryWidget::SortInventory()
 {
+	if (!InventoryRef.IsValid())
+	{
+		return;
+	}
+
 	InventoryRef->InventorySort(0, InventoryRef->GetInventorySize() - 1);
 }
 
@@ -94,7 +94,7 @@ void UCPP_InventoryWidget::SetPanelEnabled(bool enabled)
 	SlotPanel->SetIsEnabled(enabled);
 }
 
-void UCPP_InventoryWidget::SetSpliteWidget(const UCPP_Slot* fromSlot, const UCPP_Slot* toSlot)
+void UCPP_InventoryWidget::SetSplitWidget(const UCPP_Slot* fromSlot, const UCPP_Slot* toSlot)
 {
 	UUniformGridSlot* slotGrid = Cast<UUniformGridSlot>(toSlot->Slot);
 	float rowSize;
@@ -102,7 +102,7 @@ void UCPP_InventoryWidget::SetSpliteWidget(const UCPP_Slot* fromSlot, const UCPP
 	float columnSize;
 	if (IsValid(slotGrid))
 	{
-		rowSize = (float)(slotGrid->GetRow() * SlotBoxSize) - (InventoryScollBox->GetScrollOffset());
+		rowSize = (float)(slotGrid->GetRow() * SlotBoxSize) - (InventoryScrollBox->GetScrollOffset());
 		clampRow = FMath::Clamp(rowSize, 0, InventoryBoxSize);
 		columnSize = (float)(slotGrid->GetColumn() * SlotBoxSize);
 	}
@@ -115,9 +115,9 @@ void UCPP_InventoryWidget::SetSpliteWidget(const UCPP_Slot* fromSlot, const UCPP
 	FVector2D render = FVector2D(columnSize, clampRow);
 	FWidgetTransform renderTransform = FWidgetTransform(render,FVector2D(1,1), FVector2D::Zero(), 0);
 
-	SpliteWidget->SetRenderTransform(renderTransform);
-	SpliteWidget->InitWidgetInfo(fromSlot->MyAmount, fromSlot->MyIndex, false, toSlot->MyIndex);
-	SpliteWidget->SetVisibility(ESlateVisibility::Visible);
+	SplitWidget->SetRenderTransform(renderTransform);
+	SplitWidget->InitWidgetInfo(fromSlot->MyAmount, fromSlot->MyIndex, false, toSlot->MyIndex);
+	SplitWidget->SetVisibility(ESlateVisibility::Visible);
 	SetPanelEnabled(false);
 }
 
@@ -146,11 +146,23 @@ void UCPP_InventoryWidget::UpdateSlot(const FItemInfoTable* itemData, const int3
 {
 	UCPP_Slot* slot = SlotWidgetArray[index];
 	slot->UpdateSlot(itemData, index, amount);
-	SearchCombinableSlot(index);
+
+	SearchCombinableSlot(itemData->ItemType, index);	
+}
+
+void UCPP_InventoryWidget::UpdateSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData, const int32 index)
+{
+	UCPP_Slot* slot = SlotWidgetArray[index];
+	slot->UpdateSlot(itemData, equipmentData, index);
 }
 
 void UCPP_InventoryWidget::CheckCombinability(const int32 toIndex, const int32 fromIndex)
 {
+	if (!InventoryRef.IsValid())
+	{
+		return;
+	}
+
 	UCPP_Slot* slot = SlotWidgetArray[toIndex];
 	const FName itemID = InventoryRef->GetSlotInfoIndex(toIndex).ItemID;
 	const FItemInfoTable* itemData = InventoryRef->RequestItemData(itemID);
@@ -163,6 +175,16 @@ void UCPP_InventoryWidget::CheckCombinability(const int32 toIndex, const int32 f
 
 		slot->LinkedCombinableSlot = -1;
 	}
+}
+
+FName UCPP_InventoryWidget::GetCurrentEquipmentID(EEquipmentType equipmentType)
+{
+	return EquipmentInventory->GetEquipmentID(equipmentType);
+}
+
+void UCPP_InventoryWidget::UpdateEquipmentInventory(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo)
+{
+	EquipmentInventory->UpdateEquipSlot(itemInfo, equipmentInfo);
 }
 
 FReply UCPP_InventoryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -208,6 +230,36 @@ bool UCPP_InventoryWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 {
 	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 	return true;
+}
+
+void UCPP_InventoryWidget::SeSlotInfo(UCPP_Slot* slot, const int32 index)
+{
+	if (!InventoryRef.IsValid())
+	{
+		return;
+	}
+
+	const FName slotItemID = InventoryRef->GetSlotInfoIndex(index).ItemID;
+	if (slotItemID.IsNone())
+	{
+		slot->InactiveSlot();
+	}
+	else
+	{
+		const FItemInfoTable* itemData = InventoryRef->RequestItemData(slotItemID);
+
+		if (itemData->ItemType == EItemCategory::EIC_Equipment)
+		{
+			const FEquipmentInfoTable* equipmentData = InventoryRef->RequestEquipmentData(slotItemID);
+			slot->UpdateSlot(itemData, equipmentData, index);
+		}
+		else
+		{
+			const int32 amount = InventoryRef->GetSlotInfoIndex(index).ItemAmount;
+			slot->UpdateSlot(itemData, index, amount);
+			SearchCombinableSlot(itemData->ItemType, index);
+		}		
+	}
 }
 
 void UCPP_InventoryWidget::OnSlotDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation, const int32 index)
@@ -265,7 +317,7 @@ bool UCPP_InventoryWidget::OnSlotDrop(const FGeometry& InGeometry, const FDragDr
 			{
 				if (InDragDropEvent.IsShiftDown())
 				{
-					SetSpliteWidget(dragSlot->WidgetRef, slot);					
+					SetSplitWidget(dragSlot->WidgetRef, slot);					
 				}
 				else
 				{
@@ -275,7 +327,7 @@ bool UCPP_InventoryWidget::OnSlotDrop(const FGeometry& InGeometry, const FDragDr
 		}
 		else if (dragSlot->bFromEquipmentSlot)
 		{
-			InventoryRef->UnEquipWeaponAndAddItem(index);			
+			InventoryRef->UnEquipWeaponAndAddToIndex(dragSlot->EquipmentType, index);
 		}
 
 		return true;
@@ -298,7 +350,7 @@ FReply UCPP_InventoryWidget::OnSlotMouseButtonDown(const FGeometry& InGeometry, 
 		}
 		else if(itemData && itemData->ItemType == EItemCategory::EIC_Equipment)
 		{
-			EquipSlotItem(itemID, index);
+			EquipSlotItem(index);
 		}
 
 		return FReply::Handled();
@@ -333,6 +385,11 @@ FReply UCPP_InventoryWidget::OnSlotMouseButtonDoubleClick(const FGeometry& InGeo
 
 void UCPP_InventoryWidget::ChangeItem(const int32 index)
 {
+	if (!InventoryRef.IsValid())
+	{
+		return;
+	}
+
 	const FName itemID = InventoryRef->GetSlotInfoIndex(index).ItemID;
 	if (const FItemInfoTable* itemData = InventoryRef->RequestItemData(itemID))
 	{
@@ -342,17 +399,34 @@ void UCPP_InventoryWidget::ChangeItem(const int32 index)
 
 void UCPP_InventoryWidget::OnUseItem(const int32 index)
 {
-	InventoryRef->UseItem(index);
+	if (InventoryRef.IsValid())
+	{
+		InventoryRef->UseItem(index);
+	}	
 }
 
-void UCPP_InventoryWidget::EquipSlotItem(const FName& equipmentID, const int32 index)
+void UCPP_InventoryWidget::EquipSlotItem(const int32 fromIndex)
 {
-	InventoryRef->SetEquipWeapon(equipmentID, index);
+	if (InventoryRef.IsValid())
+	{
+		InventoryRef->SetEquipWeapon(fromIndex);
+	}	
 }
 
-void UCPP_InventoryWidget::SearchCombinableSlot(const int32 startIndex)
+void UCPP_InventoryWidget::SearchCombinableSlot(EItemCategory itemType, const int32 startIndex)
 {
+	if (itemType != EItemCategory::EIC_Combinables || !InventoryRef.IsValid())
+		return;
 
+	SlotWidgetArray[startIndex]->CombinableSlot = InventoryRef->FindCombinableSlot(startIndex);
+	const int32 combineSlot = SlotWidgetArray[startIndex]->CombinableSlot;
+
+	if (combineSlot != -1)
+	{
+		SlotWidgetArray[combineSlot]->ActiveCombinableSlot();
+	}
+
+	InventoryRef->ClearConnectArray();
 }
 
 

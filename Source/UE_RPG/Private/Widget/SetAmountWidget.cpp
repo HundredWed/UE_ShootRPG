@@ -4,7 +4,9 @@
 #include "Widget/SetAmountWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+
 #include "Inventory.h"
+#include "Widget/CPP_InventoryWidget.h"
 
 
 void USetAmountWidget::NativeConstruct()
@@ -42,12 +44,22 @@ void USetAmountWidget::DecreaseCount()
 
 void USetAmountWidget::ClickCancel()
 {
-	InventoryRef->InventoryWidget->SetPanelEnabled(true);
+	if (!InventoryRef.IsValid())
+	{
+		return;
+	}
+
+	InventoryRef->InventoryWidget->SetPanelEnabled(true);//델리게이트로
 	this->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void USetAmountWidget::ClickConfirm()
 {
+	if (!InventoryRef.IsValid())
+	{
+		return;
+	}
+
 	if (bThrowWidget)
 	{
 		InventoryRef->RemoveItemAtIndex(InventoryIndex, SetAmountCount);
@@ -57,7 +69,7 @@ void USetAmountWidget::ClickConfirm()
 		InventoryRef->SplitStackToIndex(InventoryIndex, ToIndex, SetAmountCount);
 	}
 
-	InventoryRef->InventoryWidget->SetPanelEnabled(true);
+	InventoryRef->InventoryWidget->SetPanelEnabled(true);//델리게이트로
 	this->SetVisibility(ESlateVisibility::Hidden);
 }
 

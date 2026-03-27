@@ -5,15 +5,35 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Structs/ST_Quest.h"
+#include "Item/Weapon/EquipmentData.h"
+#include "Item/ItemData.h"
 #include "Inventory.generated.h"
 
 class ACPP_Character;
+class UCPP_EquipmentInventory;
+class UCPP_InventoryWidget;
+
 struct FEquipmentInfoTable;
 
+USTRUCT(BlueprintType)
 struct FInventorySlot
 {
+	GENERATED_BODY()
+
+	UPROPERTY()
 	FName ItemID = NAME_None;
-	int32 ItemAmount = 1;
+
+	UPROPERTY()
+	int32 ItemAmount = 0; 
+};
+
+USTRUCT(BlueprintType)
+struct FEquipmentSlot
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FName EquipmentID = NAME_None;
 };
 
 DECLARE_DELEGATE_TwoParams(FOnOnItemRemovedDelegate, const FName&, const int32);
@@ -29,7 +49,7 @@ public:
 
 	/**widget value*/
 	UPROPERTY()
-		UCPP_InventoryWidget* InventoryWidget;
+	UCPP_InventoryWidget* InventoryWidget;
 	
 	FOnOnItemRemovedDelegate OnItemRemoved;
 
@@ -83,10 +103,10 @@ public:
 
 	/**equip weapon*/
 	/**this func set equipment and swap weapon*/
-	void SetEquipWeapon(const FName& itemID, int32 index);
+	void SetEquipWeapon(int32 fromIndex);
 	void EquipWeaponToPlayer(const FName& itemID);
 	void UpdateEquipmentInventory(const FName& itemID);
-	void UnEquipWeaponAndAddItem(const int32 index);
+	void UnEquipWeaponAndAddToIndex(EEquipmentType equipmentType, const int32 index);
 
 	/**getter*/
 	int32 GetTotalItemAmount(const FName& itemID);
@@ -101,7 +121,10 @@ public:
 
 private:	
 
+	friend class UCPP_EquipmentInventory;
+	
 	void RemoveQuestItem(const FName& itemId, const int32 amount);
+	void RequestTakeOffWeapon();
 
 	
 private:
@@ -113,13 +136,16 @@ private:
 	UPROPERTY()
 	TArray<FInventorySlot> SlotsArray;
 
+	UPROPERTY()
+	TMap<EEquipmentType, FEquipmentSlot> EquipmentSlots;
+
 	/**inventory value*/
 	int32 MaxStackSize = 99;
 	int32 InventoryRow = 0;
 	float CurrentWeight = 0.0f;
 	int32 CurrentGold = 0;
 	float MaxWeight = 0.0f;
-	int32 MaxGold = 99999999999;
+	int64 MaxGold = 999999999;
 
 	/**for FindCombinableSlot function*/
 	TArray<bool> IsConnected;

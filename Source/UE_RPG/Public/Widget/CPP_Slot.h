@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Widget/CPP_SlotBase.h"
-#include "Item/ItemData.h"
 #include "CPP_Slot.generated.h"
 
 class UButton;
@@ -30,6 +29,10 @@ public:
 	int32 MyAmount = 0;
 	bool  bMyItemCanStacked = false;
 
+	/**found CombinableSlot*/
+	int32 CombinableSlot = -1;
+	bool bActiveCombineButton = false;
+
 	/**CombinableSlot*/
 	int32 LinkedCombinableSlot = -1;
 
@@ -40,6 +43,7 @@ public:
 	virtual void ActiveSlot(UTexture2D* icon) override;
 
 	void UpdateSlot(const FItemInfoTable* itemData, const int32 index, const int32 amount);
+	void UpdateSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData, const int32 index);
 	
 
 	/**Combine function*/
@@ -69,12 +73,4 @@ private:
 
 	/**you must init ItemRef this Func*/
 	 void InitSlotInfo();
-
-	UPROPERTY()
-		class UCPP_DragSlotWidget* DragSlotWidget;
-
-	/**found CombinableSlot*/
-	int32 CombinableSlot = -1;
-	bool bActiveCombineButton = false;
-
 };

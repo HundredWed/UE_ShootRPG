@@ -43,6 +43,21 @@ void UCPP_Slot::UpdateSlot(const FItemInfoTable* itemData, const int32 index,  c
 	}
 }
 
+void UCPP_Slot::UpdateSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData, const int32 index)
+{
+	if (itemData)
+	{
+		MyIndex = index;
+		MyAmount = 1;
+		bMyItemCanStacked = itemData->bCanStacked;
+		ActiveSlot(itemData->IconTexture);
+		TextAmount->SetVisibility(ESlateVisibility::Hidden);
+	
+		/**set tooltip*/
+		SetSlotToolTip(itemData);
+	}
+}
+
 
 void UCPP_Slot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {

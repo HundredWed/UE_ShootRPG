@@ -75,12 +75,12 @@ void UCPP_SlotBase::ActiveSlot(UTexture2D* icon)
 	SlotBorder->SetBrushColor(FLinearColor::White);
 }
 
-void UCPP_SlotBase::SetSlotToolTip(const FItemInfoTable* itemInfo, const int32 itemATK)
+void UCPP_SlotBase::SetSlotToolTip(const FItemInfoTable* itemInfo)
 {
 	if (IsValid(ToolTip))
 	{
 		/**if created tootip before, don't create widget and update that tootip*/
-		ToolTip->InitToolTip(itemInfo, itemATK);
+		ToolTip->InitToolTip(itemInfo);
 		ItemIcon->SetToolTip(ToolTip);
 	}
 	else
@@ -89,7 +89,27 @@ void UCPP_SlotBase::SetSlotToolTip(const FItemInfoTable* itemInfo, const int32 i
 		if (TootipWidgetClass)
 		{
 			ToolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
-			ToolTip->InitToolTip(itemInfo, itemATK);
+			ToolTip->InitToolTip(itemInfo);
+			ItemIcon->SetToolTip(ToolTip);
+		}
+	}
+}
+
+void UCPP_SlotBase::SetSlotToolTip(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo)
+{
+	if (IsValid(ToolTip))
+	{
+		/**if created tootip before, don't create widget and update that tootip*/
+		ToolTip->InitToolTip(itemInfo, equipmentInfo);
+		ItemIcon->SetToolTip(ToolTip);
+	}
+	else
+	{
+		/**CreateWidget only once*/
+		if (TootipWidgetClass)
+		{
+			ToolTip = CreateWidget<UTootipWidget>(GetWorld(), TootipWidgetClass);
+			ToolTip->InitToolTip(itemInfo, equipmentInfo);
 			ItemIcon->SetToolTip(ToolTip);
 		}
 	}

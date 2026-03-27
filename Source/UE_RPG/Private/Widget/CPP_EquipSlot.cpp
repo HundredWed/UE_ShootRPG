@@ -8,9 +8,7 @@
 #include "Components/Image.h"
 #include "Components/Border.h"
 #include "Widget/SlotDrag.h"
-#include "Widget/CPP_DragSlotWidget.h"
 #include "Widget/CPP_Slot.h"
-#include "Item/Item.h"
 
 
 
@@ -25,40 +23,14 @@ void UCPP_EquipSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPo
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 
-	if (!IsValid(DragWidgetClass))
-		return;
-
-	UCPP_DragSlotWidget* dragWidget = CreateWidget<UCPP_DragSlotWidget>(GetWorld(), DragWidgetClass);
-	if (IsValid(dragWidget))
-		dragWidget->UpdataWidget(ItemRef);
-
-	USlotDrag* dragSlot = Cast<USlotDrag>(UWidgetBlueprintLibrary::CreateDragDropOperation(USlotDrag::StaticClass()));
-
-	if (IsValid(dragSlot))
-	{
-		dragSlot->bFromEquipmentSlot = true;
-		dragSlot->DefaultDragVisual = dragWidget;
-		dragSlot->Pivot = EDragPivot::MouseDown;
-	}
-
-	OutOperation = dragSlot;
+	OnEquipDragDetected.Execute(InGeometry, InMouseEvent, OutOperation, EquipmentID);
 }
 
 bool UCPP_EquipSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
 	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 
-	USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-
-	if (IsValid(dragSlot) 
-		&& dragSlot->WidgetRef
-		&& dragSlot->WidgetRef->GetItemRef()->ItemInfoTable.ItemType == EItemCategory::EIC_Equipment)
-	{
-		dragSlot->WidgetRef->EquipSlotItem();
-		return true;
-	}
-
-	return false;
+	return OnEquipDrop.Execute(InGeometry, InDragDropEvent, InOperation, EquipmentID);
 }
 
 bool UCPP_EquipSlot::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
@@ -75,29 +47,23 @@ FReply UCPP_EquipSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, cons
 {
 	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 
-	if (ItemIcon->GetIsEnabled() && ItemRef)
+	if (ItemIcon->GetIsEnabled())
 	{
-		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
-		{
-			InventoryRef->AddItem(ItemRef);
-			TakeOffWeapon();
-		}
-		FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
-		return reply.NativeReply;
-	}
-	return FReply::Handled();
+		return OnEquipMouseButtonDown.Execute(InGeometry, InMouseEvent, EquipmentID);
+	}		
+
+	return FReply::Unhandled();
 }
 
-void UCPP_EquipSlot::UpdateEquipmentSlot(UItem* weapon)
+void UCPP_EquipSlot::UpdateEquipmentSlot(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo)
 {
-	ActiveSlot();
-	SetSlotToolTip();
+	ActiveSlot(itemInfo->IconTexture);
+	SetSlotToolTip(itemInfo, equipmentInfo);
 }
 
 void UCPP_EquipSlot::TakeOffWeapon()
 {
 	InactiveSlot();
-	PlayerRef->TakeOffWeapon();
 }
 
 

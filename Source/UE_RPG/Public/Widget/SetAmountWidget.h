@@ -6,9 +6,9 @@
 #include "Widget/CustomUMGWidget.h"
 #include "SetAmountWidget.generated.h"
 
-/**
- * 
- */
+class UInventory;
+
+
 UCLASS()
 class UE_RPG_API USetAmountWidget : public UCustomUMGWidget
 {
@@ -45,7 +45,10 @@ public:
 	bool bThrowWidget = false;
 
 public:
-	void InitWidgetInfo(const int32 amount, const int16 index, bool bthrowEvent, 
+
+	void SetWeakInventoryRef(TWeakObjectPtr<UInventory> inventoryRef) { InventoryRef = inventoryRef; }
+
+	void InitWidgetInfo(const int32 amount, const int16 index, bool bthrowEvent,
 		/*when split*/const int16 toIndex = -1);
 	void IncreaseCount();
 	void DecreaseCount();
@@ -62,4 +65,8 @@ public:
 
 	UFUNCTION()
 		void ResetCount();
+
+private:
+
+	TWeakObjectPtr<UInventory> InventoryRef;
 };
