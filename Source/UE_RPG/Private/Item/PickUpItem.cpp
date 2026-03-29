@@ -4,7 +4,8 @@
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Item/Weapon/CPP_WeaponBase.h"
-#include "Systems/CPP_AkashicSubsystem.h"
+#include "UObject/ConstructorHelpers.h"
+
 
 
 APickUpItem::APickUpItem()
@@ -46,29 +47,42 @@ APickUpItem::APickUpItem()
 	/**Widget*/
 	ItemStateWidget->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
+
+	//데이터 테이블 세팅
+	static ConstructorHelpers::FObjectFinder<UDataTable> DT_ItemFinder(TEXT("/Script/Engine.DataTable'/Game/ShootGame/Data/DT_ItemTable.DT_ItemTable'"));
+
+	if (DT_ItemFinder.Succeeded())
+	{
+		ItemInfoHandle.DataTable = DT_ItemFinder.Object;
+	}
+
 }
 
 void APickUpItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (ItemInfoID != NAME_None)
-	{
-		UWorld* World = GetWorld();
-		if (!IsValid(World))
-		{
-			return;
-		}
+	if (ItemInfoHandle.RowName == PevItemID) return;
 
-		UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>();
-		const FItemInfoTable* thisItemInfo = AS->RequestItemInfo(ItemInfoID);
-		if (thisItemInfo != nullptr && !thisItemInfo->ItemMesh.IsNull())
-			PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh.LoadSynchronous());
+	if (ItemInfoHandle.IsNull())
+	{
+		PickUpMesh->SetStaticMesh(nullptr);
+		PevItemID = ItemInfoHandle.RowName;
+		return;
+	}
+
+	const FItemInfoTable* thisItemInfo = ItemInfoHandle.GetRow<FItemInfoTable>(TEXT("APickUpItem::OnConstruction 유효하지 않은 ID"));
+	if (thisItemInfo && !thisItemInfo->ItemMesh.IsNull())
+	{
+		PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh.LoadSynchronous());
+		ItemCategory = thisItemInfo->ItemType;
 	}
 	else
 	{
 		PickUpMesh->SetStaticMesh(nullptr);
 	}
+
+	PevItemID = ItemInfoHandle.RowName;
 }
 
 void APickUpItem::SetWidgetVisibility(bool Visible)
@@ -94,7 +108,7 @@ void APickUpItem::BeginPlay()
 		ItemStateWidget->SetVisibility(false);
 	}
 
-	InitializePickUpItem();
+	//InitializePickUpItem();
 }
 
 
@@ -129,7 +143,7 @@ void APickUpItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void APickUpItem::InitializePickUpItem()
 {
-	UWorld* World = GetWorld();
+	/*UWorld* World = GetWorld();
 	if (!IsValid(World))
 	{
 		return;
@@ -145,23 +159,21 @@ void APickUpItem::InitializePickUpItem()
 			if (!thisItemInfo->ItemMesh.IsNull())
 				PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh.LoadSynchronous());
 		}
-	}
+	}*/
 }
 
 void APickUpItem::RequestInteract(AActor* interactor)
 {
 	if (ACPP_Character* character = Cast<ACPP_Character>(interactor))
 	{
-		switch (ItemCategory)
+		if (ItemCategory == EItemCategory::EIC_Equipment)
 		{
-		case EItemCategory::EIC_Equipment:
-			character->PickUpWeapon(ItemInfoID);
-			break;
-		case EItemCategory::EIC_Gold:
-			break;
+			character->PickUpWeapon(ItemInfoHandle.RowName);
 		}
-
-		character->AddInventory(ItemInfoID, ItemAmount);
+		else
+		{
+			character->AddInventory(ItemInfoHandle.RowName, ItemAmount);
+		}		
 	}
 
 	Destroy();

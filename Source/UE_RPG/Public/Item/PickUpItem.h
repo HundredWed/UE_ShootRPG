@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "ItemData.h"
 #include "Interface/CPP_InteractInterface.h"
+#include "Engine/DataTable.h"
 #include "UE_RPG/UtilityMecro.h"
 #include "PickUpItem.generated.h"
 
@@ -39,18 +40,19 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
 		class USphereComponent* SphereComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item Widget")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class UWidgetComponent* ItemStateWidget;
 
 	
 	/**item state*/
-	UPROPERTY(EditAnywhere, Category = "Item state")
-	FName ItemInfoID;/**same name*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ItemInfo")
+	FDataTableRowHandle ItemInfoHandle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item state")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ItemInfo")
 	int32 ItemAmount = 1;
 
-	EItemCategory ItemCategory = EItemCategory::EIC_None;
+	UPROPERTY()
+	EItemCategory ItemCategory;
 
 	UFUNCTION()
 		virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
@@ -65,4 +67,9 @@ protected:
 			AActor* OtherActor,
 			UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex);	
+
+private:
+
+	/**OnConstruction 최적화 용*/
+	FName PevItemID = NAME_None;
 };
