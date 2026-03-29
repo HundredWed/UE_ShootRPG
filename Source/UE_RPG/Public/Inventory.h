@@ -111,6 +111,7 @@ public:
 	/**getter*/
 	int32 GetTotalItemAmount(const FName& itemID);
 	int32 GetInventorySize();
+	const TMap<EEquipmentType, FEquipmentSlot>& GetEquipmentSlots() { return EquipmentSlots; }
 
 	void UseItem(const int32 index);
 
@@ -121,11 +122,12 @@ public:
 
 private:	
 
+	friend class UCPP_InventoryWidget;
 	friend class UCPP_EquipmentInventory;
 	
 	void RemoveQuestItem(const FName& itemId, const int32 amount);
 	void RequestTakeOffWeapon();
-
+	void UpdateEquipSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData);
 	
 private:
 

@@ -245,7 +245,6 @@ public:
 
 	/**interact*/
 	int32 AddInventory(const FName& itemID, const int32 amount = 1);
-	int32 PickUpGold(const int32 price, const int32 amount = 1);
 	void SetDialogue(const FName& id);
 
 	FOnUpdatePlayerStateDelegate OnUpdatePlayerState;

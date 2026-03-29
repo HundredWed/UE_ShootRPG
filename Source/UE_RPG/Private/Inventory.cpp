@@ -60,6 +60,11 @@ int32 UInventory::AddItem(const FName& itemID, const int32 amount)
 		return 0;
 	}
 
+	if (itemData->ItemType == EItemCategory::EIC_Gold)
+	{
+		return AddGold(amount);
+	}
+
 	int32 remainAmount = amount;
 
 	if (itemData->bCanStacked)
@@ -222,6 +227,23 @@ void UInventory::RequestTakeOffWeapon()
 	{
 		PlayerRef->TakeOffWeapon();
 	}
+}
+
+void UInventory::UpdateEquipSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData)
+{
+	if (FEquipmentSlot* slot = EquipmentSlots.Find(equipmentData->EquipmentType))
+	{
+		slot->EquipmentID = equipmentData->EquipmentID;
+
+	}
+	else
+	{
+		FEquipmentSlot newSlot;
+		newSlot.EquipmentID = equipmentData->EquipmentID;
+		EquipmentSlots.Add(equipmentData->EquipmentType, newSlot);
+	}
+
+	InventoryWidget->UpdateEquipmentInventory(itemData, equipmentData);
 }
 
 void UInventory::SwapSlot(const int32 fromIndex, const int32 toIndex)
@@ -559,15 +581,19 @@ int32 UInventory::Partition(int32 left, int32 right)
 			SwapSlot(low, high);
 	}
 
-	SwapSlot(left, high);
+	//SwapSlot(left, high);
 	return high;
 }
 
 uint8 UInventory::GetCompareValue(int32 index)
 {
-	const FItemInfoTable* itemData = RequestItemData(SlotsArray[index].ItemID);
+	if (IsSlotEmpty(index))
+	{
+		return (uint8)EItemCategory::EIC_None;
+	}
 
-	if (itemData == nullptr || IsSlotEmpty(index))
+	const FItemInfoTable* itemData = RequestItemData(SlotsArray[index].ItemID);
+	if (itemData == nullptr)
 	{
 		return (uint8)EItemCategory::EIC_None;
 	}
@@ -594,16 +620,10 @@ void UInventory::SetEquipWeapon(const int32 fromIndex)
 	{
 		UpdateInventory(fromIndex, NAME_None, 0);//item amount 0
 	}
-	
-
-	if (FEquipmentSlot* slot = EquipmentSlots.Find(inputEquipmentData->EquipmentType))
-	{
-		slot->EquipmentID = inputEquipmentID;
-	}
 
 	/**set EquipmentInventory item to Inventory item*/
 	const FItemInfoTable* itemData = RequestItemData(inputEquipmentID);
-	InventoryWidget->UpdateEquipmentInventory(itemData, inputEquipmentData);
+	UpdateEquipSlot(itemData, inputEquipmentData);
 	EquipWeaponToPlayer(inputEquipmentID);
 }
 
@@ -625,11 +645,7 @@ void UInventory::UpdateEquipmentInventory(const FName& itemID)
 		return;
 	}
 
-	if (FEquipmentSlot* slot = EquipmentSlots.Find(equipmentData->EquipmentType))
-	{
-		slot->EquipmentID = equipmentData->EquipmentID;
-		InventoryWidget->UpdateEquipmentInventory(itemData, equipmentData);
-	}	
+	UpdateEquipSlot(itemData, equipmentData);
 }
 
 void UInventory::UnEquipWeaponAndAddToIndex(EEquipmentType equipmentType, const int32 index)

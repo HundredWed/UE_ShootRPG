@@ -620,7 +620,7 @@ bool ACPP_Character::SetEquipWeapon(const FName& itemID)
 	if (WeaponManager->EquipWeapon(itemID))
 	{
 		GameInventory->UpdateEquipmentInventory(itemID);
-		CharacterState = ECharacterStateTypes::Equipped;
+		CharacterState = ECharacterStateTypes::UnEquipped;
 		
 		return true;
 	}
@@ -895,11 +895,6 @@ int32 ACPP_Character::AddInventory(const FName& itemID, const int32 amount)
 	}
 
 	return storedAmount;
-}
-
-int32 ACPP_Character::PickUpGold(const int32 price, const int32 amount)
-{
-	return GameInventory->AddGold(price * amount);
 }
 
 void ACPP_Character::SetDialogue(const FName& id)
