@@ -46,7 +46,7 @@ public:
 public:
 	//virtual void Tick(float DeltaTime) override;
 	virtual void Attack() {};
-	virtual void InitWeaponInfo();
+	virtual void InitWeaponInfo(const FName& itemID);
 	virtual void Equip(USceneComponent* Inparent, const FName& SocketName);
 	
 protected:

@@ -3,7 +3,8 @@
 #include "Engine/AssetManager.h"
 
 #include "Item/PickUpItem.h"
-#include "Item/Weapon/CPP_WeaponBase.h"
+//#include "Item/Weapon/CPP_WeaponBase.h"
+#include "Item/Weapon/CPP_Rifle.h"//임시
 
 void UCPP_AkashicSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -120,15 +121,15 @@ void UCPP_AkashicSubsystem::OnItemAssetsLoaded(FName itemID, FVector spawnLocati
 
 void UCPP_AkashicSubsystem::OnWeaponAssetsLoaded(FName itemID, FVector spawnLocation, FOnWeaponSpawnedCallback onSpawnCompleted)
 {
-    ACPP_WeaponBase* newWeapon = GetWorld()->SpawnActor<ACPP_WeaponBase>(ACPP_WeaponBase::StaticClass(), spawnLocation, FRotator::ZeroRotator);
-    newWeapon->InitWeaponInfo();
+    ACPP_WeaponBase* newWeapon = GetWorld()->SpawnActor<ACPP_WeaponBase>(ACPP_Rifle::StaticClass(), spawnLocation, FRotator::ZeroRotator);
+    newWeapon->InitWeaponInfo(itemID);
 
     onSpawnCompleted.ExecuteIfBound(newWeapon);
 }
 
 FItemInfoTable* UCPP_AkashicSubsystem::RequestItemInfo(const FName& itemId)
 {
-    if (!ItemDataTable)
+    if (ItemDataTable == nullptr)
     {
         return nullptr;
     }
@@ -146,7 +147,7 @@ FItemInfoTable* UCPP_AkashicSubsystem::RequestItemInfo(const FName& itemId)
 
 FEquipmentInfoTable* UCPP_AkashicSubsystem::RequestWeaponInfo(const FName& itemId)
 {
-    if (!WeaponDataTable)
+    if (WeaponDataTable == nullptr)
     {
         return nullptr;
     }

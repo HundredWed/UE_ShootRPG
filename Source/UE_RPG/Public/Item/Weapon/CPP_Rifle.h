@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -21,7 +21,7 @@ public:
 		float MaxDis = 500.f;
 
 	virtual void Attack() override;
-	virtual void InitWeaponInfo() override;
+	virtual void InitWeaponInfo(const FName& itemID) override;
 	virtual void Equip(USceneComponent* Inparent, const FName& SocketName) override;
 
 	void ViewPointTrace(FHitResult& hitresult, FVector& endpoint);

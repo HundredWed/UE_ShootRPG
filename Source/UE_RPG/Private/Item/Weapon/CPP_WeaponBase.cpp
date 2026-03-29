@@ -11,7 +11,7 @@ ACPP_WeaponBase::ACPP_WeaponBase()
 	SetRootComponent(WeaponMesh);
 }
 
-void ACPP_WeaponBase::InitWeaponInfo()
+void ACPP_WeaponBase::InitWeaponInfo(const FName& itemID)
 {
 	
 }
@@ -20,7 +20,7 @@ void ACPP_WeaponBase::InitWeaponInfo()
 void ACPP_WeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
-	InitWeaponInfo();
+	//InitWeaponInfo();
 	StoreDamageUI();
 }
 

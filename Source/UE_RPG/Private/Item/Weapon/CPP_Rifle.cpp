@@ -34,9 +34,9 @@ void ACPP_Rifle::Attack()
 
 }
 
-void ACPP_Rifle::InitWeaponInfo()
+void ACPP_Rifle::InitWeaponInfo(const FName& itemID)
 {
-	Super::InitWeaponInfo();
+	Super::InitWeaponInfo(itemID);
 
 	UWorld* World = GetWorld();
 	if (!IsValid(World))
@@ -45,15 +45,16 @@ void ACPP_Rifle::InitWeaponInfo()
 	}
 
 	UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>();
-	const FEquipmentInfoTable* thisWeaponInfo = AS->RequestWeaponInfo(ItemInfoID);
+	if (const FEquipmentInfoTable* thisWeaponInfo = AS->RequestWeaponInfo(itemID))
+	{
+		FinalDamage = thisWeaponInfo->ATK;
 
-	FinalDamage = thisWeaponInfo->ATK;
-
-	BeamParticle = thisWeaponInfo->BeamParticle.LoadSynchronous();
-	FireParticle = thisWeaponInfo->FireParticle.LoadSynchronous();
-	ShootSound = thisWeaponInfo->AttackSound.LoadSynchronous();
-	EquipSound = thisWeaponInfo->EquipSound.LoadSynchronous();
-	
+		WeaponMesh->SetSkeletalMesh(thisWeaponInfo->ItemSkeletalMesh.LoadSynchronous());
+		BeamParticle = thisWeaponInfo->BeamParticle.LoadSynchronous();
+		FireParticle = thisWeaponInfo->FireParticle.LoadSynchronous();
+		ShootSound = thisWeaponInfo->AttackSound.LoadSynchronous();
+		EquipSound = thisWeaponInfo->EquipSound.LoadSynchronous();
+	}	
 }
 
 void ACPP_Rifle::Equip(USceneComponent* Inparent, const FName& SocketName)
