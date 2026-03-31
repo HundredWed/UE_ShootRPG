@@ -106,7 +106,7 @@ public:
 	void SetEquipWeapon(int32 fromIndex);
 	void EquipWeaponToPlayer(const FName& itemID);
 	void UpdateEquipmentInventory(const FName& itemID);
-	void UnEquipWeaponAndAddToIndex(EEquipmentType equipmentType, const int32 index);
+	bool UnEquipWeaponAndAddToIndex(EEquipmentType equipmentType, const int32 index);
 
 	/**getter*/
 	int32 GetTotalItemAmount(const FName& itemID);

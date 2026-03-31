@@ -20,7 +20,7 @@ struct FPointerEvent;
 
 DECLARE_DELEGATE_FourParams(FOnDragDetectedDelegate, const FGeometry&, const FPointerEvent&, UDragDropOperation*&, const int32);
 DECLARE_DELEGATE_RetVal_FourParams(bool, FOnDropDelegate, const FGeometry&, const FDragDropEvent&, UDragDropOperation*, const int32);
-DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FOnMouseButtonDownDelegate, const FGeometry&, const FPointerEvent&, const int32);
+DECLARE_DELEGATE_ThreeParams(FOnMouseButtonDownDelegate, const FGeometry&, const FPointerEvent&, const int32);
 DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FOnSlotMouseButtonDoubleClickDelegate, const FGeometry&, const FPointerEvent&, const int32);
 
 UCLASS()

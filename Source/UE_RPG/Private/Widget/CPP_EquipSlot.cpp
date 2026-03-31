@@ -47,22 +47,28 @@ FReply UCPP_EquipSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, cons
 {
 	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 
-	if (ItemIcon->GetIsEnabled())
+	if (ItemIcon->GetIsEnabled() && InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
 	{
-		return OnEquipMouseButtonDown.Execute(InGeometry, InMouseEvent, EquipmentID);
+		OnEquipMouseButtonDown.Execute(InGeometry, InMouseEvent, EquipmentID);
+		TakeOff();
+		
+		return FReply::Handled();
 	}		
 
-	return FReply::Unhandled();
+	FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
+	return reply.NativeReply;
 }
 
 void UCPP_EquipSlot::UpdateEquipmentSlot(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo)
 {
+	EquipmentID = equipmentInfo->EquipmentID;
 	ActiveSlot(itemInfo->IconTexture);
 	SetSlotToolTip(itemInfo, equipmentInfo);
 }
 
-void UCPP_EquipSlot::TakeOffWeapon()
+void UCPP_EquipSlot::TakeOff()
 {
+	EquipmentID = NAME_None;
 	InactiveSlot();
 }
 

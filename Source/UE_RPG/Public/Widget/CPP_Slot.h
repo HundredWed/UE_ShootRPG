@@ -42,6 +42,7 @@ public:
 	virtual void InactiveSlot() override;
 	virtual void ActiveSlot(UTexture2D* icon) override;
 
+	void InitSlotInfo(const int32 index);
 	void UpdateSlot(const FItemInfoTable* itemData, const int32 index, const int32 amount);
 	void UpdateSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData, const int32 index);
 	
@@ -70,7 +71,5 @@ protected:
 	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	
 private:
-
-	/**you must init ItemRef this Func*/
-	 void InitSlotInfo();
+	
 };

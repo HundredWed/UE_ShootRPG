@@ -71,36 +71,59 @@ bool UCPP_EquipmentInventory::OnSlotDrop(const FGeometry& InGeometry, const FDra
 	return false;
 }
 
-FReply UCPP_EquipmentInventory::OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const FName& equipmentID)
+void UCPP_EquipmentInventory::OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const FName& equipmentID)
 {
 	if (InventoryRef.IsValid())
 	{
-		if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+		if (const FEquipmentInfoTable* equipmentData = InventoryRef->RequestEquipmentData(equipmentID))
 		{
 			InventoryRef->AddItem(equipmentID);
 			InventoryRef->RequestTakeOffWeapon();
-		}
-		FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
-		return reply.NativeReply;
+			SetTotalState(equipmentData, true);
+		}		
 	}
-	return FReply::Handled();
+}
+
+void UCPP_EquipmentInventory::SetTotalState(const FEquipmentInfoTable* equipmentInfo, bool isSubtract)
+{
+	if (isSubtract)
+	{
+		TotalATK -= equipmentInfo->ATK;
+		TotalDEF -= equipmentInfo->DEF;
+		TotalManaDensity -= equipmentInfo->ManaDensity;
+	}
+	else
+	{
+		TotalATK += equipmentInfo->ATK;
+		TotalDEF += equipmentInfo->DEF;
+		TotalManaDensity += equipmentInfo->ManaDensity;
+	}
+	
+	const FString stringATK = FString::Printf(TEXT("%d"), TotalATK);
+	const FText textATK = FText::FromString(stringATK);
+	//const FString stringDEF = FString::Printf(TEXT("%d"), TotalDEF);
+	//const FText textDEF = FText::FromString(stringDEF);
+	//const FString stringManaDensity = FString::Printf(TEXT("%d"), TotalManaDensity);
+	//const FText textManaDensity = FText::FromString(stringManaDensity);
+
+
+	ATKText->SetText(textATK);
+	//DEFText->SetText(textDEF);
+	//ManaDensityText->SetText(textManaDensity);
 }
 
 void UCPP_EquipmentInventory::UpdateEquipSlot(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo)
 {
-	EquipSlot->UpdateEquipmentSlot(itemInfo, equipmentInfo);
-
-	const FString String = FString::Printf(TEXT("%d"), equipmentInfo->ATK);
-	const FText text = FText::FromString(String);
-
-	
-
-	ATKText->SetText(text);
+	if (TObjectPtr<UCPP_EquipSlot>* slot = EquipSlots.Find(equipmentInfo->EquipmentType))
+	{
+		(*slot)->UpdateEquipmentSlot(itemInfo, equipmentInfo);
+		SetTotalState(equipmentInfo);
+	}
 }
 
 FName UCPP_EquipmentInventory::GetEquipmentID(EEquipmentType equipmentType)
 {
-	if (UCPP_EquipSlot** FoundSlot = EquipSlots.Find(equipmentType))
+	if (TObjectPtr<UCPP_EquipSlot>* FoundSlot = EquipSlots.Find(equipmentType))
 	{
 		return (*FoundSlot)->GetEquipmentID();
 	}
@@ -110,6 +133,30 @@ FName UCPP_EquipmentInventory::GetEquipmentID(EEquipmentType equipmentType)
 
 void UCPP_EquipmentInventory::InitEquipmentInventory(TWeakObjectPtr<UInventory> inventory, TSubclassOf<UCPP_DragSlotWidget> dragWidgetClass)
 {
+	if (!inventory.IsValid()) return;
+
 	InventoryRef = inventory;
 	DragWidgetClass = dragWidgetClass;
+
+	TMap<EEquipmentType, FEquipmentSlot> slots = InventoryRef->GetEquipmentSlots();
+
+	for (auto slot : slots)
+	{
+		if (!slot.Value.EquipmentID.IsNone())
+		{
+			if (TObjectPtr<UCPP_EquipSlot>* foundSlot = EquipSlots.Find(slot.Key))
+			{
+				(*foundSlot)->EquipmentID = slot.Value.EquipmentID;
+			}
+		}
+		
+	}
+}
+
+void UCPP_EquipmentInventory::TakeOffEquipment(EEquipmentType equipmentType)
+{
+	if (TObjectPtr<UCPP_EquipSlot>* FoundSlot = EquipSlots.Find(equipmentType))
+	{
+		return (*FoundSlot)->TakeOff();
+	}
 }

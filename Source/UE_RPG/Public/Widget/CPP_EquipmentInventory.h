@@ -25,6 +25,8 @@ public:
 	FName GetEquipmentID(EEquipmentType equipmentType);
 	void InitEquipmentInventory(TWeakObjectPtr<UInventory> inventory, TSubclassOf<UCPP_DragSlotWidget> dragWidgetClass);
 	
+	void TakeOffEquipment(EEquipmentType equipmentType);
+
 protected:
 
 	virtual void NativeConstruct() override;
@@ -34,8 +36,9 @@ private:
 
 	void OnSlotDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation, const FName& equipmentID);
 	bool OnSlotDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation, const FName& equipmentID);
-	FReply OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const FName& equipmentID);
+	void OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const FName& equipmentID);
 
+	void SetTotalState(const FEquipmentInfoTable* equipmentInfo, bool isSubtract = false);
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
@@ -58,7 +61,11 @@ private:
 	TSubclassOf<UCPP_DragSlotWidget> DragWidgetClass;
 
 	UPROPERTY()
-	TMap<EEquipmentType, UCPP_EquipSlot*> EquipSlots;
+	TMap<EEquipmentType, TObjectPtr<UCPP_EquipSlot>> EquipSlots;
 
 	TWeakObjectPtr<UInventory> InventoryRef;
+
+	int32 TotalATK = 0;
+	int32 TotalDEF = 0;
+	float TotalManaDensity = 0;
 };

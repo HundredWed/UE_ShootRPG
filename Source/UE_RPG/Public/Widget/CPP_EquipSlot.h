@@ -8,7 +8,7 @@
 
 DECLARE_DELEGATE_FourParams(FOnEquipDragDetectedDelegate, const FGeometry&, const FPointerEvent&, UDragDropOperation*&, const FName&);
 DECLARE_DELEGATE_RetVal_FourParams(bool, FOnEquipDropDelegate, const FGeometry&, const FDragDropEvent&, UDragDropOperation*, const FName&);
-DECLARE_DELEGATE_RetVal_ThreeParams(FReply, FOnEquipMouseButtonDownDelegate, const FGeometry&, const FPointerEvent&, const FName&);
+DECLARE_DELEGATE_ThreeParams(FOnEquipMouseButtonDownDelegate, const FGeometry&, const FPointerEvent&, const FName&);
 
 UCLASS()
 class UE_RPG_API UCPP_EquipSlot : public UCPP_SlotBase
@@ -31,7 +31,7 @@ protected:
 public:
 
 	void UpdateEquipmentSlot(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
-	void TakeOffWeapon();
+	void TakeOff();
 	FName GetEquipmentID() { return EquipmentID; }
 	void SetEquipmentType(EEquipmentType type) { MyEquipmentType = type; }
 
@@ -41,6 +41,8 @@ public:
 	FOnEquipMouseButtonDownDelegate OnEquipMouseButtonDown;
 
 private:
+
+	friend class UCPP_EquipmentInventory;
 
 	FName EquipmentID = NAME_None;
 	EEquipmentType MyEquipmentType;

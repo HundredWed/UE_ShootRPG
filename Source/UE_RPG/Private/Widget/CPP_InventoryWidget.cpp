@@ -28,7 +28,6 @@ void UCPP_InventoryWidget::NativeConstruct()
 	if (IsValid(player))
 	{
 		InventoryRef = player->GetInventory(); 
-		EquipmentInventory->InitEquipmentInventory(InventoryRef, DragWidgetClass);
 		SplitWidget->SetWeakInventoryRef(InventoryRef);
 	}
 }
@@ -68,8 +67,7 @@ void UCPP_InventoryWidget::GenerateSlotWidget(const int32 slotsParRow)
 		}
 
 		//장비슬롯 초기화
-
-
+		EquipmentInventory->InitEquipmentInventory(InventoryRef, DragWidgetClass);
 	}
 }
 
@@ -145,9 +143,16 @@ void UCPP_InventoryWidget::UpdateGoldText(const int32 amount)
 void UCPP_InventoryWidget::UpdateSlot(const FItemInfoTable* itemData, const int32 index, const int32 amount)
 {
 	UCPP_Slot* slot = SlotWidgetArray[index];
-	slot->UpdateSlot(itemData, index, amount);
-
-	SearchCombinableSlot(itemData->ItemType, index);	
+	
+	if (itemData)
+	{
+		slot->UpdateSlot(itemData, index, amount);
+		SearchCombinableSlot(itemData->ItemType, index);
+	}
+	else
+	{
+		slot->InitSlotInfo(index);
+	}
 }
 
 void UCPP_InventoryWidget::UpdateSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData, const int32 index)
@@ -242,7 +247,7 @@ void UCPP_InventoryWidget::SeSlotInfo(UCPP_Slot* slot, const int32 index)
 	const FName slotItemID = InventoryRef->GetSlotInfoIndex(index).ItemID;
 	if (slotItemID.IsNone())
 	{
-		slot->InactiveSlot();
+		slot->InitSlotInfo(index);
 	}
 	else
 	{
@@ -327,7 +332,7 @@ bool UCPP_InventoryWidget::OnSlotDrop(const FGeometry& InGeometry, const FDragDr
 		}
 		else if (dragSlot->bFromEquipmentSlot)
 		{
-			InventoryRef->UnEquipWeaponAndAddToIndex(dragSlot->EquipmentType, index);
+			TakeOffEquipment(dragSlot->EquipmentType, index);
 		}
 
 		return true;
@@ -338,7 +343,7 @@ bool UCPP_InventoryWidget::OnSlotDrop(const FGeometry& InGeometry, const FDragDr
 	}
 }
 
-FReply UCPP_InventoryWidget::OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index)
+void UCPP_InventoryWidget::OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index)
 {
 	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton) && InventoryRef.IsValid())
 	{
@@ -348,20 +353,11 @@ FReply UCPP_InventoryWidget::OnSlotMouseButtonDown(const FGeometry& InGeometry, 
 		{
 			OnUseItem(index);
 		}
-		else if(itemData && itemData->ItemType == EItemCategory::EIC_Equipment)
+		else if (itemData && itemData->ItemType == EItemCategory::EIC_Equipment)
 		{
 			EquipSlotItem(index);
 		}
-
-		return FReply::Handled();
 	}
-	else
-	{
-		FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
-		return reply.NativeReply;
-	}
-
-	return FReply::Unhandled();
 }
 
 FReply UCPP_InventoryWidget::OnSlotMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index)
@@ -411,6 +407,14 @@ void UCPP_InventoryWidget::EquipSlotItem(const int32 fromIndex)
 	{
 		InventoryRef->SetEquipWeapon(fromIndex);
 	}	
+}
+
+void UCPP_InventoryWidget::TakeOffEquipment(EEquipmentType equipmentType, const int32 index)
+{
+	if (InventoryRef->UnEquipWeaponAndAddToIndex(equipmentType, index))
+	{
+		EquipmentInventory->TakeOffEquipment(equipmentType);
+	}
 }
 
 void UCPP_InventoryWidget::SearchCombinableSlot(EItemCategory itemType, const int32 startIndex)

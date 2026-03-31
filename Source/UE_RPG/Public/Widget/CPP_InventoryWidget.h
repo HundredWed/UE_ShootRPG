@@ -102,7 +102,7 @@ private:
 	//일반 슬롯
 	void OnSlotDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation, const int32 index);
 	bool OnSlotDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation, const int32 index);
-	FReply OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index);
+	void OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index);
 	FReply OnSlotMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index);
 
 
@@ -111,6 +111,7 @@ private:
 
 	void OnUseItem(const int32 index);
 	void EquipSlotItem(const int32 fromIndex);
+	void TakeOffEquipment(EEquipmentType equipmentType, const int32 index);
 	void SearchCombinableSlot(EItemCategory itemType, const int32 startIndex);
 
 	TWeakObjectPtr<UInventory> InventoryRef;

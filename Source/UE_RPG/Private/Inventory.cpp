@@ -350,7 +350,7 @@ void UInventory::SplitStackToIndex(const int32 fromIndex, const int32 toIndex, c
 		SlotsArray[fromIndex].ItemAmount -= splitAmount;
 
 		UpdateSlotAtIndex(fromIndex);
-		UpdateInventory(toIndex, SlotsArray[fromIndex].ItemID);
+		UpdateInventory(toIndex, SlotsArray[fromIndex].ItemID, splitAmount);
 	}
 	else
 	{
@@ -370,9 +370,15 @@ bool UInventory::CanSplitStackable(const int32 fromIndex, const int32 toIndex, c
 
 void UInventory::UpdateSlotAtIndex(const int32 index)
 {
-	const FItemInfoTable* toIndexItemData = RequestItemData(SlotsArray[index].ItemID);
-
-	InventoryWidget->UpdateSlot(toIndexItemData, index, SlotsArray[index].ItemAmount);
+	if (SlotsArray[index].ItemID.IsNone())
+	{
+		InventoryWidget->UpdateSlot(nullptr, index, 0);
+	}
+	else
+	{
+		const FItemInfoTable* indexItemData = RequestItemData(SlotsArray[index].ItemID);
+		InventoryWidget->UpdateSlot(indexItemData, index, SlotsArray[index].ItemAmount);
+	}	
 }
 
 const FInventorySlot UInventory::GetSlotInfoIndex(const int32 index)
@@ -550,16 +556,39 @@ void UInventory::ChangeItemInfo(const FName& itemId, const int32 index)
 
 void UInventory::InventorySort(int32 left, int32 right)
 {
-	if (left > right)
-	{
-		return;
-	}
+	SlotsArray.Sort([this](const FInventorySlot& A, const FInventorySlot& B) {
 
-	int32 pivot = Partition(left, right);
-	InventorySort(left, pivot - 1);
-	InventorySort(pivot + 1, right);
+		// 빈 슬롯은 무조건 인벤토리 맨 뒤로 보내기
+		bool bIsEmptyA = A.ItemID.IsNone();
+		bool bIsEmptyB = B.ItemID.IsNone();
+		if (bIsEmptyA && !bIsEmptyB) return false;
+		if (!bIsEmptyA && bIsEmptyB) return true;
+		if (bIsEmptyA && bIsEmptyB) return false;
+
+		const FItemInfoTable* itemDataA = RequestItemData(A.ItemID);
+		const FItemInfoTable* itemDataB = RequestItemData(B.ItemID);
+
+		if (!itemDataA || !itemDataB) return false;
+
+		uint8 typeA = (uint8)itemDataA->ItemType;
+		uint8 typeB = (uint8)itemDataB->ItemType;
+
+		// 만약 카테고리가 같다면, ID(알파벳) 순서대로 2차 정렬 
+		if (typeA == typeB)
+		{
+			return A.ItemID.ToString() < B.ItemID.ToString();
+		}
+
+		return typeA < typeB;
+		});
+
+	for (int32 index = 0; index < SlotsArray.Num(); index++)
+	{
+		UpdateSlotAtIndex(index);
+	}
 }
 
+//정렬 레거시
 int32 UInventory::Partition(int32 left, int32 right)
 {
 	int32 pivot = GetCompareValue(left);
@@ -581,7 +610,7 @@ int32 UInventory::Partition(int32 left, int32 right)
 			SwapSlot(low, high);
 	}
 
-	//SwapSlot(left, high);
+	SwapSlot(left, high);
 	return high;
 }
 
@@ -623,7 +652,7 @@ void UInventory::SetEquipWeapon(const int32 fromIndex)
 
 	/**set EquipmentInventory item to Inventory item*/
 	const FItemInfoTable* itemData = RequestItemData(inputEquipmentID);
-	UpdateEquipSlot(itemData, inputEquipmentData);
+	//UpdateEquipSlot(itemData, inputEquipmentData);
 	EquipWeaponToPlayer(inputEquipmentID);
 }
 
@@ -648,17 +677,26 @@ void UInventory::UpdateEquipmentInventory(const FName& itemID)
 	UpdateEquipSlot(itemData, equipmentData);
 }
 
-void UInventory::UnEquipWeaponAndAddToIndex(EEquipmentType equipmentType, const int32 index)
+bool UInventory::UnEquipWeaponAndAddToIndex(EEquipmentType equipmentType, const int32 index)
 {
+	if (!IsSlotEmpty(index))
+	{
+		return false;
+	}
+
 	if (FEquipmentSlot* slot = EquipmentSlots.Find(equipmentType))
 	{
 		const FName currentEquipmentID = slot->EquipmentID;
-		const FItemInfoTable* itemData = RequestItemData(currentEquipmentID);
 		UpdateInventory(index, currentEquipmentID, 1);
+
 
 		RequestTakeOffWeapon();
 		slot->EquipmentID = NAME_None;
+
+		return true;
 	}	
+
+	return false;
 }
 
 int32 UInventory::GetTotalItemAmount(const FName& itemID)
@@ -696,7 +734,10 @@ void UInventory::UseItem(const int32 index)
 
 	if (UCPP_ConsumptionItemDataAsset* asset = itemData->ItemLogicAsset)
 	{
-		asset->ExecuteLogic(GetOwner());
+		if (asset->ExecuteLogic(GetOwner()))
+		{
+			RemoveItemAtIndex(index, 1);
+		}
 	}
 }
 

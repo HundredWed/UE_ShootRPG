@@ -89,7 +89,9 @@ FReply UCPP_Slot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPo
 
 	if (ItemIcon->GetIsEnabled())
 	{
-		return OnSlotMouseButtonDown.Execute(InGeometry, InMouseEvent, MyIndex);		
+		OnSlotMouseButtonDown.Execute(InGeometry, InMouseEvent, MyIndex);
+		FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
+		return reply.NativeReply;
 	}
 
 	return FReply::Handled();
@@ -125,8 +127,12 @@ void UCPP_Slot::ActiveSlot(UTexture2D* icon)
 	Super::ActiveSlot(icon);
 }
 
-void UCPP_Slot::InitSlotInfo()
+void UCPP_Slot::InitSlotInfo(const int32 index)
 {
+	MyIndex = index;
+	MyAmount = 0;
+	bMyItemCanStacked = false;
+	InactiveSlot();
 }
 
 void UCPP_Slot::InactiveCombinableSlot()
