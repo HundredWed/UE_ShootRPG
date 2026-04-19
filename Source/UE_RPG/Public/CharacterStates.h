@@ -108,7 +108,7 @@ public:
 	float CurrentStamina = 150.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float PlayerATK = 0.f;
+	float PlayerATK = 10.f;
 
 	void Initialize()
 	{

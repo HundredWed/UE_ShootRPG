@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Structs/ST_Quest.h"
+#include "Structs/ST_InventoryData.h"
 #include "Item/Weapon/EquipmentData.h"
 #include "Item/ItemData.h"
 #include "Inventory.generated.h"
@@ -13,28 +14,6 @@ class ACPP_Character;
 class UCPP_EquipmentInventory;
 class UCPP_InventoryWidget;
 
-struct FEquipmentInfoTable;
-
-USTRUCT(BlueprintType)
-struct FInventorySlot
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	FName ItemID = NAME_None;
-
-	UPROPERTY()
-	int32 ItemAmount = 0; 
-};
-
-USTRUCT(BlueprintType)
-struct FEquipmentSlot
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	FName EquipmentID = NAME_None;
-};
 
 DECLARE_DELEGATE_TwoParams(FOnOnItemRemovedDelegate, const FName&, const int32);
 
