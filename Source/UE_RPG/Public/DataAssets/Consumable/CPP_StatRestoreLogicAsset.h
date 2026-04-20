@@ -21,8 +21,8 @@ public:
     ERestoreTypes RestoreType;
 
     UPROPERTY(EditDefaultsOnly)
-    int32 RestoreAmount;
+    float RestoreAmount;
 
-    virtual void ExecuteLogic(AActor* Target) override;
+    virtual bool ExecuteLogic(AActor* Target) override;
 	
 };
