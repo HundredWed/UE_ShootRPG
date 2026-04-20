@@ -15,12 +15,12 @@ APickUpItem::APickUpItem()
 	PickUpMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Pick Mesh"));
 	SetRootComponent(PickUpMesh);
 
-	SearchComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Respone item search trace"));
+	/*SearchComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Respone item search trace"));
 	SearchComponent->SetupAttachment(GetRootComponent());
 
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Respone Trace When OverLap"));
 	SphereComponent->SetupAttachment(GetRootComponent());
-	SphereComponent->SetSphereRadius(180.f);
+	SphereComponent->SetSphereRadius(180.f);*/
 
 	ItemStateWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("ItemState Widget"));
 	ItemStateWidget->SetupAttachment(GetRootComponent()); 
@@ -34,16 +34,16 @@ APickUpItem::APickUpItem()
 	PickUpMesh->SetEnableGravity(true);
 	//StaticMesh->SetVisibility(true);
 	PickUpMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	PickUpMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	/**search sphere*/
-	SearchComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	SearchComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Block);
-	SearchComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	/**overlap sphere*/
-	SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
-	SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
-	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	PickUpMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	///**search sphere*/
+	//SearchComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	//SearchComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Block);
+	//SearchComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	///**overlap sphere*/
+	//SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	//SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
+	//SphereComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
+	//SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	/**Widget*/
 	ItemStateWidget->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
@@ -97,11 +97,11 @@ void APickUpItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (IsValid(SphereComponent))
+	/*if (IsValid(SphereComponent))
 	{
 		SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &APickUpItem::OnSphereOverlap);
 		SphereComponent->OnComponentEndOverlap.AddDynamic(this, &APickUpItem::OnSphereEndOverlap);
-	}
+	}*/
 
 	if (IsValid(ItemStateWidget))
 	{
@@ -114,31 +114,31 @@ void APickUpItem::BeginPlay()
 
 void APickUpItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ACPP_Character* character = Cast<ACPP_Character>(OtherActor);
-	if (IsValid(character))
-	{
-		//DISPLAYLOG(TEXT("Player In!!"));
-		character->SetCanSearchObject(true);
-		character->OverlapCount += 1;
-	}
+	//ACPP_Character* character = Cast<ACPP_Character>(OtherActor);
+	//if (IsValid(character))
+	//{
+	//	//DISPLAYLOG(TEXT("Player In!!"));
+	//	character->SetCanSearchObject(true);
+	//	character->OverlapCount += 1;
+	//}
 }
 
 void APickUpItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	ACPP_Character* character = Cast<ACPP_Character>(OtherActor);
-	if (IsValid(character))
-	{
-     	if (character->OverlapCount > 0)
-		{
-			character->OverlapCount -= 1;
-			//DISPLAYLOG(TEXT("Count Min!!"));
-			if (character->OverlapCount == 0)
-			{
-				character->SetCanSearchObject(false);
-				//DISPLAYLOG(TEXT("Player Out!!"));
-			}
-		}
-	}
+	//ACPP_Character* character = Cast<ACPP_Character>(OtherActor);
+	//if (IsValid(character))
+	//{
+ //    	if (character->OverlapCount > 0)
+	//	{
+	//		character->OverlapCount -= 1;
+	//		//DISPLAYLOG(TEXT("Count Min!!"));
+	//		if (character->OverlapCount == 0)
+	//		{
+	//			character->SetCanSearchObject(false);
+	//			//DISPLAYLOG(TEXT("Player Out!!"));
+	//		}
+	//	}
+	//}
 }
 
 void APickUpItem::InitializePickUpItem()

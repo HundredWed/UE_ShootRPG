@@ -34,11 +34,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Item Component")
 		class UStaticMeshComponent* PickUpMesh;
 
-	UPROPERTY(VisibleAnywhere, Category = "Item Component")
-		class USphereComponent* SearchComponent;
+	//UPROPERTY(VisibleAnywhere, Category = "Item Component")
+	//	class USphereComponent* SearchComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Item Component")
-		class USphereComponent* SphereComponent;
+	//UPROPERTY(VisibleAnywhere, Category = "Item Component")
+	//	class USphereComponent* SphereComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class UWidgetComponent* ItemStateWidget;
