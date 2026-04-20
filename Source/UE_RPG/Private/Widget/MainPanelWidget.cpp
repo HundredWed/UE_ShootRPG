@@ -4,6 +4,7 @@
 #include "Widget/MainPanelWidget.h"
 
 #include "CPP_Character.h"
+#include "Component/CPP_StatComponent.h"
 #include "Inventory.h"
 #include "Widget/CPP_InventoryWidget.h"
 #include "Widget/SetAmountWidget.h"
@@ -18,10 +19,10 @@ void UMainPanelWidget::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UMainPanelWidget::BindCharacterStat(ACPP_Character* player)
+void UMainPanelWidget::BindCharacterStat(UCPP_StatComponent* statComponent)
 {
-	player->OnUpdatePlayerState.BindUObject(this, &UMainPanelWidget::InitState);
-	player->OnUpdateHP.BindUObject(this, &UMainPanelWidget::UpdateHealthBarPercent);
+	statComponent->OnUpdateCharacterState.BindUObject(this, &UMainPanelWidget::InitState);
+	statComponent->OnUpdateHP.AddUObject(this, &UMainPanelWidget::UpdateHealthBarPercent);
 }
 
 void UMainPanelWidget::InitState(const FCharacterStats& stat)

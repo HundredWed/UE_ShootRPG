@@ -3,9 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-#include "CharacterStates.h"
 #include "UE_RPG/UtilityMecro.h"
-#include "Interface/CPP_InteractInterface.h"
+#include "Interface/CPP_StatInterface.h"
 #include "CPP_Character.generated.h"
 
 class ANonPlayerCharacterBase;
@@ -21,16 +20,12 @@ class UMainPanelWidget;
 class UGrabber;
 class UInventory;
 class UCPP_QuestSubsystem;
+class UCPP_StatComponent;
 
 struct FQuest;
 
-DECLARE_DELEGATE_OneParam(FOnUpdatePlayerStateDelegate, const FCharacterStats&);
-DECLARE_DELEGATE_TwoParams(FOnUpdateHPDelegate, const float, const float);
-DECLARE_DELEGATE_OneParam(FOnUpdateManaDelegate, const float);
-DECLARE_DELEGATE_OneParam(FOnUpdateStaminaDelegate, const float);
-
 UCLASS()
-class UE_RPG_API ACPP_Character : public ACharacter
+class UE_RPG_API ACPP_Character : public ACharacter, public ICPP_StatInterface
 {
 	GENERATED_BODY()
 
@@ -46,6 +41,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = Compoenents)
 	UCPP_WeaponManager* WeaponManager;
+
+	UPROPERTY(EditAnywhere, Category = Compoenents)
+	UCPP_StatComponent* StatComponent;
 
 	/**Input*/
 	/*UPROPERTY(EditAnywhere, Category = Input)
@@ -117,7 +115,7 @@ public:
 	float SpringArmSocketOffsetYValue = 100.f;
 
 	/**Item search issue overlap counting*/
-	uint8 OverlapCount = 0;
+	//uint8 OverlapCount = 0;
 
 	/**key down info*/
 	bool bShiftDown = false;/*for inventory splite*/
@@ -132,7 +130,6 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	void SearchItem();
 	void ObjectSearchTrace();
 	bool SetSphereTrace(FHitResult& HitResult);
 
@@ -180,6 +177,9 @@ public:
 	bool IsUnderArm();
 	void SetFireRate(float rate);
 
+	virtual void OnRestore(ERestoreTypes restoreTypes, const float amount) override;
+
+
 	/**Montage*/
 	void PlayEquipMontage(FName NotifyName);
 	void PlayMontage(UAnimMontage* montage);
@@ -207,22 +207,18 @@ public:
 	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
 	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
-	FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
-	FORCEINLINE int32 GetPlayerATK() { return CharacterStats.PlayerATK; }
-	FORCEINLINE bool GetPlayerMoveState() { return bMoving; }
+	//FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
+		FORCEINLINE bool GetPlayerMoveState() { return bMoving; }
 
-	FORCEINLINE int32 GetPlayerLevel() { return CharacterStats.Level; }
-	FORCEINLINE float GetPlayerHealth() { return CharacterStats.CurrentHealth; }
-	FORCEINLINE float GetPlayerMaxHealth() { return CharacterStats.MaxHealth; }
-	FORCEINLINE float GetPlayerMana() { return CharacterStats.CurrentMana; }
-	FORCEINLINE float GetPlayerMaxMana() { return CharacterStats.MaxMana; }
-	FORCEINLINE float GetPlayerStamina() { return CharacterStats.CurrentStamina; }
-	FORCEINLINE float GetPlayerMaxStamina() { return CharacterStats.MaxStamina; }
+	//FORCEINLINE int32 GetPlayerATK() { return CharacterStats.PlayerATK; }
+	//FORCEINLINE int32 GetPlayerLevel() { return CharacterStats.Level; }
+	//FORCEINLINE float GetPlayerHealth() { return CharacterStats.CurrentHealth; }
+	//FORCEINLINE float GetPlayerMaxHealth() { return CharacterStats.MaxHealth; }
+	//FORCEINLINE float GetPlayerMana() { return CharacterStats.CurrentMana; }
+	//FORCEINLINE float GetPlayerMaxMana() { return CharacterStats.MaxMana; }
+	//FORCEINLINE float GetPlayerStamina() { return CharacterStats.CurrentStamina; }
+	//FORCEINLINE float GetPlayerMaxStamina() { return CharacterStats.MaxStamina; }
 
-	void IncreasePlayerHP(const float value);
-	void DecreasePlayerHP(const float value);
-
-	
 	
 	/**inventory*/
 	UFUNCTION()
@@ -247,16 +243,12 @@ public:
 	int32 AddInventory(const FName& itemID, const int32 amount = 1);
 	void SetDialogue(const FName& id);
 
-	FOnUpdatePlayerStateDelegate OnUpdatePlayerState;
-	FOnUpdateHPDelegate OnUpdateHP;
-	FOnUpdateManaDelegate OnOnUpdateMana;
-	FOnUpdateStaminaDelegate OnUpdateStamina;
-
 private:
 
 	float ClampRange(float value);
 	void LookAtObject(AActor* obj);
 	void EndLookAtObject(AActor* obj);
+	void StartSearTrace();
 
 	UFUNCTION()
 	void OnRemoveItemEvent(const FName& itemId, const int32 amount);
@@ -271,9 +263,6 @@ private:
 	bool PressFireKey = false;
 	bool bTrigger = true;
 	bool bMoving = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
-	FCharacterStats CharacterStats;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
 	float FireRate = 0.3f;
@@ -291,6 +280,8 @@ private:
 	float MoveAimingSpeed_Crouch = 200.f;
 	FTimerHandle TimerHandle;
 
+	/**상호작용 검사를 관리할 타이머 핸들*/
+	FTimerHandle InteractTimerHandle;
 
 	UPROPERTY()
 	AActor* HitResultObject;
@@ -314,7 +305,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "PlayerValue")
 	float ShowItemRadius = 100.f;
 
-	bool bCanSearchObject = false;
+	//bool bCanSearchObject = false;
 
 	FCollisionQueryParams Params;
 

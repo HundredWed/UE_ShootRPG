@@ -4,7 +4,7 @@
 #include "Widget/MainPanelWidget.h"
 #include "Systems/CPP_DialogueSystem.h"
 #include "Widget/NPC/Dialogue/CPP_DialogueWidget.h"
-#include "CPP_Character.h"
+#include "Component/CPP_StatComponent.h"
 #include "CPP_Controller.h"
 
 UCPP_UIManager::UCPP_UIManager()
@@ -31,12 +31,12 @@ void UCPP_UIManager::SetMainWidget(EWidgetType type)
 	ShowCurrentWidget();
 }
 
-void UCPP_UIManager::RegisterPlayerCharacterToWidget(ACPP_Character* player)
+void UCPP_UIManager::RegisterPlayerCharacterToWidget(UCPP_StatComponent* statComponent)
 {
 	if (TObjectPtr<UUserWidget>* wd = Widgets.Find(EWidgetType::Player))
 	{
 		UMainPanelWidget* playerWG = Cast<UMainPanelWidget>((*wd));
-		playerWG->BindCharacterStat(player);
+		playerWG->BindCharacterStat(statComponent);
 	}
 }
 

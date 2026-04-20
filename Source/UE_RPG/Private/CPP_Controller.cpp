@@ -60,7 +60,7 @@ void ACPP_Controller::UpdatePlayerWidget()
 
     if (UIManager && player)
     {
-        UIManager->RegisterPlayerCharacterToWidget(player);
+        UIManager->RegisterPlayerCharacterToWidget(player->StatComponent);
     }
 }
 

@@ -7,11 +7,11 @@
 #include "CharacterStates.h"
 #include "MainPanelWidget.generated.h"
 
-class ACPP_Character;
 class UCPP_InventoryWidget;
 class USetAmountWidget;
 class UCPP_PlayerStateBar;
 class UCPP_InProgressQuestsWidget;
+class UCPP_StatComponent;
 
 UCLASS()
 class UE_RPG_API UMainPanelWidget : public UCustomUMGWidget
@@ -30,7 +30,7 @@ public:
 
 
 	/**StateWidget*/
-	void BindCharacterStat(ACPP_Character* player);
+	void BindCharacterStat(UCPP_StatComponent* statComponent);
 
 	void InitState(const FCharacterStats& stat);
 	

@@ -22,5 +22,5 @@ class UE_RPG_API ICPP_StatInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void OnRestore(ERestoreTypes restoreTypes, const int32) {};
+	virtual void OnRestore(ERestoreTypes restoreTypes, const float amount) {};
 };

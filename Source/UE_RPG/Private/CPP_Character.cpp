@@ -18,6 +18,7 @@
 #include "Inventory.h"
 #include "Item/Weapon/CPP_WeaponManager.h"
 #include "Systems/CPP_QuestSubsystem.h"
+#include "Component/CPP_StatComponent.h"
 
 
 ACPP_Character::ACPP_Character()
@@ -41,6 +42,7 @@ ACPP_Character::ACPP_Character()
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
 
+	StatComponent = CreateDefaultSubobject<UCPP_StatComponent>(TEXT("StatComponent"));
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -62,13 +64,6 @@ ACPP_Character::ACPP_Character()
 void ACPP_Character::BeginPlay()
 {
 	Super::BeginPlay();
-
-	CharacterStats.Initialize();
-
-	if (OnUpdatePlayerState.IsBound())
-	{
-		OnUpdatePlayerState.Execute(CharacterStats);
-	}
 
 	//위젯
 	HideGameInventory();
@@ -102,13 +97,13 @@ void ACPP_Character::BeginPlay()
 
 	/**ignore from item trace*/
 	Params.AddIgnoredActor(this);
+
+	StartSearTrace();
 }
 
 void ACPP_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	SearchItem();
 
 	SetMouseRate();
 	CalculateCrosshairSpread(DeltaTime);
@@ -150,26 +145,17 @@ float ACPP_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	if(ActionState != ECharacterActionState::Action)
 		PlayMontage(DamagedMontage);
 
-	DecreasePlayerHP(DamageAmount);
+	if (!StatComponent->DecreaseHP(DamageAmount))
+	{
+		CharacterState = ECharacterStateTypes::Death;
+	}
 	return DamageAmount;
-}
-
-void ACPP_Character::SearchItem()
-{
-	if (bCanSearchObject)
-	{
-		ObjectSearchTrace();
-		//DISPLAYLOG(TEXT("search item"));
-	}
-	else if (IsValid(HitResultObject) && !bCanSearchObject)
-	{
-		ResetHitResultState();
-		//DISPLAYLOG(TEXT("reset hit result"))
-	}
 }
 
 void ACPP_Character::ObjectSearchTrace()
 {
+	//DISPLAYLOG(TEXT(""))
+
 	FHitResult HitResult;
 
 	bool OnHit = SetSphereTrace(HitResult);
@@ -398,12 +384,11 @@ void ACPP_Character::SetCrouch(const FInputActionValue& Value)
 
 void ACPP_Character::Dodge(const FInputActionValue& Value)
 {
-	if (ActionState != ECharacterActionState::SuperAction && CharacterStats.CurrentStamina >= 10)
+	if (ActionState != ECharacterActionState::SuperAction && StatComponent->DecreaseDodge())
 	{
 		bMoving = false;//블프 애니메이션
 		LookAt();
 		PlayMontage(DodgeMontage);
-		CharacterStats.CurrentStamina -= 10;
 		ActionState = ECharacterActionState::SuperAction;
 	}
 }
@@ -773,31 +758,6 @@ void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
 	HitResultObject = hitresultobject;
 }
 
-void ACPP_Character::IncreasePlayerHP(const float value)
-{
-	CharacterStats.IncreaseHP(value);
-
-	if (OnUpdateHP.IsBound())
-	{
-		OnUpdateHP.Execute(CharacterStats.CurrentHealth, CharacterStats.MaxHealth);
-	}
-}
-
-void ACPP_Character::DecreasePlayerHP(const float value)
-{
-	float hp = CharacterStats.DecreaseHP(value);
-
-	if (OnUpdateHP.IsBound())
-	{
-		OnUpdateHP.Execute(CharacterStats.CurrentHealth, CharacterStats.MaxHealth);
-	}
-	
-	if (hp <= 0)
-	{
-		CharacterState = ECharacterStateTypes::Death;
-	}		
-}
-
 void ACPP_Character::HideGameInventory()
 {
 	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
@@ -830,12 +790,31 @@ void ACPP_Character::OnQuestClearEvent(const FQuest& quest)
 {
 	//퀘스트 보상
 	GameInventory->ExchangeQuestItems(quest.RewardItemID, quest.RewardItemAmount, quest.NeedContentID, quest.NeedCount);
-	CharacterStats.CurrentEXP = quest.EXP;	
+	StatComponent->UpdateEXP(quest.EXP);
 }
 
 void ACPP_Character::SetFireRate(float rate)
 {
 	FireRate = rate;
+}
+
+void ACPP_Character::OnRestore(ERestoreTypes restoreTypes, const float amount)
+{
+	switch (restoreTypes)
+	{
+	case ERestoreTypes::Type_None:
+		break;
+	case ERestoreTypes::Health:
+		StatComponent->IncreaseHP(amount);
+		break;
+	case ERestoreTypes::Mana:
+		StatComponent->IncreaseMP(amount);
+		break;
+	case ERestoreTypes::Stamina:
+		break;
+	default:
+		break;
+	}
 }
 
 void ACPP_Character::StoreDamageUI()
@@ -927,6 +906,17 @@ void ACPP_Character::EndLookAtObject(AActor* obj)
 	{
 		interactObj->OnEndLookAt();
 	}
+}
+
+void ACPP_Character::StartSearTrace()
+{
+	GetWorld()->GetTimerManager().SetTimer(
+		InteractTimerHandle,
+		this,
+		&ACPP_Character::ObjectSearchTrace,
+		0.15f,
+		true
+	);
 }
 
 void ACPP_Character::OnRemoveItemEvent(const FName& itemId, const int32 amount)

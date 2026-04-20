@@ -17,5 +17,5 @@ class UE_RPG_API UCPP_ConsumptionItemDataAsset : public UPrimaryDataAsset
 public:
 
 
-	virtual void ExecuteLogic(AActor* target) PURE_VIRTUAL(UCPP_ConsumptionItemDataAsset::ExecuteLogic, );
+	virtual bool ExecuteLogic(AActor* target) PURE_VIRTUAL(UCPP_ConsumptionItemDataAsset::ExecuteLogic, return false;);
 };

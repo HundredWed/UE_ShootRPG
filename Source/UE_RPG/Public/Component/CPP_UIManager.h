@@ -9,7 +9,7 @@
 #include "CPP_UIManager.generated.h"
 
 class ACPP_Controller;
-class ACPP_Character;
+class UCPP_StatComponent;
 class UCPP_InventoryWidget;
 
 DECLARE_DELEGATE(FOnRevertPlayerWidgetDelegate);
@@ -32,7 +32,7 @@ public:
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void SetMainWidget(EWidgetType type);
-	void RegisterPlayerCharacterToWidget(ACPP_Character* player);
+	void RegisterPlayerCharacterToWidget(UCPP_StatComponent* statComponent);
 
 	bool ToggleQuestListWindow();
 
