@@ -5,7 +5,7 @@
 #include "Item/Weapon/EquipmentData.h"
 #include "Structs/ST_InventoryData.h"
 #include "Structs/ST_Quest.h"
-#include "ST_TotalPlayerData.generated.h"
+#include "ST_TotalCharacterData.generated.h"
 
 
 USTRUCT(BlueprintType)

@@ -15,6 +15,8 @@ class UMainPanelWidget;
 class UCPP_InventoryWidget;
 class UInputAction;
 class UCPP_DialogueSystem;
+class UCPP_SaveDataSubsystem;
+class ICPP_SavableInterface;
 
 
 
@@ -65,6 +67,7 @@ private:
 
 	void UpdatePlayerWidget();
 
+	void OnSaveBroadcastReceived();
 private:
 
 	/*UPROPERTY(EditDefaultsOnly, Category = "Config")
@@ -78,6 +81,12 @@ private:
 
 	UPROPERTY()
 	UCPP_DialogueSystem* DialogueSystem;
+
+	UPROPERTY()
+	UCPP_SaveDataSubsystem* SaveSubsystem;
+
+	UPROPERTY()
+	TArray<ICPP_SavableInterface*> CachedSavableInterfaces;
 
 	/**Input*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Config", meta = (AllowPrivateAccess = "true"))

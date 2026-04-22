@@ -9,6 +9,8 @@
 #include "Component/CPP_UIManager.h"
 #include "Systems/CPP_DialogueSystem.h"
 #include "CPP_Character.h"
+#include "Interface/CPP_SavableInterface.h"
+#include "Systems/CPP_SaveDataSubsystem.h"
 
 ACPP_Controller::ACPP_Controller()
 {
@@ -33,8 +35,30 @@ void ACPP_Controller::BeginPlay()
         return;
     }
 
+    TArray<UActorComponent*> comps = GetComponentsByInterface(UCPP_SavableInterface::StaticClass());
+    for (UActorComponent* comp : comps)
+    {
+        ICPP_SavableInterface* savable = Cast<ICPP_SavableInterface>(comp);
+        if (savable)
+        {
+            CachedSavableInterfaces.Add(savable);
+        }
+    }
+
     DialogueSystem = GI->GetSubsystem<UCPP_DialogueSystem>();
     check(DialogueSystem);
+
+    SaveSubsystem = GetGameInstance()->GetSubsystem<UCPP_SaveDataSubsystem>();
+    check(SaveSubsystem);
+    SaveSubsystem->OnGatherSaveData.AddUObject(this, &ACPP_Controller::OnSaveBroadcastReceived);
+
+    if (SaveSubsystem->IsDataReady())
+    {
+        for (ICPP_SavableInterface* SavableComp : CachedSavableInterfaces)
+        {
+            SavableComp->ApplySaveData(SaveSubsystem);
+        }
+    }
 }
 
 void ACPP_Controller::InteractEvent()
@@ -61,6 +85,14 @@ void ACPP_Controller::UpdatePlayerWidget()
     if (UIManager && player)
     {
         UIManager->RegisterPlayerCharacterToWidget(player->StatComponent);
+    }
+}
+
+void ACPP_Controller::OnSaveBroadcastReceived()
+{
+    for (ICPP_SavableInterface* savable : CachedSavableInterfaces)
+    {
+        savable->GatherSaveData(SaveSubsystem);
     }
 }
 

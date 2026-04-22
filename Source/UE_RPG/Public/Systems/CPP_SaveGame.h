@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
-#include "Structs/ST_TotalPlayerData.h"
+#include "Structs/ST_TotalCharacterData.h"
 #include "CPP_SaveGame.generated.h"
 
 

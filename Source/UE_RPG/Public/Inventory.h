@@ -8,17 +8,18 @@
 #include "Structs/ST_InventoryData.h"
 #include "Item/Weapon/EquipmentData.h"
 #include "Item/ItemData.h"
+#include "Interface/CPP_SavableInterface.h"
 #include "Inventory.generated.h"
 
 class ACPP_Character;
 class UCPP_EquipmentInventory;
 class UCPP_InventoryWidget;
-
+class UCPP_SaveDataSubsystem;
 
 DECLARE_DELEGATE_TwoParams(FOnOnItemRemovedDelegate, const FName&, const int32);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class UE_RPG_API UInventory : public UActorComponent
+class UE_RPG_API UInventory : public UActorComponent, public ICPP_SavableInterface
 {
 	GENERATED_BODY()
 
@@ -52,6 +53,7 @@ public:
 	bool CanAddToIndex(const int32 fromIndex, const int32 toIndex);
 	void UpdateInventory(int32 index, const FName& itemID, const int32 amount = 1);
 	void UpdateSlotAtIndex(const int32 index);
+	void UpdateAllSlot();
 	const FInventorySlot GetSlotInfoIndex(const int32 index);
 	void AddWeight(const float amount);
 	int32 AddGold(const int32 amount);
@@ -98,6 +100,9 @@ public:
     
 	FItemInfoTable* RequestItemData(const FName& itemId);
 	FEquipmentInfoTable* RequestEquipmentData(const FName& itemId);
+
+	virtual void GatherSaveData(UCPP_SaveDataSubsystem* saveSystem) override;
+	virtual void ApplySaveData(UCPP_SaveDataSubsystem* saveSystem) override;
 
 private:	
 

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "CharacterStates.h"
+#include "Interface/CPP_SavableInterface.h"
 #include "CPP_StatComponent.generated.h"
 
 
@@ -11,8 +12,10 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUpdateHPDelegate, const float, const flo
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUpdateManaDelegate, const float, const float);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUpdateStaminaDelegate, const float, const float);
 
+class UCPP_SaveDataSubsystem;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class UE_RPG_API UCPP_StatComponent : public UActorComponent
+class UE_RPG_API UCPP_StatComponent : public UActorComponent, public ICPP_SavableInterface
 {
 	GENERATED_BODY()
 
@@ -44,6 +47,9 @@ public:
 	bool DecreaseDodge();
 
 	bool UpdateEXP(const float value);
+
+	virtual void GatherSaveData(UCPP_SaveDataSubsystem* saveSystem) override;
+	virtual void ApplySaveData(UCPP_SaveDataSubsystem* saveSystem) override;
 
 private:
 

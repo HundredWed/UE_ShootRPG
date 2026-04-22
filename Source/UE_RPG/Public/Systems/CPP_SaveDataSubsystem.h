@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "Structs/ST_TotalPlayerData.h"
+#include "Structs/ST_TotalCharacterData.h"
 #include "CPP_SaveDataSubsystem.generated.h"
 
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnDataLoadedDelegate, const FTotalSaveData&);
+DECLARE_MULTICAST_DELEGATE(FOnGatherSaveDataDelegate);
 
 UCLASS()
 class UE_RPG_API UCPP_SaveDataSubsystem : public UGameInstanceSubsystem
@@ -16,6 +17,8 @@ class UE_RPG_API UCPP_SaveDataSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	UCPP_SaveDataSubsystem();
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	//플레이어
 	const FCharacterStats& GetCharacterStatData() const { return TotalSaveData.CharacterStatData; }
@@ -37,11 +40,24 @@ public:
 	void UpdateClearQuestData(const TSet<FName>& newData) { TotalSaveData.ClearQuestData = newData; }
 
 	void SaveGameData();
+	void SaveGameDataAsync();
 	void LoadGameData();
 
+	bool IsDataReady() { return bIsDataLoadedFromDisk; }
+
+	FOnGatherSaveDataDelegate OnGatherSaveData;
 	FOnDataLoadedDelegate OnDataLoaded;
 
 private:
+
+
+private:
+
 	UPROPERTY()
 	FTotalSaveData TotalSaveData;
+
+	FTimerHandle AutoSaveTimerHandle;
+
+	FString CurrentSlotName = "";
+	bool bIsDataLoadedFromDisk = false;
 };

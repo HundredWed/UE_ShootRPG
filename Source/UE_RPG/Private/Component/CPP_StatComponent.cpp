@@ -1,5 +1,5 @@
 ﻿#include "Component/CPP_StatComponent.h"
-
+#include "Systems/CPP_SaveDataSubsystem.h"
 
 UCPP_StatComponent::UCPP_StatComponent()
 {
@@ -95,5 +95,15 @@ bool UCPP_StatComponent::UpdateEXP(const float value)
 {
 	CharacterStats.CurrentEXP += value;
 	return true;
+}
+
+void UCPP_StatComponent::GatherSaveData(UCPP_SaveDataSubsystem* saveSystem)
+{
+	saveSystem->UpdateCharacterStatData(CharacterStats);
+}
+
+void UCPP_StatComponent::ApplySaveData(UCPP_SaveDataSubsystem* saveSystem)
+{
+	CharacterStats = saveSystem->GetCharacterStatData();
 }
 

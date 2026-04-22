@@ -8,6 +8,7 @@
 #include "DataAssets/CPP_ConsumptionItemDataAsset.h"
 #include "Widget/CPP_InventoryWidget.h"
 #include "Systems/CPP_AkashicSubsystem.h"
+#include "Systems/CPP_SaveDataSubsystem.h"
 
 UInventory::UInventory()
 {
@@ -381,6 +382,14 @@ void UInventory::UpdateSlotAtIndex(const int32 index)
 	}	
 }
 
+void UInventory::UpdateAllSlot()
+{
+	for (int32 index = 0; index < SlotsArray.Num(); index++)
+	{
+		UpdateSlotAtIndex(index);
+	}
+}
+
 const FInventorySlot UInventory::GetSlotInfoIndex(const int32 index)
 {
 	return SlotsArray[index];
@@ -582,10 +591,7 @@ void UInventory::InventorySort(int32 left, int32 right)
 		return typeA < typeB;
 		});
 
-	for (int32 index = 0; index < SlotsArray.Num(); index++)
-	{
-		UpdateSlotAtIndex(index);
-	}
+	UpdateAllSlot();
 }
 
 //정렬 레거시
@@ -778,6 +784,18 @@ FEquipmentInfoTable* UInventory::RequestEquipmentData(const FName& itemId)
 	}
 
 	return nullptr;
+}
+
+void UInventory::GatherSaveData(UCPP_SaveDataSubsystem* saveSystem)
+{
+	saveSystem->UpdateInventorySlotData(SlotsArray);
+	saveSystem->UpdateEquipmentSlotData(EquipmentSlots);
+}
+
+void UInventory::ApplySaveData(UCPP_SaveDataSubsystem* saveSystem)
+{
+	SlotsArray = saveSystem->GetInventorySlotData();
+	EquipmentSlots = saveSystem->GetEquipmentSlotData();
 }
 
 void UInventory::ShowInventory()
