@@ -496,16 +496,11 @@ void ACPP_Character::AttackWeapon()
 			PlayMontage(FireMontage);
 		}
 
-		WeaponManager->GetCurrentWeapon()->Attack();
+		const float triggerRate = WeaponManager->GetCurrentWeapon()->Attack();
 
 		bTrigger = false;
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Character::CanTrigger, TriggerRate, false);
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Character::CanTrigger, triggerRate, false);
 	}
-
-	/*if (PressFireKey or when a skill or other trigger condition is true)
-	{
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Character::FireWeapon, FireRate, false);
-	}*/
 }
 
 void ACPP_Character::CanTrigger()
@@ -804,11 +799,6 @@ void ACPP_Character::OnQuestClearEvent(const FQuest& quest)
 	//퀘스트 보상
 	GameInventory->ExchangeQuestItems(quest.RewardItemID, quest.RewardItemAmount, quest.NeedContentID, quest.NeedCount);
 	StatComponent->UpdateEXP(quest.EXP);
-}
-
-void ACPP_Character::SetFireRate(float rate)
-{
-	FireRate = rate;
 }
 
 void ACPP_Character::OnRestore(ERestoreTypes restoreTypes, const float amount)

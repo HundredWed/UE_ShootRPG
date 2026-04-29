@@ -39,9 +39,13 @@ public:
 	int32 ManaCost;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 	float ManaDensity;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+	float FireRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
 	TSoftObjectPtr<USkeletalMesh> ItemSkeletalMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
+	FVector ParticleSize;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
 	TSoftObjectPtr<UParticleSystem> FireParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")

@@ -6,9 +6,10 @@
 #include "Item/Weapon/CPP_WeaponBase.h"
 #include "CPP_Rifle.generated.h"
 
-/**
- * 
- */
+
+class UParticleSystem;
+class USoundCue;
+
 UCLASS()
 class UE_RPG_API ACPP_Rifle : public ACPP_WeaponBase
 {
@@ -17,10 +18,11 @@ class UE_RPG_API ACPP_Rifle : public ACPP_WeaponBase
 public:
 	ACPP_Rifle();
 
-	UPROPERTY(EditAnywhere, Category = "WeaponInfo|Effect")
-		float MaxDis = 500.f;
+	float MaxDis = 500.f;
+	FVector ParticleSize = { 1.f, 1.f, 1.f };
+	float FireRate = 0.5f;
 
-	virtual void Attack() override;
+	virtual float Attack() override;
 	virtual void InitWeaponInfo(const FName& itemID) override;
 	virtual void Equip(USceneComponent* Inparent, const FName& SocketName) override;
 
@@ -35,16 +37,15 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, Category = "WeaponInfo|Effect")
-		FVector ParticleSize;
+	
 	UPROPERTY()
-		class UParticleSystem* BeamParticle;
+	UParticleSystem* BeamParticle;
 	UPROPERTY()
-		class UParticleSystem* FireParticle;
+	UParticleSystem* FireParticle;
 	UPROPERTY()
-		class USoundCue* ShootSound;
-		UPROPERTY()
-		class USoundCue* EquipSound;
+	USoundCue* ShootSound;
+	UPROPERTY()
+	USoundCue* EquipSound;
 
 private:
 	/**between camera and player aiming issue Value*/

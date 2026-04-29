@@ -176,7 +176,6 @@ public:
 	bool CanEquipState();
 	bool CanUnEquipState();
 	bool IsUnderArm();
-	void SetFireRate(float rate);
 
 	virtual void OnRestore(ERestoreTypes restoreTypes, const float amount) override;
 
@@ -265,10 +264,6 @@ private:
 	bool bTrigger = true;
 	bool bMoving = false;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
-	float FireRate = 0.3f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
-	float TriggerRate = 0.5f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
 	float DefaultMRR = 500.f;//MovementRotationRate
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))

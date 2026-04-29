@@ -14,9 +14,9 @@ ACPP_Rifle::ACPP_Rifle()
 {
 }
 
-void ACPP_Rifle::Attack()
+float ACPP_Rifle::Attack()
 {
-	SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Boom!!!!!!!"));
+	//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Boom!!!!!!!"));
 	if (IsValid(ShootSound))
 	{
 		UGameplayStatics::PlaySound2D(this, ShootSound);
@@ -32,6 +32,7 @@ void ACPP_Rifle::Attack()
 
 	ShootEffect(hitpotin);
 
+	return FireRate;
 }
 
 void ACPP_Rifle::InitWeaponInfo(const FName& itemID)
@@ -48,6 +49,9 @@ void ACPP_Rifle::InitWeaponInfo(const FName& itemID)
 	if (const FEquipmentInfoTable* thisWeaponInfo = AS->RequestWeaponInfo(itemID))
 	{
 		FinalDamage = thisWeaponInfo->ATK;
+		MaxDis = thisWeaponInfo->ManaDensity;
+		ParticleSize = thisWeaponInfo->ParticleSize;
+		FireRate = thisWeaponInfo->FireRate;
 
 		WeaponMesh->SetSkeletalMesh(thisWeaponInfo->ItemSkeletalMesh.LoadSynchronous());
 		BeamParticle = thisWeaponInfo->BeamParticle.LoadSynchronous();
