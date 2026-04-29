@@ -246,23 +246,6 @@ void UCPP_InventoryWidget::SeSlotInfo(UCPP_Slot* slot, const int32 index)
 
 	const FName slotItemID = InventoryRef->GetSlotInfoIndex(index).ItemID;
 	slot->InitSlotInfo(index);
-
-	if (!slotItemID.IsNone())
-	{
-		const FItemInfoTable* itemData = InventoryRef->RequestItemData(slotItemID);
-
-		if (itemData->ItemType == EItemCategory::EIC_Equipment)
-		{
-			const FEquipmentInfoTable* equipmentData = InventoryRef->RequestEquipmentData(slotItemID);
-			slot->UpdateSlot(itemData, equipmentData, index);
-		}
-		else
-		{
-			const int32 amount = InventoryRef->GetSlotInfoIndex(index).ItemAmount;
-			slot->UpdateSlot(itemData, index, amount);
-			SearchCombinableSlot(itemData->ItemType, index);
-		}
-	}
 }
 
 void UCPP_InventoryWidget::OnSlotDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation, const int32 index)

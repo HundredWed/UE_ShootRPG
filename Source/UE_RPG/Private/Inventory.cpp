@@ -37,8 +37,8 @@ void UInventory::BeginPlay()
 		InventoryWidget->UpdateWeightText(0);
 		InventoryWidget->GenerateSlotWidget(InventoryRow);
 
-		AddGold(CurrentGold);
-		AddWeight(CurrentWeight);
+
+		ApplyInventoryData();
 	}
 	else
 	{
@@ -251,6 +251,18 @@ void UInventory::UpdateEquipSlot(const FItemInfoTable* itemData, const FEquipmen
 	}
 
 	InventoryWidget->UpdateEquipmentInventory(itemData, equipmentData);
+}
+
+void UInventory::ApplyInventoryData()
+{
+	for (int32 index = 0; index < CachedSlotsArray.Num(); index++)
+	{
+		UpdateInventory(index, CachedSlotsArray[index].ItemID, CachedSlotsArray[index].ItemAmount);
+	}
+
+	CachedSlotsArray.Empty();	
+	InventoryWidget->UpdateGoldText(CurrentGold);
+	InventoryWidget->UpdateWeightText(CurrentWeight);
 }
 
 void UInventory::SwapSlot(const int32 fromIndex, const int32 toIndex)
@@ -805,7 +817,7 @@ void UInventory::GatherSaveData(UCPP_SaveDataSubsystem* saveSystem)
 void UInventory::ApplySaveData(UCPP_SaveDataSubsystem* saveSystem)
 {
 	FInventoryTotalData loadData = saveSystem->GetInventoryData();
-	SlotsArray = loadData.SlotsArrayData;
+	CachedSlotsArray = loadData.SlotsArrayData;
 	EquipmentSlots = loadData.EquipmentSlotData;
 	CurrentGold = loadData.Gold;
 	CurrentWeight = loadData.Weight;
