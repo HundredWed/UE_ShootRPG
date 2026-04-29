@@ -86,7 +86,7 @@ bool UCPP_AkashicSubsystem::SpawnWeaponAsync(FName itemID, FVector spawnLocation
         assetsToLoad.AddUnique(weaponInfo->BeamParticle.ToSoftObjectPath());
     if (!weaponInfo->EquipSound.IsNull())
         assetsToLoad.AddUnique(weaponInfo->EquipSound.ToSoftObjectPath());
-    if (weaponInfo->AttackSound.IsNull())
+    if (!weaponInfo->AttackSound.IsNull())
         assetsToLoad.AddUnique(weaponInfo->AttackSound.ToSoftObjectPath());
 
 
