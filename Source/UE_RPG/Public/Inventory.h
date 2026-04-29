@@ -112,6 +112,9 @@ private:
 	void RemoveQuestItem(const FName& itemId, const int32 amount);
 	void RequestTakeOffEquipment(EEquipmentType type);
 	void UpdateEquipSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData);
+
+	void ApplyInventoryData();
+	//void AddItem();
 	
 private:
 
@@ -135,4 +138,6 @@ private:
 
 	/**for FindCombinableSlot function*/
 	TArray<bool> IsConnected;
+
+	TArray<FInventorySlot> CachedSlotsArray;
 };
