@@ -8,6 +8,7 @@
 
 
 class ACPP_WeaponBase;
+class ACPP_DamageActor;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UE_RPG_API UCPP_WeaponManager : public USceneComponent
@@ -27,14 +28,18 @@ public:
 
 	void ClearWeaponGarbage();
 
-protected:
+private:
 
 	UPROPERTY(EditAnywhere, Category = "EquipManagerInfo")
-		float ClearWeaponTick = 10.f;
+	float ClearWeaponTick = 10.f;
 
 
 	UPROPERTY()
 	TMap<FName, ACPP_WeaponBase*> WeaponStorage;
+
+	/**데미지 ui*/
+	UPROPERTY(EditAnywhere, Category = "WeaponInfo", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<ACPP_DamageActor> DamageUIActorClass;
 
 	UPROPERTY()
 	ACPP_WeaponBase* PrevWeapon = nullptr;

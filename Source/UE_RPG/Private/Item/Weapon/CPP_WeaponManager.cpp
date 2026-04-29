@@ -61,6 +61,7 @@ void UCPP_WeaponManager::TakeOffWeapon()
 void UCPP_WeaponManager::OnWeaponReady(ACPP_WeaponBase* weapon)
 {
 	weapon->SetOwner(GetOwner());
+	weapon->StoreDamageUI(DamageUIActorClass);
 	ACharacter* player = Cast<ACharacter>(GetOwner());
 	weapon->Equip(player->GetMesh(), "weapon_socket_back");
 	WeaponStorage.Add(weapon->ItemInfoID, weapon);

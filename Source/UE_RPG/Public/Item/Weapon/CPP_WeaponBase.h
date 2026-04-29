@@ -10,12 +10,7 @@
 
 class UWeaponAbilityBase;
 class USoundCue;
-
-//struct FWeaponInfo
-//{
-//	/**weapon states*/
-//	float FinalDamage = 0;
-//};
+class ACPP_DamageActor;
 
 UCLASS()
 class UE_RPG_API ACPP_WeaponBase : public AActor
@@ -32,16 +27,15 @@ public:
 	UPROPERTY(EditAnywhere, Category = "WeaponInfo")
 	FName ItemInfoID;
 
-	/**widget*/
-	UPROPERTY(EditAnywhere, Category = "WeaponInfo")
-	TSubclassOf<class ACPP_DamageActor> DamageUIActorClass;
 	UPROPERTY()
-	TArray<class ACPP_DamageActor*> DamageUIActors;
+	TArray<ACPP_DamageActor*> DamageUIActors;
 	
 	int32 DamageUI = 0;
 
 	/**weapon states*/
 	float FinalDamage = 0;
+
+	void StoreDamageUI(TSubclassOf<ACPP_DamageActor> damageUIActorClass);
 
 public:
 	//virtual void Tick(float DeltaTime) override;
@@ -57,6 +51,5 @@ protected:
 
 	/**damage ui*/
 	void SpawnDamageUI(const FVector pos, float damage = 0.f);
-	void StoreDamageUI();
 	class ACPP_DamageActor* GetDamageActor();
 };

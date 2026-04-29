@@ -21,7 +21,6 @@ void ACPP_WeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 	//InitWeaponInfo();
-	StoreDamageUI();
 }
 
 void ACPP_WeaponBase::SpawnDamageUI(const FVector pos, float damage)
@@ -30,16 +29,16 @@ void ACPP_WeaponBase::SpawnDamageUI(const FVector pos, float damage)
 	damageActor->UpdateDamageActor(pos, damage);
 }
 
-void ACPP_WeaponBase::StoreDamageUI()
+void ACPP_WeaponBase::StoreDamageUI(TSubclassOf<ACPP_DamageActor> damageUIActorClass)
 {
 	UWorld* world = GetWorld();
 	const int32 amount = 50;
 
-	if (IsValid(world) && IsValid(DamageUIActorClass))
+	if (IsValid(world) && IsValid(damageUIActorClass))
 	{
 		for (int32 i = 0; i < amount; i++)
 		{
-			ACPP_DamageActor* damageActor = world->SpawnActor<ACPP_DamageActor>(DamageUIActorClass);
+			ACPP_DamageActor* damageActor = world->SpawnActor<ACPP_DamageActor>(damageUIActorClass);
 			DamageUIActors.Push(damageActor);
 		}
 	}
