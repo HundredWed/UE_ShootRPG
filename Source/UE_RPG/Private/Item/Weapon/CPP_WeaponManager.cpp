@@ -2,6 +2,7 @@
 #include "Item/Weapon/CPP_WeaponBase.h"
 #include "GameFramework/Character.h"
 #include "Systems/CPP_AkashicSubsystem.h"
+#include "Systems/CPP_SaveDataSubsystem.h"
 
 UCPP_WeaponManager::UCPP_WeaponManager()
 {
@@ -15,7 +16,11 @@ void UCPP_WeaponManager::BeginPlay()
 
 bool UCPP_WeaponManager::EquipWeapon(const FName& weaponId)
 {
-	
+	if (weaponId.IsNone())
+	{
+		return false;
+	}
+
 	if (WeaponStorage.Contains(weaponId))
 	{
 		PrevWeapon = CurrentWeapon;
@@ -25,7 +30,6 @@ bool UCPP_WeaponManager::EquipWeapon(const FName& weaponId)
 		ACPP_WeaponBase* weapon = *(WeaponStorage.Find(weaponId));
 		weapon->SetActorHiddenInGame(false);
 		CurrentWeapon = weapon;
-
 		return true;
 	}
 	else
@@ -91,5 +95,4 @@ void UCPP_WeaponManager::ClearWeaponGarbage()
 
 	bClearWeaponTick = false;
 }
-
 

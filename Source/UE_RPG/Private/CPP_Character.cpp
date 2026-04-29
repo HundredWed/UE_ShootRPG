@@ -340,7 +340,6 @@ void ACPP_Character::Attack(const FInputActionValue& Value)
 	if (bTrigger)
 	{
 		AttackWeapon();
-		CharacterState = ECharacterStateTypes::Aim;
 	}
 }
 
@@ -630,7 +629,7 @@ bool ACPP_Character::SetEquipWeapon(const FName& itemID)
 void ACPP_Character::TakeOffWeapon()
 {
 	WeaponManager->TakeOffWeapon();
-	SetStateUnEquipped();
+	CharacterState = ECharacterStateTypes::Normal;
 }
 
 bool ACPP_Character::CanAttackState()
