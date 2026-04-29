@@ -110,7 +110,7 @@ private:
 	friend class UCPP_EquipmentInventory;
 	
 	void RemoveQuestItem(const FName& itemId, const int32 amount);
-	void RequestTakeOffWeapon();
+	void RequestTakeOffEquipment(EEquipmentType type);
 	void UpdateEquipSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData);
 	
 private:

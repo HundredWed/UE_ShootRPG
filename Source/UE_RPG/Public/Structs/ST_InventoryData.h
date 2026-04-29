@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Item/Weapon/EquipmentData.h"
 #include "ST_InventoryData.generated.h"
 
 
@@ -23,4 +24,21 @@ struct FEquipmentSlot
 
 	UPROPERTY()
 	FName EquipmentID = NAME_None;
+};
+
+USTRUCT(BlueprintType)
+struct FInventoryTotalData
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY()
+	TArray<FInventorySlot> SlotsArrayData;
+	UPROPERTY()
+	TMap<EEquipmentType, FEquipmentSlot> EquipmentSlotData;
+	UPROPERTY()
+	float Weight = 0.f;
+	UPROPERTY()
+	int32 Gold = 0;
 };

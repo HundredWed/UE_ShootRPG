@@ -245,11 +245,9 @@ void UCPP_InventoryWidget::SeSlotInfo(UCPP_Slot* slot, const int32 index)
 	}
 
 	const FName slotItemID = InventoryRef->GetSlotInfoIndex(index).ItemID;
-	if (slotItemID.IsNone())
-	{
-		slot->InitSlotInfo(index);
-	}
-	else
+	slot->InitSlotInfo(index);
+
+	if (!slotItemID.IsNone())
 	{
 		const FItemInfoTable* itemData = InventoryRef->RequestItemData(slotItemID);
 
@@ -263,7 +261,7 @@ void UCPP_InventoryWidget::SeSlotInfo(UCPP_Slot* slot, const int32 index)
 			const int32 amount = InventoryRef->GetSlotInfoIndex(index).ItemAmount;
 			slot->UpdateSlot(itemData, index, amount);
 			SearchCombinableSlot(itemData->ItemType, index);
-		}		
+		}
 	}
 }
 

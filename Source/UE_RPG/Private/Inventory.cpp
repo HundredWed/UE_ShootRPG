@@ -30,7 +30,6 @@ void UInventory::BeginPlay()
 		InventoryRow = PlayerRef->GetInventoryRowSize();
 		MaxWeight = PlayerRef->GetPlayerWeightInfo();
 
-
 		//임시
 		ACPP_Controller* controller = Cast<ACPP_Controller>(PlayerRef->GetController());
 		InventoryWidget = controller->GetInventoryWidget();
@@ -38,6 +37,8 @@ void UInventory::BeginPlay()
 		InventoryWidget->UpdateWeightText(0);
 		InventoryWidget->GenerateSlotWidget(InventoryRow);
 
+		AddGold(CurrentGold);
+		AddWeight(CurrentWeight);
 	}
 	else
 	{
@@ -222,11 +223,16 @@ void UInventory::RemoveQuestItem(const FName& itemId, const int32 amount)
 	}
 }
 
-void UInventory::RequestTakeOffWeapon()
+void UInventory::RequestTakeOffEquipment(EEquipmentType type)
 {
 	if (IsValid(PlayerRef))
 	{
 		PlayerRef->TakeOffWeapon();
+
+		if (FEquipmentSlot* slot = EquipmentSlots.Find(type))
+		{
+			slot->EquipmentID = NAME_None; 
+		}
 	}
 }
 
@@ -410,7 +416,7 @@ int32 UInventory::AddGold(const int32 amount)
 	}
 	else
 	{
-		CurrentGold = FMath::Max(newTotal, MaxGold);
+		CurrentGold = FMath::Min(newTotal, MaxGold);
 		InventoryWidget->UpdateGoldText(CurrentGold);
 
 		const int32 allStored = 0;
@@ -696,8 +702,7 @@ bool UInventory::UnEquipWeaponAndAddToIndex(EEquipmentType equipmentType, const 
 		UpdateInventory(index, currentEquipmentID, 1);
 
 
-		RequestTakeOffWeapon();
-		slot->EquipmentID = NAME_None;
+		RequestTakeOffEquipment(equipmentType);
 
 		return true;
 	}	
@@ -788,14 +793,22 @@ FEquipmentInfoTable* UInventory::RequestEquipmentData(const FName& itemId)
 
 void UInventory::GatherSaveData(UCPP_SaveDataSubsystem* saveSystem)
 {
-	saveSystem->UpdateInventorySlotData(SlotsArray);
-	saveSystem->UpdateEquipmentSlotData(EquipmentSlots);
+	FInventoryTotalData saveData;
+	saveData.SlotsArrayData = SlotsArray;
+	saveData.EquipmentSlotData = EquipmentSlots;
+	saveData.Gold = CurrentGold;
+	saveData.Weight = CurrentWeight;
+
+	saveSystem->UpdateInventoryData(saveData);
 }
 
 void UInventory::ApplySaveData(UCPP_SaveDataSubsystem* saveSystem)
 {
-	SlotsArray = saveSystem->GetInventorySlotData();
-	EquipmentSlots = saveSystem->GetEquipmentSlotData();
+	FInventoryTotalData loadData = saveSystem->GetInventoryData();
+	SlotsArray = loadData.SlotsArrayData;
+	EquipmentSlots = loadData.EquipmentSlotData;
+	CurrentGold = loadData.Gold;
+	CurrentWeight = loadData.Weight;
 }
 
 void UInventory::ShowInventory()

@@ -51,21 +51,23 @@ public:
 	void ShowCursor();
 	void HideCursor(); 
 
+	void UpdatePlayerWidget();
+
 	//임시. 리펙토링 필수
 	UCPP_InventoryWidget* GetInventoryWidget(); 
 
 protected:
 
 	virtual void SetupInputComponent() override;
+	virtual void OnPossess(APawn* aPawn) override;
 
 private:
+
 	UFUNCTION()
 	void InteractEvent();
 
 	UFUNCTION()
 	void SetToDefaultInteractionState();
-
-	void UpdatePlayerWidget();
 
 	void OnSaveBroadcastReceived();
 private:
@@ -86,7 +88,7 @@ private:
 	UCPP_SaveDataSubsystem* SaveSubsystem;
 
 	UPROPERTY()
-	TArray<ICPP_SavableInterface*> CachedSavableInterfaces;
+	TArray<TScriptInterface<ICPP_SavableInterface>> CachedSavableInterfaces;
 
 	/**Input*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Config", meta = (AllowPrivateAccess = "true"))

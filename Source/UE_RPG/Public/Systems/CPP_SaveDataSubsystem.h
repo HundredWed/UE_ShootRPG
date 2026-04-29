@@ -23,13 +23,11 @@ public:
 	//플레이어
 	const FCharacterStats& GetCharacterStatData() const { return TotalSaveData.CharacterStatData; }
 	const FTransform& GetCharacterTransform() const { return TotalSaveData.PlayerTransform; }
-	const TArray<FInventorySlot>& GetInventorySlotData() const { return TotalSaveData.SlotsArrayData; }
-	const TMap<EEquipmentType, FEquipmentSlot>& GetEquipmentSlotData() const { return TotalSaveData.EquipmentSlotData; }
+	const FInventoryTotalData& GetInventoryData() const { return TotalSaveData.InventoryTotalData; }
 
 	void UpdateCharacterStatData(const FCharacterStats& newStats) { TotalSaveData.CharacterStatData = newStats; }
 	void UpdateCharacterTransform(const FTransform& newTransform) { TotalSaveData.PlayerTransform = newTransform; }
-	void UpdateInventorySlotData(const TArray<FInventorySlot>& newSlots) { TotalSaveData.SlotsArrayData = newSlots; }
-	void UpdateEquipmentSlotData(const TMap<EEquipmentType, FEquipmentSlot>& newSlots) { TotalSaveData.EquipmentSlotData = newSlots; }
+	void UpdateInventoryData(const FInventoryTotalData& data) { TotalSaveData.InventoryTotalData = data; }
 
 
 	//퀘스트
@@ -43,13 +41,16 @@ public:
 	void SaveGameDataAsync();
 	void LoadGameData();
 
-	bool IsDataReady() { return bIsDataLoadedFromDisk; }
-
 	FOnGatherSaveDataDelegate OnGatherSaveData;
 	FOnDataLoadedDelegate OnDataLoaded;
 
 private:
 
+	void DefaultSaveSetting();
+	FString SwitchSlot();
+	void SaveMetaData(const FString& SlotName, const int32 UserIndex, bool bSuccess);
+
+	bool TryLoadFromSlot(const FString& targetSlot);
 
 private:
 
@@ -59,5 +60,4 @@ private:
 	FTimerHandle AutoSaveTimerHandle;
 
 	FString CurrentSlotName = "";
-	bool bIsDataLoadedFromDisk = false;
 };

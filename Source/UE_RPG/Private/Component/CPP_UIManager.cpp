@@ -132,5 +132,10 @@ void UCPP_UIManager::BeginPlay()
 		UCPP_DialogueSystem* dialogue = GI->GetSubsystem<UCPP_DialogueSystem>();
 		dialogue->OnQuitDialogue.BindUObject(this, &UCPP_UIManager::SwitchToPlayerWidget);
 	}	
+
+	if (PlayerController)
+	{
+		PlayerController->UpdatePlayerWidget();
+	}
 }
 

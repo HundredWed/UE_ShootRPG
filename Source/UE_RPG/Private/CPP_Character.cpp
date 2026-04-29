@@ -109,6 +109,20 @@ void ACPP_Character::Tick(float DeltaTime)
 	CalculateCrosshairSpread(DeltaTime);
 }
 
+void ACPP_Character::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	TMap<EEquipmentType, FEquipmentSlot> slots = GameInventory->GetEquipmentSlots();
+	if (slots.IsEmpty())return;
+
+	if (FEquipmentSlot* slotData = slots.Find(EEquipmentType::Weapon))
+	{
+		WeaponManager->EquipWeapon(slotData->EquipmentID);
+		CharacterState = ECharacterStateTypes::UnEquipped;
+	}	
+}
+
 void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);

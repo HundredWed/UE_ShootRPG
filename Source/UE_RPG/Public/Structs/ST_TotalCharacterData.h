@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "CharacterStates.h"
-#include "Item/Weapon/EquipmentData.h"
 #include "Structs/ST_InventoryData.h"
 #include "Structs/ST_Quest.h"
 #include "ST_TotalCharacterData.generated.h"
@@ -23,9 +22,7 @@ public:
 
 	//인벤토리
 	UPROPERTY()
-	TArray<FInventorySlot> SlotsArrayData;
-	UPROPERTY()
-	TMap<EEquipmentType, FEquipmentSlot> EquipmentSlotData;
+	FInventoryTotalData InventoryTotalData;
 
 	//퀘스트
 	UPROPERTY()

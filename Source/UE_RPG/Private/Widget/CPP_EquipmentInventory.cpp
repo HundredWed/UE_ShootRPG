@@ -78,7 +78,7 @@ void UCPP_EquipmentInventory::OnSlotMouseButtonDown(const FGeometry& InGeometry,
 		if (const FEquipmentInfoTable* equipmentData = InventoryRef->RequestEquipmentData(equipmentID))
 		{
 			InventoryRef->AddItem(equipmentID);
-			InventoryRef->RequestTakeOffWeapon();
+			InventoryRef->RequestTakeOffEquipment(equipmentData->EquipmentType);
 			SetTotalState(equipmentData, true);
 		}		
 	}
@@ -146,7 +146,13 @@ void UCPP_EquipmentInventory::InitEquipmentInventory(TWeakObjectPtr<UInventory> 
 		{
 			if (TObjectPtr<UCPP_EquipSlot>* foundSlot = EquipSlots.Find(slot.Key))
 			{
-				(*foundSlot)->EquipmentID = slot.Value.EquipmentID;
+				const FName& id = slot.Value.EquipmentID;
+
+				(*foundSlot)->EquipmentID = id;
+				const FItemInfoTable* itemData = InventoryRef->RequestItemData(id);
+				const FEquipmentInfoTable* equipmentData = InventoryRef->RequestEquipmentData(id);
+				(*foundSlot)->UpdateEquipmentSlot(itemData, equipmentData);
+				SetTotalState(equipmentData);
 			}
 		}
 		

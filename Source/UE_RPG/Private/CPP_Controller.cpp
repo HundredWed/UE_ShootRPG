@@ -27,38 +27,8 @@ void ACPP_Controller::BeginPlay()
 
     SetToDefaultInteractionState();
 
-    UpdatePlayerWidget();
-
-    UGameInstance* GI = GetGameInstance();
-    if (!IsValid(GI))
-    {
-        return;
-    }
-
-    TArray<UActorComponent*> comps = GetComponentsByInterface(UCPP_SavableInterface::StaticClass());
-    for (UActorComponent* comp : comps)
-    {
-        ICPP_SavableInterface* savable = Cast<ICPP_SavableInterface>(comp);
-        if (savable)
-        {
-            CachedSavableInterfaces.Add(savable);
-        }
-    }
-
-    DialogueSystem = GI->GetSubsystem<UCPP_DialogueSystem>();
-    check(DialogueSystem);
-
-    SaveSubsystem = GetGameInstance()->GetSubsystem<UCPP_SaveDataSubsystem>();
-    check(SaveSubsystem);
-    SaveSubsystem->OnGatherSaveData.AddUObject(this, &ACPP_Controller::OnSaveBroadcastReceived);
-
-    if (SaveSubsystem->IsDataReady())
-    {
-        for (ICPP_SavableInterface* SavableComp : CachedSavableInterfaces)
-        {
-            SavableComp->ApplySaveData(SaveSubsystem);
-        }
-    }
+    DialogueSystem = GetGameInstance()->GetSubsystem<UCPP_DialogueSystem>();
+    check(DialogueSystem);   
 }
 
 void ACPP_Controller::InteractEvent()
@@ -90,9 +60,12 @@ void ACPP_Controller::UpdatePlayerWidget()
 
 void ACPP_Controller::OnSaveBroadcastReceived()
 {
-    for (ICPP_SavableInterface* savable : CachedSavableInterfaces)
+    for (auto& savable : CachedSavableInterfaces)
     {
-        savable->GatherSaveData(SaveSubsystem);
+        if (savable)
+        {
+            savable->GatherSaveData(SaveSubsystem);
+        }
     }
 }
 
@@ -130,6 +103,45 @@ void ACPP_Controller::SetupInputComponent()
     {
         EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ACPP_Controller::InteractEvent);
     }
+}
+
+void ACPP_Controller::OnPossess(APawn* aPawn)
+{
+    UGameInstance* GI = GetGameInstance();
+    if (!IsValid(GI))
+    {
+        return;
+    }
+
+    TArray<UActorComponent*> comps = aPawn->GetComponentsByInterface(UCPP_SavableInterface::StaticClass());
+
+    CachedSavableInterfaces.Empty();
+    for (UActorComponent* comp : comps)
+    {
+        if (comp->Implements<UCPP_SavableInterface>())
+        {
+            CachedSavableInterfaces.Add(comp);
+        }
+    }
+
+    SaveSubsystem = GI->GetSubsystem<UCPP_SaveDataSubsystem>();
+    check(SaveSubsystem);
+
+    SaveSubsystem->OnGatherSaveData.RemoveAll(this);
+    SaveSubsystem->OnGatherSaveData.AddUObject(this, &ACPP_Controller::OnSaveBroadcastReceived);
+
+    for (auto& SavableComp : CachedSavableInterfaces)
+    {
+        if (SavableComp)
+        {
+            SavableComp->ApplySaveData(SaveSubsystem);
+        }        
+    }
+
+    Super::OnPossess(aPawn);
+
+    //GetPawn() 유효구간
+    UpdatePlayerWidget();
 }
 
 void ACPP_Controller::SetNPCInteract(const FName& npcID)
