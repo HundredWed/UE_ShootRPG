@@ -11,7 +11,7 @@ class ACPP_WeaponBase;
 class ACPP_DamageActor;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class UE_RPG_API UCPP_WeaponManager : public USceneComponent
+class UE_RPG_API UCPP_WeaponManager : public UActorComponent
 {
 	GENERATED_BODY()
 
