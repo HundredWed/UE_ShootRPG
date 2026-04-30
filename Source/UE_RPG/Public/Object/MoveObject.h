@@ -1,4 +1,4 @@
-
+﻿
 
 #pragma once
 
@@ -15,6 +15,9 @@ public:
 	
 	AMoveObject();
 	void AttachKey();
+
+	UFUNCTION(BlueprintCallable)
+	void StartDown();
 
 protected:
 	

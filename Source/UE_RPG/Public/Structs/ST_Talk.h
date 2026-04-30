@@ -18,7 +18,10 @@ enum class EDialogueEventType : uint8
 	ShowSpecificUI UMETA(DisplayName = "Show UI (특정 UI 출력)"),
 
 	/** 몬스터 스폰 또는 시네마틱 재생 등 */
-	TriggerCinematic UMETA(DisplayName = "Play Cinematic (시네마틱 재생)")
+	TriggerCinematic UMETA(DisplayName = "Play Cinematic (시네마틱 재생)"),
+
+	/** 문이 열리는 등의 기믹 이벤트 */
+	TriggerGimmick UMETA(DisplayName = "Gimmick (기믹 이벤트)")
 };
 
 
@@ -41,4 +44,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	EDialogueEventType DialogueEventType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "DialogueEventType == EDialogueEventType::TriggerGimmick", EditConditionHides))
+	FName TriggerEventID = NAME_None;
 };

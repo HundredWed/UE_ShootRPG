@@ -267,7 +267,7 @@ bool UCPP_DialogueWidget::HasAvailableQuest(const FNPCDialogue& npcInfo)
 	return !hasQuest;
 }
 
-void UCPP_DialogueWidget::UpdateDialogueEvent(const FText& text, EDialogueEventType dialogueEventType)
+void UCPP_DialogueWidget::UpdateDialogueEvent(const FText& text, EDialogueEventType dialogueEventType, const FName& eventId)
 {
 	
 	DialogueText->SetText(text);
@@ -284,6 +284,9 @@ void UCPP_DialogueWidget::UpdateDialogueEvent(const FText& text, EDialogueEventT
 	case EDialogueEventType::ShowSpecificUI:
 		break;
 	case EDialogueEventType::TriggerCinematic:
+		break;
+	case EDialogueEventType::TriggerGimmick:
+		DialogueSystem->OnTriggeredGimmickEvent(eventId);
 		break;
 	default:
 		break;

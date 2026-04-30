@@ -125,6 +125,14 @@ void UCPP_DialogueSystem::SelectedQuest(const FQuest& quest)
 	PrintDialogue();
 }
 
+void UCPP_DialogueSystem::OnTriggeredGimmickEvent(const FName& eventID)
+{
+	if (eventID != NAME_None)
+	{
+		OnDialogueEventTriggered.Broadcast(eventID);
+	}
+}
+
 void UCPP_DialogueSystem::RevertDialogue()
 {
 	InitDialogue(DialogueOwnerName);
@@ -150,7 +158,7 @@ void UCPP_DialogueSystem::PrintDialogueJustTalk()
 			return;
 		}
 
-		UpdateDialogueText.Execute(talk.Dialogue, talk.DialogueEventType);
+		UpdateDialogueText.Execute(talk.Dialogue, talk.DialogueEventType, talk.TriggerEventID);
 
 		if (talk.Answers.Num() > 0)
 		{
@@ -180,7 +188,7 @@ void UCPP_DialogueSystem::PrintDialogueQuest()
 			return;
 		}
 
-		UpdateDialogueText.Execute(quest.Dialogue, quest.DialogueEventType);
+		UpdateDialogueText.Execute(quest.Dialogue, quest.DialogueEventType, quest.TriggerEventID);
 
 		if (quest.Answers.Num() > 0)
 		{

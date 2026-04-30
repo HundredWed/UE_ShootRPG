@@ -32,7 +32,7 @@ public:
 	void InitDialogueWidget();
 	
 	UFUNCTION()
-	void UpdateDialogueEvent(const FText& text, EDialogueEventType dialogueEventType);
+	void UpdateDialogueEvent(const FText& text, EDialogueEventType dialogueEventType, const FName& eventId);
 	UFUNCTION()
 	void UpdateAnswerBox(TArray<FAnswerDialogue> answers, bool questAnswer = false);
 

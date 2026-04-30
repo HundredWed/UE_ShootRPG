@@ -10,10 +10,12 @@
 
 class UCPP_CustomInstance;
 
-DECLARE_DELEGATE_TwoParams(FUpdateDialogueTextDelegate, const FText&, EDialogueEventType);
+DECLARE_DELEGATE_ThreeParams(FUpdateDialogueTextDelegate, const FText&, EDialogueEventType, const FName&);
 DECLARE_DELEGATE_TwoParams(FOnUpdateAnswerBoxDelegate, TArray<FAnswerDialogue>, bool);
 DECLARE_DELEGATE(FOnQuitDialogueDelegate);
 DECLARE_DELEGATE(FEndDialogueDelegate);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDialogueEventTriggeredSignature, const FName&, EventID);
 
 UCLASS(Blueprintable, BlueprintType)
 class UE_RPG_API UCPP_DialogueSystem : public UGameInstanceSubsystem
@@ -31,6 +33,8 @@ public:
 	void SelectedAnswer(const FName& rowName);
 	void SelectedQuest(const FQuest& quest);
 
+	void OnTriggeredGimmickEvent(const FName& eventID);
+
 	//DataTable
 	FTalkDialogue GetTalkStruct();
 	FTalkDialogue GetQuestDialogueStruct();
@@ -41,6 +45,8 @@ public:
 	FOnUpdateAnswerBoxDelegate OnUpdateAnswerBox;
 	FOnQuitDialogueDelegate OnQuitDialogue;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnDialogueEventTriggeredSignature OnDialogueEventTriggered;
 
 private:
 

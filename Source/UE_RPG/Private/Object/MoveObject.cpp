@@ -1,4 +1,4 @@
-#include "Object/MoveObject.h"
+﻿#include "Object/MoveObject.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "CPP_Character.h"
@@ -61,6 +61,11 @@ void AMoveObject::AttachKey()
 		Mover->MoveDown();
 		moving = true;
 	}
+}
+
+void AMoveObject::StartDown()
+{
+	Mover->MoveDown();
 }
 
 AActor* AMoveObject::GetAcceptableActor() const
