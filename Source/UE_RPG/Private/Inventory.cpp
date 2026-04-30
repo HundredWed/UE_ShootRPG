@@ -31,7 +31,7 @@ void UInventory::BeginPlay()
 		MaxWeight = PlayerRef->GetPlayerWeightInfo();
 
 		//임시
-		ACPP_Controller* controller = Cast<ACPP_Controller>(PlayerRef->GetController());
+		ACPP_Controller* controller = Cast<ACPP_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 		InventoryWidget = controller->GetInventoryWidget();
 		InventoryWidget->UpdateWeightMaxAmount(MaxWeight);
 		InventoryWidget->UpdateWeightText(0);

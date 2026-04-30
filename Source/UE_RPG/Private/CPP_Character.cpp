@@ -162,6 +162,11 @@ float ACPP_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	if (!StatComponent->DecreaseHP(DamageAmount))
 	{
 		CharacterState = ECharacterStateTypes::Death;
+
+		if (ACPP_Controller* PC = Cast<ACPP_Controller>(GetController()))
+		{
+			PC->HandlePlayerDeath();
+		}
 	}
 	return DamageAmount;
 }

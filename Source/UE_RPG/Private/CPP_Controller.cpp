@@ -5,6 +5,9 @@
 #include "GameFramework/HUD.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "GameFramework/GameModeBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerStart.h"
 
 #include "Component/CPP_UIManager.h"
 #include "Systems/CPP_DialogueSystem.h"
@@ -81,10 +84,20 @@ void ACPP_Controller::ChangeInteractionState(EPlayerIputMappingState newState)
     }
 
     Subsystem->ClearAllMappings();
-    Subsystem->AddMappingContext(InputMappingContexts[CurrentInteractionState], 0);
+
+    if (CurrentInteractionState != EPlayerIputMappingState::None)
+    {
+        if (InputMappingContexts.Contains(CurrentInteractionState))
+        {
+            Subsystem->AddMappingContext(InputMappingContexts[CurrentInteractionState], 0);
+        }
+    }
 
     switch (CurrentInteractionState)
     {
+    case EPlayerIputMappingState::None:
+        HideCursor();
+        break;
     case EPlayerIputMappingState::Default:
         bInteractEvent = false;
         HideCursor();
@@ -142,6 +155,39 @@ void ACPP_Controller::OnPossess(APawn* aPawn)
 
     //GetPawn() 유효구간
     UpdatePlayerWidget();
+}
+
+void ACPP_Controller::HandlePlayerDeath()
+{
+    ChangeInteractionState(EPlayerIputMappingState::None);
+    GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &ACPP_Controller::RespawnPlayer, RespawnDelay, false);
+}
+
+void ACPP_Controller::RespawnPlayer()
+{
+    APawn* DeadPawn = GetPawn();
+    if (DeadPawn)
+    {
+        UnPossess();
+        DeadPawn->Destroy();
+    }
+
+    AActor* spawnPoint = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass());
+    FVector spawnLocation = spawnPoint ? spawnPoint->GetActorLocation() : FVector(0, 0, 100);
+    FRotator spawnRotation = spawnPoint ? spawnPoint->GetActorRotation() : FRotator::ZeroRotator;
+
+    AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
+    UClass* characterClass = GameMode ? GameMode->GetDefaultPawnClassForController(this) : nullptr;
+    if (characterClass)
+    {
+        APawn* NewPawn = GetWorld()->SpawnActor<APawn>(characterClass, spawnLocation, spawnRotation);
+
+        if (NewPawn)
+        {
+            Possess(NewPawn);
+            ChangeInteractionState(EPlayerIputMappingState::Default);
+        }
+    }
 }
 
 void ACPP_Controller::SetNPCInteract(const FName& npcID)

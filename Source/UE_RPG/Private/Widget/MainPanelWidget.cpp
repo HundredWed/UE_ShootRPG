@@ -23,6 +23,8 @@ void UMainPanelWidget::BindCharacterStat(UCPP_StatComponent* statComponent)
 {
 	statComponent->OnUpdateCharacterState.BindUObject(this, &UMainPanelWidget::InitState);
 	statComponent->OnUpdateHP.AddUObject(this, &UMainPanelWidget::UpdateHealthBarPercent);
+
+	InitState(FCharacterStats());
 }
 
 void UMainPanelWidget::InitState(const FCharacterStats& stat)

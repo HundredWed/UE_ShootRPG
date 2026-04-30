@@ -56,10 +56,15 @@ public:
 	//임시. 리펙토링 필수
 	UCPP_InventoryWidget* GetInventoryWidget(); 
 
+	void HandlePlayerDeath();
+
 protected:
 
 	virtual void SetupInputComponent() override;
 	virtual void OnPossess(APawn* aPawn) override;
+
+
+	void RespawnPlayer();
 
 private:
 
@@ -93,6 +98,12 @@ private:
 	/**Input*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Config", meta = (AllowPrivateAccess = "true"))
 	UInputAction* InteractAction;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	float RespawnDelay = 3.0f;
+
+	FTimerHandle RespawnTimerHandle;
 
 
 	EPlayerIputMappingState CurrentInteractionState = EPlayerIputMappingState::Default;
