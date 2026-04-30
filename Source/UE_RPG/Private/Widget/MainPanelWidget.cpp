@@ -24,6 +24,7 @@ void UMainPanelWidget::BindCharacterStat(UCPP_StatComponent* statComponent)
 	statComponent->OnUpdateCharacterState.BindUObject(this, &UMainPanelWidget::InitState);
 	statComponent->OnUpdateHP.AddUObject(this, &UMainPanelWidget::UpdateHealthBarPercent);
 
+	//플레이어 생성시 한번만 콜되니 여기서 초기화
 	InitState(FCharacterStats());
 }
 

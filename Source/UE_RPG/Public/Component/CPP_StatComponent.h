@@ -37,6 +37,8 @@ public:
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void InitCharacterStats();
+
 	bool IncreaseHP(const float value);
 	bool DecreaseHP(const float value);
 

@@ -11,15 +11,20 @@ void UCPP_StatComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (OnUpdateCharacterState.IsBound())
-	{
-		OnUpdateCharacterState.Execute(CharacterStats);
-	}
+	//InitCharacterStats();
 }
 
 void UCPP_StatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UCPP_StatComponent::InitCharacterStats()
+{
+	if (OnUpdateCharacterState.IsBound())
+	{
+		OnUpdateCharacterState.Execute(CharacterStats);
+	}
 }
 
 bool UCPP_StatComponent::IncreaseHP(const float value)
