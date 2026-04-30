@@ -111,23 +111,34 @@ TArray<FQuest> UCPP_QuestSubsystem::GetQuestList()
 		if (CheckClear(quest.Value.QuestID))
 			continue;
 
-		//선행퀘스트 완료 유무
-		if (!quest.Value.PrevQuestID.IsNone() && CheckClear(quest.Value.PrevQuestID))
+		//선행퀘스트 유무
+		if (!quest.Value.PrevQuestID.IsNone())
 		{
-			questLists.Add(CheckProgress(quest.Value.QuestID));
-			continue;
-		}
-
-		FQuest progressQuest = CheckProgress(quest.Value.QuestID);
-
-		if (progressQuest.QuestID.IsNone())
-		{
-			questLists.Add(quest.Value);
+			if (CheckClear(quest.Value.PrevQuestID))
+			{
+				FQuest progressQuest = CheckProgress(quest.Value.QuestID);
+				if (progressQuest.QuestID.IsNone())
+				{
+					questLists.Add(quest.Value);
+				}
+				else
+				{
+					questLists.Add(progressQuest);
+				}
+			}
 		}
 		else
 		{
-			questLists.Add(progressQuest);
-		}
+			FQuest progressQuest = CheckProgress(quest.Value.QuestID);
+			if (progressQuest.QuestID.IsNone())
+			{
+				questLists.Add(quest.Value);
+			}
+			else
+			{
+				questLists.Add(progressQuest);
+			}
+		}		
 	}
 
 

@@ -75,6 +75,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "NPC Info | Target Info")
 		class ACPP_Character* Target = nullptr;
 
+	UPROPERTY(EditAnyWhere, Category = "NPC Info")
+		FName NPCID;
+
 	UPROPERTY()
 		class ACPP_NPCcontroller* NPCController;
 
@@ -115,12 +118,12 @@ protected:
 	void SetControlOwner(ANonPlayerCharacterBase* owner);
 	
 	UFUNCTION()
-		void MoveDown();
+	void MoveDown();
 	UFUNCTION()
-		void MoveUp();
+	void MoveUp();
 
+	
 private:
 
-	UPROPERTY(EditDefaultsOnly, Category = "NPC Info", meta = (AllowPrivateAccess = "true"))
-	FName NPCID;
+	
 };

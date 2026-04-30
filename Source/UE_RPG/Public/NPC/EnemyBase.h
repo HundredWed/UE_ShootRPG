@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -65,6 +65,7 @@ public:
 	UFUNCTION()
 		void FinishMoveUpEvent();
 
+	virtual void RequestInteract(AActor* interactor) override;
 protected:
 
 	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
@@ -80,7 +81,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		UDataTable* EnemyDataTable;
 
-	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 		FName EnemyID;/**same name*/
 
 	UPROPERTY(VisibleAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))

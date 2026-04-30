@@ -176,10 +176,10 @@ bool UInventory::RemoveItemAtIndex(const int32 index, const int32 removeAmount)
 	{
 		const FItemInfoTable* itemData = RequestItemData(SlotsArray[index].ItemID);
 
-		if (itemData->ItemType == EItemCategory::EIC_QuestItems)
+		/*if (itemData->ItemType == EItemCategory::EIC_QuestItems)
 		{
 			return false;
-		}
+		}*/
 
 		const int32 amount = GetAmountAtIndex(index);
 		const float weight = itemData->Weight;

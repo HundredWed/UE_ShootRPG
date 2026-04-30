@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "NPC/EnemyBase.h"
@@ -260,6 +260,8 @@ void AEnemyBase::InitEnenmyInfo()
 {
 	if (IsValid(EnemyDataTable))
 	{
+		EnemyID = NPCID;
+
 		const FEnemyInfoTable* info = EnemyDataTable->FindRow<FEnemyInfoTable>(EnemyID,TEXT(""));
 		if (info == nullptr)
 		{
@@ -345,7 +347,7 @@ void AEnemyBase::Combat()
 
 	if (CanUpdateState() && animLength > 0)
 	{
-		// �ӽ�
+		// 임시
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::UpdateState, animLength, false);
 	}
 }
@@ -415,4 +417,8 @@ void AEnemyBase::FinishMoveDownEvent()
 void AEnemyBase::FinishMoveUpEvent()
 {
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::ReSpawn, DELAY5, false);
+}
+
+void AEnemyBase::RequestInteract(AActor* interactor)
+{
 }

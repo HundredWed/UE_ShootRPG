@@ -119,6 +119,17 @@ void ANonPlayerCharacterBase::DieNPC()
 	SetStateDeath();
 	NPCAnimInstance->Montage_Play(DeathActionMontage);
 
+	UGameInstance* GI = GetGameInstance();
+	if (IsValid(GI))
+	{
+		UCPP_QuestSubsystem* questSystem = GI->GetSubsystem<UCPP_QuestSubsystem>();
+
+		if (IsValid(questSystem))
+		{
+			questSystem->CheckQuestContent(NPCID, 1);
+		}
+	}
+
 	GetWorldTimerManager().SetTimer(TimerHandle,this, &ANonPlayerCharacterBase::MoveDown,
 		DeathActionMontage->GetPlayLength() * 2.f, false);
 }
