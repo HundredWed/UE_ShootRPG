@@ -149,7 +149,7 @@ bool UInventory::SearchFreeStackSlot(const FName& itemId, int32& canStackedSlotI
 	{
 		const FName slotItemID = SlotsArray[index].ItemID;
 		const int32 slotItemAmount = SlotsArray[index].ItemAmount;
-		if (slotItemID.IsNone())
+		if (!slotItemID.IsNone())
 		{
 			if ((slotItemID == itemId) && (slotItemAmount < MaxStackSize))
 			{
