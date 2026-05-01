@@ -19,6 +19,7 @@
 #include "Item/Weapon/CPP_WeaponManager.h"
 #include "Systems/CPP_QuestSubsystem.h"
 #include "Component/CPP_StatComponent.h"
+#include "Animations/CPP_AnimInstance.h"
 
 
 ACPP_Character::ACPP_Character()
@@ -656,6 +657,11 @@ bool ACPP_Character::CanUnEquipState()
 bool ACPP_Character::IsUnderArm()
 {
 	return (CharacterState == ECharacterStateTypes::Equipped) || (CharacterState == ECharacterStateTypes::Aim);
+}
+
+void ACPP_Character::ResetRootOffset()
+{
+	Cast<UCPP_AnimInstance>(GetMesh()->GetAnimInstance())->ResetCurrentRotate();
 }
 
 void ACPP_Character::PlayEquipMontage(FName NotifyName)

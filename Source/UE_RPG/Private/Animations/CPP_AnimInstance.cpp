@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Animations/CPP_AnimInstance.h"
@@ -43,7 +43,7 @@ void UCPP_AnimInstance::TurnInplace()
 {
 	if (GroundSpeed > 0 || CharacterState == ECharacterStateTypes::UnEquipped)
 	{
-		SetCurrentRotate();
+		ResetCurrentRotate();
 	}
 	else
 	{
@@ -133,7 +133,7 @@ double UCPP_AnimInstance::GetAngle2()
 	return UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation,	AimRotation).Yaw; 
 }
 
-void UCPP_AnimInstance::SetCurrentRotate()
+void UCPP_AnimInstance::ResetCurrentRotate()
 {
 	/*FRotator newRotate = FRotator(MyCharacter->GetActorRotation().Pitch, 
 		MyCharacter->GetActorRotation().Yaw + RootYawOffset, 

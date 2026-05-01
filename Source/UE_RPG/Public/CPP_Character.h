@@ -178,6 +178,9 @@ public:
 	bool CanUnEquipState();
 	bool IsUnderArm();
 
+	UFUNCTION(BlueprintCallable)
+	void ResetRootOffset();
+
 	virtual void OnRestore(ERestoreTypes restoreTypes, const float amount) override;
 
 
