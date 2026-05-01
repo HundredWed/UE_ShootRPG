@@ -39,6 +39,7 @@ public:
 
 	virtual void BeginPlay() override;
 	
+	UFUNCTION(BlueprintCallable)
 	void ChangeInteractionState(EPlayerIputMappingState newState);
 		
 	void SetNPCInteract(const FName& npcID);
