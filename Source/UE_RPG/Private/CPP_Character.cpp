@@ -799,6 +799,11 @@ void ACPP_Character::ShowGameInventory()
 	GameInventory->ShowInventory();
 }
 
+void ACPP_Character::InitInventory(ACPP_Controller* PC)
+{
+	GameInventory->InitInventoryInfo(PC);
+}
+
 void ACPP_Character::OnQuestClearEvent(const FQuest& quest)
 {
 	//퀘스트 보상

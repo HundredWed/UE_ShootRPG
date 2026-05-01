@@ -12,6 +12,25 @@ UCPP_UIManager::UCPP_UIManager()
 	//PrimaryComponentTick.bCanEverTick = true;
 }
 
+void UCPP_UIManager::InitUIManager()
+{
+	if (!Widgets.IsEmpty())
+	{
+		return;
+	}
+
+	for (auto widgetClass : WidgetClasses)
+	{
+		if (widgetClass.Value)
+		{
+			UUserWidget* widget = CreateWidget<UUserWidget>(GetWorld(), widgetClass.Value);
+			widget->AddToViewport();
+			widget->SetVisibility(ESlateVisibility::Hidden);
+			Widgets.Add(widgetClass.Key, widget);
+		}
+	}
+}
+
 void UCPP_UIManager::SetMainWidget(EWidgetType type)
 {
 	HideCurrentWidget();
@@ -110,32 +129,14 @@ void UCPP_UIManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	PlayerController = Cast<ACPP_Controller>(GetOwner());
-
-	for (auto widgetClass : WidgetClasses)
-	{
-		if (widgetClass.Value)
-		{
-			UUserWidget* widget = CreateWidget<UUserWidget>(GetWorld(), widgetClass.Value);
-			widget->AddToViewport();
-			widget->SetVisibility(ESlateVisibility::Hidden);
-			Widgets.Add(widgetClass.Key, widget);
-		}
-	}
-
 	SetMainWidgetToPlayer();
 
-
-	UGameInstance* GI = PlayerController->GetGameInstance();
+	ACPP_Controller* PC = Cast<ACPP_Controller>(GetOwner());
+	UGameInstance* GI = PC->GetGameInstance();
 	if (IsValid(GI))
 	{
 		UCPP_DialogueSystem* dialogue = GI->GetSubsystem<UCPP_DialogueSystem>();
 		dialogue->OnQuitDialogue.BindUObject(this, &UCPP_UIManager::SwitchToPlayerWidget);
-	}	
-
-	if (PlayerController)
-	{
-		PlayerController->UpdatePlayerWidget();
 	}
 }
 

@@ -20,29 +20,28 @@ void UInventory::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+void UInventory::InitInventoryInfo(ACPP_Controller* PC)
+{
 	PlayerRef = Cast<ACPP_Character>(GetOwner());
 	if (PlayerRef)
 	{
 		SlotsArray.SetNum(PlayerRef->GetInventorySize());
 		IsConnected.SetNum(PlayerRef->GetInventorySize());
 		ClearConnectArray();
-
 		InventoryRow = PlayerRef->GetInventoryRowSize();
 		MaxWeight = PlayerRef->GetPlayerWeightInfo();
 
-		//임시
-		ACPP_Controller* controller = Cast<ACPP_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-		InventoryWidget = controller->GetInventoryWidget();
-		InventoryWidget->UpdateWeightMaxAmount(MaxWeight);
-		InventoryWidget->UpdateWeightText(0);
-		InventoryWidget->GenerateSlotWidget(InventoryRow);
+		if (PC && IsValid(PC->GetInventoryWidget()))
+		{
+			InventoryWidget = PC->GetInventoryWidget();
+			InventoryWidget->UpdateWeightMaxAmount(MaxWeight);
+			InventoryWidget->UpdateWeightText(0);
+			InventoryWidget->GenerateSlotWidget(InventoryRow);
 
-
-		ApplyInventoryData();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("not found PlayerRef at Inventory!!"));
+			ApplyInventoryData();
+		}
 	}
 }
 
@@ -825,12 +824,18 @@ void UInventory::ApplySaveData(UCPP_SaveDataSubsystem* saveSystem)
 
 void UInventory::ShowInventory()
 {
-	InventoryWidget->SetVisibility(ESlateVisibility::Visible);
-	InventoryWidget->SetIsEnabled(true);
+	if (IsValid(InventoryWidget))
+	{
+		InventoryWidget->SetVisibility(ESlateVisibility::Visible);
+		InventoryWidget->SetIsEnabled(true);
+	}	
 }
 
 void UInventory::HideInventory()
 {
-	InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
-	InventoryWidget->SetIsEnabled(false);	
+	if (IsValid(InventoryWidget))
+	{
+		InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+		InventoryWidget->SetIsEnabled(false);
+	}	
 }

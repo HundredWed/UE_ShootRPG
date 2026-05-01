@@ -31,6 +31,7 @@ public:
 	UCPP_UIManager();
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void InitUIManager();
 	void SetMainWidget(EWidgetType type);
 	void RegisterPlayerCharacterToWidget(UCPP_StatComponent* statComponent);
 
@@ -60,8 +61,6 @@ private:
 
 	UPROPERTY()
 	TMap<EWidgetType, TObjectPtr<UUserWidget>> Widgets;
-
-	ACPP_Controller* PlayerController;
 
 	EWidgetType CurrentWidgetType = EWidgetType::Player;
 

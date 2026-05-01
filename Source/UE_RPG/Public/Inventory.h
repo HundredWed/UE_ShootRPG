@@ -15,6 +15,7 @@ class ACPP_Character;
 class UCPP_EquipmentInventory;
 class UCPP_InventoryWidget;
 class UCPP_SaveDataSubsystem;
+class ACPP_Controller;
 
 DECLARE_DELEGATE_TwoParams(FOnOnItemRemovedDelegate, const FName&, const int32);
 
@@ -38,6 +39,7 @@ protected:
 	virtual void BeginPlay() override;
 	
 public:
+	void InitInventoryInfo(ACPP_Controller* PC);
 
 	/**inventory function*/
 	bool IsSlotEmpty(const int32 index);
@@ -114,7 +116,6 @@ private:
 	void UpdateEquipSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData);
 
 	void ApplyInventoryData();
-	//void AddItem();
 	
 private:
 

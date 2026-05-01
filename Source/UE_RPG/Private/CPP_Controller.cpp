@@ -51,14 +51,15 @@ void ACPP_Controller::SetToDefaultInteractionState()
     ChangeInteractionState(EPlayerIputMappingState::Default);
 }
 
-void ACPP_Controller::UpdatePlayerWidget()
+void ACPP_Controller::LinkPlayerWidgets()
 {
     ACPP_Character* player = Cast<ACPP_Character>(GetPawn());
-
-    if (UIManager && player)
+    if (player)
     {
+        UIManager->InitUIManager();
         UIManager->RegisterPlayerCharacterToWidget(player->StatComponent);
-    }
+        player->InitInventory(this);
+    }   
 }
 
 void ACPP_Controller::OnSaveBroadcastReceived()
@@ -154,7 +155,7 @@ void ACPP_Controller::OnPossess(APawn* aPawn)
     Super::OnPossess(aPawn);
 
     //GetPawn() 유효구간
-    UpdatePlayerWidget();
+    LinkPlayerWidgets();
 }
 
 void ACPP_Controller::HandlePlayerDeath()

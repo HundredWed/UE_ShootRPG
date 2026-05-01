@@ -21,6 +21,7 @@ class UGrabber;
 class UInventory;
 class UCPP_QuestSubsystem;
 class UCPP_StatComponent;
+class ACPP_Controller;
 
 struct FQuest;
 
@@ -209,22 +210,15 @@ public:
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	//FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
 		FORCEINLINE bool GetPlayerMoveState() { return bMoving; }
-
-	//FORCEINLINE int32 GetPlayerATK() { return CharacterStats.PlayerATK; }
-	//FORCEINLINE int32 GetPlayerLevel() { return CharacterStats.Level; }
-	//FORCEINLINE float GetPlayerHealth() { return CharacterStats.CurrentHealth; }
-	//FORCEINLINE float GetPlayerMaxHealth() { return CharacterStats.MaxHealth; }
-	//FORCEINLINE float GetPlayerMana() { return CharacterStats.CurrentMana; }
-	//FORCEINLINE float GetPlayerMaxMana() { return CharacterStats.MaxMana; }
-	//FORCEINLINE float GetPlayerStamina() { return CharacterStats.CurrentStamina; }
-	//FORCEINLINE float GetPlayerMaxStamina() { return CharacterStats.MaxStamina; }
-
 	
 	/**inventory*/
 	UFUNCTION()
 	void HideGameInventory();
 
 	void ShowGameInventory();
+
+	void InitInventory(ACPP_Controller* PC);
+
 	const float GetPlayerWeightInfo() { return InventoryMaxWeight; }
 	void OnQuestClearEvent(const FQuest& quest);
 

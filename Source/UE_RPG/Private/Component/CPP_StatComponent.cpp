@@ -10,8 +10,7 @@ UCPP_StatComponent::UCPP_StatComponent()
 void UCPP_StatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	//InitCharacterStats();
+
 }
 
 void UCPP_StatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

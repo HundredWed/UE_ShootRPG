@@ -51,7 +51,7 @@ public:
 	void ShowCursor();
 	void HideCursor(); 
 
-	void UpdatePlayerWidget();
+	void LinkPlayerWidgets();
 
 	//임시. 리펙토링 필수
 	UCPP_InventoryWidget* GetInventoryWidget(); 
