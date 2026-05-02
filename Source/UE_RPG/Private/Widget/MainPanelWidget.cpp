@@ -16,7 +16,6 @@
 #include "Animation/WidgetAnimation.h"
 #include "Kismet/GameplayStatics.h"
 #include "CPP_Controller.h"
-#include "UE_RPG/UtilityMecro.h"
 
 void UMainPanelWidget::NativeConstruct()
 {
