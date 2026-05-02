@@ -75,6 +75,7 @@ void ACPP_Controller::OnSaveBroadcastReceived()
 
 void ACPP_Controller::ChangeInteractionState(EPlayerIputMappingState newState)
 {
+    PrevInteractionState = CurrentInteractionState;
     CurrentInteractionState = newState;
 
 
@@ -97,11 +98,17 @@ void ACPP_Controller::ChangeInteractionState(EPlayerIputMappingState newState)
     switch (CurrentInteractionState)
     {
     case EPlayerIputMappingState::None:
+        OnScreenBlackEvent.Broadcast();
         HideCursor();
         break;
     case EPlayerIputMappingState::Default:
+        OnScreenRevealEvent.Broadcast();
         bInteractEvent = false;
         HideCursor();
+        if (PrevInteractionState == EPlayerIputMappingState::NPCTalking)
+        {
+            Cast<ACPP_Character>(GetPawn())->EndDialogueCamera();
+        }
         break;
     case EPlayerIputMappingState::NPCTalking:
         ShowCursor();

@@ -18,7 +18,8 @@ class UCPP_DialogueSystem;
 class UCPP_SaveDataSubsystem;
 class ICPP_SavableInterface;
 
-
+DECLARE_MULTICAST_DELEGATE(FOnScreenBlackEventDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnScreenRevealEventDelegate);
 
 
 UENUM(BlueprintType)
@@ -53,11 +54,12 @@ public:
 	void HideCursor(); 
 
 	void LinkPlayerWidgets();
-
-	//임시. 리펙토링 필수
 	UCPP_InventoryWidget* GetInventoryWidget(); 
 
 	void HandlePlayerDeath();
+
+	FOnScreenBlackEventDelegate OnScreenBlackEvent;
+	FOnScreenRevealEventDelegate OnScreenRevealEvent;
 
 protected:
 
@@ -108,6 +110,7 @@ private:
 
 
 	EPlayerIputMappingState CurrentInteractionState = EPlayerIputMappingState::Default;
+	EPlayerIputMappingState PrevInteractionState = EPlayerIputMappingState::Default;
 
 	AHUD* CrosshairHUD;
 

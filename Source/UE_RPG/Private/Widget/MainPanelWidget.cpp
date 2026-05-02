@@ -13,6 +13,10 @@
 #include "Widget/CPP_Slot.h"
 #include "Widget/CPP_PlayerStateBar.h"
 #include "Widget/Player/Quest/CPP_InProgressQuestsWidget.h"
+#include "Animation/WidgetAnimation.h"
+#include "Kismet/GameplayStatics.h"
+#include "CPP_Controller.h"
+#include "UE_RPG/UtilityMecro.h"
 
 void UMainPanelWidget::NativeConstruct()
 {
@@ -23,6 +27,10 @@ void UMainPanelWidget::BindCharacterStat(UCPP_StatComponent* statComponent)
 {
 	statComponent->OnUpdateCharacterState.BindUObject(this, &UMainPanelWidget::InitState);
 	statComponent->OnUpdateHP.AddUObject(this, &UMainPanelWidget::UpdateHealthBarPercent);
+
+	ACPP_Controller* PC = Cast<ACPP_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	PC->OnScreenBlackEvent.AddUObject(this, &UMainPanelWidget::PlayFadeIn);
+	PC->OnScreenRevealEvent.AddUObject(this, &UMainPanelWidget::PlayFadeOut);
 
 	//플레이어 생성시 한번만 콜되니 여기서 초기화
 	InitState(FCharacterStats());
@@ -65,6 +73,24 @@ bool UMainPanelWidget::ToggleQuestList()
 	}	
 
 	return IsQuestListActivate;
+}
+
+void UMainPanelWidget::PlayFadeIn()
+{
+	if (FadeAnim)
+	{
+		PlayAnimation(FadeAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+		IsPrevBackScreenEvent = true;
+	}
+}
+
+void UMainPanelWidget::PlayFadeOut()
+{
+	if (FadeAnim && IsPrevBackScreenEvent)
+	{
+		PlayAnimation(FadeAnim, 0.0f, 1, EUMGSequencePlayMode::Reverse, 1.0f);
+		IsPrevBackScreenEvent = false;
+	}
 }
 
 bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)

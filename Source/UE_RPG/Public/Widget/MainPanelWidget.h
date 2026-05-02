@@ -12,6 +12,8 @@ class USetAmountWidget;
 class UCPP_PlayerStateBar;
 class UCPP_InProgressQuestsWidget;
 class UCPP_StatComponent;
+class UImage;
+class UWidgetAnimation;
 
 UCLASS()
 class UE_RPG_API UMainPanelWidget : public UCustomUMGWidget
@@ -40,6 +42,9 @@ public:
 
 	bool ToggleQuestList();
 
+	void PlayFadeIn();
+	void PlayFadeOut();
+
 protected:
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override ;
 
@@ -64,4 +69,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UUserWidget* PopupWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UImage* BackScreen;
+
+	UPROPERTY(Transient, meta = (BindWidgetAnim, AllowPrivateAccess = "true"))
+	UWidgetAnimation* FadeAnim;
+
+	bool IsPrevBackScreenEvent = true;
 };
