@@ -1,6 +1,7 @@
 ﻿#include "NPC/NonPlayerCharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Camera/CameraComponent.h"
 
 #include "NPC/HealthBarComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -15,6 +16,11 @@ ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 	//PrimaryActorTick.bCanEverTick = true;
 	HealthBarComponent = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HPBar"));
 	HealthBarComponent->SetupAttachment(GetRootComponent());
+
+	DialogueCameraPreview = CreateDefaultSubobject<UCameraComponent>(TEXT("DialogueCameraPreview"));
+	DialogueCameraPreview->SetupAttachment(GetRootComponent());
+	DialogueCameraPreview->bIsEditorOnly = true;
+
 
 	Mover = CreateDefaultSubobject<UMover>(TEXT("Moving component"));
 	
@@ -36,12 +42,26 @@ ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 	SidStepSpeed = 170.f;
 }
 
+void ANonPlayerCharacterBase::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+#if WITH_EDITOR
+
+	if (DialogueCameraPreview)
+	{
+		CachedCameraTransform = DialogueCameraPreview->GetComponentTransform();
+	}
+
+#endif
+}
+
 void ANonPlayerCharacterBase::RequestInteract(AActor* interactor)
 {
 	if (ACPP_Character* character = Cast<ACPP_Character>(interactor))
 	{
 		InitQuestSystem();
-		character->SetDialogue(NPCID);
+		character->SetDialogue(NPCID, CachedCameraTransform);
 	}
 }
 

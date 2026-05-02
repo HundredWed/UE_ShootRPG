@@ -108,10 +108,12 @@ void ACPP_Controller::ChangeInteractionState(EPlayerIputMappingState newState)
         if (PrevInteractionState == EPlayerIputMappingState::NPCTalking)
         {
             Cast<ACPP_Character>(GetPawn())->EndDialogueCamera();
+            GetPawn()->SetActorHiddenInGame(false);
         }
         break;
     case EPlayerIputMappingState::NPCTalking:
         ShowCursor();
+        GetPawn()->SetActorHiddenInGame(true);
         break;
     }
 }

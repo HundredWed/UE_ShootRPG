@@ -9,6 +9,15 @@
 #include "CharacterStates.h"
 #include "NonPlayerCharacterBase.generated.h"
 
+class UHealthBarComponent;
+class UMover;
+class UAnimMontage;
+class ACPP_Character;
+class ACPP_NPCcontroller;
+class UCameraComponent;
+class UCPP_NPCAnimInstance;
+
+
 UCLASS()
 class UE_RPG_API ANonPlayerCharacterBase : public ACharacter, public ICPP_InteractInterface
 {
@@ -17,30 +26,33 @@ class UE_RPG_API ANonPlayerCharacterBase : public ACharacter, public ICPP_Intera
 public:
 	
 	ANonPlayerCharacterBase();
-
+	virtual void OnConstruction(const FTransform& Transform) override;
 	/**component*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item Widget")
-		class UHealthBarComponent* HealthBarComponent;
+	UHealthBarComponent* HealthBarComponent;
 	UPROPERTY(EditAnyWhere)
-		class UMover* Mover;
+	UMover* Mover;
 
 	/**montage*/
 	UPROPERTY(VisibleAnywhere, Category = "NPC Info|Montage")
-		class UCPP_NPCAnimInstance* NPCAnimInstance;
+	UCPP_NPCAnimInstance* NPCAnimInstance;
 	UPROPERTY(EditDefaultsOnly, Category = "NPC Info|Montage")
-		class UAnimMontage* HitActionMontage_NoDamaged;
+	UAnimMontage* HitActionMontage_NoDamaged;
 	UPROPERTY(EditDefaultsOnly, Category = "NPC Info|Montage")
-		class UAnimMontage* HitActionMontage;
+	UAnimMontage* HitActionMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "NPC Info|Montage")
-		class UAnimMontage* DeathActionMontage;
+	UAnimMontage* DeathActionMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "NPC Info|Montage")
-		class UAnimMontage* CombatActionMontage;
+	UAnimMontage* CombatActionMontage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	UCameraComponent* DialogueCameraPreview;
 
 	bool bTurningLoop = false;
 
 public:
 	FORCEINLINE ENPCState GetNPCState() { return NPCState; }
-	//FORCEINLINE ECharacterTypes GetCharacterTypes() { return CharaterType; }
+	FORCEINLINE ECharacterTypes GetCharacterTypes() { return CharaterType; }
 	virtual	void UpdateState() {};
 	virtual void RequestInteract(AActor* interactor) override;
 
@@ -53,33 +65,36 @@ protected:
 	
 	/**states*/
 	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-		int32 MaxHealth = 100;
+	int32 MaxHealth = 100;
 	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-		int32 MaxMana = 100;
+	int32 MaxMana = 100;
 	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-		int32 MaxStamina = 100;
+	int32 MaxStamina = 100;
 	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-		int32 ATK = 15;
+	int32 ATK = 15;
 	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-		int32 DEF = 10;
-	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-		ECharacterTypes CharaterType = ECharacterTypes::Type_None;
+	int32 DEF = 10;
+	UPROPERTY(EditAnywhere, Category = "NPC Info")
+	ECharacterTypes CharaterType = ECharacterTypes::Type_None;
 	UPROPERTY(EditDefaultsOnly, Category = "NPC Info")
-		float RespawnDelay = 6.f;
+	float RespawnDelay = 6.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC Info")
-		ENPCActionState ENPCActionState = ENPCActionState::Normal;
+	ENPCActionState ENPCActionState = ENPCActionState::Normal;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC Info")
-		ENPCState NPCState = ENPCState::Patrol;
+	ENPCState NPCState = ENPCState::Patrol;
 
 	UPROPERTY(VisibleAnywhere, Category = "NPC Info | Target Info")
-		class ACPP_Character* Target = nullptr;
+	ACPP_Character* Target = nullptr;
 
 	UPROPERTY(EditAnyWhere, Category = "NPC Info")
-		FName NPCID;
+	FName NPCID;
 
 	UPROPERTY()
-		class ACPP_NPCcontroller* NPCController;
+	ACPP_NPCcontroller* NPCController;
+
+	UPROPERTY()
+	FTransform CachedCameraTransform;
 
 	FVector HitDir = FVector::Zero();
 	FVector SpawnPos = FVector::Zero();
@@ -107,8 +122,10 @@ protected:
 	void MoveSide(const FVector& pos);
 	float PlayNPCMontage(UAnimMontage* montageToPlay, const FName& section = "null");
 	float CheckDist();
+
 	UFUNCTION()
-		void LookAtTarget(const FVector& targetpos, bool boverTurn = false);
+	void LookAtTarget(const FVector& targetpos, bool boverTurn = false);
+
 	void TurnRight();
 	void TurnLeft();
 	void ClearTargetInfo();

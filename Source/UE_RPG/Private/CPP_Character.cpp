@@ -9,6 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "DrawDebugHelpers.h"
 
 #include "Grabber.h"
 #include "Item/Weapon/CPP_WeaponBase.h"
@@ -895,11 +896,16 @@ int32 ACPP_Character::AddInventory(const FName& itemID, const int32 amount)
 	return storedAmount;
 }
 
-void ACPP_Character::SetDialogue(const FName& id)
+void ACPP_Character::SetDialogue(const FName& id, const FTransform& transform)
 {
 	if (ACPP_Controller* PC = Cast<ACPP_Controller>(GetController()))
 	{
 		PC->SetNPCInteract(id);
+
+		if (IsValid(HitResultObject))
+		{
+			CameraManager->StartDialogueCamera(HitResultObject, transform);
+		}		
 	}
 }
 
@@ -950,5 +956,10 @@ void ACPP_Character::SmoothSpringArmOffset(float NewYoffset)
 {
 	//GetCharacterMovement()->bOrientRotationToMovement = bOrientRotationToMovement;
 	CameraManager->NewValue = NewYoffset;
+}
+
+void ACPP_Character::EndDialogueCamera()
+{
+	CameraManager->EndDialogueCamera();
 }
 

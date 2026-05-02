@@ -155,6 +155,7 @@ public:
 
 	/**camera*/
 	void SmoothSpringArmOffset(float NewYoffset);
+	void EndDialogueCamera();
 
 	bool PressKey(const FInputActionValue& Value);
 	//class AWeapon* isWeapon(AActor* hitobject) const;
@@ -238,7 +239,7 @@ public:
 
 	/**interact*/
 	int32 AddInventory(const FName& itemID, const int32 amount = 1);
-	void SetDialogue(const FName& id);
+	void SetDialogue(const FName& id, const FTransform& transform);
 
 private:
 

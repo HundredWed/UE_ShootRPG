@@ -1,10 +1,14 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "CharacterStates.h"
 #include "CameraManager.generated.h"
 
+class USpringArmComponent;
+class UCameraComponent;
+class ACPP_Character;
+class ACameraActor;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UE_RPG_API UCameraManager : public UActorComponent
@@ -22,9 +26,9 @@ protected:
 public:	
 	
 	UPROPERTY()
-		class USpringArmComponent* SpringArm;
+	USpringArmComponent* SpringArm;
 	UPROPERTY()
-		class UCameraComponent* Camera;
+	UCameraComponent* Camera;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -34,11 +38,14 @@ public:
 	void UpdateSpringArmZOffset(float newYoffset,float deltaTime);
 	void SpringArmZOffsetFix(float deltaTime);
 
+	void StartDialogueCamera(AActor* TargetNPC, const FTransform& transform);
+	void EndDialogueCamera();
+
 	UFUNCTION()
-		void SetBeginCamera();
+	void SetBeginCamera();
 
 	UPROPERTY(EditAnywhere)
-		float InterpSpeed;
+	float InterpSpeed;
 
 	float NewValue;
 	
@@ -49,7 +56,7 @@ public:
 
 	//character state;
 	UPROPERTY()
-		class ACPP_Character* MyCharacter;
+	ACPP_Character* MyCharacter;
 
 	bool isAiming = false;
 	ECharacterStateTypes CharacterState;
@@ -59,10 +66,17 @@ public:
 
 private:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
-		float CameraZoomedFOV = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Config", meta = (AllowPrivateAccess = "true"))
+	float CameraZoomedFOV = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraValue", meta = (AllowPrivateAccess = "true"))
-		float ZoomInterpSpeed = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Config", meta = (AllowPrivateAccess = "true"))
+	float ZoomInterpSpeed = 0;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Config", meta = (AllowPrivateAccess = "true"))
+	float DialogueCameraSpeed = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Config", meta = (AllowPrivateAccess = "true"))
+	float DialogueCameraBlendOut = 2.f;
+
+	TWeakObjectPtr<ACameraActor> CurrentDialogueCamera;
 };

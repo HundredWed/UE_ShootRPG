@@ -1,5 +1,6 @@
-#include "Camera/CameraManager.h"
+﻿#include "Camera/CameraManager.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/CameraActor.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CPP_Character.h"
@@ -67,6 +68,37 @@ void UCameraManager::SpringArmZOffsetFix(float deltaTime)
 	else
 	{
 		UpdateSpringArmZOffset(0, deltaTime);
+	}
+}
+
+void UCameraManager::StartDialogueCamera(AActor* TargetNPC, const FTransform& transform)
+{
+	if (!TargetNPC || !GetWorld()) return;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	CurrentDialogueCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), transform.GetLocation(), transform.Rotator(), SpawnParams);
+
+	if (CurrentDialogueCamera.IsValid())
+	{
+		//CurrentDialogueCamera->GetCameraComponent()->SetFieldOfView(60.0f);
+		CurrentDialogueCamera->GetCameraComponent()->bConstrainAspectRatio = false;
+	}
+
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(CurrentDialogueCamera.Get(), DialogueCameraSpeed, EViewTargetBlendFunction::VTBlend_Cubic, 2.f, false);
+}
+
+void UCameraManager::EndDialogueCamera()
+{
+	if (IsValid(MyCharacter))
+	{
+		UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(MyCharacter, DialogueCameraBlendOut, EViewTargetBlendFunction::VTBlend_Cubic);
+	}
+
+	if (CurrentDialogueCamera.IsValid())
+	{
+		
 	}
 }
 
