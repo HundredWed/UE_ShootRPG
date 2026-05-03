@@ -7,7 +7,7 @@
 class UParticleSystem;
 class USoundCue;
 class UParticleSystem;
-class UCPP_WeaponDataAsset;
+class UCPP_EquipmentAbilityDataAsset;
 
 UENUM(BlueprintType)
 enum class EEquipmentType : uint8
@@ -60,5 +60,5 @@ public:
 	TSoftObjectPtr<USoundCue> AttackSound;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
-	TObjectPtr<UCPP_WeaponDataAsset> EquipmentLogicAsset;
+	TObjectPtr<UCPP_EquipmentAbilityDataAsset> EquipmentLogicAsset;
 };
