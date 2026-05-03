@@ -1,4 +1,4 @@
-#include "NPC/CPP_EnemyCombatBox.h"
+﻿#include "NPC/CPP_EnemyCombatBox.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -42,7 +42,8 @@ void ACPP_EnemyCombatBox::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent,
 	{
 		Hicount++;
 
-		if (Hicount > OVERHIT)
+		const int32 overHit = 1;
+		if (Hicount > overHit)
 		{
 			//WARNINGLOG(TEXT("OverHit!!!"))
 			return;
@@ -71,8 +72,8 @@ void ACPP_EnemyCombatBox::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent,
 		}
 		else
 		{
-			const float damage = 1.f;
-			UGameplayStatics::ApplyDamage(Player, damage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
+			//const float damage = 1.f;
+			UGameplayStatics::ApplyDamage(Player, Damage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
 		}
 	}
 

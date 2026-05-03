@@ -5,7 +5,6 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 
-#define MAX 1
 
 void UCPP_PlayerStateBar::InitStateBar(const FCharacterStats& stat)
 {
@@ -15,7 +14,8 @@ void UCPP_PlayerStateBar::InitStateBar(const FCharacterStats& stat)
 
 	if (IsValid(BackGroundBar))
 	{
-		BackGroundBar->SetPercent(MAX);
+		const float max = 1.f;
+		BackGroundBar->SetPercent(max);
 	}
 }
 

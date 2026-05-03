@@ -1,17 +1,17 @@
-#pragma once
+﻿#pragma once
 #include "CoreMinimal.h"
 
 // value
-#define SPEED1 0.1f
-#define SPEED2 0.01f
-#define SPEED3 0.001f
-#define SPEED4 0.0001f
+const float SPEED1 = 0.1f;
+const float SPEED2 = 0.01f;
+const float SPEED3 = 0.001f;
+const float SPEED4 = 0.0001f;
 
-#define DELAY1 0.1f
-#define DELAY2 0.2f
-#define DELAY3 0.3f
-#define DELAY4 0.4f
-#define DELAY5 0.5f
+const float DELAY1 = 0.1f;
+const float DELAY2 = 0.2f;
+const float DELAY3 = 0.3f;
+const float DELAY4 = 0.4f;
+const float DELAY5 = 0.5f;
 
 
 // debug
