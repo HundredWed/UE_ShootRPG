@@ -351,10 +351,9 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 
 void ACPP_Character::TryAttack(const FInputActionValue& Value)
 {
-	if (!IsUnderArm() || ActionState != ECharacterActionState::Normal) return;
-
 	PressFireKey = PressKey(Value);
 
+	if (!IsUnderArm() || ActionState != ECharacterActionState::Normal) return;
 
 	if (PressFireKey && !bOverHeat)
 	{
@@ -568,16 +567,14 @@ void ACPP_Character::LookAt()
 		SetActorRotation(newRot);
 		return;
 	}
-	else if (CharacterState != ECharacterStateTypes::Aim)
+	else if (GetCharacterMovement()->bOrientRotationToMovement)
 	{
+		//bOrientRotationToMovement가 true인 경우는 현재 캐릭터가 바라보는 방향그대로
 		return;
 	}
 
 	newRot.Yaw = currentRot.Yaw + UKismetMathLibrary::NormalizedDeltaRotator(InputDir, AimRotation).Yaw;
 	SetActorRotation(newRot);
-
-	//GetMesh()->SetWorldRotation(newRot);
-	//GetMesh()->SetRelativeRotation(newRot);
 }
 
 void ACPP_Character::ResetHitResultState()
