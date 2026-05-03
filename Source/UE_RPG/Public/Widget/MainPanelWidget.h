@@ -14,6 +14,7 @@ class UCPP_InProgressQuestsWidget;
 class UCPP_StatComponent;
 class UImage;
 class UWidgetAnimation;
+class ACPP_Character;
 
 UCLASS()
 class UE_RPG_API UMainPanelWidget : public UCustomUMGWidget
@@ -26,13 +27,16 @@ public:
 
 	FORCEINLINE UCPP_InventoryWidget* GetInventoryWidget() { return InventoryWidget; }
 	FORCEINLINE UCPP_PlayerStateBar* GetStateWidget() { return StateWidget; }
+	
+	void ShowInteractWidget();
+	void HideInteractWidget();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	bool UpdatePopupText(const FText& text);
 
 
-	/**StateWidget*/
-	void BindCharacterStat(UCPP_StatComponent* statComponent);
+
+	void BindCharacter(ACPP_Character* player);
 
 	void InitState(const FCharacterStats& stat);
 	
@@ -69,6 +73,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UUserWidget* PopupWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UUserWidget* InteractWidget;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UImage* BackScreen;

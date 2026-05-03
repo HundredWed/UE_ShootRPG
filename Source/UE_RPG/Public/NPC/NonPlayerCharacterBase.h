@@ -6,7 +6,6 @@
 #include "GameFramework/Character.h"
 #include "Interface/CPP_InteractInterface.h"
 #include "UE_RPG/UtilityMecro.h"
-#include "CharacterStates.h"
 #include "NonPlayerCharacterBase.generated.h"
 
 class UHealthBarComponent;
@@ -52,9 +51,9 @@ public:
 
 public:
 	FORCEINLINE ENPCState GetNPCState() { return NPCState; }
-	FORCEINLINE ECharacterTypes GetCharacterTypes() { return CharaterType; }
 	virtual	void UpdateState() {};
 	virtual void RequestInteract(AActor* interactor) override;
+	virtual ECharacterTypes GetType() override;
 
 private:
 
@@ -75,7 +74,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
 	int32 DEF = 10;
 	UPROPERTY(EditAnywhere, Category = "NPC Info")
-	ECharacterTypes CharaterType = ECharacterTypes::Type_None;
+	ECharacterTypes CharacterType = ECharacterTypes::Type_None;
 	UPROPERTY(EditDefaultsOnly, Category = "NPC Info")
 	float RespawnDelay = 6.f;
 

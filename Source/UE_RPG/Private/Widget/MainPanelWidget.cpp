@@ -20,12 +20,26 @@
 void UMainPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	HideInteractWidget();
 }
 
-void UMainPanelWidget::BindCharacterStat(UCPP_StatComponent* statComponent)
+void UMainPanelWidget::ShowInteractWidget()
 {
-	statComponent->OnUpdateCharacterState.BindUObject(this, &UMainPanelWidget::InitState);
-	statComponent->OnUpdateHP.AddUObject(this, &UMainPanelWidget::UpdateHealthBarPercent);
+	InteractWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UMainPanelWidget::HideInteractWidget()
+{
+	InteractWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UMainPanelWidget::BindCharacter(ACPP_Character* player)
+{
+	player->OnLookAtTalker.AddUObject(this, &UMainPanelWidget::ShowInteractWidget);
+	player->OnEndLookAtTalker.AddUObject(this, &UMainPanelWidget::HideInteractWidget);
+
+	player->GetStatComponent()->OnUpdateCharacterState.BindUObject(this, &UMainPanelWidget::InitState);
+	player->GetStatComponent()->OnUpdateHP.AddUObject(this, &UMainPanelWidget::UpdateHealthBarPercent);
 
 	ACPP_Controller* PC = Cast<ACPP_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	PC->OnScreenBlackEvent.AddUObject(this, &UMainPanelWidget::PlayFadeIn);

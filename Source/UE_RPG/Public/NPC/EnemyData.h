@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
@@ -57,5 +57,5 @@ public:
 		int32 DEF = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		ECharacterTypes CharaterType = ECharacterTypes::Type_None;
+		ECharacterTypes CharacterType = ECharacterTypes::Type_None;
 };

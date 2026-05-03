@@ -65,6 +65,11 @@ void ANonPlayerCharacterBase::RequestInteract(AActor* interactor)
 	}
 }
 
+ECharacterTypes ANonPlayerCharacterBase::GetType()
+{
+	return CharacterType;
+}
+
 void ANonPlayerCharacterBase::InitQuestSystem()
 {
 	UGameInstance* GI = GetGameInstance();

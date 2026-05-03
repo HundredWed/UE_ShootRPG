@@ -50,12 +50,12 @@ void UCPP_UIManager::SetMainWidget(EWidgetType type)
 	ShowCurrentWidget();
 }
 
-void UCPP_UIManager::RegisterPlayerCharacterToWidget(UCPP_StatComponent* statComponent)
+void UCPP_UIManager::RegisterPlayerCharacterToWidget(ACPP_Character* player)
 {
 	if (TObjectPtr<UUserWidget>* wd = Widgets.Find(EWidgetType::Player))
 	{
 		UMainPanelWidget* playerWG = Cast<UMainPanelWidget>((*wd));
-		playerWG->BindCharacterStat(statComponent);
+		playerWG->BindCharacter(player);
 	}
 }
 

@@ -7,6 +7,9 @@
 #include "Interface/CPP_StatInterface.h"
 #include "CPP_Character.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnLookAtTalkerDelegete);
+DECLARE_MULTICAST_DELEGATE(FOnEndLookAtTalkerDelegete);
+
 class ANonPlayerCharacterBase;
 class ACPP_DamageActor;
 class UCameraManager;
@@ -115,13 +118,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "EditValue")
 	float SpringArmSocketOffsetYValue = 100.f;
 
-	/**Item search issue overlap counting*/
-	//uint8 OverlapCount = 0;
-
 	/**key down info*/
 	bool bShiftDown = false;/*for inventory splite*/
 	bool bMoveKeyDown = false;/*for dodge dir info*/
 	FRotator InputDir = FRotator::ZeroRotator;
+
+	FOnLookAtTalkerDelegete OnLookAtTalker;
+	FOnEndLookAtTalkerDelegete OnEndLookAtTalker;
 
 protected:
 	virtual void BeginPlay() override;
@@ -212,8 +215,8 @@ public:
 	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
 	FORCEINLINE void SetHitResultObject(AActor* hitresultobject);
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
-	//FORCEINLINE void SetCanSearchObject(bool cansearch) { bCanSearchObject = cansearch; }
-		FORCEINLINE bool GetPlayerMoveState() { return bMoving; }
+	FORCEINLINE bool GetPlayerMoveState() { return bMoving; }
+	FORCEINLINE UCPP_StatComponent* GetStatComponent() { return StatComponent; }
 	
 	/**inventory*/
 	UFUNCTION()

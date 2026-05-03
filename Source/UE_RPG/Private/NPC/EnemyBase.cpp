@@ -284,7 +284,7 @@ void AEnemyBase::InitEnenmyInfo()
 		MaxMana = info->MaxMana;
 		ATK = info->ATK;
 		DEF = info->DEF;
-		CharaterType = info->CharaterType;
+		CharacterType = info->CharacterType;
 
 		WeaponReady();
 		SpawnPos = GetActorLocation();

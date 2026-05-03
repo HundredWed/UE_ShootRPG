@@ -57,7 +57,7 @@ void ACPP_Controller::LinkPlayerWidgets()
     if (player)
     {
         UIManager->InitUIManager();
-        UIManager->RegisterPlayerCharacterToWidget(player->StatComponent);
+        UIManager->RegisterPlayerCharacterToWidget(player);
         player->InitInventory(this);
     }   
 }

@@ -8,9 +8,8 @@
 #include "Structs/ST_DialogueAnswer.h"
 #include "CPP_UIManager.generated.h"
 
-class ACPP_Controller;
-class UCPP_StatComponent;
 class UCPP_InventoryWidget;
+class ACPP_Character;
 
 DECLARE_DELEGATE(FOnRevertPlayerWidgetDelegate);
 
@@ -33,7 +32,7 @@ public:
 
 	void InitUIManager();
 	void SetMainWidget(EWidgetType type);
-	void RegisterPlayerCharacterToWidget(UCPP_StatComponent* statComponent);
+	void RegisterPlayerCharacterToWidget(ACPP_Character* player);
 
 	bool ToggleQuestListWindow();
 
