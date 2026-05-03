@@ -30,9 +30,9 @@ enum class ECharacterStateTypes : uint8
 	Death,
 
 	Normal,/**기본(무기x)*/
+	UnEquipped,/**무기 수납(무기o)*/
 	Equipped,/**무기 장착(무기o)*/
 	Aim,/**무기 조준(무기o)*/
-	UnEquipped,/**무기 수납(무기o)*/
 };
 
 UENUM(BlueprintType)
@@ -99,6 +99,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float MaxMana = 100.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float ManaRegen = 1.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float CurrentMana = 100.f;
 

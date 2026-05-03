@@ -34,6 +34,8 @@ public:
 
 	/**weapon states*/
 	float FinalDamage = 0;
+	float ManaRegen = 0;
+	float ManaCost = 0;
 
 	void StoreDamageUI(TSubclassOf<ACPP_DamageActor> damageUIActorClass);
 

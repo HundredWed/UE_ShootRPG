@@ -36,9 +36,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 	int32 DEF;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-	int32 ManaCost;
+	float ManaCost;
+	/**마나 응집력(사거리)*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 	float ManaDensity;
+	/**마나 회복력*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+	float ManaRegen;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 	float FireRate;
 

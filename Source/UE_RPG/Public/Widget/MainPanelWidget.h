@@ -34,6 +34,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	bool UpdatePopupText(const FText& text);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	bool ManaOverHeat();
+	UFUNCTION(BlueprintImplementableEvent)
+	bool ManaCoolDown();
 
 
 	void BindCharacter(ACPP_Character* player);
@@ -54,7 +58,11 @@ protected:
 
 private:
 	void UpdateHealthBarPercent(const float currentHp, const float max);
-	void UpdateManaBarPercent(const float percent);
+	void UpdateManaBarPercent(const float currentMP, const float max);
+	void RecoverManaBar(const float percent);
+
+	void ManaOverHeatEvent();
+	void ManaCoolDownEvent();
 
 
 	bool IsQuestListActivate = false;

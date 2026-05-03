@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -24,7 +24,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* HealthAmount;
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 		class UProgressBar* PlayerHealth;
 
 	UPROPERTY(meta = (BindWidget))
@@ -44,12 +44,12 @@ public:
 	void UpdateBackGroundBar();
 	void SetPercentTick();
 	bool CheckPercent();
+	void StartManaRecover(const float percent);
 
 private:
 
 	/**BackGround*/
 	float BGPercent;
-	float CurrnetBGPercent;
+	float CurrentBGPercent;
 	bool UpdatePercent = false;
-
 };

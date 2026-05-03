@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widget/CPP_PlayerStateBar.h"
@@ -43,7 +43,7 @@ void UCPP_PlayerStateBar::UpdateManaBarPercent(const float percent)
 {
 	if (IsValid(PlayerMana))
 	{
-		PlayerHealth->SetPercent(percent);
+		PlayerMana->SetPercent(percent);
 	}
 }
 
@@ -79,8 +79,8 @@ void UCPP_PlayerStateBar::SetPercentTick()
 	if (!IsValid(world) || UpdatePercent || CheckPercent())
 		return;
 
-	const float precent = BackGroundBar->GetPercent() - SPEED2;
-	BackGroundBar->SetPercent(precent);
+	const float percent = BackGroundBar->GetPercent() - SPEED2;
+	BackGroundBar->SetPercent(percent);
 
 	FTimerHandle TimerHandle;
 	world->GetTimerManager().SetTimer(TimerHandle, this, &UCPP_PlayerStateBar::SetPercentTick, SPEED4, false);
@@ -89,4 +89,11 @@ void UCPP_PlayerStateBar::SetPercentTick()
 bool UCPP_PlayerStateBar::CheckPercent()
 {
 	return BackGroundBar->GetPercent() < PlayerHealth->GetPercent() ? true : false;
+}
+
+void UCPP_PlayerStateBar::StartManaRecover(const float percent)
+{
+	if (!PlayerMana) return;
+
+	PlayerMana->SetPercent(percent);
 }

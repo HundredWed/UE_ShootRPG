@@ -52,6 +52,8 @@ void ACPP_Rifle::InitWeaponInfo(const FName& itemID)
 		MaxDis = thisWeaponInfo->ManaDensity;
 		ParticleSize = thisWeaponInfo->ParticleSize;
 		FireRate = thisWeaponInfo->FireRate;
+		ManaRegen = thisWeaponInfo->ManaRegen;
+		ManaCost = thisWeaponInfo->ManaCost;
 
 		WeaponMesh->SetSkeletalMesh(thisWeaponInfo->ItemSkeletalMesh.LoadSynchronous());
 		BeamParticle = thisWeaponInfo->BeamParticle.LoadSynchronous();

@@ -25,8 +25,14 @@ public:
 	void OnWeaponReady(ACPP_WeaponBase* weapon);
 	ACPP_WeaponBase* SpawnWeapon(TSubclassOf<ACPP_WeaponBase> weapon);
 	ACPP_WeaponBase* GetCurrentWeapon() { return CurrentWeapon; }
+	float GetManaRegen();
+	float GetManaCost();
 
 	void ClearWeaponGarbage();
+
+	void HoldWeapon(USceneComponent* Inparent, const FName& SocketName);
+	void UnHoldWeapon(USceneComponent* Inparent, const FName& SocketName);
+	float TriggerWeapon();
 
 private:
 

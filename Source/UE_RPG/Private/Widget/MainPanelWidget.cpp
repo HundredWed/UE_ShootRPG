@@ -40,6 +40,10 @@ void UMainPanelWidget::BindCharacter(ACPP_Character* player)
 
 	player->GetStatComponent()->OnUpdateCharacterState.BindUObject(this, &UMainPanelWidget::InitState);
 	player->GetStatComponent()->OnUpdateHP.AddUObject(this, &UMainPanelWidget::UpdateHealthBarPercent);
+	player->GetStatComponent()->OnUpdateMP.AddUObject(this, &UMainPanelWidget::UpdateManaBarPercent);
+	player->GetStatComponent()->OnOverHeat.AddUObject(this, &UMainPanelWidget::ManaOverHeatEvent);
+	player->GetStatComponent()->OnCoolDown.AddUObject(this, &UMainPanelWidget::ManaCoolDownEvent);
+	player->GetStatComponent()->OnRecoverMP.AddUObject(this, &UMainPanelWidget::RecoverManaBar);
 
 	ACPP_Controller* PC = Cast<ACPP_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	PC->OnScreenBlackEvent.AddUObject(this, &UMainPanelWidget::PlayFadeIn);
@@ -62,9 +66,25 @@ void UMainPanelWidget::UpdateHealthBarPercent(const float currentHp, const float
 	StateWidget->UpdateHealthBarPercent(currentHp, max);
 }
 
-void UMainPanelWidget::UpdateManaBarPercent(const float percent)
+void UMainPanelWidget::UpdateManaBarPercent(const float currentMP, const float max)
 {
+	const float percent = currentMP / max;
 	StateWidget->UpdateManaBarPercent(percent);
+}
+
+void UMainPanelWidget::RecoverManaBar(const float percent)
+{
+	StateWidget->StartManaRecover(percent);
+}
+
+void UMainPanelWidget::ManaOverHeatEvent()
+{
+	ManaOverHeat();
+}
+
+void UMainPanelWidget::ManaCoolDownEvent()
+{
+	ManaCoolDown();
 }
 
 void UMainPanelWidget::UpdateLevel(int32 level)

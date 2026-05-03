@@ -145,7 +145,7 @@ public:
 	void GrabItem(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
 	void Equip(const FInputActionValue& Value);
-	void Attack(const FInputActionValue& Value);
+	void TryAttack(const FInputActionValue& Value);
 	void Aiming(const FInputActionValue& Value);
 	void SetCrouch(const FInputActionValue& Value);
 	void Dodge(const FInputActionValue& Value);
@@ -164,7 +164,6 @@ public:
 	//class AWeapon* isWeapon(AActor* hitobject) const;
 	bool PickUpWeapon(const FName& itemID);
 	void AttackWeapon();
-	void CanTrigger();
 	void SetMovementRotate(bool bORT, float rotationRate);
 	void LookAt();
 	
@@ -176,7 +175,9 @@ public:
     void SetStateEquipped();
 	void SetStateUnEquipped();
 	bool SetEquipWeapon(const FName& itemID);
+	void ApplyWeaponStat();
 	void TakeOffWeapon();
+	void StopAttack();
 	bool CanAttackState();
 	bool CanEquipState();
 	bool CanUnEquipState();
@@ -262,8 +263,8 @@ private:
 
 	/**character states - weapon*/
 	bool PressFireKey = false;
-	bool bTrigger = true;
 	bool bMoving = false;
+	bool bOverHeat = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player states", meta = (AllowPrivateAccess = "true"))
 	float DefaultMRR = 500.f;//MovementRotationRate
@@ -275,7 +276,7 @@ private:
 	float MoveAimingSpeed = 320.f;
 	float MoveDefaultSpeed_Crouch = 250.f;
 	float MoveAimingSpeed_Crouch = 200.f;
-	FTimerHandle TimerHandle;
+	FTimerHandle FireTimerHandle;
 
 	/**상호작용 검사를 관리할 타이머 핸들*/
 	FTimerHandle InteractTimerHandle;

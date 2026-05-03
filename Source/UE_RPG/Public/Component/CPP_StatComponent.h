@@ -9,7 +9,10 @@
 
 DECLARE_DELEGATE_OneParam(FOnOnUpdateCharacterStateDelegate, const FCharacterStats&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUpdateHPDelegate, const float, const float);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUpdateManaDelegate, const float, const float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnRecoverMPDelegate, const float);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUpdateMPDelegate, const float, const float);
+DECLARE_MULTICAST_DELEGATE(FOnOverHeatDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnCoolDownDelegate);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUpdateStaminaDelegate, const float, const float);
 
 class UCPP_SaveDataSubsystem;
@@ -26,7 +29,10 @@ public:
 	FOnOnUpdateCharacterStateDelegate OnUpdateCharacterState;
 
 	FOnUpdateHPDelegate OnUpdateHP;
-	FOnUpdateManaDelegate OnOnUpdateMP;
+	FOnRecoverMPDelegate OnRecoverMP;
+	FOnUpdateMPDelegate OnUpdateMP;
+	FOnOverHeatDelegate OnOverHeat;
+	FOnCoolDownDelegate OnCoolDown;
 	FOnUpdateStaminaDelegate OnUpdateStamina;
 
 protected:
@@ -42,8 +48,8 @@ public:
 	bool IncreaseHP(const float value);
 	bool DecreaseHP(const float value);
 
-	bool IncreaseMP(const float value);
-	bool DecreaseMP(const float value);
+	void IncreaseMP();
+	bool DecreaseMP();
 
 	bool IncreaseStamina(const float value);
 	bool DecreaseDodge();
@@ -52,6 +58,14 @@ public:
 
 	virtual void GatherSaveData(UCPP_SaveDataSubsystem* saveSystem) override;
 	virtual void ApplySaveData(UCPP_SaveDataSubsystem* saveSystem) override;
+
+	void ApplyManaRegen(const float manaRegen);
+	void ApplyManaCost(const float value);
+
+private:
+
+	void StartRecoverMP();
+	void OverHeatRecoverMP();
 
 private:
 
@@ -63,4 +77,13 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config", meta = (AllowPrivateAccess = "true"))
 	float DashValue;
+
+	FTimerHandle ManaRegenTimerHandle;
+	float MPCost = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config", meta = (AllowPrivateAccess = "true"))
+	float UpdateInterval = 0.1f;
+
+
+	bool bOverHeatFlag;
 };

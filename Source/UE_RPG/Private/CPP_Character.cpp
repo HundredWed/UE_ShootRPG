@@ -12,7 +12,6 @@
 #include "DrawDebugHelpers.h"
 
 #include "Grabber.h"
-#include "Item/Weapon/CPP_WeaponBase.h"
 #include "Item/PickUpItem.h"
 #include "Camera/CameraManager.h"
 #include "Widget/NPC/CPP_DamageActor.h"
@@ -96,6 +95,19 @@ void ACPP_Character::BeginPlay()
 	QuestSubsystem = GI->GetSubsystem<UCPP_QuestSubsystem>();
 	QuestSubsystem->OnQuestClear.AddUObject(this, &ACPP_Character::OnQuestClearEvent);
 
+	if (IsValid(StatComponent))
+	{
+		StatComponent->OnOverHeat.AddLambda([this]()
+			{
+				bOverHeat = true;
+			});
+
+		StatComponent->OnCoolDown.AddLambda([this]()
+			{
+				bOverHeat = false;
+			});
+	}
+	
 
 	/**ignore from item trace*/
 	Params.AddIgnoredActor(this);
@@ -143,7 +155,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(GrabAndPickupAction, ETriggerEvent::Triggered, this, &ACPP_Character::GrabItem);
 		
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ACPP_Character::Equip);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ACPP_Character::Attack);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ACPP_Character::TryAttack);
 
 		EnhancedInputComponent->BindAction(AimingAction, ETriggerEvent::Triggered, this, &ACPP_Character::Aiming);
 
@@ -337,16 +349,22 @@ void ACPP_Character::Equip(const FInputActionValue& Value)
 	}
 }
 
-void ACPP_Character::Attack(const FInputActionValue& Value)
+void ACPP_Character::TryAttack(const FInputActionValue& Value)
 {
-	if(!IsUnderArm())
-		return;
-	
+	if (!IsUnderArm() || ActionState != ECharacterActionState::Normal) return;
+
 	PressFireKey = PressKey(Value);
-	
-	if (bTrigger)
+
+
+	if (PressFireKey && !bOverHeat)
 	{
+		DISPLAYLOG(TEXT("사격"))
 		AttackWeapon();
+	}
+	else
+	{
+		WARNINGLOG(TEXT("사격중지"))
+		StopAttack();		
 	}
 }
 
@@ -490,29 +508,26 @@ bool ACPP_Character::PickUpWeapon(const FName& itemID)
 
 void ACPP_Character::AttackWeapon()
 {
-	if (CanAttackState())
+	if (!CanAttackState())
 	{
-		SetMovementRotate(false, FocusingMRR);
-
-		if (bAiming)
-		{
-			PlayMontage(AimingFireMontage);
-		}
-		else
-		{
-			PlayMontage(FireMontage);
-		}
-
-		const float triggerRate = WeaponManager->GetCurrentWeapon()->Attack();
-
-		bTrigger = false;
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ACPP_Character::CanTrigger, triggerRate, false);
+		return;
 	}
-}
 
-void ACPP_Character::CanTrigger()
-{
-	bTrigger = true;
+	if (!StatComponent->DecreaseMP())
+	{
+		GetWorldTimerManager().ClearTimer(FireTimerHandle);
+		//WARNINGLOG(TEXT("마나 부족: 강제 회복 시작!"))
+		StatComponent->IncreaseMP();
+		
+		return;
+	}
+
+	SetMovementRotate(false, FocusingMRR);
+	PlayMontage(bAiming ? AimingFireMontage : FireMontage);
+
+	const float triggerRate = WeaponManager->TriggerWeapon();
+
+	GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ACPP_Character::AttackWeapon, triggerRate, false);
 }
 
 void ACPP_Character::SetMovementRotate(bool bORT, float rotationRate)
@@ -560,6 +575,9 @@ void ACPP_Character::LookAt()
 
 	newRot.Yaw = currentRot.Yaw + UKismetMathLibrary::NormalizedDeltaRotator(InputDir, AimRotation).Yaw;
 	SetActorRotation(newRot);
+
+	//GetMesh()->SetWorldRotation(newRot);
+	//GetMesh()->SetRelativeRotation(newRot);
 }
 
 void ACPP_Character::ResetHitResultState()
@@ -621,11 +639,16 @@ bool ACPP_Character::SetEquipWeapon(const FName& itemID)
 	{
 		GameInventory->UpdateEquipmentInventory(itemID);
 		CharacterState = ECharacterStateTypes::UnEquipped;
-		
 		return true;
 	}
 
 	return false;
+}
+
+void ACPP_Character::ApplyWeaponStat()
+{
+	StatComponent->ApplyManaCost(WeaponManager->GetManaCost());
+	StatComponent->ApplyManaRegen(WeaponManager->GetManaRegen());
 }
 
 void ACPP_Character::TakeOffWeapon()
@@ -634,9 +657,15 @@ void ACPP_Character::TakeOffWeapon()
 	CharacterState = ECharacterStateTypes::Normal;
 }
 
+void ACPP_Character::StopAttack()
+{
+	GetWorldTimerManager().ClearTimer(FireTimerHandle);
+	StatComponent->IncreaseMP();
+}
+
 bool ACPP_Character::CanAttackState()
 {
-	return (CharacterState == ECharacterStateTypes::Equipped || CharacterState == ECharacterStateTypes::Aim)
+	return IsUnderArm()
 		&& ActionState == ECharacterActionState::Normal
 		&& PressFireKey;
 }
@@ -657,7 +686,7 @@ bool ACPP_Character::CanUnEquipState()
 
 bool ACPP_Character::IsUnderArm()
 {
-	return (CharacterState == ECharacterStateTypes::Equipped) || (CharacterState == ECharacterStateTypes::Aim);
+	return CharacterState > ECharacterStateTypes::UnEquipped;
 }
 
 void ACPP_Character::ResetRootOffset()
@@ -698,17 +727,17 @@ void ACPP_Character::PlayMontage(UAnimMontage* montage)
 
 void ACPP_Character::HoldWeapon()
 {
-	if (IsValid(WeaponManager->GetCurrentWeapon()))
+	if (IsValid(WeaponManager))
 	{
-		WeaponManager->GetCurrentWeapon()->Equip(GetMesh(), "weapon_socket_r");
+		WeaponManager->HoldWeapon(GetMesh(), "weapon_socket_r");
 	}
 }
 
 void ACPP_Character::UnHoldWeapon()
 {
-	if (IsValid(WeaponManager->GetCurrentWeapon()))
+	if (IsValid(WeaponManager))
 	{
-		WeaponManager->GetCurrentWeapon()->Equip(GetMesh(), "weapon_socket_back");
+		WeaponManager->UnHoldWeapon(GetMesh(), "weapon_socket_back");
 	}
 }
 
@@ -721,7 +750,11 @@ void ACPP_Character::EquippingEnd()
 void ACPP_Character::SuperActionEnd()
 {
 	ActionState = ECharacterActionState::Normal;
-	//DISPLAYLOG(TEXT("bOrientRotationToMovement is true"))
+
+	if (PressFireKey)
+	{
+		AttackWeapon();
+	}
 }
 
 void ACPP_Character::SetMouseRate()
@@ -826,9 +859,6 @@ void ACPP_Character::OnRestore(ERestoreTypes restoreTypes, const float amount)
 		break;
 	case ERestoreTypes::Health:
 		StatComponent->IncreaseHP(amount);
-		break;
-	case ERestoreTypes::Mana:
-		StatComponent->IncreaseMP(amount);
 		break;
 	case ERestoreTypes::Stamina:
 		break;
