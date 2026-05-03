@@ -533,6 +533,12 @@ void ACPP_Character::SetMovementRotate(bool bORT, float rotationRate)
 {
 	GetCharacterMovement()->bOrientRotationToMovement = bORT;
 	GetCharacterMovement()->RotationRate.Yaw = rotationRate;
+	
+	UCPP_AnimInstance* anim = Cast<UCPP_AnimInstance>(GetMesh()->GetAnimInstance());
+	if (anim)
+	{
+		anim->isOrientRot = bORT;
+	}
 }
 
 void ACPP_Character::LookAt()

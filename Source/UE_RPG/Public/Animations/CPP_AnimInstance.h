@@ -60,6 +60,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 		bool isCrouching = false;
 
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+		bool isOrientRot = true;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Movement | CharacterState")
 		ECharacterStateTypes CharacterState;
 
