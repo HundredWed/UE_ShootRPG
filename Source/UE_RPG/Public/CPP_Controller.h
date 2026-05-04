@@ -48,8 +48,6 @@ public:
 	UFUNCTION()
 	void SetHUDVisibility(bool bshowHUD);
 
-	bool ToggleQuestWindow();
-
 	void ShowCursor();
 	void HideCursor(); 
 

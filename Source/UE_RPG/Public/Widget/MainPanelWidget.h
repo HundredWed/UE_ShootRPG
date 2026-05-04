@@ -48,8 +48,6 @@ public:
 	//void SetStaminaBarPercent(float Percent);
 	void UpdateLevel(int32 level);
 
-	bool ToggleQuestList();
-
 	void PlayFadeIn();
 	void PlayFadeOut();
 

@@ -821,21 +821,3 @@ void UInventory::ApplySaveData(UCPP_SaveDataSubsystem* saveSystem)
 	CurrentGold = loadData.Gold;
 	CurrentWeight = loadData.Weight;
 }
-
-void UInventory::ShowInventory()
-{
-	if (IsValid(InventoryWidget))
-	{
-		InventoryWidget->SetVisibility(ESlateVisibility::Visible);
-		InventoryWidget->SetIsEnabled(true);
-	}	
-}
-
-void UInventory::HideInventory()
-{
-	if (IsValid(InventoryWidget))
-	{
-		InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
-		InventoryWidget->SetIsEnabled(false);
-	}	
-}

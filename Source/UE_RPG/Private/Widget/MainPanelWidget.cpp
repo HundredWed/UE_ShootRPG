@@ -49,8 +49,6 @@ void UMainPanelWidget::BindCharacter(ACPP_Character* player)
 	PC->OnScreenBlackEvent.AddUObject(this, &UMainPanelWidget::PlayFadeIn);
 	PC->OnScreenRevealEvent.AddUObject(this, &UMainPanelWidget::PlayFadeOut);
 
-	//플레이어 생성시 한번만 콜되니 여기서 초기화
-	InitState(FCharacterStats());
 }
 
 void UMainPanelWidget::InitState(const FCharacterStats& stat)
@@ -90,22 +88,6 @@ void UMainPanelWidget::ManaCoolDownEvent()
 void UMainPanelWidget::UpdateLevel(int32 level)
 {
 	StateWidget->UpdateLevel(level);
-}
-
-bool UMainPanelWidget::ToggleQuestList()
-{
-	if (IsQuestListActivate)
-	{
-		InProgressQuestsWidget->SetCustomVisibility(ESlateVisibility::Hidden);
-		IsQuestListActivate = false;
-	}
-	else
-	{
-		InProgressQuestsWidget->SetCustomVisibility(ESlateVisibility::Visible);
-		IsQuestListActivate = true;
-	}	
-
-	return IsQuestListActivate;
 }
 
 void UMainPanelWidget::PlayFadeIn()
@@ -164,7 +146,6 @@ bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDrop
 			else
 			{
 				//임시 로직
-				// ui매니저에 위젯을 등록하는 방법을 바꾸면서 리팩토링
 				//===================================================================================
 				ACPP_Character* player = Cast<ACPP_Character>(GetOwningPlayerPawn());
 				bool successRemove = player->GetInventory()->RemoveItemAtIndex(slotIndex, amount);

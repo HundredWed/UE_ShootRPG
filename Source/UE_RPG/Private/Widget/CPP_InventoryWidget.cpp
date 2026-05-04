@@ -16,6 +16,7 @@
 #include "Widget/SlotDrag.h"
 #include "Widget/SetAmountWidget.h"
 #include "Widget/CPP_EquipmentInventory.h"
+#include "Systems/CPP_UIEventHubSubsystem.h"
 
 void UCPP_InventoryWidget::NativeConstruct()
 {
@@ -30,6 +31,11 @@ void UCPP_InventoryWidget::NativeConstruct()
 		InventoryRef = player->GetInventory(); 
 		SplitWidget->SetWeakInventoryRef(InventoryRef);
 	}
+
+	UCPP_UIEventHubSubsystem* hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
+	hub->OnInventoryToggleEvent.AddUObject(this, &UCPP_InventoryWidget::SetVisibilityInventory);
+
+	SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UCPP_InventoryWidget::GenerateSlotWidget(const int32 slotsParRow)
@@ -73,8 +79,24 @@ void UCPP_InventoryWidget::GenerateSlotWidget(const int32 slotsParRow)
 
 void UCPP_InventoryWidget::CloseWidget()
 {
-	//PlayerRef->HideGameInventory();
-	SplitWidget->SetVisibility(ESlateVisibility::Hidden);
+	UCPP_UIEventHubSubsystem* Hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
+
+	if (Hub)
+	{
+		Hub->OnRequestHideCursor.Execute();
+		SplitWidget->SetVisibility(ESlateVisibility::Hidden);
+		SetVisibility(ESlateVisibility::Hidden);
+	}	
+}
+
+void UCPP_InventoryWidget::OpenWidget()
+{
+	UCPP_UIEventHubSubsystem* Hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
+	if (Hub)
+	{
+		Hub->OnRequestShowCursor.Execute();
+		SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void UCPP_InventoryWidget::SortInventory()
@@ -246,6 +268,20 @@ void UCPP_InventoryWidget::SeSlotInfo(UCPP_Slot* slot, const int32 index)
 
 	const FName slotItemID = InventoryRef->GetSlotInfoIndex(index).ItemID;
 	slot->InitSlotInfo(index);
+}
+
+void UCPP_InventoryWidget::SetVisibilityInventory()
+{
+	ESlateVisibility visible = GetVisibility();
+	switch (visible)
+	{
+	case ESlateVisibility::Visible:
+		CloseWidget();
+		break;
+	case ESlateVisibility::Hidden:
+		OpenWidget();
+		break;
+	}
 }
 
 void UCPP_InventoryWidget::OnSlotDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation, const int32 index)

@@ -73,6 +73,8 @@ public:
 
 	UFUNCTION()
 	void CloseWidget();
+	UFUNCTION()
+	void OpenWidget();
 
 	UFUNCTION()
 	void SortInventory();
@@ -98,6 +100,7 @@ protected:
 private:
 
 	void SeSlotInfo(UCPP_Slot* slot, const int32 index );
+	void SetVisibilityInventory();
 
 	//일반 슬롯
 	void OnSlotDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation, const int32 index);

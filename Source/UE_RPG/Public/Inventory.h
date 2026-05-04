@@ -80,10 +80,6 @@ public:
 	int32 Partition(int32 left, int32 right);
 	uint8 GetCompareValue(int32 index);
 
-	/**inventory widget function (FORCEINLINE) */
-	void ShowInventory(); 
-	void HideInventory();
-
 	/**equip weapon*/
 	/**this func set equipment and swap weapon*/
 	void SetEquipWeapon(int32 fromIndex);

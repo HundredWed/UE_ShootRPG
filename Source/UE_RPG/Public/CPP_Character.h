@@ -218,12 +218,7 @@ public:
 	FORCEINLINE bool GetIsAiming() const { return bAiming; }
 	FORCEINLINE bool GetPlayerMoveState() { return bMoving; }
 	FORCEINLINE UCPP_StatComponent* GetStatComponent() { return StatComponent; }
-	
-	/**inventory*/
-	UFUNCTION()
-	void HideGameInventory();
 
-	void ShowGameInventory();
 
 	void InitInventory(ACPP_Controller* PC);
 

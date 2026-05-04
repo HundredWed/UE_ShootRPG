@@ -3,6 +3,7 @@
 #include "Widget/NPC/Dialogue/CPP_QuestListButton.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
+#include "Systems/CPP_UIEventHubSubsystem.h"
 
 void UCPP_InProgressQuestsWidget::NativeConstruct()
 {
@@ -15,6 +16,9 @@ void UCPP_InProgressQuestsWidget::NativeConstruct()
 		questSystem->OnChangeQuestInfo.BindUObject(this, &UCPP_InProgressQuestsWidget::UpdateQuestInfo);
 		questSystem->OnAddProgress.AddUObject(this, &UCPP_InProgressQuestsWidget::AddQuestList);
 		questSystem->OnQuestClear.AddUObject(this, &UCPP_InProgressQuestsWidget::RemoveQuestList);
+
+		UCPP_UIEventHubSubsystem* hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
+		hub->OnQuestListToggleEvent.AddUObject(this, &UCPP_InProgressQuestsWidget::SetVisibilityInProgressQuest);
 	}
 	
 	if (HiddenAnimation)
@@ -72,6 +76,20 @@ void UCPP_InProgressQuestsWidget::RemoveQuestList(const FQuest& quest)
 	{
 		QuestDescription->SetText(FText::FromString(TEXT("")));
 		QuestObjective->SetText(FText::FromString(TEXT("")));
+	}
+}
+
+void UCPP_InProgressQuestsWidget::SetVisibilityInProgressQuest()
+{
+	ESlateVisibility visible = GetVisibility();
+	switch (visible)
+	{
+	case ESlateVisibility::Visible:
+		CloseWidget();		
+		break;
+	case ESlateVisibility::Hidden:
+		OpenWidget();
+		break;
 	}
 }
 
@@ -160,4 +178,24 @@ void UCPP_InProgressQuestsWidget::UpdateQuestInfo(const FQuest& quest)
 void UCPP_InProgressQuestsWidget::OnHiddenAnimationFinished()
 {
 	SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UCPP_InProgressQuestsWidget::CloseWidget()
+{
+	UCPP_UIEventHubSubsystem* Hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
+	if (Hub)
+	{
+		Hub->OnRequestHideCursor.Execute();
+		SetCustomVisibility(ESlateVisibility::Hidden);		
+	}
+}
+
+void UCPP_InProgressQuestsWidget::OpenWidget()
+{
+	UCPP_UIEventHubSubsystem* Hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
+	if (Hub)
+	{
+		Hub->OnRequestShowCursor.Execute();
+		SetCustomVisibility(ESlateVisibility::Visible);		
+	}
 }

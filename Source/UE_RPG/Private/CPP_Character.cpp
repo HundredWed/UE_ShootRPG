@@ -20,6 +20,7 @@
 #include "Systems/CPP_QuestSubsystem.h"
 #include "Component/CPP_StatComponent.h"
 #include "Animations/CPP_AnimInstance.h"
+#include "Systems/CPP_UIEventHubSubsystem.h"
 
 
 ACPP_Character::ACPP_Character()
@@ -66,8 +67,7 @@ void ACPP_Character::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//위젯
-	HideGameInventory();
+	StatComponent->InitCharacterStats();
 
 	if (IsValid(CameraManager))
 	{
@@ -88,12 +88,12 @@ void ACPP_Character::BeginPlay()
 	}
 
 	UGameInstance* GI = GetGameInstance();
-	if (!IsValid(GI))
+	if (IsValid(GI))
 	{
-		return;
+		QuestSubsystem = GI->GetSubsystem<UCPP_QuestSubsystem>();
+		QuestSubsystem->OnQuestClear.AddUObject(this, &ACPP_Character::OnQuestClearEvent);
 	}
-	QuestSubsystem = GI->GetSubsystem<UCPP_QuestSubsystem>();
-	QuestSubsystem->OnQuestClear.AddUObject(this, &ACPP_Character::OnQuestClearEvent);
+	
 
 	if (IsValid(StatComponent))
 	{
@@ -432,24 +432,19 @@ void ACPP_Character::Dodge(const FInputActionValue& Value)
 
 void ACPP_Character::InventoryVisibility(const FInputActionValue& Value)
 {
-	if (PressKey(Value) && IsQuestListVisible == false)
+	UCPP_UIEventHubSubsystem* hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
+	if (hub)
 	{
-		if (isVisible)
-		{
-			HideGameInventory();
-		}
-		else if(!isVisible)
-		{
-			ShowGameInventory();
-		}
+		hub->OnInventoryToggleEvent.Broadcast();
 	}
 }
 
 void ACPP_Character::QuestListVisibility(const FInputActionValue& Value)
 {
-	if (ACPP_Controller* PC = Cast<ACPP_Controller>(GetController()))
+	UCPP_UIEventHubSubsystem* hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
+	if (hub)
 	{
-		IsQuestListVisible = PC->ToggleQuestWindow();
+		hub->OnQuestListToggleEvent.Broadcast();
 	}
 }
 
@@ -812,34 +807,6 @@ float ACPP_Character::GetCrosshairSpreadMultiplier() const
 void ACPP_Character::SetHitResultObject(AActor* hitresultobject)
 {
 	HitResultObject = hitresultobject;
-}
-
-void ACPP_Character::HideGameInventory()
-{
-	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
-	if (IsValid(playercontroller) == false)
-	{
-		return;
-	}
-	
-	playercontroller->HideCursor();
-
-	isVisible = false;
-	GameInventory->HideInventory();
-}
-
-void ACPP_Character::ShowGameInventory()
-{
-	ACPP_Controller* playercontroller = Cast<ACPP_Controller>(GetController());
-	if (IsValid(playercontroller) == false)
-	{
-		return;
-	}
-
-	playercontroller->ShowCursor();
-
-	isVisible = true;
-	GameInventory->ShowInventory();
 }
 
 void ACPP_Character::InitInventory(ACPP_Controller* PC)

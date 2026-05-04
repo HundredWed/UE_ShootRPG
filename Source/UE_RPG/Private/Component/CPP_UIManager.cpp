@@ -6,6 +6,7 @@
 #include "Widget/NPC/Dialogue/CPP_DialogueWidget.h"
 #include "Component/CPP_StatComponent.h"
 #include "CPP_Controller.h"
+#include "Systems/CPP_UIEventHubSubsystem.h"
 
 UCPP_UIManager::UCPP_UIManager()
 {
@@ -59,17 +60,6 @@ void UCPP_UIManager::RegisterPlayerCharacterToWidget(ACPP_Character* player)
 	}
 }
 
-bool UCPP_UIManager::ToggleQuestListWindow()
-{
-	if (CurrentWidgetType == EWidgetType::Player)
-	{
-		UMainPanelWidget* playerWG = Cast<UMainPanelWidget>((CurrentWidget));
-		return playerWG->ToggleQuestList();
-	}
-
-	return false;
-}
-
 UCPP_InventoryWidget* UCPP_UIManager::GetInventoryWidget()
 {
 	if (TObjectPtr<UUserWidget>* wd = Widgets.Find(EWidgetType::Player))
@@ -94,6 +84,18 @@ void UCPP_UIManager::HideCurrentWidget()
 	{
 		CurrentWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+void UCPP_UIManager::RequestShowCursor()
+{
+	ACPP_Controller* PC = Cast<ACPP_Controller>(GetOwner());
+	PC->ShowCursor();
+}
+
+void UCPP_UIManager::RequestHideCursor()
+{
+	ACPP_Controller* PC = Cast<ACPP_Controller>(GetOwner());
+	PC->HideCursor();
 }
 
 void UCPP_UIManager::SwitchToPlayerWidget()
@@ -137,6 +139,10 @@ void UCPP_UIManager::BeginPlay()
 	{
 		UCPP_DialogueSystem* dialogue = GI->GetSubsystem<UCPP_DialogueSystem>();
 		dialogue->OnQuitDialogue.BindUObject(this, &UCPP_UIManager::SwitchToPlayerWidget);
-	}
+
+		UCPP_UIEventHubSubsystem* hub = GI->GetSubsystem<UCPP_UIEventHubSubsystem>();
+		hub->OnRequestShowCursor.BindUObject(this, &UCPP_UIManager::RequestShowCursor);
+		hub->OnRequestHideCursor.BindUObject(this, &UCPP_UIManager::RequestHideCursor);
+	}	
 }
 

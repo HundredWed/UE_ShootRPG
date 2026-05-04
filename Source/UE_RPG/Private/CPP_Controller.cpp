@@ -216,24 +216,10 @@ void ACPP_Controller::SetHUDVisibility(bool bshowHUD)
 	}
 }
 
-bool ACPP_Controller::ToggleQuestWindow()
-{
-    bool isActivate = UIManager->ToggleQuestListWindow();
-
-    if (isActivate)
-    {
-        ShowCursor();
-    }
-    else
-    {
-        HideCursor();
-    }
-
-    return isActivate;
-}
-
 void ACPP_Controller::ShowCursor()
 {
+    if (bShowMouseCursor) return;
+
     FInputModeGameAndUI InputMode;
     InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
     InputMode.SetHideCursorDuringCapture(false);
@@ -248,6 +234,8 @@ UCPP_InventoryWidget* ACPP_Controller::GetInventoryWidget()
 
 void ACPP_Controller::HideCursor()
 {
+    if (!bShowMouseCursor) return;
+
     SetInputMode(FInputModeGameOnly());
     bShowMouseCursor = false;
 }

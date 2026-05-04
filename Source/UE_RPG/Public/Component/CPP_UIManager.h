@@ -34,9 +34,6 @@ public:
 	void SetMainWidget(EWidgetType type);
 	void RegisterPlayerCharacterToWidget(ACPP_Character* player);
 
-	bool ToggleQuestListWindow();
-
-	//임시 리펙토링 필수
 	UCPP_InventoryWidget* GetInventoryWidget();
 
 	FOnRevertPlayerWidgetDelegate RevertPlayerWidget;
@@ -48,6 +45,9 @@ private:
 
 	void ShowCurrentWidget();
 	void HideCurrentWidget();
+
+	void RequestShowCursor();
+	void RequestHideCursor();
 
 	UFUNCTION()
 	void SwitchToPlayerWidget();
