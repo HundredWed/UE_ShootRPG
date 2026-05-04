@@ -1,4 +1,4 @@
-#include "Object/CPP_Projectile.h"
+﻿#include "Object/CPP_Projectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -71,13 +71,13 @@ void ACPP_Projectile::ShootProjectile(bool bAEO)
 	//WARNINGLOG(TEXT("%s"), *location.ToString())
 	//WARNINGLOG(TEXT("%s"), *PredictResult.HitResult.Location.ToString())
 
-	const float fixZ = 0.5f;/**to fix the issue of getting buried in the ground*/
+	const float fixZ = 10.f;/**to fix the issue of getting buried in the ground*/
 	location.Z += fixZ;
 
 	UWorld* world = GetWorld();
 	if (bAEO && IsValid(AOEclass) && IsValid(world))
 	{		
-		AOE = world->SpawnActor<ACPP_AOE>(AOEclass, location, PredictResult.HitResult.ImpactPoint.Rotation());
+		AOE = world->SpawnActor<ACPP_AOE>(AOEclass, location, FRotator::ZeroRotator);
 		AOE->SetAreaSpeed(ActualHitTime);
 
 		FTimerHandle TimerHandle;

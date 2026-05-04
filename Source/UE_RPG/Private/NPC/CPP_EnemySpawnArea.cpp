@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "NPC/CPP_EnemySpawnArea.h"
@@ -15,8 +15,6 @@ ACPP_EnemySpawnArea::ACPP_EnemySpawnArea()
 
 	SpawnArea->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SpawnArea->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-
-	SpawnArea->SetSphereRadius(SearchAreaRadius);
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +28,7 @@ void ACPP_EnemySpawnArea::BeginPlay()
 		SpawnArea->OnComponentEndOverlap.AddDynamic(this, &ACPP_EnemySpawnArea::OnSphereEndOverlap);
 
 		CenterPos = GetActorLocation();
+		SpawnArea->SetSphereRadius(SearchAreaRadius);
 	}
 	//CreateEnemy();
 	SpawnEnemy();
@@ -73,7 +72,7 @@ void ACPP_EnemySpawnArea::SpawnEnemy()
 
 void ACPP_EnemySpawnArea::FocusTarget()
 {
-	if (!IsValid(Target) || Enemys.Num() <= 0)
+	if (!Target.IsValid() || Enemys.Num() <= 0)
 	{
 		//WARNINGLOG(TEXT("can not work FocusTarget please check valid Target or EnemysNum"))
 		return;
@@ -108,7 +107,7 @@ void ACPP_EnemySpawnArea::Encounter()
 		if (!IsValid(Enemys[i]))
 			return;
 
-		Enemys[i]->SetTarget(Target);
+		Enemys[i]->SetTarget(Target.Get());
 	}
 
 	FocusTarget();
@@ -155,7 +154,7 @@ void ACPP_EnemySpawnArea::CreateEnemy()
 	for (int32 i = 0; i < EnemyClass.Num(); i++)
 	{
 		AEnemyBase* enemy = world->SpawnActor<AEnemyBase>(EnemyClass[i]);
-		Enemys.Push(enemy);
+		Enemys.Add(enemy);
 	}
 }
 

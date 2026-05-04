@@ -1,4 +1,4 @@
-#include "NPC/CPP_Enemy_Gunner.h"
+﻿#include "NPC/CPP_Enemy_Gunner.h"
 #include "CPP_Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -15,7 +15,7 @@ void ACPP_Enemy_Gunner::BeginPlay()
 
 void ACPP_Enemy_Gunner::Combat()
 {
-	if (!IsValid(Target))
+	if (!Target.IsValid())
 		return;
 
 	float animLength = 0.f;

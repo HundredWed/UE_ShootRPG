@@ -78,13 +78,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "NPC Info")
 	float RespawnDelay = 6.f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC Info")
-	ENPCActionState ENPCActionState = ENPCActionState::Normal;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC Info")
-	ENPCState NPCState = ENPCState::Patrol;
 
-	UPROPERTY(VisibleAnywhere, Category = "NPC Info | Target Info")
-	ACPP_Character* Target = nullptr;
+	ENPCActionState ENPCActionState = ENPCActionState::Normal;
+	ENPCState NPCState = ENPCState::Patrol;
+	ENPCState PrevNPCState = ENPCState::Patrol;
+
 
 	UPROPERTY(EditAnyWhere, Category = "NPC Info")
 	FName NPCID;
@@ -94,6 +92,8 @@ protected:
 
 	UPROPERTY()
 	FTransform CachedCameraTransform;
+
+	TWeakObjectPtr<ACPP_Character> Target;
 
 	FVector HitDir = FVector::Zero();
 	FVector SpawnPos = FVector::Zero();

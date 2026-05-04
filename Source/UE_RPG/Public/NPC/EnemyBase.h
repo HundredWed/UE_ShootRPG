@@ -41,6 +41,7 @@ public:
 	void BehaviorMode(ENPCState enemyState);
 	void InitBehaviorState();
 	bool CanUpdateState();
+	void ExecuteBehavior();
 	
 	/**action*/
 	void Patrol();
@@ -103,6 +104,7 @@ protected:
 	bool bRotatOnly = false;
 	float CorwdTraceRadius = 0.f;
 
+	FTimerHandle BehaviorTimerHandle;
 private:
 
 	

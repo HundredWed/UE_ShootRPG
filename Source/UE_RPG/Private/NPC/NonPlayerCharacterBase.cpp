@@ -167,6 +167,7 @@ void ANonPlayerCharacterBase::SetStateDeath()
 	NPCState = ENPCState::Death;
 	NPCAnimInstance->SetNPCState(NPCState);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetWorldTimerManager().ClearAllTimersForObject(this);
 	//GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
 	//GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel4, ECollisionResponse::ECR_Ignore);
 }
@@ -204,7 +205,7 @@ void ANonPlayerCharacterBase::MoveSide(const FVector& pos)
 	NPCController->MoveTo(MoveRequest);
 	NPCController->CanUpdateState(true);
 
-	if (IsValid(Target))
+	if (Target.IsValid())
 	{
 		bTurningLoop = true;
 		LookAtTarget(Target->GetActorLocation());
@@ -235,7 +236,7 @@ float ANonPlayerCharacterBase::PlayNPCMontage(UAnimMontage* montageToPlay, const
 
 float ANonPlayerCharacterBase::CheckDist()
 {
-	if (!IsValid(Target))
+	if (!Target.IsValid())
 		return -1;
 
 	FVector targetPos = Target->GetActorLocation();
@@ -275,7 +276,7 @@ void ANonPlayerCharacterBase::LookAtTarget(const FVector& targetpos, bool boverT
 		TurnRight();
 	}
 
-	if (bTurningLoop && IsValid(Target))
+	if (bTurningLoop && Target.IsValid())
 	{
 		FTimerHandle timerHandle;
 		FTimerDelegate TimerDel;

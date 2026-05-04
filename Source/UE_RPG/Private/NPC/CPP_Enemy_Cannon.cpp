@@ -1,4 +1,4 @@
-#include "NPC/CPP_Enemy_Cannon.h"
+﻿#include "NPC/CPP_Enemy_Cannon.h"
 #include "CPP_Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -32,7 +32,7 @@ void ACPP_Enemy_Cannon::ShootProjectile(bool bAEO, int32 index)
 
 	bool socket = GetMesh()->DoesSocketExist("Muzzle_Front");
 
-	if (socket && PTClassse.Num() > 0 && IsValid(Target))
+	if (socket && PTClassse.Num() > 0 && Target.IsValid())
 	{
 		FVector loc = GetMesh()->GetSocketLocation("Muzzle_Front");
 		FRotator rot = UKismetMathLibrary::FindLookAtRotation(loc, Target->GetActorLocation());
@@ -62,7 +62,7 @@ void ACPP_Enemy_Cannon::ShootProjectile(bool bAEO, int32 index)
 
 void ACPP_Enemy_Cannon::AttackFunc()
 {
-	if (!IsValid(Target) || PlaySection.Num() <= 0)
+	if (!Target.IsValid() || PlaySection.Num() <= 0)
 		return;
 	float animLength = 0;
 	float dis = CheckDist();

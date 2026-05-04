@@ -58,9 +58,9 @@ void AEnemyBase::UpdateState()
 
 	if (NPCState == ENPCState::Death)
 	{
-		BehaviorMode(NPCState = ENPCState::Death);
+		BehaviorMode(ENPCState::Death);
 	}
-	else if (!IsValid(Target))
+	else if (!Target.IsValid())
 	{
 		BehaviorMode(NPCState = ENPCState::Patrol);
 	}
@@ -72,15 +72,15 @@ void AEnemyBase::UpdateState()
 
 		if (bCorwd)
 		{
-			BehaviorMode(NPCState = ENPCState::SideStep);
+			BehaviorMode(ENPCState::SideStep);
 		}
 		else if (dis > CombatDis)
 		{
-			BehaviorMode(NPCState = ENPCState::Chase);
+			BehaviorMode(ENPCState::Chase);
 		}
 		else
 		{
-			BehaviorMode(NPCState = ENPCState::Combat);
+			BehaviorMode(ENPCState::Combat);
 		}
 	}
 }
@@ -108,7 +108,7 @@ float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	if(NPCState == ENPCState::Death)
-		BehaviorMode(NPCState = ENPCState::Death);
+		BehaviorMode(ENPCState::Death);
 
 	return 0.0f;
 }
@@ -123,7 +123,7 @@ void AEnemyBase::ThinkAction()
 {
 	if (bRotatOnly)
 	{
-		if (!IsValid(Target))
+		if (!Target.IsValid())
 			return;
 		
 		FRotator newRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Target->GetActorLocation());
@@ -153,34 +153,11 @@ void AEnemyBase::ThinkAction()
 
 void AEnemyBase::BehaviorMode(ENPCState enemyState)
 {
-	InitBehaviorState();
+	NPCState = enemyState;
 
-	switch (enemyState)
-	{
-	case ENPCState::Normal:
-		break;
-	case ENPCState::Patrol:
-		Patrol();
-		break;
-	case ENPCState::Combat:
-		Combat();
-		break;
-	case ENPCState::Chase:
-		ChaseTarget();
-		SetHealthBarWidget(true);
-		SetActorTickEnabled(true);
-		break;
-	case ENPCState::SideStep:
-		LookAtTarget(Target->GetActorLocation());
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::SideStep, DELAY4, false);
-		break;
-	case ENPCState::Death:
-		if(!bOrderfromSpawnArea)
-			MySpawnArea->EnemyDeathCount(SpawnArrNum);
-		break;
-	default:
-		break;
-	}
+	GetWorldTimerManager().ClearTimer(BehaviorTimerHandle);
+
+	GetWorldTimerManager().SetTimer(BehaviorTimerHandle, this, &AEnemyBase::ExecuteBehavior, 0.05f, false);
 }
 
 void AEnemyBase::InitBehaviorState()
@@ -217,6 +194,38 @@ bool AEnemyBase::CanUpdateState()
 	return !bOrderfromSpawnArea && 
 		ENPCActionState != ENPCActionState::Action &&
 		NPCState != ENPCState::Death;
+}
+
+void AEnemyBase::ExecuteBehavior()
+{
+	InitBehaviorState();
+
+	switch (NPCState)
+	{
+	case ENPCState::Normal:
+		break;
+	case ENPCState::Patrol:
+		Patrol();
+		break;
+	case ENPCState::Combat:
+		Combat();
+		break;
+	case ENPCState::Chase:
+		ChaseTarget();
+		SetHealthBarWidget(true);
+		SetActorTickEnabled(true);
+		break;
+	case ENPCState::SideStep:
+		LookAtTarget(Target->GetActorLocation());
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::SideStep, DELAY4, false);
+		break;
+	case ENPCState::Death:
+		if (!bOrderfromSpawnArea)
+			MySpawnArea->EnemyDeathCount(SpawnArrNum);
+		break;
+	default:
+		break;
+	}
 }
 
 void AEnemyBase::SetTarget(ACPP_Character* target)
@@ -297,7 +306,7 @@ void AEnemyBase::InitEnenmyInfo()
 
 void AEnemyBase::Patrol()
 {
-	if (Target != nullptr)
+	if (Target.IsValid())
 		ClearTargetInfo();
 
 	SetHealthBarWidget(false);
@@ -331,7 +340,7 @@ void AEnemyBase::Combat()
 		int32 random = FMath::RandRange(0, PlaySection.Num());
 		if (random == PlaySection.Num())
 		{
-			BehaviorMode(NPCState = ENPCState::SideStep);
+			BehaviorMode(ENPCState::SideStep);
 			return;
 		}
 		else
@@ -342,8 +351,8 @@ void AEnemyBase::Combat()
 		animLength = PlayNPCMontage(CombatActionMontage);
 	}
 
-
-	LookAtTarget(Target->GetActorLocation());
+	if(Target.IsValid())
+		LookAtTarget(Target->GetActorLocation());
 
 	if (CanUpdateState() && animLength > 0)
 	{
@@ -390,7 +399,7 @@ void AEnemyBase::LookatTargetByTick()
 
 void AEnemyBase::ChaseTarget()
 {
-	MoveToActor(Target);
+	MoveToActor(Target.Get());
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
@@ -410,7 +419,7 @@ void AEnemyBase::DeactivateCombatBox(const uint8 index, bool knockBack)
 
 void AEnemyBase::FinishMoveDownEvent()
 {
-	BehaviorMode(NPCState = ENPCState::Normal);
+	BehaviorMode(ENPCState::Normal);
 	GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::MoveUp, RespawnDelay, false);
 }
 

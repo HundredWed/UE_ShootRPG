@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -27,7 +27,7 @@ public:
 	void CreateEnemy();
 
 	UFUNCTION()
-		ACPP_Character* GetTarget() { return Target; }
+	TWeakObjectPtr<ACPP_Character> GetTarget() { return Target; }
 
 protected:
 
@@ -65,13 +65,12 @@ public:
 	
 private:
 
-	UPROPERTY(VisibleAnywhere, Category = "Area Info")
-		ACPP_Character* Target;
+	TWeakObjectPtr<ACPP_Character> Target;
 
 	UPROPERTY(EditAnywhere, Category = "Area Info")
 		TArray<AEnemyBase*> Enemys;
 
-	UPROPERTY(VisibleAnywhere, Category = "Area Info")
+	UPROPERTY(EditAnywhere, Category = "Area Info")
 		TArray<TSubclassOf<AEnemyBase>> EnemyClass;
 
 	UPROPERTY(VisibleAnywhere, Category = "Area Info")
