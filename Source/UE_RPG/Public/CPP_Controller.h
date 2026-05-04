@@ -51,7 +51,7 @@ public:
 	void ShowCursor();
 	void HideCursor(); 
 
-	void LinkPlayerWidgets();
+	void SetupPlayer();
 	UCPP_InventoryWidget* GetInventoryWidget(); 
 
 	void HandlePlayerDeath();

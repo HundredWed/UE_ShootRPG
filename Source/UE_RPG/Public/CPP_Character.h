@@ -182,6 +182,8 @@ public:
 	bool CanEquipState();
 	bool CanUnEquipState();
 	bool IsUnderArm();
+	void InitCharacterStat(bool bFill);
+	void SetHiddenPlayer(bool bHidden);
 
 	UFUNCTION(BlueprintCallable)
 	void ResetRootOffset();

@@ -69,7 +69,7 @@ public:
 public:	
 
 	UFUNCTION()
-	void GenerateSlotWidget(const int32 slotsParRow);
+	void GenerateSlotWidget(UInventory* inventory, const int32 slotsParRow);
 
 	UFUNCTION()
 	void CloseWidget();

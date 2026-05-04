@@ -144,3 +144,11 @@ float UCPP_WeaponManager::TriggerWeapon()
 	return -1.f;
 }
 
+void UCPP_WeaponManager::SetHiddenWeapon(bool newHidden)
+{
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentWeapon->SetActorHiddenInGame(newHidden);
+	}	
+}
+

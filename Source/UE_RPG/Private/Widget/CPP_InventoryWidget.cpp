@@ -25,21 +25,17 @@ void UCPP_InventoryWidget::NativeConstruct()
 	CloseButton->OnClicked.AddDynamic(this, &UCPP_InventoryWidget::CloseWidget);
 	SortButton->OnClicked.AddDynamic(this, &UCPP_InventoryWidget::SortInventory);
 
-	ACPP_Character* player = Cast<ACPP_Character>(GetOwningPlayerPawn());
-	if (IsValid(player))
-	{
-		InventoryRef = player->GetInventory(); 
-		SplitWidget->SetWeakInventoryRef(InventoryRef);
-	}
-
 	UCPP_UIEventHubSubsystem* hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
 	hub->OnInventoryToggleEvent.AddUObject(this, &UCPP_InventoryWidget::SetVisibilityInventory);
 
 	SetVisibility(ESlateVisibility::Hidden);
 }
 
-void UCPP_InventoryWidget::GenerateSlotWidget(const int32 slotsParRow)
+void UCPP_InventoryWidget::GenerateSlotWidget(UInventory* inventory, const int32 slotsParRow)
 {
+	InventoryRef = inventory;
+	SplitWidget->SetWeakInventoryRef(InventoryRef);
+
 	if (InventoryRef.IsValid())
 	{
 		SlotPanel->ClearChildren();

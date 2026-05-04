@@ -34,6 +34,8 @@ public:
 	void UnHoldWeapon(USceneComponent* Inparent, const FName& SocketName);
 	float TriggerWeapon();
 
+	void SetHiddenWeapon(bool newHidden);
+
 private:
 
 	UPROPERTY(EditAnywhere, Category = "EquipManagerInfo")

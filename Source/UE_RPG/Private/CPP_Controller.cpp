@@ -51,7 +51,7 @@ void ACPP_Controller::SetToDefaultInteractionState()
     ChangeInteractionState(EPlayerIputMappingState::Default);
 }
 
-void ACPP_Controller::LinkPlayerWidgets()
+void ACPP_Controller::SetupPlayer()
 {
     ACPP_Character* player = Cast<ACPP_Character>(GetPawn());
     if (player)
@@ -59,6 +59,7 @@ void ACPP_Controller::LinkPlayerWidgets()
         UIManager->InitUIManager();
         UIManager->RegisterPlayerCharacterToWidget(player);
         player->InitInventory(this);
+        player->InitCharacterStat(true);
     }   
 }
 
@@ -108,12 +109,12 @@ void ACPP_Controller::ChangeInteractionState(EPlayerIputMappingState newState)
         if (PrevInteractionState == EPlayerIputMappingState::NPCTalking)
         {
             Cast<ACPP_Character>(GetPawn())->EndDialogueCamera();
-            GetPawn()->SetActorHiddenInGame(false);
+            Cast<ACPP_Character>(GetPawn())->SetHiddenPlayer(false);
         }
         break;
     case EPlayerIputMappingState::NPCTalking:
         ShowCursor();
-        GetPawn()->SetActorHiddenInGame(true);
+        Cast<ACPP_Character>(GetPawn())->SetHiddenPlayer(true);
         break;
     }
 }
@@ -147,7 +148,9 @@ void ACPP_Controller::OnPossess(APawn* aPawn)
         }
     }
 
-    SaveSubsystem = GI->GetSubsystem<UCPP_SaveDataSubsystem>();
+    if(SaveSubsystem == nullptr)
+        SaveSubsystem = GI->GetSubsystem<UCPP_SaveDataSubsystem>();
+
     check(SaveSubsystem);
 
     SaveSubsystem->OnGatherSaveData.RemoveAll(this);
@@ -164,7 +167,7 @@ void ACPP_Controller::OnPossess(APawn* aPawn)
     Super::OnPossess(aPawn);
 
     //GetPawn() 유효구간
-    LinkPlayerWidgets();
+    SetupPlayer();
 }
 
 void ACPP_Controller::HandlePlayerDeath()
@@ -175,6 +178,8 @@ void ACPP_Controller::HandlePlayerDeath()
 
 void ACPP_Controller::RespawnPlayer()
 {
+    SaveSubsystem->SaveGameData();
+
     APawn* DeadPawn = GetPawn();
     if (DeadPawn)
     {

@@ -67,8 +67,6 @@ void ACPP_Character::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StatComponent->InitCharacterStats();
-
 	if (IsValid(CameraManager))
 	{
 		CameraManager->SetSpringArm(CameraBoom);
@@ -167,7 +165,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 float ACPP_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (ActionState == ECharacterActionState::SuperAction)
+	if (ActionState == ECharacterActionState::SuperAction || CharacterState == ECharacterStateTypes::Death)
 		return 0.0f;
 
 	if(ActionState != ECharacterActionState::Action)
@@ -176,7 +174,7 @@ float ACPP_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	if (!StatComponent->DecreaseHP(DamageAmount))
 	{
 		CharacterState = ECharacterStateTypes::Death;
-
+		
 		if (ACPP_Controller* PC = Cast<ACPP_Controller>(GetController()))
 		{
 			PC->HandlePlayerDeath();
@@ -685,6 +683,20 @@ bool ACPP_Character::CanUnEquipState()
 bool ACPP_Character::IsUnderArm()
 {
 	return CharacterState > ECharacterStateTypes::UnEquipped;
+}
+
+void ACPP_Character::InitCharacterStat(bool bFill)
+{
+	if (IsValid(StatComponent))
+	{
+		StatComponent->InitCharacterStats(bFill);
+	}
+}
+
+void ACPP_Character::SetHiddenPlayer(bool newHidden)
+{
+	SetActorHiddenInGame(newHidden);
+	WeaponManager->SetHiddenWeapon(newHidden);
 }
 
 void ACPP_Character::ResetRootOffset()

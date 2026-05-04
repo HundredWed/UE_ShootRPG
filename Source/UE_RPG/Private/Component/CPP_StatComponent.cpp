@@ -18,10 +18,16 @@ void UCPP_StatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UCPP_StatComponent::InitCharacterStats()
+void UCPP_StatComponent::InitCharacterStats(bool bFill)
 {
 	if (OnUpdateCharacterState.IsBound())
 	{
+		if (bFill)
+		{
+			CharacterStats.CurrentHealth = CharacterStats.MaxHealth;
+			CharacterStats.CurrentMana = CharacterStats.MaxMana;
+		}
+
 		OnUpdateCharacterState.Execute(CharacterStats);
 	}
 }

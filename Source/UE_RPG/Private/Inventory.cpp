@@ -38,7 +38,7 @@ void UInventory::InitInventoryInfo(ACPP_Controller* PC)
 			InventoryWidget = PC->GetInventoryWidget();
 			InventoryWidget->UpdateWeightMaxAmount(MaxWeight);
 			InventoryWidget->UpdateWeightText(0);
-			InventoryWidget->GenerateSlotWidget(InventoryRow);
+			InventoryWidget->GenerateSlotWidget(this, InventoryRow);
 
 			ApplyInventoryData();
 		}
