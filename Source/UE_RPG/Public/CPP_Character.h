@@ -89,6 +89,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* QuestListToggle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* SettingsToggle;
+
 	
 
 	/**Montage*/
@@ -151,6 +154,7 @@ public:
 	void Dodge(const FInputActionValue& Value);
 	void InventoryVisibility(const FInputActionValue& Value);
 	void QuestListVisibility(const FInputActionValue& Value);
+	void SettingsVisibility(const FInputActionValue& Value);
 	void KnockBack(const FVector& velocity);
 
 	/**trace*/

@@ -25,8 +25,10 @@ public:
 	void AddQuestList(const FQuest& quest);
 	void RemoveQuestList(const FQuest& quest);
 
-	void SetVisibilityInProgressQuest();
+protected:
 
+	virtual void CloseWidget() override;
+	virtual void OpenWidget() override;
 
 private:
 
@@ -38,12 +40,6 @@ private:
 	void UpdateQuestInfo(const FQuest& quest);
 	UFUNCTION()
 	void OnHiddenAnimationFinished();
-
-
-	void CloseWidget();
-	void OpenWidget();
-
-	void SetCustomVisibility(ESlateVisibility visibility);
 
 private:
 

@@ -72,11 +72,6 @@ public:
 	void GenerateSlotWidget(UInventory* inventory, const int32 slotsParRow);
 
 	UFUNCTION()
-	void CloseWidget();
-	UFUNCTION()
-	void OpenWidget();
-
-	UFUNCTION()
 	void SortInventory();
 
 	void SetPanelEnabled(bool enabled);
@@ -97,10 +92,12 @@ protected:
 	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)override;
 
+	UFUNCTION()
+	virtual void CloseWidget() override;
+
 private:
 
 	void SeSlotInfo(UCPP_Slot* slot, const int32 index );
-	void SetVisibilityInventory();
 
 	//일반 슬롯
 	void OnSlotDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation, const int32 index);

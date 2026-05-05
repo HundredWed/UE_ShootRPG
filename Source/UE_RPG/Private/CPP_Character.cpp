@@ -159,6 +159,7 @@ void ACPP_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		EnhancedInputComponent->BindAction(InventoryToggle, ETriggerEvent::Triggered, this, &ACPP_Character::InventoryVisibility);
 		EnhancedInputComponent->BindAction(QuestListToggle, ETriggerEvent::Triggered, this, &ACPP_Character::QuestListVisibility);
+		EnhancedInputComponent->BindAction(SettingsToggle, ETriggerEvent::Triggered, this, &ACPP_Character::SettingsVisibility);
 	}
 
 }
@@ -443,6 +444,15 @@ void ACPP_Character::QuestListVisibility(const FInputActionValue& Value)
 	if (hub)
 	{
 		hub->OnQuestListToggleEvent.Broadcast();
+	}
+}
+
+void ACPP_Character::SettingsVisibility(const FInputActionValue& Value)
+{
+	UCPP_UIEventHubSubsystem* hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
+	if (hub)
+	{
+		hub->OnSettingsWidgetToggleEvent.Broadcast();
 	}
 }
 

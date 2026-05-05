@@ -83,6 +83,17 @@ void UCPP_SaveDataSubsystem::SaveGameDataAsync()
 	}
 }
 
+void UCPP_SaveDataSubsystem::SaveAndQuitGame()
+{
+	SaveGameData();
+
+	if (UWorld* World = GetWorld())
+	{
+		APlayerController* PC = World->GetFirstPlayerController();
+		UKismetSystemLibrary::QuitGame(World, PC, EQuitPreference::Quit, true);
+	}
+}
+
 void UCPP_SaveDataSubsystem::LoadGameData()
 {
 	if (TryLoadFromSlot(CurrentSlotName))

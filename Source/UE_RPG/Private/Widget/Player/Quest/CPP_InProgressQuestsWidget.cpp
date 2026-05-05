@@ -18,7 +18,7 @@ void UCPP_InProgressQuestsWidget::NativeConstruct()
 		questSystem->OnQuestClear.AddUObject(this, &UCPP_InProgressQuestsWidget::RemoveQuestList);
 
 		UCPP_UIEventHubSubsystem* hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
-		hub->OnQuestListToggleEvent.AddUObject(this, &UCPP_InProgressQuestsWidget::SetVisibilityInProgressQuest);
+		hub->OnQuestListToggleEvent.AddUObject(this, &UCPP_InProgressQuestsWidget::SetWidgetVisibility);
 	}
 	
 	if (HiddenAnimation)
@@ -76,41 +76,6 @@ void UCPP_InProgressQuestsWidget::RemoveQuestList(const FQuest& quest)
 	{
 		QuestDescription->SetText(FText::FromString(TEXT("")));
 		QuestObjective->SetText(FText::FromString(TEXT("")));
-	}
-}
-
-void UCPP_InProgressQuestsWidget::SetVisibilityInProgressQuest()
-{
-	ESlateVisibility visible = GetVisibility();
-	switch (visible)
-	{
-	case ESlateVisibility::Visible:
-		CloseWidget();		
-		break;
-	case ESlateVisibility::Hidden:
-		OpenWidget();
-		break;
-	}
-}
-
-void UCPP_InProgressQuestsWidget::SetCustomVisibility(ESlateVisibility visibility)
-{
-	if (!VisibleAnimation || !HiddenAnimation)
-	{
-		return;
-	}
-
-	switch (visibility)
-	{
-	case ESlateVisibility::Visible:
-		PlayAnimation(VisibleAnimation);
-		SetVisibility(ESlateVisibility::Visible);
-		break;
-	case ESlateVisibility::Hidden:
-		PlayAnimation(HiddenAnimation);
-		break;
-	default:
-		break;
 	}
 }
 
@@ -182,20 +147,23 @@ void UCPP_InProgressQuestsWidget::OnHiddenAnimationFinished()
 
 void UCPP_InProgressQuestsWidget::CloseWidget()
 {
-	UCPP_UIEventHubSubsystem* Hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
-	if (Hub)
+	Super::CloseWidget();
+
+	if (HiddenAnimation)
 	{
-		Hub->OnRequestHideCursor.Execute();
-		SetCustomVisibility(ESlateVisibility::Hidden);		
-	}
+		//Super::CloseWidget()로 위젯이 꺼지기 때문에 애니메이션 재생을 위해 Visible
+		SetVisibility(ESlateVisibility::Visible);
+		PlayAnimation(HiddenAnimation);
+	}	
 }
 
 void UCPP_InProgressQuestsWidget::OpenWidget()
 {
-	UCPP_UIEventHubSubsystem* Hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
-	if (Hub)
+	Super::OpenWidget();
+
+	if (VisibleAnimation)
 	{
-		Hub->OnRequestShowCursor.Execute();
-		SetCustomVisibility(ESlateVisibility::Visible);		
+		PlayAnimation(VisibleAnimation);
 	}
+	
 }

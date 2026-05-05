@@ -15,6 +15,7 @@ class UCPP_StatComponent;
 class UImage;
 class UWidgetAnimation;
 class ACPP_Character;
+class UCPP_SettingsWidget;
 
 UCLASS()
 class UE_RPG_API UMainPanelWidget : public UCustomUMGWidget
@@ -85,6 +86,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UImage* BackScreen;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UCPP_SettingsWidget* SettingsWidget;
 
 	UPROPERTY(Transient, meta = (BindWidgetAnim, AllowPrivateAccess = "true"))
 	UWidgetAnimation* FadeAnim;

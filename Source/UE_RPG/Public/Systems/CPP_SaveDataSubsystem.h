@@ -39,7 +39,9 @@ public:
 
 	void SaveGameData();
 	void SaveGameDataAsync();
+	void SaveAndQuitGame();
 	void LoadGameData();
+
 
 	FOnGatherSaveDataDelegate OnGatherSaveData;
 	FOnDataLoadedDelegate OnDataLoaded;

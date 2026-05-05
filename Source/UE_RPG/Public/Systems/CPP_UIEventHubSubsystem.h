@@ -10,6 +10,7 @@ DECLARE_DELEGATE(FOnRequestHideCursorEvent);
 
 DECLARE_MULTICAST_DELEGATE(FOnInventoryToggleEvent)
 DECLARE_MULTICAST_DELEGATE(FOnQuestListToggleEvent)
+DECLARE_MULTICAST_DELEGATE(FOnSettingsWidgetToggleEvent)
 
 UCLASS()
 class UE_RPG_API UCPP_UIEventHubSubsystem : public UGameInstanceSubsystem
@@ -20,9 +21,10 @@ public:
 
 	FOnRequestShowCursorEvent OnRequestShowCursor;
 	FOnRequestHideCursorEvent OnRequestHideCursor;
-
+	
 
 	FOnInventoryToggleEvent OnInventoryToggleEvent;
 	FOnQuestListToggleEvent OnQuestListToggleEvent;
+	FOnSettingsWidgetToggleEvent OnSettingsWidgetToggleEvent;
 
 };

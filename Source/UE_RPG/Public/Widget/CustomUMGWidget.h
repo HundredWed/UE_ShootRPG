@@ -7,7 +7,6 @@
 #include "UE_RPG/UtilityMecro.h"
 #include "CustomUMGWidget.generated.h"
 
-DECLARE_DELEGATE(FOnCloseEventDelegate);
 
 UCLASS()
 class UE_RPG_API UCustomUMGWidget : public UUserWidget
@@ -17,5 +16,8 @@ class UE_RPG_API UCustomUMGWidget : public UUserWidget
 protected:
 	virtual void NativeConstruct() override;
 
-	FOnCloseEventDelegate OnCloseEvent;
+	virtual void CloseWidget();
+	virtual void OpenWidget();
+
+	virtual void SetWidgetVisibility();
 };
