@@ -7,7 +7,7 @@ enum class ECharacterTypes : uint8
 {
 	Player,
 	NPC_Monster,
-	NPC_Person,
+	NPC_Talkable,
 
 	Type_None
 };

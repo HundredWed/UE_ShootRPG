@@ -944,7 +944,7 @@ void ACPP_Character::LookAtObject(AActor* obj)
 	if (ICPP_InteractInterface* interactObj = Cast<ICPP_InteractInterface>(obj))
 	{
 		interactObj->OnBeginLookAt();
-		if (interactObj->GetType() == ECharacterTypes::NPC_Person)
+		if (interactObj->GetType() == ECharacterTypes::NPC_Talkable)
 		{
 			OnLookAtTalker.Broadcast();
 		}
@@ -956,7 +956,7 @@ void ACPP_Character::EndLookAtObject(AActor* obj)
 	if (ICPP_InteractInterface* interactObj = Cast<ICPP_InteractInterface>(obj))
 	{
 		interactObj->OnEndLookAt();
-		if (interactObj->GetType() == ECharacterTypes::NPC_Person)
+		if (interactObj->GetType() == ECharacterTypes::NPC_Talkable)
 		{
 			OnEndLookAtTalker.Broadcast();
 		}
