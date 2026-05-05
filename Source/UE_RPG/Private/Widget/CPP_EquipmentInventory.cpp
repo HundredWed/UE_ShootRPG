@@ -116,8 +116,17 @@ void UCPP_EquipmentInventory::UpdateEquipSlot(const FItemInfoTable* itemInfo, co
 {
 	if (TObjectPtr<UCPP_EquipSlot>* slot = EquipSlots.Find(equipmentInfo->EquipmentType))
 	{
+		//만약 전에 장착한 무기가 있다면 해당 무기만큼 능력치를 뺀 후 업데이트
+		if ((*slot)->GetEquipmentID().IsNone() == false)
+		{
+			if (const FEquipmentInfoTable* prevEquipment = InventoryRef->RequestEquipmentData((*slot)->GetEquipmentID()))
+			{
+				SetTotalState(prevEquipment, true);				
+			}
+		}
+		
 		(*slot)->UpdateEquipmentSlot(itemInfo, equipmentInfo);
-		SetTotalState(equipmentInfo);
+		SetTotalState(equipmentInfo);		
 	}
 }
 
@@ -152,6 +161,10 @@ void UCPP_EquipmentInventory::InitEquipmentInventory(TWeakObjectPtr<UInventory> 
 				const FItemInfoTable* itemData = InventoryRef->RequestItemData(id);
 				const FEquipmentInfoTable* equipmentData = InventoryRef->RequestEquipmentData(id);
 				(*foundSlot)->UpdateEquipmentSlot(itemData, equipmentData);
+
+				TotalATK = 0;
+				TotalDEF = 0;
+				TotalManaDensity = 0.f;
 				SetTotalState(equipmentData);
 			}
 		}
