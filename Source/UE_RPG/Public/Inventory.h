@@ -43,7 +43,7 @@ public:
 
 	/**inventory function*/
 	bool IsSlotEmpty(const int32 index);
-	int32 AddItem(const FName& itemID, const int32 amount = 1);
+	int32 AddItem(const FName& itemID, const int32 amount = 1, bool bAddWeight = true);
 	bool SearchEmptySlot(int32& emptySlotIndex);
 	bool SearchFreeStackSlot(const FName& itemID, int32& canStackedSlotIndex);
 	int32 GetAmountAtIndex(const int32 index);

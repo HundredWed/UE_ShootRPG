@@ -52,7 +52,7 @@ bool UInventory::IsSlotEmpty(const int32 index)
 	return itemId.IsNone();	
 }
 
-int32 UInventory::AddItem(const FName& itemID, const int32 amount)
+int32 UInventory::AddItem(const FName& itemID, const int32 amount, bool bAddWeight)
 {
 	FItemInfoTable* itemData = RequestItemData(itemID);
 
@@ -83,7 +83,9 @@ int32 UInventory::AddItem(const FName& itemID, const int32 amount)
 			int32 newAmount = SlotsArray[stackSlotIndex].ItemAmount + amountToPut;
 
 			UpdateInventory(stackSlotIndex, itemID, newAmount);
-			AddWeight(itemData->Weight * amountToPut);
+
+			if(bAddWeight)
+				AddWeight(itemData->Weight * amountToPut);
 
 			remainAmount -= amountToPut;
 		}
@@ -100,7 +102,9 @@ int32 UInventory::AddItem(const FName& itemID, const int32 amount)
 			int32 amountToPut = FMath::Min(remainAmount, MaxStackSize);
 
 			UpdateInventory(emptySlotIndex, itemID, amountToPut);
-			AddWeight(itemData->Weight * amountToPut);
+
+			if (bAddWeight)
+				AddWeight(itemData->Weight * amountToPut);
 
 			remainAmount -= amountToPut;
 		}
@@ -117,7 +121,9 @@ int32 UInventory::AddItem(const FName& itemID, const int32 amount)
 			}
 
 			UpdateInventory(emptySlotIndex, itemID, 1);
-			AddWeight(itemData->Weight * 1);
+
+			if (bAddWeight)
+				AddWeight(itemData->Weight * 1);
 
 			remainAmount -= 1;
 		}

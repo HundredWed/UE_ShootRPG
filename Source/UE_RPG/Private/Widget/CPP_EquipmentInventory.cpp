@@ -77,7 +77,7 @@ void UCPP_EquipmentInventory::OnSlotMouseButtonDown(const FGeometry& InGeometry,
 	{
 		if (const FEquipmentInfoTable* equipmentData = InventoryRef->RequestEquipmentData(equipmentID))
 		{
-			InventoryRef->AddItem(equipmentID);
+			InventoryRef->AddItem(equipmentID, 1, false);
 			InventoryRef->RequestTakeOffEquipment(equipmentData->EquipmentType);
 			SetTotalState(equipmentData, true);
 		}		
