@@ -32,7 +32,7 @@ public:
 	FName ItemInfoID;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 	FText Name;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data", meta = (MultiLine = "true"))
 	FText Description;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 	bool bCanBeUsed;
