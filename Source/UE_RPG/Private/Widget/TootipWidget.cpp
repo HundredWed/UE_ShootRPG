@@ -21,7 +21,7 @@ void UTootipWidget::InitToolTip(const FItemInfoTable* itemInfo, const FEquipment
 {
 	SetItemType(itemInfo);
 
-	ATKText->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), equipmentInfo->ATK));
+	ATKText->SetText(FText::Format(NSLOCTEXT("TootipWidget", "ATK", "공격력: {0}"), equipmentInfo->EquipmentStat.ATK));
 	Weight->SetText(FText::Format(NSLOCTEXT("TootipWidget", "Weight", "무게: {0}"), itemInfo->Weight));
 }
 

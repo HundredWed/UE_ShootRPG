@@ -61,7 +61,7 @@ FReply UCPP_EquipSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, cons
 
 void UCPP_EquipSlot::UpdateEquipmentSlot(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo)
 {
-	EquipmentID = equipmentInfo->EquipmentID;
+	EquipmentID = equipmentInfo->EquipmentStat.EquipmentID;
 	ActiveSlot(itemInfo->IconTexture);
 	SetSlotToolTip(itemInfo, equipmentInfo);
 }

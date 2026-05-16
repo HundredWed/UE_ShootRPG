@@ -14,18 +14,25 @@ void UCPP_EquipmentInventory::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (EquipSlot)
-	{
-		EquipSlot->SetEquipmentType(EEquipmentType::Weapon);
-		EquipSlots.Add(EEquipmentType::Weapon, EquipSlot);
+	TArray<EEquipmentType> typeArray;
 
-		EquipSlot->OnEquipDragDetected.BindUObject(this, &UCPP_EquipmentInventory::OnSlotDragDetected);
-		EquipSlot->OnEquipDrop.BindUObject(this, &UCPP_EquipmentInventory::OnSlotDrop);
-		EquipSlot->OnEquipMouseButtonDown.BindUObject(this, &UCPP_EquipmentInventory::OnSlotMouseButtonDown);
+	for (uint8 i = 0; i < (uint8)EEquipmentType::EquipmentTypeCount; ++i)
+	{
+		typeArray.Add(static_cast<EEquipmentType>(i));
 	}
-		
-	//if (OffensiveRingSlot) EquipSlots.Add(EEquipmentType::OffensiveRing, OffensiveRingSlot);
-	//if (DefensiveRingSlot) EquipSlots.Add(EEquipmentType::DefensiveRing, DefensiveRingSlot);
+
+	for (EEquipmentType type : typeArray)
+	{
+		if (UCPP_EquipSlot* slot = GetEquipSlot(type))
+		{
+			slot->SetEquipmentType(type);
+			slot->OnEquipDragDetected.BindUObject(this, &UCPP_EquipmentInventory::OnSlotDragDetected);
+			slot->OnEquipDrop.BindUObject(this, &UCPP_EquipmentInventory::OnSlotDrop);
+			slot->OnEquipMouseButtonDown.BindUObject(this, &UCPP_EquipmentInventory::OnSlotMouseButtonDown);
+
+			EquipSlots.Add(type, slot);
+		}
+	}
 }
 
 bool UCPP_EquipmentInventory::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
@@ -50,7 +57,7 @@ void UCPP_EquipmentInventory::OnSlotDragDetected(const FGeometry& InGeometry, co
 	if (IsValid(dragSlot))
 	{
 		dragSlot->bFromEquipmentSlot = true;
-		dragSlot->EquipmentType = equipmentData->EquipmentType;
+		dragSlot->EquipmentType = equipmentData->EquipmentStat.EquipmentType;
 		dragSlot->DefaultDragVisual = dragWidget;
 		dragSlot->Pivot = EDragPivot::MouseDown;
 	}
@@ -78,7 +85,7 @@ void UCPP_EquipmentInventory::OnSlotMouseButtonDown(const FGeometry& InGeometry,
 		if (const FEquipmentInfoTable* equipmentData = InventoryRef->RequestEquipmentData(equipmentID))
 		{
 			InventoryRef->AddItem(equipmentID, 1, false);
-			InventoryRef->RequestTakeOffEquipment(equipmentData->EquipmentType);
+			InventoryRef->RequestTakeOffEquipment(equipmentData->EquipmentStat.EquipmentType);
 			SetTotalState(equipmentData, true);
 		}		
 	}
@@ -88,33 +95,52 @@ void UCPP_EquipmentInventory::SetTotalState(const FEquipmentInfoTable* equipment
 {
 	if (isSubtract)
 	{
-		TotalATK -= equipmentInfo->ATK;
-		TotalDEF -= equipmentInfo->DEF;
-		TotalManaDensity -= equipmentInfo->ManaDensity;
+		TotalATK -= equipmentInfo->EquipmentStat.ATK;
+		TotalDEF -= equipmentInfo->EquipmentStat.DEF;
+		TotalManaDensity -= equipmentInfo->EquipmentStat.ManaDensity;
 	}
 	else
 	{
-		TotalATK += equipmentInfo->ATK;
-		TotalDEF += equipmentInfo->DEF;
-		TotalManaDensity += equipmentInfo->ManaDensity;
+		TotalATK += equipmentInfo->EquipmentStat.ATK;
+		TotalDEF += equipmentInfo->EquipmentStat.DEF;
+		TotalManaDensity += equipmentInfo->EquipmentStat.ManaDensity;
 	}
 	
 	const FString stringATK = FString::Printf(TEXT("%d"), TotalATK);
 	const FText textATK = FText::FromString(stringATK);
-	//const FString stringDEF = FString::Printf(TEXT("%d"), TotalDEF);
-	//const FText textDEF = FText::FromString(stringDEF);
-	//const FString stringManaDensity = FString::Printf(TEXT("%d"), TotalManaDensity);
-	//const FText textManaDensity = FText::FromString(stringManaDensity);
+	const FString stringDEF = FString::Printf(TEXT("%d"), TotalDEF);
+	const FText textDEF = FText::FromString(stringDEF);
+	const FString stringManaDensity = FString::Printf(TEXT("%d"), TotalManaDensity);
+	const FText textManaDensity = FText::FromString(stringManaDensity);
 
 
 	ATKText->SetText(textATK);
-	//DEFText->SetText(textDEF);
-	//ManaDensityText->SetText(textManaDensity);
+	DEFText->SetText(textDEF);
+	ManaDensityText->SetText(textManaDensity);
+}
+
+UCPP_EquipSlot* UCPP_EquipmentInventory::GetEquipSlot(EEquipmentType equipmentType)
+{
+	switch (equipmentType)
+	{
+	case EEquipmentType::None:
+		break;
+	case EEquipmentType::Weapon:
+		return WeaponSlot;
+	case EEquipmentType::OffensiveRing:
+		return OffensiveRingSlot;
+	case EEquipmentType::DefensiveRing:
+		return DefensiveRingSlot;
+	default:
+		break;
+	}
+
+	return nullptr;
 }
 
 void UCPP_EquipmentInventory::UpdateEquipSlot(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo)
 {
-	if (TObjectPtr<UCPP_EquipSlot>* slot = EquipSlots.Find(equipmentInfo->EquipmentType))
+	if (TObjectPtr<UCPP_EquipSlot>* slot = EquipSlots.Find(equipmentInfo->EquipmentStat.EquipmentType))
 	{
 		//만약 전에 장착한 무기가 있다면 해당 무기만큼 능력치를 뺀 후 업데이트
 		if ((*slot)->GetEquipmentID().IsNone() == false)
@@ -123,7 +149,7 @@ void UCPP_EquipmentInventory::UpdateEquipSlot(const FItemInfoTable* itemInfo, co
 			{
 				SetTotalState(prevEquipment, true);				
 			}
-		}
+		}	
 		
 		(*slot)->UpdateEquipmentSlot(itemInfo, equipmentInfo);
 		SetTotalState(equipmentInfo);		

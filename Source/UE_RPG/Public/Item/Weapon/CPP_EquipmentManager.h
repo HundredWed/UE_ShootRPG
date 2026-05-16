@@ -4,27 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "CPP_WeaponManager.generated.h"
+#include "CPP_EquipmentManager.generated.h"
 
 
-class ACPP_WeaponBase;
+class ACPP_EquipmentBase;
 class ACPP_DamageActor;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class UE_RPG_API UCPP_WeaponManager : public UActorComponent
+class UE_RPG_API UCPP_EquipmentManager : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UCPP_WeaponManager();
+	UCPP_EquipmentManager();
 	virtual void BeginPlay() override;
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	bool EquipWeapon(const FName& weaponid);
 	void TakeOffWeapon();
-	void OnWeaponReady(ACPP_WeaponBase* weapon);
-	ACPP_WeaponBase* SpawnWeapon(TSubclassOf<ACPP_WeaponBase> weapon);
-	ACPP_WeaponBase* GetCurrentWeapon() { return CurrentWeapon; }
+	void OnWeaponReady(ACPP_EquipmentBase* weapon);
+	ACPP_EquipmentBase* SpawnWeapon(TSubclassOf<ACPP_EquipmentBase> weapon);
+	ACPP_EquipmentBase* GetCurrentWeapon() { return CurrentWeapon; }
 	float GetManaRegen();
 	float GetManaCost();
 
@@ -43,16 +43,16 @@ private:
 
 
 	UPROPERTY()
-	TMap<FName, ACPP_WeaponBase*> WeaponStorage;
+	TMap<FName, ACPP_EquipmentBase*> WeaponStorage;
 
 	/**데미지 ui*/
 	UPROPERTY(EditAnywhere, Category = "WeaponInfo", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ACPP_DamageActor> DamageUIActorClass;
 
 	UPROPERTY()
-	ACPP_WeaponBase* PrevWeapon = nullptr;
+	ACPP_EquipmentBase* PrevWeapon = nullptr;
 	UPROPERTY()
-	ACPP_WeaponBase* CurrentWeapon = nullptr;
+	ACPP_EquipmentBase* CurrentWeapon = nullptr;
 
 	FTimerHandle ManagerTimer;
 

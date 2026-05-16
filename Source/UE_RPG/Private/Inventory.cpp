@@ -243,16 +243,16 @@ void UInventory::RequestTakeOffEquipment(EEquipmentType type)
 
 void UInventory::UpdateEquipSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData)
 {
-	if (FEquipmentSlot* slot = EquipmentSlots.Find(equipmentData->EquipmentType))
+	if (FEquipmentSlot* slot = EquipmentSlots.Find(equipmentData->EquipmentStat.EquipmentType))
 	{
-		slot->EquipmentID = equipmentData->EquipmentID;
+		slot->EquipmentID = equipmentData->EquipmentStat.EquipmentID;
 
 	}
 	else
 	{
 		FEquipmentSlot newSlot;
-		newSlot.EquipmentID = equipmentData->EquipmentID;
-		EquipmentSlots.Add(equipmentData->EquipmentType, newSlot);
+		newSlot.EquipmentID = equipmentData->EquipmentStat.EquipmentID;
+		EquipmentSlots.Add(equipmentData->EquipmentStat.EquipmentType, newSlot);
 	}
 
 	InventoryWidget->UpdateEquipmentInventory(itemData, equipmentData);
@@ -667,7 +667,7 @@ void UInventory::SetEquipWeapon(const int32 fromIndex)
 	if (inputEquipmentData == nullptr)
 		return;
 
-	const FName currentEquipmentID = InventoryWidget->GetCurrentEquipmentID(inputEquipmentData->EquipmentType);
+	const FName currentEquipmentID = InventoryWidget->GetCurrentEquipmentID(inputEquipmentData->EquipmentStat.EquipmentType);
 
 	//장비칸에 장비가 있으면 스왑. 없으면 해당 index빈칸으로 초기화
 	if (!currentEquipmentID.IsNone())

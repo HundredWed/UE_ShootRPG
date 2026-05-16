@@ -3,7 +3,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Item/Weapon/CPP_WeaponBase.h"
+#include "Item/Weapon/CPP_EquipmentBase.h"
 #include "UObject/ConstructorHelpers.h"
 
 

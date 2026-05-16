@@ -21,7 +21,7 @@ enum class EEquipmentType : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FEquipmentInfoTable : public FTableRowBase
+struct FEquipmentStat
 {
 	GENERATED_BODY()
 
@@ -45,6 +45,20 @@ public:
 	float ManaRegen;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 	float FireRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
+	TObjectPtr<UCPP_EquipmentAbilityDataAsset> EquipmentLogicAsset;
+};
+
+USTRUCT(BlueprintType)
+struct FEquipmentInfoTable : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+	FEquipmentStat EquipmentStat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Asset Data")
 	TSoftObjectPtr<USkeletalMesh> ItemSkeletalMesh;

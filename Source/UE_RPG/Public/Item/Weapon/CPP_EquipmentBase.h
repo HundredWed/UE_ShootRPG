@@ -6,36 +6,31 @@
 #include "Item/Weapon/EquipmentData.h"
 #include "Engine/DataTable.h"
 #include "UE_RPG/UtilityMecro.h"
-#include "CPP_WeaponBase.generated.h"
+#include "CPP_EquipmentBase.generated.h"
 
 class UWeaponAbilityBase;
 class USoundCue;
 class ACPP_DamageActor;
 
 UCLASS()
-class UE_RPG_API ACPP_WeaponBase : public AActor
+class UE_RPG_API ACPP_EquipmentBase : public AActor
 
 {
 	GENERATED_BODY()
 	
 public:	
-	ACPP_WeaponBase();
+	ACPP_EquipmentBase();
 
 	UPROPERTY()
 	USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(EditAnywhere, Category = "WeaponInfo")
-	FName ItemInfoID;
+	FEquipmentStat EquipmentStat;
 
 	UPROPERTY()
 	TArray<ACPP_DamageActor*> DamageUIActors;
 	
 	int32 DamageUI = 0;
-
-	/**weapon states*/
-	float FinalDamage = 0;
-	float ManaRegen = 0;
-	float ManaCost = 0;
 
 	void StoreDamageUI(TSubclassOf<ACPP_DamageActor> damageUIActorClass);
 
@@ -44,7 +39,7 @@ public:
 
 	/**공격딜레이 리턴*/
 	virtual float Attack() { return 0.f; };
-	virtual void InitWeaponInfo(const FName& itemID);
+	virtual void InitWeaponInfo(const FName& itemID) {};
 	virtual void Equip(USceneComponent* Inparent, const FName& SocketName);
 	
 protected:

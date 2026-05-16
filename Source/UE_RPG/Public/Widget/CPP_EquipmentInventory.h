@@ -39,22 +39,23 @@ private:
 	void OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const FName& equipmentID);
 
 	void SetTotalState(const FEquipmentInfoTable* equipmentInfo, bool isSubtract = false);
+
+	UCPP_EquipSlot* GetEquipSlot(EEquipmentType equipmentType);
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
-	UCPP_EquipSlot* EquipSlot;
-
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UCPP_EquipSlot* OffensiveRigSlot;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UCPP_EquipSlot* DefensiveRingSlot;*/
+	UCPP_EquipSlot* WeaponSlot;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UCPP_EquipSlot* OffensiveRingSlot;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UCPP_EquipSlot* DefensiveRingSlot;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UTextBlock* ATKText;
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
 	UTextBlock* DEFText;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* ManaDensityText;*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	UTextBlock* ManaDensityText;
 
 
 	UPROPERTY()

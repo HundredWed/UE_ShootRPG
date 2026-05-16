@@ -32,7 +32,7 @@ float ACPP_Rifle::Attack()
 
 	ShootEffect(hitpotin);
 
-	return FireRate;
+	return EquipmentStat.FireRate;
 }
 
 void ACPP_Rifle::InitWeaponInfo(const FName& itemID)
@@ -48,13 +48,9 @@ void ACPP_Rifle::InitWeaponInfo(const FName& itemID)
 	UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>();
 	if (const FEquipmentInfoTable* thisWeaponInfo = AS->RequestWeaponInfo(itemID))
 	{
-		FinalDamage = thisWeaponInfo->ATK;
-		MaxDis = thisWeaponInfo->ManaDensity;
-		ParticleSize = thisWeaponInfo->ParticleSize;
-		FireRate = thisWeaponInfo->FireRate;
-		ManaRegen = thisWeaponInfo->ManaRegen;
-		ManaCost = thisWeaponInfo->ManaCost;
+		EquipmentStat = thisWeaponInfo->EquipmentStat;
 
+		ParticleSize = thisWeaponInfo->ParticleSize;
 		WeaponMesh->SetSkeletalMesh(thisWeaponInfo->ItemSkeletalMesh.LoadSynchronous());
 		BeamParticle = thisWeaponInfo->BeamParticle.LoadSynchronous();
 		FireParticle = thisWeaponInfo->FireParticle.LoadSynchronous();
@@ -90,7 +86,7 @@ void ACPP_Rifle::ViewPointTrace(FHitResult& hitresult, FVector& endpoint)
 	/**between camera and player aiming issue*/
 	location = location + rotation.Vector() * TraceStartPoint;
 
-	FVector end = location + spreadBullet.Vector() * MaxDis;
+	FVector end = location + spreadBullet.Vector() * EquipmentStat.ManaDensity;
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
@@ -156,8 +152,8 @@ void ACPP_Rifle::TakeHit(FHitResult& hitresult, const FVector& shootpoint)
 	bool damaged = enemy->GetHit(shootpoint);
 	if (damaged)
 	{
-		UGameplayStatics::ApplyDamage(enemy, FinalDamage, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
-		SpawnDamageUI(hitresult.ImpactPoint, FinalDamage);
+		UGameplayStatics::ApplyDamage(enemy, EquipmentStat.ATK, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
+		SpawnDamageUI(hitresult.ImpactPoint, EquipmentStat.ATK);
 	}
 	else if (!damaged)
 	{

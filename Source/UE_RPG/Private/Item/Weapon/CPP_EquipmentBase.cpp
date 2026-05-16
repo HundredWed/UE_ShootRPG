@@ -1,35 +1,29 @@
-﻿#include "Item/Weapon/CPP_WeaponBase.h"
+﻿#include "Item/Weapon/CPP_EquipmentBase.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Widget/NPC/CPP_DamageActor.h"
 #include "Sound/SoundCue.h"
 #include "Systems/CPP_AkashicSubsystem.h"
 
-ACPP_WeaponBase::ACPP_WeaponBase()
+ACPP_EquipmentBase::ACPP_EquipmentBase()
 {
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon Mesh"));
 	SetRootComponent(WeaponMesh);
 }
 
-void ACPP_WeaponBase::InitWeaponInfo(const FName& itemID)
-{
-	
-}
-
 // Called when the game starts or when spawned
-void ACPP_WeaponBase::BeginPlay()
+void ACPP_EquipmentBase::BeginPlay()
 {
 	Super::BeginPlay();
-	//InitWeaponInfo();
 }
 
-void ACPP_WeaponBase::SpawnDamageUI(const FVector pos, float damage)
+void ACPP_EquipmentBase::SpawnDamageUI(const FVector pos, float damage)
 {
 	ACPP_DamageActor* damageActor = GetDamageActor();
 	damageActor->UpdateDamageActor(pos, damage);
 }
 
-void ACPP_WeaponBase::StoreDamageUI(TSubclassOf<ACPP_DamageActor> damageUIActorClass)
+void ACPP_EquipmentBase::StoreDamageUI(TSubclassOf<ACPP_DamageActor> damageUIActorClass)
 {
 	UWorld* world = GetWorld();
 	const int32 amount = 50;
@@ -48,7 +42,7 @@ void ACPP_WeaponBase::StoreDamageUI(TSubclassOf<ACPP_DamageActor> damageUIActorC
 	}
 }
 
-ACPP_DamageActor* ACPP_WeaponBase::GetDamageActor()
+ACPP_DamageActor* ACPP_EquipmentBase::GetDamageActor()
 {
 	DamageUI = DamageUI > (DamageUIActors.Num() - 1) ? 0 : DamageUI;
 	ACPP_DamageActor* nextUI = DamageUIActors[DamageUI];
@@ -57,7 +51,7 @@ ACPP_DamageActor* ACPP_WeaponBase::GetDamageActor()
 	return nextUI;
 }
 
-void ACPP_WeaponBase::Equip(USceneComponent* Inparent, const FName& SocketName)
+void ACPP_EquipmentBase::Equip(USceneComponent* Inparent, const FName& SocketName)
 {
 	FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	WeaponMesh->AttachToComponent(Inparent, TransformRules, SocketName);

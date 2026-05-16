@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Item/Weapon/CPP_WeaponBase.h"
+#include "Item/Weapon/CPP_EquipmentBase.h"
 #include "CPP_Rifle.generated.h"
 
 
@@ -11,16 +11,12 @@ class UParticleSystem;
 class USoundCue;
 
 UCLASS()
-class UE_RPG_API ACPP_Rifle : public ACPP_WeaponBase
+class UE_RPG_API ACPP_Rifle : public ACPP_EquipmentBase
 {
 	GENERATED_BODY()
 
 public:
 	ACPP_Rifle();
-
-	float MaxDis = 500.f;
-	FVector ParticleSize = { 1.f, 1.f, 1.f };
-	float FireRate = 0.5f;
 
 	virtual float Attack() override;
 	virtual void InitWeaponInfo(const FName& itemID) override;
@@ -47,12 +43,11 @@ protected:
 	UPROPERTY()
 	USoundCue* EquipSound;
 
-private:
-	/**between camera and player aiming issue Value*/
+	FVector ParticleSize = { 1.f, 1.f, 1.f };
 	float TraceStartPoint = 500.f;
-
-	/**when hitresult is not, BeamParticle Direction*/
 	FVector NoHitLocation = FVector::Zero();
-	
 	FVector FirePoint = FVector::Zero();
+
+private:
+	
 };

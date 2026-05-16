@@ -16,7 +16,7 @@
 #include "Camera/CameraManager.h"
 #include "Widget/NPC/CPP_DamageActor.h"
 #include "Inventory.h"
-#include "Item/Weapon/CPP_WeaponManager.h"
+#include "Item/Weapon/CPP_EquipmentManager.h"
 #include "Systems/CPP_QuestSubsystem.h"
 #include "Component/CPP_StatComponent.h"
 #include "Animations/CPP_AnimInstance.h"
@@ -59,7 +59,7 @@ ACPP_Character::ACPP_Character()
 	GameInventory = CreateDefaultSubobject<UInventory>(TEXT("Inventory"));
 	GameInventory->OnItemRemoved.BindUObject(this, &ACPP_Character::OnRemoveItemEvent);
 
-	WeaponManager = CreateDefaultSubobject<UCPP_WeaponManager>(TEXT("WeaponManager"));
+	EquipmentManager = CreateDefaultSubobject<UCPP_EquipmentManager>(TEXT("WeaponManager"));
 }
 
 
@@ -130,7 +130,7 @@ void ACPP_Character::PossessedBy(AController* NewController)
 
 	if (FEquipmentSlot* slotData = slots.Find(EEquipmentType::Weapon))
 	{
-		WeaponManager->EquipWeapon(slotData->EquipmentID);
+		EquipmentManager->EquipWeapon(slotData->EquipmentID);
 		CharacterState = ECharacterStateTypes::UnEquipped;
 	}	
 }
@@ -497,7 +497,7 @@ bool ACPP_Character::PressKey(const FInputActionValue& Value)
 
 bool ACPP_Character::PickUpWeapon(const FName& itemID)
 {
-	if (WeaponManager->GetCurrentWeapon() == nullptr)
+	if (EquipmentManager->GetCurrentWeapon() == nullptr)
 	{
 		return SetEquipWeapon(itemID);
 	}
@@ -527,7 +527,7 @@ void ACPP_Character::AttackWeapon()
 	SetMovementRotate(false, FocusingMRR);
 	PlayMontage(bAiming ? AimingFireMontage : FireMontage);
 
-	const float triggerRate = WeaponManager->TriggerWeapon();
+	const float triggerRate = EquipmentManager->TriggerWeapon();
 
 	GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ACPP_Character::AttackWeapon, triggerRate, false);
 }
@@ -641,7 +641,7 @@ void ACPP_Character::SetStateUnEquipped()
 
 bool ACPP_Character::SetEquipWeapon(const FName& itemID)
 {
-	if (WeaponManager->EquipWeapon(itemID))
+	if (EquipmentManager->EquipWeapon(itemID))
 	{
 		GameInventory->UpdateEquipmentInventory(itemID);
 		CharacterState = ECharacterStateTypes::UnEquipped;
@@ -653,13 +653,13 @@ bool ACPP_Character::SetEquipWeapon(const FName& itemID)
 
 void ACPP_Character::ApplyWeaponStat()
 {
-	StatComponent->ApplyManaCost(WeaponManager->GetManaCost());
-	StatComponent->ApplyManaRegen(WeaponManager->GetManaRegen());
+	StatComponent->ApplyManaCost(EquipmentManager->GetManaCost());
+	StatComponent->ApplyManaRegen(EquipmentManager->GetManaRegen());
 }
 
 void ACPP_Character::TakeOffWeapon()
 {
-	WeaponManager->TakeOffWeapon();
+	EquipmentManager->TakeOffWeapon();
 	CharacterState = ECharacterStateTypes::Normal;
 }
 
@@ -706,7 +706,7 @@ void ACPP_Character::InitCharacterStat(bool bFill)
 void ACPP_Character::SetHiddenPlayer(bool newHidden)
 {
 	SetActorHiddenInGame(newHidden);
-	WeaponManager->SetHiddenWeapon(newHidden);
+	EquipmentManager->SetHiddenWeapon(newHidden);
 }
 
 void ACPP_Character::ResetRootOffset()
@@ -747,17 +747,17 @@ void ACPP_Character::PlayMontage(UAnimMontage* montage)
 
 void ACPP_Character::HoldWeapon()
 {
-	if (IsValid(WeaponManager))
+	if (IsValid(EquipmentManager))
 	{
-		WeaponManager->HoldWeapon(GetMesh(), "weapon_socket_r");
+		EquipmentManager->HoldWeapon(GetMesh(), "weapon_socket_r");
 	}
 }
 
 void ACPP_Character::UnHoldWeapon()
 {
-	if (IsValid(WeaponManager))
+	if (IsValid(EquipmentManager))
 	{
-		WeaponManager->UnHoldWeapon(GetMesh(), "weapon_socket_back");
+		EquipmentManager->UnHoldWeapon(GetMesh(), "weapon_socket_back");
 	}
 }
 

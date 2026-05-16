@@ -121,7 +121,7 @@ void UCPP_AkashicSubsystem::OnItemAssetsLoaded(FName itemID, FVector spawnLocati
 
 void UCPP_AkashicSubsystem::OnWeaponAssetsLoaded(FName itemID, FVector spawnLocation, FOnWeaponSpawnedCallback onSpawnCompleted)
 {
-    ACPP_WeaponBase* newWeapon = GetWorld()->SpawnActor<ACPP_WeaponBase>(ACPP_Rifle::StaticClass(), spawnLocation, FRotator::ZeroRotator);
+    ACPP_EquipmentBase* newWeapon = GetWorld()->SpawnActor<ACPP_EquipmentBase>(ACPP_Rifle::StaticClass(), spawnLocation, FRotator::ZeroRotator);
     newWeapon->InitWeaponInfo(itemID);
 
     onSpawnCompleted.ExecuteIfBound(newWeapon);

@@ -8,9 +8,9 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "CPP_AkashicSubsystem.generated.h"
 
-class ACPP_WeaponBase;
+class ACPP_EquipmentBase;
 
-DECLARE_DELEGATE_OneParam(FOnWeaponSpawnedCallback, ACPP_WeaponBase*);
+DECLARE_DELEGATE_OneParam(FOnWeaponSpawnedCallback, ACPP_EquipmentBase*);
 
 UCLASS()
 class UE_RPG_API UCPP_AkashicSubsystem : public UWorldSubsystem

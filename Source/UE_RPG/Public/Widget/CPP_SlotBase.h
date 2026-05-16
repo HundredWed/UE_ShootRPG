@@ -45,6 +45,9 @@ public:
 
 	/**for drag over event only once*/
 	bool bDraggedOver = false;
+
+	void SetBorderDefault();
+	void SetBorderWhite();
 	
 protected:
 
@@ -55,6 +58,8 @@ protected:
 	virtual void ActiveSlot(UTexture2D* icon);
 	void SetSlotToolTip(const FItemInfoTable* itemInfo);
 	void SetSlotToolTip(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
+
+
 
 protected:
 

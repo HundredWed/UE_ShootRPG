@@ -15,7 +15,7 @@ class ACPP_DamageActor;
 class UCameraManager;
 class UCameraComponent;
 class USpringArmComponent;
-class UCPP_WeaponManager;
+class UCPP_EquipmentManager;
 class UInputComponent;
 class UInputAction;
 class UAnimMontage;
@@ -44,7 +44,7 @@ public:
 	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, Category = Compoenents)
-	UCPP_WeaponManager* WeaponManager;
+	UCPP_EquipmentManager* EquipmentManager;
 
 	UPROPERTY(EditAnywhere, Category = Compoenents)
 	UCPP_StatComponent* StatComponent;

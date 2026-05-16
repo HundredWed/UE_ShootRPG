@@ -1,33 +1,33 @@
-﻿#include "Item/Weapon/CPP_WeaponManager.h"
-#include "Item/Weapon/CPP_WeaponBase.h"
+﻿#include "Item/Weapon/CPP_EquipmentManager.h"
+#include "Item/Weapon/CPP_EquipmentBase.h"
 #include "Systems/CPP_AkashicSubsystem.h"
 #include "Systems/CPP_SaveDataSubsystem.h"
 #include "CPP_Character.h"
 
-UCPP_WeaponManager::UCPP_WeaponManager()
+UCPP_EquipmentManager::UCPP_EquipmentManager()
 {
 
 }
 
-void UCPP_WeaponManager::BeginPlay()
+void UCPP_EquipmentManager::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-bool UCPP_WeaponManager::EquipWeapon(const FName& weaponId)
+bool UCPP_EquipmentManager::EquipWeapon(const FName& weaponId)
 {
 	if (weaponId.IsNone())
 	{
 		return false;
 	}
 
-	if (WeaponStorage.Contains(weaponId))
+	if (!WeaponStorage.IsEmpty() && WeaponStorage.Contains(weaponId))
 	{
 		PrevWeapon = CurrentWeapon;
 
 		PrevWeapon->SetActorHiddenInGame(true);
 
-		ACPP_WeaponBase* weapon = *(WeaponStorage.Find(weaponId));
+		ACPP_EquipmentBase* weapon = *(WeaponStorage.Find(weaponId));
 		weapon->SetActorHiddenInGame(false);
 		CurrentWeapon = weapon;
 		return true;
@@ -41,24 +41,24 @@ bool UCPP_WeaponManager::EquipWeapon(const FName& weaponId)
 		}
 
 		UCPP_AkashicSubsystem* AS = world->GetSubsystem<UCPP_AkashicSubsystem>();
-		bool IsValidWeaponId = AS->SpawnWeaponAsync(weaponId, GetOwner()->GetActorLocation(), FOnWeaponSpawnedCallback::CreateUObject(this, &UCPP_WeaponManager::OnWeaponReady));
+		bool IsValidWeaponId = AS->SpawnWeaponAsync(weaponId, GetOwner()->GetActorLocation(), FOnWeaponSpawnedCallback::CreateUObject(this, &UCPP_EquipmentManager::OnWeaponReady));
 	
 		if (IsValidWeaponId && !bClearWeaponTick)
 		{
 			bClearWeaponTick = true;
-			world->GetTimerManager().SetTimer(ManagerTimer, this, &UCPP_WeaponManager::ClearWeaponGarbage, ClearWeaponTick);
+			world->GetTimerManager().SetTimer(ManagerTimer, this, &UCPP_EquipmentManager::ClearWeaponGarbage, ClearWeaponTick);
 		}
 
 		return IsValidWeaponId;
 	}
 }
 
-void UCPP_WeaponManager::TakeOffWeapon()
+void UCPP_EquipmentManager::TakeOffWeapon()
 {
 	CurrentWeapon->SetActorHiddenInGame(true);
 }
 
-void UCPP_WeaponManager::OnWeaponReady(ACPP_WeaponBase* weapon)
+void UCPP_EquipmentManager::OnWeaponReady(ACPP_EquipmentBase* weapon)
 {
 	if (ACPP_Character* player = Cast<ACPP_Character>(GetOwner()))
 	{
@@ -68,45 +68,45 @@ void UCPP_WeaponManager::OnWeaponReady(ACPP_WeaponBase* weapon)
 
 		weapon->Equip(player->GetMesh(), "weapon_socket_back");
 		player->ApplyWeaponStat();
-		WeaponStorage.Add(weapon->ItemInfoID, weapon);		
+		WeaponStorage.Add(weapon->EquipmentStat.EquipmentID, weapon);
 	}	
 }
 
-ACPP_WeaponBase* UCPP_WeaponManager::SpawnWeapon(TSubclassOf<ACPP_WeaponBase> weapon)
+ACPP_EquipmentBase* UCPP_EquipmentManager::SpawnWeapon(TSubclassOf<ACPP_EquipmentBase> weapon)
 {
 	UWorld* world = GetWorld();
 	if (!IsValid(world))
 		return nullptr;
 
-	return  world->SpawnActor<ACPP_WeaponBase>(weapon);
+	return  world->SpawnActor<ACPP_EquipmentBase>(weapon);
 }
 
-float UCPP_WeaponManager::GetManaRegen()
+float UCPP_EquipmentManager::GetManaRegen()
 {
 	if (IsValid(CurrentWeapon))
 	{
-		return CurrentWeapon->ManaRegen;
+		return CurrentWeapon->EquipmentStat.ManaRegen;
 	}
 	return 0.0f;
 }
 
-float UCPP_WeaponManager::GetManaCost()
+float UCPP_EquipmentManager::GetManaCost()
 {
 	if (IsValid(CurrentWeapon))
 	{
-		return CurrentWeapon->ManaCost;
+		return CurrentWeapon->EquipmentStat.ManaCost;
 	}
 	return 0.0f;
 }
 
-void UCPP_WeaponManager::ClearWeaponGarbage()
+void UCPP_EquipmentManager::ClearWeaponGarbage()
 {
 	for (auto weapon : WeaponStorage)
 	{
 		if (weapon.Value)
 		{
-			if (weapon.Key == CurrentWeapon->ItemInfoID
-				|| weapon.Key == PrevWeapon->ItemInfoID)
+			if (weapon.Key == CurrentWeapon->EquipmentStat.EquipmentID
+				|| weapon.Key == PrevWeapon->EquipmentStat.EquipmentID)
 			{
 				continue;
 			}
@@ -119,7 +119,7 @@ void UCPP_WeaponManager::ClearWeaponGarbage()
 	bClearWeaponTick = false;
 }
 
-void UCPP_WeaponManager::HoldWeapon(USceneComponent* Inparent, const FName& SocketName)
+void UCPP_EquipmentManager::HoldWeapon(USceneComponent* Inparent, const FName& SocketName)
 {
 	if (IsValid(CurrentWeapon))
 	{
@@ -127,7 +127,7 @@ void UCPP_WeaponManager::HoldWeapon(USceneComponent* Inparent, const FName& Sock
 	}
 }
 
-void UCPP_WeaponManager::UnHoldWeapon(USceneComponent* Inparent, const FName& SocketName)
+void UCPP_EquipmentManager::UnHoldWeapon(USceneComponent* Inparent, const FName& SocketName)
 {
 	if (IsValid(CurrentWeapon))
 	{
@@ -135,7 +135,7 @@ void UCPP_WeaponManager::UnHoldWeapon(USceneComponent* Inparent, const FName& So
 	}
 }
 
-float UCPP_WeaponManager::TriggerWeapon()
+float UCPP_EquipmentManager::TriggerWeapon()
 {
 	if (IsValid(CurrentWeapon))
 	{
@@ -144,7 +144,7 @@ float UCPP_WeaponManager::TriggerWeapon()
 	return -1.f;
 }
 
-void UCPP_WeaponManager::SetHiddenWeapon(bool newHidden)
+void UCPP_EquipmentManager::SetHiddenWeapon(bool newHidden)
 {
 	if (IsValid(CurrentWeapon))
 	{
