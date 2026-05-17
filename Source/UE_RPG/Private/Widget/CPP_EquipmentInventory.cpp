@@ -56,8 +56,10 @@ void UCPP_EquipmentInventory::OnSlotDragDetected(const FGeometry& InGeometry, co
 
 	if (IsValid(dragSlot))
 	{
-		dragSlot->bFromEquipmentSlot = true;
-		dragSlot->EquipmentType = equipmentData->EquipmentStat.EquipmentType;
+		dragSlot->SourceID = equipmentID;
+		dragSlot->SourceType = ESlotSourceType::Equipment;
+		dragSlot->CachedTypeFlag = static_cast<int32>(equipmentData->EquipmentStat.EquipmentType);
+
 		dragSlot->DefaultDragVisual = dragWidget;
 		dragSlot->Pivot = EDragPivot::MouseDown;
 	}
@@ -68,10 +70,11 @@ void UCPP_EquipmentInventory::OnSlotDragDetected(const FGeometry& InGeometry, co
 bool UCPP_EquipmentInventory::OnSlotDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation, const FName& equipmentID)
 {
 	USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
+	ESlotSourceType sourceType = dragSlot->SourceType;
 
-	if (IsValid(dragSlot) && InventoryRef.IsValid())
+	if (IsValid(dragSlot) && InventoryRef.IsValid() && sourceType != ESlotSourceType::Equipment)
 	{
-		InventoryRef->SetEquipWeapon(dragSlot->GetIndex());
+		InventoryRef->SetEquipWeapon(dragSlot->SlotIndex);
 		return true;
 	}
 

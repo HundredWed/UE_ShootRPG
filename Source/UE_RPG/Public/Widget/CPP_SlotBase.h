@@ -59,7 +59,7 @@ protected:
 	void SetSlotToolTip(const FItemInfoTable* itemInfo);
 	void SetSlotToolTip(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
 
-
+	virtual	bool IsValidDragOverTarget(UDragDropOperation* InOperation) { return true; }
 
 protected:
 

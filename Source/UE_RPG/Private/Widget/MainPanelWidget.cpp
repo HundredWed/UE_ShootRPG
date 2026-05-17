@@ -130,36 +130,43 @@ bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDrop
 	else
 	{
 		USlotDrag* inSlotDragWidget = Cast<USlotDrag>(InOperation);
-		if (inSlotDragWidget)
+		if (!inSlotDragWidget)
 		{
-			const uint8 slotIndex = inSlotDragWidget->WidgetRef->MyIndex;
-			const int32 amount = inSlotDragWidget->WidgetRef->MyAmount;
-			bool bstackable = inSlotDragWidget->WidgetRef->bMyItemCanStacked;
+			return false;
+		}
 
-			if ((amount > 1) && bstackable)
-			{
-				ThrowWidget->InitWidgetInfo(amount, slotIndex, true);
-				ThrowWidget->SetVisibility(ESlateVisibility::Visible);
-				InventoryWidget->SetPanelEnabled(false);
-				true;
-			}
-			else
-			{
-				//임시 로직
-				//===================================================================================
-				ACPP_Character* player = Cast<ACPP_Character>(GetOwningPlayerPawn());
-				bool successRemove = player->GetInventory()->RemoveItemAtIndex(slotIndex, amount);
-				if (successRemove == false)
-				{
-					//TODO
-					//버리지 못하는 안내창 출력
-					UpdatePopupText(FText::FromString(TEXT("해당 아이템은 버릴 수 없습니다.")));
-					PopupWidget->SetVisibility(ESlateVisibility::Visible);
-				}
-				//===================================================================================
-				return successRemove;
-			}
+		const uint8 slotIndex = inSlotDragWidget->SlotIndex;
+		UCPP_Slot* slot = InventoryWidget->GetSlotWidget(slotIndex);
 
+		if (!IsValid(slot))
+		{
+			return false;
+		}
+
+		const int32 amount = slot->MyAmount;
+		bool bStackable = slot->bMyItemCanStacked;
+
+		if ((amount > 1) && bStackable)
+		{
+			ThrowWidget->InitWidgetInfo(amount, slotIndex, true);
+			ThrowWidget->SetVisibility(ESlateVisibility::Visible);
+			InventoryWidget->SetPanelEnabled(false);
+		}
+		else
+		{
+			//임시 로직
+			//===================================================================================
+			ACPP_Character* player = Cast<ACPP_Character>(GetOwningPlayerPawn());
+			bool successRemove = player->GetInventory()->RemoveItemAtIndex(slotIndex, amount);
+			if (successRemove == false)
+			{
+				//TODO
+				//버리지 못하는 안내창 출력
+				UpdatePopupText(FText::FromString(TEXT("해당 아이템은 버릴 수 없습니다.")));
+				PopupWidget->SetVisibility(ESlateVisibility::Visible);
+			}
+			//===================================================================================
+			return successRemove;
 		}
 	}
 	

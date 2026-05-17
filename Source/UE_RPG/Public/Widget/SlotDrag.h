@@ -7,7 +7,13 @@
 #include "Item/Weapon/EquipmentData.h"
 #include "SlotDrag.generated.h"
 
-class UCPP_Slot;
+UENUM(BlueprintType)
+enum class ESlotSourceType : uint8
+{
+	Inventory,
+	Equipment,
+	QuickSlot
+};
 
 UCLASS()
 class UE_RPG_API USlotDrag : public UDragDropOperation
@@ -16,11 +22,8 @@ class UE_RPG_API USlotDrag : public UDragDropOperation
 	
 public:
 
-	UPROPERTY()
-	UCPP_Slot* WidgetRef = nullptr;
-
-	int32 GetIndex();
-
-	bool bFromEquipmentSlot = false;
-	EEquipmentType EquipmentType = EEquipmentType::None;
+	ESlotSourceType SourceType;
+	FName SourceID; 
+	int32 SlotIndex;
+	int32 CachedTypeFlag = -1;
 };

@@ -27,6 +27,8 @@ protected:
 	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	
+	virtual	bool IsValidDragOverTarget(UDragDropOperation* InOperation) override;
 
 public:
 

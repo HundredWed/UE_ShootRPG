@@ -3,8 +3,3 @@
 
 #include "Widget/SlotDrag.h"
 #include "Widget/CPP_Slot.h"
-
-int32 USlotDrag::GetIndex()
-{
-	return WidgetRef->MyIndex;
-}

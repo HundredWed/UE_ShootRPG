@@ -75,7 +75,7 @@ public:
 	void SortInventory();
 
 	void SetPanelEnabled(bool enabled);
-	void SetSplitWidget(const UCPP_Slot* fromSlot,const UCPP_Slot* toSlot);
+	void SetSplitWidget(const int32 fromSlotIndex, const int32 toSlotIndex);
 	void UpdateWeightText(const float amount);
 	void UpdateWeightMaxAmount(const float amount);
 	void UpdateGoldText(const int32 amount);
@@ -84,6 +84,7 @@ public:
 	void CheckCombinability(const int32 toIndex, const int32 fromIndex);
 
 	FName GetCurrentEquipmentID(EEquipmentType equipmentType);
+	UCPP_Slot* GetSlotWidget(const int32 index);
 	void UpdateEquipmentInventory(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
 
 protected:

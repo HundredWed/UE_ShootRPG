@@ -59,11 +59,22 @@ FReply UCPP_EquipSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, cons
 	return reply.NativeReply;
 }
 
+bool UCPP_EquipSlot::IsValidDragOverTarget(UDragDropOperation* InOperation)
+{
+	if (USlotDrag* dragSlot = Cast<USlotDrag>(InOperation))
+	{
+		EEquipmentType type = static_cast<EEquipmentType>(dragSlot->CachedTypeFlag);
+		return type == MyEquipmentType;
+	}
+	return false;
+}
+
 void UCPP_EquipSlot::UpdateEquipmentSlot(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo)
 {
 	EquipmentID = equipmentInfo->EquipmentStat.EquipmentID;
 	ActiveSlot(itemInfo->IconTexture);
 	SetSlotToolTip(itemInfo, equipmentInfo);
+	SetBorderWhite();
 }
 
 void UCPP_EquipSlot::TakeOff()

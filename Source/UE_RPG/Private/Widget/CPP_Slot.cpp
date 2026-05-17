@@ -40,6 +40,7 @@ void UCPP_Slot::UpdateSlot(const FItemInfoTable* itemData, const int32 index,  c
 
 		/**set tooltip*/
 		SetSlotToolTip(itemData);
+		SetBorderWhite();
 	}
 }
 
@@ -55,6 +56,7 @@ void UCPP_Slot::UpdateSlot(const FItemInfoTable* itemData, const FEquipmentInfoT
 	
 		/**set tooltip*/
 		SetSlotToolTip(itemData);
+		SetBorderWhite();
 	}
 }
 

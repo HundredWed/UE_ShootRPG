@@ -95,8 +95,11 @@ void UCPP_InventoryWidget::SetPanelEnabled(bool enabled)
 	SlotPanel->SetIsEnabled(enabled);
 }
 
-void UCPP_InventoryWidget::SetSplitWidget(const UCPP_Slot* fromSlot, const UCPP_Slot* toSlot)
+void UCPP_InventoryWidget::SetSplitWidget(const int32 fromSlotIndex, const int32 toSlotIndex)
 {
+	UCPP_Slot* fromSlot = SlotWidgetArray[fromSlotIndex];
+	UCPP_Slot* toSlot = SlotWidgetArray[toSlotIndex];
+
 	UUniformGridSlot* slotGrid = Cast<UUniformGridSlot>(toSlot->Slot);
 	float rowSize;
 	float clampRow;
@@ -190,6 +193,11 @@ FName UCPP_InventoryWidget::GetCurrentEquipmentID(EEquipmentType equipmentType)
 	return EquipmentInventory->GetEquipmentID(equipmentType);
 }
 
+UCPP_Slot* UCPP_InventoryWidget::GetSlotWidget(const int32 index)
+{
+	return SlotWidgetArray[index];
+}
+
 void UCPP_InventoryWidget::UpdateEquipmentInventory(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo)
 {
 	EquipmentInventory->UpdateEquipSlot(itemInfo, equipmentInfo);
@@ -272,8 +280,12 @@ void UCPP_InventoryWidget::OnSlotDragDetected(const FGeometry& InGeometry, const
 		{
 			SlotWidgetArray[slot->LinkedCombinableSlot]->InactiveCombinableSlot();
 		}
-
-		dragSlot->WidgetRef = slot;
+;
+		dragSlot->SlotIndex = index;
+		dragSlot->SourceID = itemID;
+		dragSlot->SourceType = ESlotSourceType::Inventory;
+		dragSlot->CachedTypeFlag = static_cast<int32>(itemData->ItemType);
+		
 		dragSlot->DefaultDragVisual = dragWidget;
 		dragSlot->Pivot = EDragPivot::MouseDown;
 	}
@@ -285,46 +297,43 @@ bool UCPP_InventoryWidget::OnSlotDrop(const FGeometry& InGeometry, const FDragDr
 {
 	USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
 	UCPP_Slot* slot = SlotWidgetArray[index];
+	ESlotSourceType sourceType = dragSlot->SourceType;
 
 	if (dragSlot && InventoryRef.IsValid())
 	{
-		if (dragSlot->WidgetRef && dragSlot->WidgetRef != slot)
+		const int16 fromIndex = dragSlot->SlotIndex;
+		const int16 toIndex = index;
+
+		slot->bDraggedOver = false;
+
+		//border
+		slot->SetBorder();
+
+		if (sourceType == ESlotSourceType::Equipment)
 		{
-			const int16 fromIndex = dragSlot->WidgetRef->MyIndex;
-			const int16 toIndex = index;
-
-			slot->bDraggedOver = false;
-
-			//border
-			slot->SetBorder();
-
-			if (InventoryRef->CanAddToIndex(fromIndex, toIndex))
+			EEquipmentType type = static_cast<EEquipmentType>(dragSlot->CachedTypeFlag);
+			TakeOffEquipment(type, index);
+		}
+		else if (InventoryRef->CanAddToIndex(fromIndex, toIndex))
+		{
+			InventoryRef->AddToIndex(fromIndex, toIndex);
+		}
+		else
+		{
+			if (InDragDropEvent.IsShiftDown())
 			{
-				InventoryRef->AddToIndex(fromIndex, toIndex);;
+				SetSplitWidget(fromIndex, toIndex);
 			}
 			else
 			{
-				if (InDragDropEvent.IsShiftDown())
-				{
-					SetSplitWidget(dragSlot->WidgetRef, slot);					
-				}
-				else
-				{
-					InventoryRef->SwapSlot(fromIndex, toIndex);
-				}
+				InventoryRef->SwapSlot(fromIndex, toIndex);
 			}
-		}
-		else if (dragSlot->bFromEquipmentSlot)
-		{
-			TakeOffEquipment(dragSlot->EquipmentType, index);
 		}
 
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+
+	return false;
 }
 
 void UCPP_InventoryWidget::OnSlotMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, const int32 index)

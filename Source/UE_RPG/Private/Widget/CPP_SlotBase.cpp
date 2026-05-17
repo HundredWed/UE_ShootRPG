@@ -8,6 +8,7 @@
 #include "Widget/TootipWidget.h"
 
 
+
 bool UCPP_SlotBase::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
 	Super::NativeOnDragOver(InGeometry, InDragDropEvent, InOperation);
@@ -19,7 +20,7 @@ bool UCPP_SlotBase::NativeOnDragOver(const FGeometry& InGeometry, const FDragDro
 	else
 	{
 		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-		if (dragSlot)
+		if (dragSlot && IsValidDragOverTarget(InOperation))
 		{
 			UE_LOG(LogTemp, Display, TEXT("DragOver"));
 			bDraggedOver = true;
@@ -41,17 +42,23 @@ void UCPP_SlotBase::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDr
 	if (bDraggedOver)
 	{
 		USlotDrag* dragSlot = Cast<USlotDrag>(InOperation);
-		if (dragSlot)
+		if (dragSlot && !ItemIcon->IsVisible())
 		{
-			bDraggedOver = false;
-			SlotBorder->SetBrushColor(DefaultBorderColor);
-		}
-		else
-		{
-			bDraggedOver = false;
-			SlotBorder->SetBrushColor(FLinearColor::White);
+			SetBorderDefault();
 		}
 	}
+}
+
+void UCPP_SlotBase::SetBorderDefault()
+{
+	bDraggedOver = false;
+	SlotBorder->SetBrushColor(DefaultBorderColor);
+}
+
+void UCPP_SlotBase::SetBorderWhite()
+{
+	bDraggedOver = false;
+	SlotBorder->SetBrushColor(FLinearColor::White);
 }
 
 void UCPP_SlotBase::InactiveSlot()
