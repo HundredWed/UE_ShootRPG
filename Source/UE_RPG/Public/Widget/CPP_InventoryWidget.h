@@ -87,6 +87,8 @@ public:
 	UCPP_Slot* GetSlotWidget(const int32 index);
 	void UpdateEquipmentInventory(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
 
+	bool RequestRemoveItem(const int32 index, const int32 amount);
+
 protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;

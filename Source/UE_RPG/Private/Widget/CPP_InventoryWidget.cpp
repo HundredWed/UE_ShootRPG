@@ -203,6 +203,16 @@ void UCPP_InventoryWidget::UpdateEquipmentInventory(const FItemInfoTable* itemIn
 	EquipmentInventory->UpdateEquipSlot(itemInfo, equipmentInfo);
 }
 
+bool UCPP_InventoryWidget::RequestRemoveItem(const int32 index, const int32 amount)
+{
+	if (InventoryRef.IsValid())
+	{
+		return InventoryRef->RemoveItemAtIndex(index, amount);
+	}
+
+	return false;
+}
+
 FReply UCPP_InventoryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);

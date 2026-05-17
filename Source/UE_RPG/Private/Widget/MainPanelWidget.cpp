@@ -5,7 +5,6 @@
 
 #include "CPP_Character.h"
 #include "Component/CPP_StatComponent.h"
-#include "Inventory.h"
 #include "Widget/CPP_InventoryWidget.h"
 #include "Widget/SetAmountWidget.h"
 #include "Widget/DragWidget.h"
@@ -154,20 +153,12 @@ bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDrop
 		}
 		else
 		{
-			//임시 로직
-			//===================================================================================
-			ACPP_Character* player = Cast<ACPP_Character>(GetOwningPlayerPawn());
-			bool successRemove = player->GetInventory()->RemoveItemAtIndex(slotIndex, amount);
-			if (successRemove == false)
+			if (bool successRemove = InventoryWidget->RequestRemoveItem(slotIndex, amount))
 			{
-				//TODO
-				//버리지 못하는 안내창 출력
 				UpdatePopupText(FText::FromString(TEXT("해당 아이템은 버릴 수 없습니다.")));
 				PopupWidget->SetVisibility(ESlateVisibility::Visible);
 			}
-			//===================================================================================
-			return successRemove;
-		}
+		}	
 	}
 	
 	return true;

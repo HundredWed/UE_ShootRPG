@@ -35,7 +35,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data", meta = (MultiLine = "true"))
 	FText Description;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
-	bool bCanBeUsed;
+	bool bCanDiscard;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 	bool bCanStacked;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
