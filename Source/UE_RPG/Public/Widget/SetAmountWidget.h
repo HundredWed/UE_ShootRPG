@@ -6,8 +6,11 @@
 #include "Widget/CustomUMGWidget.h"
 #include "SetAmountWidget.generated.h"
 
-class UInventory;
+DECLARE_DELEGATE(FOnCancelEventDelegate);
+DECLARE_DELEGATE_TwoParams(FOnThrowEventDelegate, const int32, const int32);
+DECLARE_DELEGATE_ThreeParams(FOnSplitEventDelegate,const int32, const int32, const int32);
 
+class UInventory;
 
 UCLASS()
 class UE_RPG_API USetAmountWidget : public UCustomUMGWidget
@@ -44,9 +47,11 @@ public:
 
 	bool bThrowWidget = false;
 
-public:
+	FOnCancelEventDelegate OnCancelEvent;
+	FOnThrowEventDelegate OnThrowEvent;
+	FOnSplitEventDelegate OnSplitEvent;
 
-	void SetWeakInventoryRef(TWeakObjectPtr<UInventory> inventoryRef) { InventoryRef = inventoryRef; }
+public:
 
 	void InitWidgetInfo(const int32 amount, const int16 index, bool bthrowEvent,
 		/*when split*/const int16 toIndex = -1);
@@ -55,18 +60,14 @@ public:
 	void SetCountText(const int32 count);
 
 	UFUNCTION()
-		void ClickCancel();
+	void ClickCancel();
 	UFUNCTION()
-		void ClickConfirm();
+	void ClickConfirm();
 	UFUNCTION()
-		void ClickMinus();
+	void ClickMinus();
 	UFUNCTION()
-		void ClickPlus();
+	void ClickPlus();
 
 	UFUNCTION()
-		void ResetCount();
-
-private:
-
-	TWeakObjectPtr<UInventory> InventoryRef;
+	void ResetCount();
 };

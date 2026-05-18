@@ -63,6 +63,9 @@ private:
 	void ManaOverHeatEvent();
 	void ManaCoolDownEvent();
 
+	void ThrowItem(const int32 index, const int32 amount);
+	void ClosedThrowWidget();
+
 
 	bool IsQuestListActivate = false;
 

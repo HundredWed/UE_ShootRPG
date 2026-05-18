@@ -28,13 +28,14 @@ void UCPP_InventoryWidget::NativeConstruct()
 	UCPP_UIEventHubSubsystem* hub = GetGameInstance()->GetSubsystem<UCPP_UIEventHubSubsystem>();
 	hub->OnInventoryToggleEvent.AddUObject(this, &UCPP_InventoryWidget::SetWidgetVisibility);
 
+	SplitWidget->OnSplitEvent.BindUObject(this, &UCPP_InventoryWidget::RequestSplit);
+
 	SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UCPP_InventoryWidget::GenerateSlotWidget(UInventory* inventory, const int32 slotsParRow)
 {
 	InventoryRef = inventory;
-	SplitWidget->SetWeakInventoryRef(InventoryRef);
 
 	if (InventoryRef.IsValid())
 	{
@@ -203,11 +204,11 @@ void UCPP_InventoryWidget::UpdateEquipmentInventory(const FItemInfoTable* itemIn
 	EquipmentInventory->UpdateEquipSlot(itemInfo, equipmentInfo);
 }
 
-bool UCPP_InventoryWidget::RequestRemoveItem(const int32 index, const int32 amount)
+bool UCPP_InventoryWidget::RequestThrowItem(const int32 index, const int32 amount)
 {
 	if (InventoryRef.IsValid())
 	{
-		return InventoryRef->RemoveItemAtIndex(index, amount);
+		return InventoryRef->ThrowItem(index, amount);
 	}
 
 	return false;
@@ -434,6 +435,14 @@ void UCPP_InventoryWidget::SearchCombinableSlot(EItemCategory itemType, const in
 	}
 
 	InventoryRef->ClearConnectArray();
+}
+
+void UCPP_InventoryWidget::RequestSplit(const int32 fromIndex, const int32 toIndex, const int32 amount)
+{
+	if (!InventoryRef.IsValid())
+		return;
+
+	InventoryRef->SplitStackToIndex(fromIndex, toIndex, amount);
 }
 
 

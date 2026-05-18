@@ -98,6 +98,7 @@ public:
     
 	FItemInfoTable* RequestItemData(const FName& itemId);
 	FEquipmentInfoTable* RequestEquipmentData(const FName& itemId);
+	bool ThrowItem(const int32 index, const int32 removeAmount);
 
 	virtual void GatherSaveData(UCPP_SaveDataSubsystem* saveSystem) override;
 	virtual void ApplySaveData(UCPP_SaveDataSubsystem* saveSystem) override;
@@ -112,6 +113,8 @@ private:
 	void UpdateEquipSlot(const FItemInfoTable* itemData, const FEquipmentInfoTable* equipmentData);
 
 	void ApplyInventoryData();
+
+	FVector GetSpawnLocation();
 	
 private:
 

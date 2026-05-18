@@ -87,7 +87,7 @@ public:
 	UCPP_Slot* GetSlotWidget(const int32 index);
 	void UpdateEquipmentInventory(const FItemInfoTable* itemInfo, const FEquipmentInfoTable* equipmentInfo);
 
-	bool RequestRemoveItem(const int32 index, const int32 amount);
+	bool RequestThrowItem(const int32 index, const int32 amount);
 
 protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -116,6 +116,7 @@ private:
 	void EquipSlotItem(const int32 fromIndex);
 	void TakeOffEquipment(EEquipmentType equipmentType, const int32 index);
 	void SearchCombinableSlot(EItemCategory itemType, const int32 startIndex);
+	void RequestSplit(const int32 fromIndex, const int32 toIndex, const int32 amount);
 
 	TWeakObjectPtr<UInventory> InventoryRef;
 

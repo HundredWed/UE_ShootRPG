@@ -9,6 +9,7 @@
 #include "CPP_AkashicSubsystem.generated.h"
 
 class ACPP_EquipmentBase;
+class APickUpItem;
 
 DECLARE_DELEGATE_OneParam(FOnWeaponSpawnedCallback, ACPP_EquipmentBase*);
 
@@ -41,5 +42,11 @@ public:
 	UPROPERTY()
 	UDataTable* WeaponDataTable;
 
+	UPROPERTY()
+	TSubclassOf<APickUpItem> EquipmentClass;
+	UPROPERTY()
+	TSubclassOf<APickUpItem> ItemClass;
+
 	TArray<TSharedPtr<FStreamableHandle>> ActiveLoadHandles;
+	TSubclassOf<APickUpItem> CurrentSpawnClass = nullptr;
 };

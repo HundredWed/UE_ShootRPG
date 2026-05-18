@@ -808,6 +808,30 @@ FEquipmentInfoTable* UInventory::RequestEquipmentData(const FName& itemId)
 	return nullptr;
 }
 
+bool UInventory::ThrowItem(const int32 index, const int32 removeAmount)
+{
+	const FName id = SlotsArray[index].ItemID;
+
+	if (RemoveItemAtIndex(index, removeAmount))
+	{
+		UWorld* World = GetWorld();
+		if (!IsValid(World))
+		{
+			return false;
+		}
+
+		if (UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>())
+		{			
+			const FVector& loc = GetSpawnLocation();
+			AS->SpawnItemAsync(id, loc);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
 void UInventory::GatherSaveData(UCPP_SaveDataSubsystem* saveSystem)
 {
 	FInventoryTotalData saveData;
@@ -826,4 +850,24 @@ void UInventory::ApplySaveData(UCPP_SaveDataSubsystem* saveSystem)
 	EquipmentSlots = loadData.EquipmentSlotData;
 	CurrentGold = loadData.Gold;
 	CurrentWeight = loadData.Weight;
+}
+
+FVector UInventory::GetSpawnLocation()
+{
+	if (!IsValid(GetOwner()))
+		return FVector::ZeroVector;
+
+	FVector loc = GetOwner()->GetActorLocation();
+
+	//높이 보정
+	loc.Z += 10.f;
+
+	AController* PC = Cast<APawn>(GetOwner())->GetController();
+	const FRotator rot = PC->GetControlRotation();
+	const FRotator yaw(0, rot.Yaw, 0);
+	const FVector dir = FRotationMatrix(yaw).GetUnitAxis(EAxis::X);
+
+	const float dis = 200.f;
+
+	return loc + dir * dis;
 }

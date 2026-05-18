@@ -64,25 +64,7 @@ void APickUpItem::OnConstruction(const FTransform& Transform)
 
 	if (ItemInfoHandle.RowName == PevItemID) return;
 
-	if (ItemInfoHandle.IsNull())
-	{
-		PickUpMesh->SetStaticMesh(nullptr);
-		PevItemID = ItemInfoHandle.RowName;
-		return;
-	}
-
-	const FItemInfoTable* thisItemInfo = ItemInfoHandle.GetRow<FItemInfoTable>(TEXT("APickUpItem::OnConstruction 유효하지 않은 ID"));
-	if (thisItemInfo && !thisItemInfo->ItemMesh.IsNull())
-	{
-		PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh.LoadSynchronous());
-		ItemCategory = thisItemInfo->ItemType;
-	}
-	else
-	{
-		PickUpMesh->SetStaticMesh(nullptr);
-	}
-
-	PevItemID = ItemInfoHandle.RowName;
+	InitializePickUpItem(ItemInfoHandle.RowName);
 }
 
 void APickUpItem::SetWidgetVisibility(bool Visible)
@@ -106,9 +88,8 @@ void APickUpItem::BeginPlay()
 	if (IsValid(ItemStateWidget))
 	{
 		ItemStateWidget->SetVisibility(false);
-	}
-
-	//InitializePickUpItem();
+		InitPickUpWidget();
+	}	
 }
 
 
@@ -141,25 +122,30 @@ void APickUpItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 	//}
 }
 
-void APickUpItem::InitializePickUpItem()
+void APickUpItem::InitializePickUpItem(const FName& itemID)
 {
-	/*UWorld* World = GetWorld();
-	if (!IsValid(World))
+	ItemInfoHandle.RowName = itemID;
+
+	if (ItemInfoHandle.IsNull())
 	{
+		PickUpMesh->SetStaticMesh(nullptr);
+		PevItemID = ItemInfoHandle.RowName;
 		return;
 	}
 
-	if (UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>())
+	const FItemInfoTable* thisItemInfo = ItemInfoHandle.GetRow<FItemInfoTable>(TEXT("APickUpItem::OnConstruction 유효하지 않은 ID"));
+	if (thisItemInfo && !thisItemInfo->ItemMesh.IsNull())
 	{
-		const FItemInfoTable* thisItemInfo = AS->RequestItemInfo(ItemInfoID);
+		PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh.LoadSynchronous());
 		ItemCategory = thisItemInfo->ItemType;
+	}
+	else
+	{
+		PickUpMesh->SetStaticMesh(nullptr);
+	}
 
-		if (thisItemInfo)
-		{
-			if (!thisItemInfo->ItemMesh.IsNull())
-				PickUpMesh->SetStaticMesh(thisItemInfo->ItemMesh.LoadSynchronous());
-		}
-	}*/
+	InitPickUpWidget();
+	PevItemID = ItemInfoHandle.RowName;
 }
 
 void APickUpItem::RequestInteract(AActor* interactor)

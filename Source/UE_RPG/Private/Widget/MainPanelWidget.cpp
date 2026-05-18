@@ -20,6 +20,9 @@ void UMainPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	HideInteractWidget();
+
+	ThrowWidget->OnCancelEvent.BindUObject(this, &UMainPanelWidget::ClosedThrowWidget);
+	ThrowWidget->OnThrowEvent.BindUObject(this, &UMainPanelWidget::ThrowItem);
 }
 
 void UMainPanelWidget::ShowInteractWidget()
@@ -82,6 +85,17 @@ void UMainPanelWidget::ManaOverHeatEvent()
 void UMainPanelWidget::ManaCoolDownEvent()
 {
 	ManaCoolDown();
+}
+
+void UMainPanelWidget::ThrowItem(const int32 index, const int32 amount)
+{
+	InventoryWidget->RequestThrowItem(index, amount);
+	InventoryWidget->SetPanelEnabled(true);
+}
+
+void UMainPanelWidget::ClosedThrowWidget()
+{
+	InventoryWidget->SetPanelEnabled(true);
 }
 
 void UMainPanelWidget::UpdateLevel(int32 level)
@@ -153,7 +167,8 @@ bool UMainPanelWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDrop
 		}
 		else
 		{
-			if (bool successRemove = InventoryWidget->RequestRemoveItem(slotIndex, amount))
+			bool successRemove = InventoryWidget->RequestThrowItem(slotIndex, amount);
+			if (!successRemove)
 			{
 				UpdatePopupText(FText::FromString(TEXT("해당 아이템은 버릴 수 없습니다.")));
 				PopupWidget->SetVisibility(ESlateVisibility::Visible);

@@ -13,6 +13,9 @@ void UCPP_AkashicSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	const UCPP_MyGameSettings* Settings = GetDefault<UCPP_MyGameSettings>();
 	ItemDataTable = UCPP_MyGameSettings::LoadDataTableSafely(Settings->ItemData);
 	WeaponDataTable = UCPP_MyGameSettings::LoadDataTableSafely(Settings->WeaponData);
+
+    EquipmentClass = UCPP_MyGameSettings::LoadWorldObjSubClassSafely(Settings->EquipmentDropClass);
+    ItemClass = UCPP_MyGameSettings::LoadWorldObjSubClassSafely(Settings->ItemDropClass);
 }
 
 void UCPP_AkashicSubsystem::Deinitialize()
@@ -37,6 +40,15 @@ void UCPP_AkashicSubsystem::SpawnItemAsync(FName itemID, FVector spawnLocation)
     if (itemInfo == nullptr)
     {
         return;
+    }
+
+    if (itemInfo->ItemType == EItemCategory::EIC_Equipment)
+    {
+        CurrentSpawnClass = EquipmentClass;
+    }
+    else
+    {
+        CurrentSpawnClass = ItemClass;
     }
 
     TArray<FSoftObjectPath> assetsToLoad;
@@ -115,8 +127,8 @@ bool UCPP_AkashicSubsystem::SpawnWeaponAsync(FName itemID, FVector spawnLocation
 
 void UCPP_AkashicSubsystem::OnItemAssetsLoaded(FName itemID, FVector spawnLocation)
 {
-    APickUpItem* newItem = GetWorld()->SpawnActor<APickUpItem>(APickUpItem::StaticClass(), spawnLocation, FRotator::ZeroRotator);
-    newItem->InitializePickUpItem();
+    APickUpItem* newItem = GetWorld()->SpawnActor<APickUpItem>(CurrentSpawnClass, spawnLocation, FRotator::ZeroRotator);
+    newItem->InitializePickUpItem(itemID);
 }
 
 void UCPP_AkashicSubsystem::OnWeaponAssetsLoaded(FName itemID, FVector spawnLocation, FOnWeaponSpawnedCallback onSpawnCompleted)

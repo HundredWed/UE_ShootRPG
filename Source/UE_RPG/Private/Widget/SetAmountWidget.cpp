@@ -44,32 +44,21 @@ void USetAmountWidget::DecreaseCount()
 
 void USetAmountWidget::ClickCancel()
 {
-	if (!InventoryRef.IsValid())
-	{
-		return;
-	}
-
-	InventoryRef->InventoryWidget->SetPanelEnabled(true);//델리게이트로
+	OnCancelEvent.Execute();
 	this->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void USetAmountWidget::ClickConfirm()
 {
-	if (!InventoryRef.IsValid())
-	{
-		return;
-	}
-
 	if (bThrowWidget)
 	{
-		InventoryRef->RemoveItemAtIndex(InventoryIndex, SetAmountCount);
+		OnThrowEvent.Execute(InventoryIndex, SetAmountCount);
 	}
 	else
 	{
-		InventoryRef->SplitStackToIndex(InventoryIndex, ToIndex, SetAmountCount);
+		OnSplitEvent.Execute(InventoryIndex, ToIndex, SetAmountCount);
 	}
 
-	InventoryRef->InventoryWidget->SetPanelEnabled(true);//델리게이트로
 	this->SetVisibility(ESlateVisibility::Hidden);
 }
 

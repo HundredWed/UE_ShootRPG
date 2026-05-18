@@ -20,11 +20,14 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	void SetWidgetVisibility(bool Visible);
-	void InitializePickUpItem();
+	void InitializePickUpItem(const FName& itemID);
 
 	virtual void RequestInteract(AActor* interactor) override;
 	virtual void OnBeginLookAt() override;
 	virtual void OnEndLookAt() override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	bool InitPickUpWidget();
 
 protected:
 

@@ -7,6 +7,7 @@
 #include "Engine/DataTable.h"
 #include "CPP_MyGameSettings.generated.h"
 
+class APickUpItem;
 
 UCLASS(Config = Game, defaultconfig, meta = (DisplayName = "My RPG Settings"))
 class UE_RPG_API UCPP_MyGameSettings : public UDeveloperSettings
@@ -38,8 +39,14 @@ public:
 	TSoftObjectPtr<UDataTable> WeaponData;
 	
 
+	UPROPERTY(Config, EditAnywhere, Category = "Drop Item Settings")
+	TSoftClassPtr<AActor> EquipmentDropClass;
+	UPROPERTY(Config, EditAnywhere, Category = "Drop Item Settings")
+	TSoftClassPtr<AActor> ItemDropClass;
+
 public:
 
 	static UDataTable* LoadDataTableSafely(const TSoftObjectPtr<UDataTable>& SoftTablePtr);
+	static UClass* LoadWorldObjSubClassSafely(const TSoftClassPtr<AActor>& SoftTablePtr);
 
 };
