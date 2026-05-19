@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -21,14 +21,8 @@ protected:
 	
 	virtual void BeginPlay() override;
 
-	FTimerHandle TimerHandle;
-
 public:	
 	
 	//virtual void Tick(float DeltaTime) override;
 	void UpdateDamageActor(const FVector& pos, const int32 amount);
-	void StartValidTime();
-
-	UFUNCTION()
-		void SetActorHidden();
 };
