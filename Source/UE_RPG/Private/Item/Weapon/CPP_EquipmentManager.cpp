@@ -63,7 +63,6 @@ void UCPP_EquipmentManager::OnWeaponReady(ACPP_EquipmentBase* weapon)
 	if (ACPP_Character* player = Cast<ACPP_Character>(GetOwner()))
 	{
 		weapon->SetOwner(GetOwner());
-		weapon->StoreDamageUI(DamageUIActorClass);
 		CurrentWeapon = weapon;
 
 		weapon->Equip(player->GetMesh(), "weapon_socket_back");

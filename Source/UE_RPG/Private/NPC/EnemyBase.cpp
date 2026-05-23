@@ -7,12 +7,15 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Engine/DamageEvents.h"
 
 #include "CPP_Character.h"
 #include "NPC/CPP_EnemyCombatBox.h"
 #include "NPC/CPP_EnemySpawnArea.h"
 #include "Animations/CPP_NPCAnimInstance.h"
 #include "Object/Mover.h"
+#include "Component/CPP_StatComponent.h"
+#include "Interface/CPP_CombatReceiptReceiver.h"
 
 #define NO_TARGET 0
 
@@ -33,12 +36,12 @@ void AEnemyBase::BeginPlay()
 		WARNINGLOG(TEXT("Enemy HitMontage is not Valid!!"));
 	}
 
-	if (CombatTypes == EEnemyCombatTypes::Dummy || !IsValid(CombatBoxClass))
+	if (EnemyInfo.CombatTypes == EEnemyCombatTypes::Dummy || !IsValid(CombatBoxClass))
 	{
 		WARNINGLOG(TEXT("Please set CombatType!!"));
 	}
 
-	InitEnenmyInfo();
+	InitEnemyInfo();
 }
 
 void AEnemyBase::Tick(float DeltaTime)
@@ -74,7 +77,7 @@ void AEnemyBase::UpdateState()
 		{
 			BehaviorMode(ENPCState::SideStep);
 		}
-		else if (dis > CombatDis)
+		else if (dis > EnemyInfo.CombatDis)
 		{
 			BehaviorMode(ENPCState::Chase);
 		}
@@ -85,39 +88,22 @@ void AEnemyBase::UpdateState()
 	}
 }
 
-bool AEnemyBase::GetHit(const FVector& targetLocation)
+void AEnemyBase::ExecuteHitEvent(FDamageReceipt& receipt, AController* eventInstigator, AActor* damageCauser)
 {
-	if (NPCState == ENPCState::Death || NPCState == ENPCState::Normal)
-		return false;
+	SetHealthBarWidget(true);
 
-	float dis = (GetActorLocation() - targetLocation).Length();
+	receipt.Damage = FinalDamage(receipt.Damage);
+	PlayNPCMontage(HitActionMontage);
 
-	if (dis >= NoDamagedDistance)
+	if (!Damaged(receipt.Damage))
 	{
-		NoDamaged(targetLocation);
-		//SCREENLOG(INDEX_NONE, 5.f, FColor::Black, TEXT("NoDamaged!!"));
-		return false;
+		DieNPC();
+		BehaviorMode(ENPCState::Death);
 	}
 
-	PlayNPCMontage(HitActionMontage);
-	return true;
-}
-
-float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	if(NPCState == ENPCState::Death)
-		BehaviorMode(ENPCState::Death);
-
-	return 0.0f;
-}
-
-void AEnemyBase::NoDamaged(const FVector& targetLocation)
-{
-	//SCREENLOG(INDEX_NONE, 5.f, FColor::Red, TEXT("Ouch!!"));
-	PlayNPCMontage(HitActionMontage_NoDamaged);
-}
+	ICPP_CombatReceiptReceiver* CRR = Cast<ICPP_CombatReceiptReceiver>(damageCauser);
+	CRR->SubmitReceipt(receipt);
+}	
 
 void AEnemyBase::ThinkAction()
 {
@@ -136,14 +122,14 @@ void AEnemyBase::ThinkAction()
 		if (dis < NO_TARGET)
 			return;
 
-		if ((ValidSightDis > 0) && (dis < ValidSightDis) && IsCorwd())
+		if ((EnemyInfo.ValidSightDis > 0) && (dis < EnemyInfo.ValidSightDis) && IsCorwd())
 		{
 			SetActorTickEnabled(false);
 			bCorwd = true;
 			UpdateState();
 		}
 
-		if (dis < CombatDis)
+		if (dis < EnemyInfo.CombatDis)
 		{
 			SetActorTickEnabled(false);
 			UpdateState();
@@ -163,7 +149,7 @@ void AEnemyBase::BehaviorMode(ENPCState enemyState)
 void AEnemyBase::InitBehaviorState()
 {
 	GetCharacterMovement()->bOrientRotationToMovement = false;
-	GetCharacterMovement()->MaxWalkSpeed = DelfaultSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = EnemyInfo.DefaultSpeed;
 	SetActorTickEnabled(false);
 	bCorwd = false;
 	bRotatOnly = false;
@@ -179,8 +165,7 @@ void AEnemyBase::Spawn(ACPP_EnemySpawnArea* spawnarea, const int32 arrNum)
 
 void AEnemyBase::ReSpawn()
 {
-	CurrentHP = MaxHealth;
-	UpdateHealthPercent(CurrentHP);
+	InitStats(EnemyInfo.StatData);
 	SetHealthBarWidget(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
@@ -247,61 +232,38 @@ void AEnemyBase::WeaponReady()
 	if (!IsValid(CombatBoxClass) && !IsValid(World))
 		return;
 
-	uint8 weapons = (uint8)CombatTypes;
+	uint8 weapons = (uint8)EnemyInfo.CombatTypes;
 
-	if (weapons != SocketNames.Num())
+	if (weapons != EnemyInfo.SocketNames.Num())
 		return;
 
 	for (uint8 i = 0; i < weapons; i++)
 	{
 		ACPP_EnemyCombatBox* weapon = World->SpawnActor<ACPP_EnemyCombatBox>(CombatBoxClass);
-		weapon->SetDamage(ATK);
+		weapon->SetDamage(EnemyInfo.StatData.CharacterATK);
 		CombatBoxes.Push(weapon);
 		FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-		CombatBoxes[i]->AttachToComponent(GetMesh(), TransformRules, SocketNames[i]);
+		CombatBoxes[i]->AttachToComponent(GetMesh(), TransformRules, EnemyInfo.SocketNames[i]);
 		CombatBoxes[i]->SetOwner(this);
 
 		DISPLAYLOG(TEXT("WeaponReady!!"))
 	}
 }
 
-void AEnemyBase::InitEnenmyInfo()
+void AEnemyBase::InitEnemyInfo()
 {
-	if (IsValid(EnemyDataTable))
+	if (const UDataTable* enemyDataTable = EnemyHandle.DataTable)
 	{
-		EnemyID = NPCID;
+		const FEnemyInfoTable* info = enemyDataTable->FindRow<FEnemyInfoTable>(EnemyHandle.RowName, TEXT("유효하지 않은 ID입니다."));
 
-		const FEnemyInfoTable* info = EnemyDataTable->FindRow<FEnemyInfoTable>(EnemyID,TEXT(""));
-		if (info == nullptr)
-		{
-			WARNINGLOG(TEXT("[%s] was not found!!Please check the ID."), *EnemyID.ToString())
-				return;
-		}
-
-		CombatTypes = info->CombatTypes;
-		PlaySection = info->PlaySection;
-		SocketNames = info->SocketNames;
-		NoDamagedDistance = info->NoDamagedDistance;
-		CombatDis = info->CombatDis;
-		ValidSightDis = info->ValidSightDis;
-		SidStepSpeed = info->SidStepSpeed;
-		DelfaultSpeed = info->DelfaultSpeed;
-		SidStepDis = info->SidStepDis;
-
-		MaxHealth = info->MaxHealth;
-		CurrentHP = MaxHealth;
-		MaxMana = info->MaxMana;
-		ATK = info->ATK;
-		DEF = info->DEF;
-		CharacterType = info->CharacterType;
+		EnemyInfo = *info;
+		InitStats(info->StatData);
 
 		WeaponReady();
 		SpawnPos = GetActorLocation();
 		SetControlOwner(this);
 		SetActorTickEnabled(false);
-	}
-
-	
+	}	
 }
 
 void AEnemyBase::Patrol()
@@ -313,12 +275,12 @@ void AEnemyBase::Patrol()
 	bOrderfromSpawnArea = false;
 
 	MoveToLocation(SpawnPos);
-	SetHPMAX();
+	InitStats(EnemyInfo.StatData);
 }
 
 void AEnemyBase::SideStep()
 {
-	GetCharacterMovement()->MaxWalkSpeed = SidStepSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = EnemyInfo.SidStepSpeed;
 	
 	FVector rightVector = GetActorRightVector().GetSafeNormal();
 
@@ -326,7 +288,7 @@ void AEnemyBase::SideStep()
 	float dir = randomDir == -1 ? -1.f : 1.f;
 	NPCAnimInstance->Angle = dir;
 
-	FVector sideVector = GetActorLocation() + (rightVector * dir * SidStepDis);
+	FVector sideVector = GetActorLocation() + (rightVector * dir * EnemyInfo.SidStepDis);
 
 	MoveSide(sideVector);
 }
@@ -335,16 +297,16 @@ void AEnemyBase::Combat()
 {
 	float animLength = 0.f;
 
-	if (PlaySection.Num() > 0)
+	if (EnemyInfo.PlaySection.Num() > 0)
 	{
-		int32 random = FMath::RandRange(0, PlaySection.Num());
-		if (random == PlaySection.Num())
+		int32 random = FMath::RandRange(0, EnemyInfo.PlaySection.Num());
+		if (random == EnemyInfo.PlaySection.Num())
 		{
 			BehaviorMode(ENPCState::SideStep);
 			return;
 		}
 		else
-			animLength = PlayNPCMontage(CombatActionMontage, PlaySection[random]);
+			animLength = PlayNPCMontage(CombatActionMontage, EnemyInfo.PlaySection[random]);
 	}
 	else
 	{
@@ -420,7 +382,7 @@ void AEnemyBase::DeactivateCombatBox(const uint8 index, bool knockBack)
 void AEnemyBase::FinishMoveDownEvent()
 {
 	BehaviorMode(ENPCState::Normal);
-	GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::MoveUp, RespawnDelay, false);
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &AEnemyBase::MoveUp, EnemyInfo.RespawnDelay, false);
 }
 
 void AEnemyBase::FinishMoveUpEvent()

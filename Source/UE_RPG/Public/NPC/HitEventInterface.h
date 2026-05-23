@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -13,14 +13,13 @@ class UHitEventInterface : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
+struct FDamageReceipt;
+
 class UE_RPG_API IHitEventInterface
 {
 	GENERATED_BODY()
 
 public:
 
-	virtual bool GetHit(const FVector& hitDir) = 0;
+	virtual void ExecuteHitEvent(FDamageReceipt& receipt, AController* eventInstigator, AActor* damageCauser) {}
 };

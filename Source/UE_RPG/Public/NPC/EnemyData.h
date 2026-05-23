@@ -15,47 +15,32 @@ public:
 	FEnemyInfoTable() {};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		EEnemyCombatTypes CombatTypes = EEnemyCombatTypes::Dummy;
+	FCharacterStats StatData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		TArray<FName> SocketNames;
+	EEnemyCombatTypes CombatTypes = EEnemyCombatTypes::Dummy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		TArray<FName> PlaySection;
+	TArray<FName> SocketNames;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		float NoDamagedDistance = 500.f;
+	TArray<FName> PlaySection;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		float CombatDis = 200.f;
+	float CombatDis = 200.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		float ValidSightDis = 500.f;
+	float ValidSightDis = 500.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		float DelfaultSpeed = 630.f;
+	float DefaultSpeed = 630.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		float SidStepSpeed = 170.f;
+	float SidStepSpeed = 170.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		float SidStepDis = 300.f;
+	float SidStepDis = 300.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		int32 MaxHealth = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		int32 MaxMana = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		int32 MaxStamina = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		int32 ATK = 15;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		int32 DEF = 10;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Data")
-		ECharacterTypes CharacterType = ECharacterTypes::Type_None;
+	float RespawnDelay = 6.f;
 };

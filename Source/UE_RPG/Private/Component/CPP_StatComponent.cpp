@@ -24,12 +24,48 @@ void UCPP_StatComponent::InitCharacterStats(bool bFill)
 	{
 		if (bFill)
 		{
-			CharacterStats.CurrentHealth = CharacterStats.MaxHealth;
-			CharacterStats.CurrentMana = CharacterStats.MaxMana;
+			CharacterStats.Initialize();
 		}
 
 		OnUpdateCharacterState.Execute(CharacterStats);
 	}
+}
+
+void UCPP_StatComponent::InitCharacterStats(FCharacterStats stats)
+{
+	CharacterStats = stats;
+
+	if (OnUpdateCharacterState.IsBound())
+	{
+		CharacterStats.Initialize();
+		OnUpdateCharacterState.Execute(CharacterStats);
+	}
+}
+
+float UCPP_StatComponent::CalculateFinalDamage(const float damage)
+{
+	//방어력 보간 상수
+	const float armorConstant = 100.0f;
+
+	float damageMultiplier = armorConstant / (armorConstant + CharacterStats.CharacterDEF);
+	float finalDamage = damage * damageMultiplier;
+	finalDamage = FMath::Max(1.0f, finalDamage);
+
+	return finalDamage;
+}
+
+void UCPP_StatComponent::CalculateApplyDamage(FDamageReceipt& receipt)
+{
+	float newDamage = CharacterStats.CharacterATK;
+	float criticalRoll = FMath::RandRange(0.0f, 100.0f);
+
+	if (criticalRoll <= CharacterStats.CritRate)
+	{
+		receipt.DamageType = EDamageType::Critical;
+		newDamage *= CharacterStats.CritMultiplier;
+	}
+
+	receipt.Damage = newDamage;
 }
 
 bool UCPP_StatComponent::IncreaseHP(const float value)

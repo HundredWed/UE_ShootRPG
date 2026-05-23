@@ -85,6 +85,9 @@ struct FCharacterStats
 
 public:
 	FCharacterStats() {};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	ECharacterTypes CharacterType;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 Level = 1;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -110,30 +113,19 @@ public:
 	float CurrentStamina = 150.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float PlayerATK = 10.f;
+	float CharacterATK = 10.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float CharacterDEF = 10.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float CritRate = 30.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float CritMultiplier = 1.3f;
 
 	void Initialize()
 	{
 		CurrentHealth = MaxHealth;
 		CurrentMana = MaxMana;
 		CurrentStamina = MaxStamina;
-	}
-
-	float GetHealthRatio() const
-	{
-		return (MaxHealth > 0.f) ? (CurrentHealth / MaxHealth) : 0.f;
-	}
-
-	float IncreaseHP(const float value) {
-		CurrentHealth += value;
-		float overValue = CurrentHealth - MaxHealth;
-		CurrentHealth = FMath::Clamp(CurrentHealth, 0.f, MaxHealth);
-
-		return FMath::Clamp(overValue, 0.f, overValue);
-	}
-
-	float DecreaseHP(const float value) {
-		CurrentHealth -= value;
-		return CurrentHealth = FMath::Clamp(CurrentHealth, 0.f, MaxHealth);
 	}
 };

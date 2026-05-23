@@ -20,15 +20,15 @@ void ACPP_Enemy_Gunner::Combat()
 
 	float animLength = 0.f;
 
-	if (PlaySection.Num() > 0)
+	if (EnemyInfo.PlaySection.Num() > 0)
 	{
-		int32 random = FMath::RandRange(0, PlaySection.Num()-1);
+		int32 random = FMath::RandRange(0, EnemyInfo.PlaySection.Num()-1);
 		/*if (random == PlaySection.Num())
 		{
 			BehaviorMode(NPCState = ENPCState::SideStep);
 			return;
 		}*/
-		animLength = PlayNPCMontage(CombatActionMontage, PlaySection[random]);
+		animLength = PlayNPCMontage(CombatActionMontage, EnemyInfo.PlaySection[random]);
 	}
 	else
 	{
@@ -54,7 +54,7 @@ void ACPP_Enemy_Gunner::GunTrace()
 {
 	FVector StartLocation = GetMesh()->GetSocketLocation("Muzzle_Front");
 	//FVector end = StartLocation + GetActorForwardVector().GetSafeNormal() * ValidSightDis;
-	FVector end = StartLocation + (Target->GetActorLocation() - StartLocation).GetSafeNormal() * ValidSightDis;
+	FVector end = StartLocation + (Target->GetActorLocation() - StartLocation).GetSafeNormal() * EnemyInfo.ValidSightDis;
 
 	float spreadrange = 100.f;
 	float randPich = FMath::FRandRange(-spreadrange, spreadrange);
@@ -73,7 +73,7 @@ void ACPP_Enemy_Gunner::GunTrace()
 	bool onhit = GetWorld()->LineTraceSingleByChannel(hitresult_gunTrace, StartLocation, fixEnd, ECC_GameTraceChannel5, Params);
 	if (onhit)
 	{
-		UGameplayStatics::ApplyDamage(hitresult_gunTrace.GetActor(), ATK, GetController(), GetOwner(), UDamageType::StaticClass());
+		UGameplayStatics::ApplyDamage(hitresult_gunTrace.GetActor(), EnemyInfo.StatData.CharacterATK, GetController(), GetOwner(), UDamageType::StaticClass());
 
 		FVector beamspawnpoint = StartLocation;
 		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(this, BeamParticle, beamspawnpoint);

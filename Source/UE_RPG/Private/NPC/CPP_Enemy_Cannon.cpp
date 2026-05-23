@@ -47,42 +47,42 @@ void ACPP_Enemy_Cannon::ShootProjectile(bool bAEO, int32 index)
 			rot = GetMesh()->GetSocketRotation("Muzzle_Front");
 
 			const float dis = CheckDist();
-			if (dis < CombatDis)
+			if (dis < EnemyInfo.CombatDis)
 			{
-				rot.Pitch += ((CombatDis - dis) / 40.f);
+				rot.Pitch += ((EnemyInfo.CombatDis - dis) / 40.f);
 			}
 		}
 
 		ACPP_Projectile* pt = world->SpawnActor<ACPP_Projectile>(PTClassse[index], loc, rot);
 		pt->ShootProjectile(bAEO);
 		pt->SetOwner(this);
-		pt->UpdateDamage(ATK);
+		pt->UpdateDamage(EnemyInfo.StatData.CharacterATK);
 	}
 }
 
 void ACPP_Enemy_Cannon::AttackFunc()
 {
-	if (!Target.IsValid() || PlaySection.Num() <= 0)
+	if (!Target.IsValid() || EnemyInfo.PlaySection.Num() <= 0)
 		return;
 	float animLength = 0;
 	float dis = CheckDist();
 
-	const float middle = CombatDis * 0.70f;
-	const float near = CombatDis * 0.15f;
+	const float middle = EnemyInfo.CombatDis * 0.70f;
+	const float near = EnemyInfo.CombatDis * 0.15f;
 
-	if (dis < CombatDis && dis > middle)
+	if (dis < EnemyInfo.CombatDis && dis > middle)
 	{
 		LookatTargetByTick();
-		animLength = PlayNPCMontage(CombatActionMontage, PlaySection[ATTACK1]);
+		animLength = PlayNPCMontage(CombatActionMontage, EnemyInfo.PlaySection[ATTACK1]);
 	}
 	else if (dis < middle && dis > near)
 	{
 		ShootProjectile(false, ATTACK2);
-		animLength = PlayNPCMontage(CombatActionMontage, PlaySection[ATTACK2]);
+		animLength = PlayNPCMontage(CombatActionMontage, EnemyInfo.PlaySection[ATTACK2]);
 	}
 	else if (dis < near)
 	{
-		animLength = PlayNPCMontage(CombatActionMontage, PlaySection[ATTACK3]);
+		animLength = PlayNPCMontage(CombatActionMontage, EnemyInfo.PlaySection[ATTACK3]);
 	}
 	else
 	{

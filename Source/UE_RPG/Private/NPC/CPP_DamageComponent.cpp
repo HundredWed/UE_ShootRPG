@@ -1,10 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "NPC/CPP_DamageComponent.h"
 #include "Widget/NPC/CPP_DamageUI.h"
 
-void UCPP_DamageComponent::UpdateDamageUI(const int32 amount)
+
+void UCPP_DamageComponent::UpdateDamageUI(const float amount, EDamageType type)
 {
 	if (!IsValid(DamageUI))
 	{
@@ -13,6 +14,14 @@ void UCPP_DamageComponent::UpdateDamageUI(const int32 amount)
 
 	if (IsValid(DamageUI))
 	{
-		DamageUI->UpdateWidget(amount);
+		DamageUI->UpdateWidget(amount, type);
 	}
+}
+
+bool UCPP_DamageComponent::IsActivateUI()
+{
+	if (!IsValid(DamageUI))
+		return false;
+
+	return DamageUI->bActivate;
 }

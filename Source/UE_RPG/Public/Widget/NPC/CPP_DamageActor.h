@@ -5,6 +5,10 @@
 #include "UE_RPG/UtilityMecro.h"
 #include "CPP_DamageActor.generated.h"
 
+class UCPP_DamageComponent;
+
+struct FDamageReceipt;
+
 UCLASS()
 class UE_RPG_API ACPP_DamageActor : public AActor
 {
@@ -15,8 +19,8 @@ public:
 	ACPP_DamageActor();
 
 	UPROPERTY(VisibleAnywhere, Category = "DamageWidget")
-		class UCPP_DamageComponent* DamageComponent;
-
+	UCPP_DamageComponent* DamageComponent;
+	
 protected:
 	
 	virtual void BeginPlay() override;
@@ -24,5 +28,6 @@ protected:
 public:	
 	
 	//virtual void Tick(float DeltaTime) override;
-	void UpdateDamageActor(const FVector& pos, const int32 amount);
+	void UpdateDamageActor(const FDamageReceipt& receipt);
+	bool IsActivateUI();
 };

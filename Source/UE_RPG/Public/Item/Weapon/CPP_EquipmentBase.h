@@ -27,13 +27,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "WeaponInfo")
 	FEquipmentStat EquipmentStat;
 
-	UPROPERTY()
-	TArray<ACPP_DamageActor*> DamageUIActors;
-	
-	int32 DamageUI = 0;
-
-	void StoreDamageUI(TSubclassOf<ACPP_DamageActor> damageUIActorClass);
-
 public:
 	//virtual void Tick(float DeltaTime) override;
 
@@ -41,12 +34,12 @@ public:
 	virtual float Attack() { return 0.f; };
 	virtual void InitWeaponInfo(const FName& itemID) {};
 	virtual void Equip(USceneComponent* Inparent, const FName& SocketName);
+
+	FORCEINLINE void AddFinalDamage(const float amount) { FinalDamage += amount; }
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	/**damage ui*/
-	void SpawnDamageUI(const FVector pos, float damage = 0.f);
-	class ACPP_DamageActor* GetDamageActor();
+	float FinalDamage = 0.f;
 };

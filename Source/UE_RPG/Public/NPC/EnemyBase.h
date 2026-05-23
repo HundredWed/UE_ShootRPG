@@ -4,14 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "NPC/NonPlayerCharacterBase.h"
-#include "NPC/HitEventInterface.h"
 #include "NPC/EnemyData.h"
 #include "EnemyBase.generated.h"
 
 class ACPP_Character;
+class ACPP_EnemySpawnArea;
+class ACPP_EnemyCombatBox;
 
 UCLASS()
-class UE_RPG_API AEnemyBase : public ANonPlayerCharacterBase, public IHitEventInterface
+class UE_RPG_API AEnemyBase : public ANonPlayerCharacterBase
 {
 	GENERATED_BODY()
 
@@ -23,8 +24,7 @@ public:
 
 public:
 
-	virtual bool GetHit(const FVector& targetLocation = FVector::Zero()) override;
-    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	virtual void ExecuteHitEvent(FDamageReceipt& receipt, AController* eventInstigator, AActor* damageCauser) override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
@@ -32,11 +32,10 @@ public:
 	void ReSpawn();
 	void SetTarget(ACPP_Character* target);
 	void WeaponReady();
-	void InitEnenmyInfo();
+	void InitEnemyInfo();
 	FORCEINLINE void IsOrderfromSpawnArea(bool order) { bOrderfromSpawnArea = order; }
 
 	/**ai*/
-	void NoDamaged(const FVector& targetLocation);
 	void ThinkAction();
 	void BehaviorMode(ENPCState enemyState);
 	void InitBehaviorState();
@@ -70,34 +69,22 @@ public:
 protected:
 
 	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class ACPP_EnemyCombatBox> CombatBoxClass;
+	TSubclassOf<ACPP_EnemyCombatBox> CombatBoxClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+	FDataTableRowHandle EnemyHandle;
+
 
 	UPROPERTY()
-		TArray<class ACPP_EnemyCombatBox*> CombatBoxes;
+	TArray<ACPP_EnemyCombatBox*> CombatBoxes;
 
 	UPROPERTY()
-		class ACPP_EnemySpawnArea* MySpawnArea;
-
-	/**data table info*/
-	UPROPERTY(EditAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
-		UDataTable* EnemyDataTable;
-
-	UPROPERTY(VisibleAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
-		FName EnemyID;/**same name*/
-
-	UPROPERTY(VisibleAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
-		EEnemyCombatTypes CombatTypes = EEnemyCombatTypes::Dummy;
-
-	UPROPERTY(VisibleAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
-		TArray<FName> PlaySection;
-
-	UPROPERTY(VisibleAnywhere, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
-		TArray<FName> SocketNames;
+	ACPP_EnemySpawnArea* MySpawnArea;
+	
+	UPROPERTY()
+	FEnemyInfoTable EnemyInfo;
 
 	int32 SpawnArrNum = 0;
-	float NoDamagedDistance = 0.f;
-	float CombatDis = 0.f;
-	float ValidSightDis = 0.f;
 
 	bool bOrderfromSpawnArea = false;
 	bool bCorwd = false;
@@ -106,8 +93,4 @@ protected:
 
 	FTimerHandle BehaviorTimerHandle;
 private:
-
-	
-
-	
 };

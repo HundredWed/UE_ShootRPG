@@ -5,13 +5,13 @@
 #include "InputActionValue.h"
 #include "UE_RPG/UtilityMecro.h"
 #include "Interface/CPP_StatInterface.h"
+#include "Interface/CPP_CombatReceiptReceiver.h"
 #include "CPP_Character.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnLookAtTalkerDelegete);
 DECLARE_MULTICAST_DELEGATE(FOnEndLookAtTalkerDelegete);
 
 class ANonPlayerCharacterBase;
-class ACPP_DamageActor;
 class UCameraManager;
 class UCameraComponent;
 class USpringArmComponent;
@@ -25,11 +25,13 @@ class UInventory;
 class UCPP_QuestSubsystem;
 class UCPP_StatComponent;
 class ACPP_Controller;
+class UCPP_CombatFeedbackComponent;
+class UCPP_CombatFeedbackComponent;
 
 struct FQuest;
 
 UCLASS()
-class UE_RPG_API ACPP_Character : public ACharacter, public ICPP_StatInterface
+class UE_RPG_API ACPP_Character : public ACharacter, public ICPP_StatInterface, public ICPP_CombatReceiptReceiver
 {
 	GENERATED_BODY()
 
@@ -48,6 +50,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Compoenents)
 	UCPP_StatComponent* StatComponent;
+
+	UPROPERTY(EditAnywhere, Category = Compoenents)
+	UCPP_CombatFeedbackComponent* CombatFeedback;
 
 	/**Input*/
 	/*UPROPERTY(EditAnywhere, Category = Input)
@@ -113,9 +118,6 @@ public:
 	/**widget*/
 	UPROPERTY(EditAnywhere, Category = "Player Widget")
 	TSubclassOf<UMainPanelWidget> MainPanelclass;
-
-	UPROPERTY(EditAnywhere, Category = "Player Widget")
-	TSubclassOf<ACPP_DamageActor> DamageUIActorClass;
 
 	/**spring arm*/
 	UPROPERTY(EditAnywhere, Category = "EditValue")
@@ -188,6 +190,7 @@ public:
 	bool IsUnderArm();
 	void InitCharacterStat(bool bFill);
 	void SetHiddenPlayer(bool bHidden);
+	void SubmitReceipt(const FDamageReceipt& receipt) override;
 
 	UFUNCTION(BlueprintCallable)
 	void ResetRootOffset();
@@ -234,12 +237,6 @@ public:
 	FORCEINLINE class UInventory* GetInventory() { return GameInventory; }
 	FORCEINLINE const int16 GetInventorySize() { return InventoryAmountOfSlot; }
 	FORCEINLINE const int16 GetInventoryRowSize() { return InventoryRowSize; }
-
-
-	/**damage ui*/
-	void StoreDamageUI();
-	class ACPP_DamageActor* GetDamageActor();
-	int32 GetDamageUIArrayLength();
 
 
 	/**interact*/
@@ -342,10 +339,6 @@ private:
 	/**widget*/
 	UPROPERTY()
 	UMainPanelWidget* MainPanelWidget;
-	UPROPERTY()
-	TArray<ACPP_DamageActor*> DamageUIActors;
-	int32 NextUI = 0;
-
 
 	/**inventory*/
 	UPROPERTY(VisibleAnywhere)

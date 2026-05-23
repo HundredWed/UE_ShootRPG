@@ -10,12 +10,15 @@
 #include "CPP_Character.h"
 #include "NPC/CPP_NPCcontroller.h"
 #include "Systems/CPP_QuestSubsystem.h"
+#include "Component/CPP_StatComponent.h"
 
 ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 {
 	//PrimaryActorTick.bCanEverTick = true;
 	HealthBarComponent = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HPBar"));
 	HealthBarComponent->SetupAttachment(GetRootComponent());
+	
+	StatComponent = CreateDefaultSubobject<UCPP_StatComponent>(TEXT("StatComponent"));
 
 	DialogueCameraPreview = CreateDefaultSubobject<UCameraComponent>(TEXT("DialogueCameraPreview"));
 	DialogueCameraPreview->SetupAttachment(GetRootComponent());
@@ -37,9 +40,6 @@ ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 	GetCharacterMovement()->RotationRate.Yaw = 180;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
-
-	DelfaultSpeed = GetCharacterMovement()->MaxWalkSpeed;
-	SidStepSpeed = 170.f;
 }
 
 void ANonPlayerCharacterBase::OnConstruction(const FTransform& Transform)
@@ -100,30 +100,42 @@ void ANonPlayerCharacterBase::BeginPlay()
 		WARNINGLOG(TEXT("NPCController is not Valid!! Please Check 'AI controller class'"));
 	}
 
-	if (IsValid(HealthBarComponent))
+	if (IsValid(StatComponent))
 	{
-		CurrentHP = MaxHealth;
-		UpdateHealthPercent(CurrentHP);
+		StatComponent->OnUpdateCharacterState.BindUObject(this, &ANonPlayerCharacterBase::UpdateCharacterStats);
+		StatComponent->OnUpdateHP.AddUObject(this, &ANonPlayerCharacterBase::UpdateHealthPercent);
 		SetHealthBarWidget(false);
 	}
 }
 
-float ANonPlayerCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ANonPlayerCharacterBase::InitStats(const FCharacterStats& stats)
 {
-	SetHealthBarWidget(true);
-
-	CurrentHP = FMath::Clamp(CurrentHP - DamageAmount, 0.f, MaxHealth);
-	UpdateHealthPercent(CurrentHP);
-	if (CurrentHP <= 0)
-	{
-		WARNINGLOG(TEXT("DieNPC"))
-		DieNPC();
-	}
-
-	return DamageAmount;
+	StatComponent->InitCharacterStats(stats);
+	CharacterType = stats.CharacterType;
 }
 
-void ANonPlayerCharacterBase::UpdateHealthPercent(float currentAmount)
+void ANonPlayerCharacterBase::RecoverHP(const float value)
+{
+	StatComponent->IncreaseHP(value);
+}
+
+bool ANonPlayerCharacterBase::Damaged(const float value)
+{
+	return StatComponent->DecreaseHP(value);
+}
+
+float ANonPlayerCharacterBase::FinalDamage(const float value)
+{
+	return StatComponent->CalculateFinalDamage(value);
+}
+
+void ANonPlayerCharacterBase::UpdateCharacterStats(const FCharacterStats& stats)
+{
+	UpdateHealthPercent(stats.CurrentHealth, stats.MaxHealth);
+	//TODO 모든 스탯
+}
+
+void ANonPlayerCharacterBase::UpdateHealthPercent(const float currentAmount, const float maxAmount)
 {
 	if (!IsValid(HealthBarComponent))
 	{
@@ -131,8 +143,7 @@ void ANonPlayerCharacterBase::UpdateHealthPercent(float currentAmount)
 		return;
 	}
 		
-	float hp = currentAmount / MaxHealth;
-
+	float hp = currentAmount / maxAmount;
 	HealthBarComponent->SetHealthPercent(hp);
 }
 
@@ -329,12 +340,6 @@ void ANonPlayerCharacterBase::ClearTargetInfo()
 void ANonPlayerCharacterBase::SetHealthBarWidget(bool bvisibility)
 {
 	HealthBarComponent->SetVisibility(bvisibility);
-}
-
-void ANonPlayerCharacterBase::SetHPMAX()
-{
-	CurrentHP = MaxHealth;
-	UpdateHealthPercent(CurrentHP);
 }
 
 void ANonPlayerCharacterBase::StopMove()

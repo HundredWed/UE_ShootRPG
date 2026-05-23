@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/CPP_InteractInterface.h"
+#include "NPC/HitEventInterface.h"
 #include "UE_RPG/UtilityMecro.h"
 #include "NonPlayerCharacterBase.generated.h"
 
@@ -15,10 +16,12 @@ class ACPP_Character;
 class ACPP_NPCcontroller;
 class UCameraComponent;
 class UCPP_NPCAnimInstance;
+class UCPP_StatComponent;
+
 
 
 UCLASS()
-class UE_RPG_API ANonPlayerCharacterBase : public ACharacter, public ICPP_InteractInterface
+class UE_RPG_API ANonPlayerCharacterBase : public ACharacter, public ICPP_InteractInterface, public IHitEventInterface
 {
 	GENERATED_BODY()
 
@@ -29,6 +32,9 @@ public:
 	/**component*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item Widget")
 	UHealthBarComponent* HealthBarComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item Widget")
+	UCPP_StatComponent* StatComponent;
+
 	UPROPERTY(EditAnyWhere)
 	UMover* Mover;
 
@@ -61,28 +67,13 @@ private:
 	void InitQuestSystem();
 
 protected:
-	
-	/**states*/
-	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-	int32 MaxHealth = 100;
-	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-	int32 MaxMana = 100;
-	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-	int32 MaxStamina = 100;
-	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-	int32 ATK = 15;
-	UPROPERTY(VisibleAnywhere, Category = "NPC Info")
-	int32 DEF = 10;
-	UPROPERTY(EditAnywhere, Category = "NPC Info")
-	ECharacterTypes CharacterType = ECharacterTypes::Type_None;
-	UPROPERTY(EditDefaultsOnly, Category = "NPC Info")
-	float RespawnDelay = 6.f;
 
+	ECharacterTypes CharacterType;
 
 	ENPCActionState ENPCActionState = ENPCActionState::Normal;
 	ENPCState NPCState = ENPCState::Patrol;
 	ENPCState PrevNPCState = ENPCState::Patrol;
-
+	
 
 	UPROPERTY(EditAnyWhere, Category = "NPC Info")
 	FName NPCID;
@@ -97,11 +88,7 @@ protected:
 
 	FVector HitDir = FVector::Zero();
 	FVector SpawnPos = FVector::Zero();
-	float CurrentHP = 0;
-	float DelfaultSpeed = 0.f;
-	float SidStepSpeed = 0.f;
-	float SidStepDis = 0.f;
-
+	
 	float CurrentTurningValue = 0.f;
 	float TurnSpeed = 1.5f;
 	float TurningValue = 0.f;
@@ -111,9 +98,12 @@ protected:
 	FTimerHandle TurningHandle;
 
 	virtual void BeginPlay() override;
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	void UpdateHealthPercent(float currentAmount);
+	void InitStats(const FCharacterStats& stats);
+	void RecoverHP(const float value);
+	bool Damaged(const float value);
+	float FinalDamage(const float value);
+
 	void DieNPC();
 	void SetStateDeath();
 	void MoveToActor(const AActor* actor, const int acceptanceRadius = 3.f);
@@ -129,7 +119,6 @@ protected:
 	void TurnLeft();
 	void ClearTargetInfo();
 	void SetHealthBarWidget(bool bvisibility);
-	void SetHPMAX();
 	void StopMove();
 	void SetControlOwner(ANonPlayerCharacterBase* owner);
 	
@@ -141,5 +130,6 @@ protected:
 	
 private:
 
-	
+	void UpdateCharacterStats(const FCharacterStats& stats);
+	void UpdateHealthPercent(const float currentAmount, const float maxAmount);
 };

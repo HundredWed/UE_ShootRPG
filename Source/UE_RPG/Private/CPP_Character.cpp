@@ -14,13 +14,13 @@
 #include "Grabber.h"
 #include "Item/PickUpItem.h"
 #include "Camera/CameraManager.h"
-#include "Widget/NPC/CPP_DamageActor.h"
 #include "Inventory.h"
 #include "Item/Weapon/CPP_EquipmentManager.h"
 #include "Systems/CPP_QuestSubsystem.h"
 #include "Component/CPP_StatComponent.h"
 #include "Animations/CPP_AnimInstance.h"
 #include "Systems/CPP_UIEventHubSubsystem.h"
+#include "Component/CPP_CombatFeedbackComponent.h"
 
 
 ACPP_Character::ACPP_Character()
@@ -60,6 +60,8 @@ ACPP_Character::ACPP_Character()
 	GameInventory->OnItemRemoved.BindUObject(this, &ACPP_Character::OnRemoveItemEvent);
 
 	EquipmentManager = CreateDefaultSubobject<UCPP_EquipmentManager>(TEXT("WeaponManager"));
+
+	CombatFeedback = CreateDefaultSubobject<UCPP_CombatFeedbackComponent>(TEXT("CombatFeedbackComp"));
 }
 
 
@@ -709,6 +711,11 @@ void ACPP_Character::SetHiddenPlayer(bool newHidden)
 	EquipmentManager->SetHiddenWeapon(newHidden);
 }
 
+void ACPP_Character::SubmitReceipt(const FDamageReceipt& receipt)
+{
+	CombatFeedback->SpawnDamageUI(receipt);
+}
+
 void ACPP_Character::ResetRootOffset()
 {
 	Cast<UCPP_AnimInstance>(GetMesh()->GetAnimInstance())->ResetCurrentRotate();
@@ -857,40 +864,6 @@ void ACPP_Character::OnRestore(ERestoreTypes restoreTypes, const float amount)
 	default:
 		break;
 	}
-}
-
-void ACPP_Character::StoreDamageUI()
-{
-	//제거
-	UWorld* world = GetWorld();
-	const int32 amount = 50;
-
-	if (IsValid(world) && IsValid(DamageUIActorClass))
-	{
-		for (int32 i = 0; i < amount; i++)
-		{
-			ACPP_DamageActor* damageActor = world->SpawnActor<ACPP_DamageActor>(DamageUIActorClass);
-			DamageUIActors.Push(damageActor);
-		}
-	}
-	else
-	{
-		WARNINGLOG(TEXT("is not valid DamageUIActorClass!!"))
-	}
-}
-
-ACPP_DamageActor* ACPP_Character::GetDamageActor()
-{
-	NextUI = NextUI > (DamageUIActors.Num() - 1) ? 0 : NextUI;
-	ACPP_DamageActor* nextUI = DamageUIActors[NextUI];
-	NextUI++;
-
-	return nextUI;
-}
-
-int32 ACPP_Character::GetDamageUIArrayLength()
-{
-	return DamageUIActors.Num();
 }
 
 int32 ACPP_Character::AddInventory(const FName& itemID, const int32 amount)

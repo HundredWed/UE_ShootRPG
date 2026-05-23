@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "CharacterStates.h"
 #include "Interface/CPP_SavableInterface.h"
+#include "Structs/ST_DamageFeedback.h"
 #include "CPP_StatComponent.generated.h"
 
 
@@ -44,6 +45,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void InitCharacterStats(bool bFill);
+	void InitCharacterStats(FCharacterStats stats);
+	float CalculateFinalDamage(const float damage);
+	void CalculateApplyDamage(FDamageReceipt& damageInfo);
 
 	bool IncreaseHP(const float value);
 	bool DecreaseHP(const float value);

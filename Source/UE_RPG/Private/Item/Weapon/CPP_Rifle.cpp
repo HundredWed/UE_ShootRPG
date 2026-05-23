@@ -9,6 +9,8 @@
 #include "Systems/CPP_AkashicSubsystem.h"
 #include "NPC/EnemyBase.h"
 #include "CPP_Character.h"
+#include "NPC/HitEventInterface.h"
+#include "Structs/ST_DamageFeedback.h"
 
 ACPP_Rifle::ACPP_Rifle()
 {
@@ -49,6 +51,7 @@ void ACPP_Rifle::InitWeaponInfo(const FName& itemID)
 	if (const FEquipmentInfoTable* thisWeaponInfo = AS->RequestWeaponInfo(itemID))
 	{
 		EquipmentStat = thisWeaponInfo->EquipmentStat;
+		FinalDamage = EquipmentStat.ATK;
 
 		ParticleSize = thisWeaponInfo->ParticleSize;
 		WeaponMesh->SetSkeletalMesh(thisWeaponInfo->ItemSkeletalMesh.LoadSynchronous());
@@ -145,19 +148,13 @@ void ACPP_Rifle::ShootEffect(const FVector& shootpoint)
 
 void ACPP_Rifle::TakeHit(FHitResult& hitresult, const FVector& shootpoint)
 {
-	AEnemyBase* enemy = Cast<AEnemyBase>(hitresult.GetActor());
-	if (!IsValid(enemy))
-		return;
+	if (IHitEventInterface* hitEvent = Cast<IHitEventInterface>(hitresult.GetActor()))
+	{
+		FDamageReceipt receipt;
+		receipt.Damage = FinalDamage;
+		receipt.DamagedPoint = hitresult.ImpactPoint;
 
-	bool damaged = enemy->GetHit(shootpoint);
-	if (damaged)
-	{
-		UGameplayStatics::ApplyDamage(enemy, EquipmentStat.ATK, GetOwnerController(), GetOwner(), UDamageType::StaticClass());
-		SpawnDamageUI(hitresult.ImpactPoint, EquipmentStat.ATK);
-	}
-	else if (!damaged)
-	{
-		SpawnDamageUI(hitresult.ImpactPoint);
+		hitEvent->ExecuteHitEvent(receipt, GetOwnerController(), GetOwner());
 	}
 }
 

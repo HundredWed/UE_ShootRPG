@@ -1,14 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/WidgetComponent.h"
+#include "Structs/ST_DamageFeedback.h"
 #include "CPP_DamageComponent.generated.h"
 
-/**
- * 
- */
+class UCPP_DamageUI;
+
 UCLASS()
 class UE_RPG_API UCPP_DamageComponent : public UWidgetComponent
 {
@@ -16,10 +16,12 @@ class UE_RPG_API UCPP_DamageComponent : public UWidgetComponent
 
 public:
 
-	void UpdateDamageUI(const int32 amount);
+	void UpdateDamageUI(const float amount, EDamageType type);
+	
+	bool IsActivateUI();
 
 private:
 	UPROPERTY()
-		class UCPP_DamageUI* DamageUI;
+	UCPP_DamageUI* DamageUI;
 	
 };
