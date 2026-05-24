@@ -132,7 +132,7 @@ void ACPP_Character::PossessedBy(AController* NewController)
 
 	if (FEquipmentSlot* slotData = slots.Find(EEquipmentType::Weapon))
 	{
-		EquipmentManager->EquipWeapon(slotData->EquipmentID);
+		StatComponent->AddEquipmentStats(EquipmentManager->EquipEquipment(slotData->EquipmentID));
 		CharacterState = ECharacterStateTypes::UnEquipped;
 	}	
 }
@@ -643,7 +643,7 @@ void ACPP_Character::SetStateUnEquipped()
 
 bool ACPP_Character::SetEquipWeapon(const FName& itemID)
 {
-	if (EquipmentManager->EquipWeapon(itemID))
+	if (StatComponent->AddEquipmentStats(EquipmentManager->EquipEquipment(itemID)))
 	{
 		GameInventory->UpdateEquipmentInventory(itemID);
 		CharacterState = ECharacterStateTypes::UnEquipped;
@@ -651,12 +651,6 @@ bool ACPP_Character::SetEquipWeapon(const FName& itemID)
 	}
 
 	return false;
-}
-
-void ACPP_Character::ApplyWeaponStat()
-{
-	StatComponent->ApplyManaCost(EquipmentManager->GetManaCost());
-	StatComponent->ApplyManaRegen(EquipmentManager->GetManaRegen());
 }
 
 void ACPP_Character::TakeOffWeapon()
@@ -714,6 +708,11 @@ void ACPP_Character::SetHiddenPlayer(bool newHidden)
 void ACPP_Character::SubmitReceipt(const FDamageReceipt& receipt)
 {
 	CombatFeedback->SpawnDamageUI(receipt);
+}
+
+void ACPP_Character::CalculateDamage(FDamageReceipt& damageInfo)
+{
+	StatComponent->CalculateApplyDamage(damageInfo);
 }
 
 void ACPP_Character::ResetRootOffset()

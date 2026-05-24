@@ -10,6 +10,7 @@
 class ACPP_Character;
 class ACPP_EnemySpawnArea;
 class ACPP_EnemyCombatBox;
+class USphereComponent;
 
 UCLASS()
 class UE_RPG_API AEnemyBase : public ANonPlayerCharacterBase
@@ -24,7 +25,7 @@ public:
 
 public:
 
-	virtual void ExecuteHitEvent(FDamageReceipt& receipt, AController* eventInstigator, AActor* damageCauser) override;
+	virtual void ExecuteHitEvent(const FDamageReceipt& receipt, AActor* damageCauser) override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
@@ -74,6 +75,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
 	FDataTableRowHandle EnemyHandle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Info", meta = (AllowPrivateAccess = "true"))
+	bool bDamageAble = true;
 
 	UPROPERTY()
 	TArray<ACPP_EnemyCombatBox*> CombatBoxes;
@@ -83,6 +86,9 @@ protected:
 	
 	UPROPERTY()
 	FEnemyInfoTable EnemyInfo;
+
+	UPROPERTY()
+	TArray<USphereComponent*> WeakPointSpheres;
 
 	int32 SpawnArrNum = 0;
 

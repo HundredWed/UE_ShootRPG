@@ -102,7 +102,7 @@ protected:
 	void InitStats(const FCharacterStats& stats);
 	void RecoverHP(const float value);
 	bool Damaged(const float value);
-	float FinalDamage(const float value);
+	float FinalDamage(const float value, EDamageType damageType);
 
 	void DieNPC();
 	void SetStateDeath();

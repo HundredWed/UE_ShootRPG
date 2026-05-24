@@ -19,7 +19,7 @@ public:
 	ACPP_Rifle();
 
 	virtual float Attack() override;
-	virtual void InitWeaponInfo(const FName& itemID) override;
+	virtual void InitEquipmentInfo(const FName& itemID) override;
 	virtual void Equip(USceneComponent* Inparent, const FName& SocketName) override;
 
 	void ViewPointTrace(FHitResult& hitresult, FVector& endpoint);

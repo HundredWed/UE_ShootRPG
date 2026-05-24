@@ -14,30 +14,36 @@ void UCPP_EquipmentManager::BeginPlay()
 	Super::BeginPlay();
 }
 
-bool UCPP_EquipmentManager::EquipWeapon(const FName& weaponId)
+const FEquipmentStat* UCPP_EquipmentManager::EquipEquipment(const FName& weaponId)
 {
 	if (weaponId.IsNone())
 	{
-		return false;
+		return nullptr;
 	}
 
-	if (!WeaponStorage.IsEmpty() && WeaponStorage.Contains(weaponId))
+	if (ACPP_EquipmentBase** foundWeaponPtr = WeaponStorage.Find(weaponId))
 	{
+		ACPP_EquipmentBase* weapon = *foundWeaponPtr;
+		if (!IsValid(weapon))
+			return nullptr;
+
+		if (IsValid(CurrentWeapon))
+		{
+			CurrentWeapon->SetActorHiddenInGame(true);
+		}
+
 		PrevWeapon = CurrentWeapon;
-
-		PrevWeapon->SetActorHiddenInGame(true);
-
-		ACPP_EquipmentBase* weapon = *(WeaponStorage.Find(weaponId));
 		weapon->SetActorHiddenInGame(false);
 		CurrentWeapon = weapon;
-		return true;
+
+		return &weapon->EquipmentStat;
 	}
 	else
 	{
 		UWorld* world = GetWorld();
 		if (!IsValid(world))
 		{
-			return false;
+			return nullptr;
 		}
 
 		UCPP_AkashicSubsystem* AS = world->GetSubsystem<UCPP_AkashicSubsystem>();
@@ -49,7 +55,12 @@ bool UCPP_EquipmentManager::EquipWeapon(const FName& weaponId)
 			world->GetTimerManager().SetTimer(ManagerTimer, this, &UCPP_EquipmentManager::ClearWeaponGarbage, ClearWeaponTick);
 		}
 
-		return IsValidWeaponId;
+		if (const auto* weaponInfo = AS->RequestEquipmentInfo(weaponId))
+		{
+			return &weaponInfo->EquipmentStat;
+		}
+
+		return nullptr;
 	}
 }
 
@@ -66,7 +77,6 @@ void UCPP_EquipmentManager::OnWeaponReady(ACPP_EquipmentBase* weapon)
 		CurrentWeapon = weapon;
 
 		weapon->Equip(player->GetMesh(), "weapon_socket_back");
-		player->ApplyWeaponStat();
 		WeaponStorage.Add(weapon->EquipmentStat.EquipmentID, weapon);
 	}	
 }

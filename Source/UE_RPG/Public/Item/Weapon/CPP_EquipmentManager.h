@@ -10,6 +10,8 @@
 class ACPP_EquipmentBase;
 class ACPP_DamageActor;
 
+struct FEquipmentStat;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UE_RPG_API UCPP_EquipmentManager : public UActorComponent
 {
@@ -20,7 +22,7 @@ public:
 	virtual void BeginPlay() override;
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	bool EquipWeapon(const FName& weaponid);
+	const FEquipmentStat* EquipEquipment(const FName& weaponid);
 	void TakeOffWeapon();
 	void OnWeaponReady(ACPP_EquipmentBase* weapon);
 	ACPP_EquipmentBase* SpawnWeapon(TSubclassOf<ACPP_EquipmentBase> weapon);

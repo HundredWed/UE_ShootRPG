@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "Structs/ST_DamageFeedback.h"
 #include "HitEventInterface.generated.h"
 
 
@@ -13,13 +14,11 @@ class UHitEventInterface : public UInterface
 	GENERATED_BODY()
 };
 
-struct FDamageReceipt;
-
 class UE_RPG_API IHitEventInterface
 {
 	GENERATED_BODY()
 
 public:
 
-	virtual void ExecuteHitEvent(FDamageReceipt& receipt, AController* eventInstigator, AActor* damageCauser) {}
+	virtual void ExecuteHitEvent(const FDamageReceipt& receipt, AActor* damageCauser) {}
 };

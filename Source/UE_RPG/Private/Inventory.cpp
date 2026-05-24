@@ -802,7 +802,7 @@ FEquipmentInfoTable* UInventory::RequestEquipmentData(const FName& itemId)
 
 	if (UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>())
 	{
-		return AS->RequestWeaponInfo(itemId);
+		return AS->RequestEquipmentInfo(itemId);
 	}
 
 	return nullptr;

@@ -181,7 +181,6 @@ public:
     void SetStateEquipped();
 	void SetStateUnEquipped();
 	bool SetEquipWeapon(const FName& itemID);
-	void ApplyWeaponStat();
 	void TakeOffWeapon();
 	void StopAttack();
 	bool CanAttackState();
@@ -191,6 +190,7 @@ public:
 	void InitCharacterStat(bool bFill);
 	void SetHiddenPlayer(bool bHidden);
 	void SubmitReceipt(const FDamageReceipt& receipt) override;
+	void CalculateDamage(FDamageReceipt& damageInfo);
 
 	UFUNCTION(BlueprintCallable)
 	void ResetRootOffset();

@@ -9,8 +9,7 @@
 #include "Systems/CPP_AkashicSubsystem.h"
 #include "NPC/EnemyBase.h"
 #include "CPP_Character.h"
-#include "NPC/HitEventInterface.h"
-#include "Structs/ST_DamageFeedback.h"
+#include "FunctionLibrary/MyGameplayStatics.h"
 
 ACPP_Rifle::ACPP_Rifle()
 {
@@ -37,9 +36,9 @@ float ACPP_Rifle::Attack()
 	return EquipmentStat.FireRate;
 }
 
-void ACPP_Rifle::InitWeaponInfo(const FName& itemID)
+void ACPP_Rifle::InitEquipmentInfo(const FName& itemID)
 {
-	Super::InitWeaponInfo(itemID);
+	Super::InitEquipmentInfo(itemID);
 
 	UWorld* World = GetWorld();
 	if (!IsValid(World))
@@ -48,10 +47,9 @@ void ACPP_Rifle::InitWeaponInfo(const FName& itemID)
 	}
 
 	UCPP_AkashicSubsystem* AS = World->GetSubsystem<UCPP_AkashicSubsystem>();
-	if (const FEquipmentInfoTable* thisWeaponInfo = AS->RequestWeaponInfo(itemID))
+	if (const FEquipmentInfoTable* thisWeaponInfo = AS->RequestEquipmentInfo(itemID))
 	{
 		EquipmentStat = thisWeaponInfo->EquipmentStat;
-		FinalDamage = EquipmentStat.ATK;
 
 		ParticleSize = thisWeaponInfo->ParticleSize;
 		WeaponMesh->SetSkeletalMesh(thisWeaponInfo->ItemSkeletalMesh.LoadSynchronous());
@@ -148,14 +146,12 @@ void ACPP_Rifle::ShootEffect(const FVector& shootpoint)
 
 void ACPP_Rifle::TakeHit(FHitResult& hitresult, const FVector& shootpoint)
 {
-	if (IHitEventInterface* hitEvent = Cast<IHitEventInterface>(hitresult.GetActor()))
-	{
-		FDamageReceipt receipt;
-		receipt.Damage = FinalDamage;
-		receipt.DamagedPoint = hitresult.ImpactPoint;
+	FDamageReceipt receipt;
+	receipt.DamagedPoint = hitresult.ImpactPoint;
+	receipt.DamageLocation = hitresult.Location;
+	CalculateDamage(receipt);
 
-		hitEvent->ExecuteHitEvent(receipt, GetOwnerController(), GetOwner());
-	}
+	UMyGameplayStatics::ApplyDamage(hitresult.GetActor(), receipt, GetOwner());
 }
 
 void ACPP_Rifle::SpreadBulletRandomRange(FRotator& randDir)
@@ -169,11 +165,11 @@ void ACPP_Rifle::SpreadBulletRandomRange(FRotator& randDir)
 		//UE_LOG(LogTemp, Warning, TEXT("spreadrange!!"));
 	}
 
-	float randPich = FMath::FRandRange(-spreadrange, spreadrange);
+	float randPitch = FMath::FRandRange(-spreadrange, spreadrange);
 	float randYaw = FMath::FRandRange(-spreadrange, spreadrange);
 	float randRoll = FMath::FRandRange(-spreadrange, spreadrange);
 
-	randDir += FRotator(randPich, randYaw, randRoll);
+	randDir += FRotator(randPitch, randYaw, randRoll);
 }
 
 AController* ACPP_Rifle::GetOwnerController()

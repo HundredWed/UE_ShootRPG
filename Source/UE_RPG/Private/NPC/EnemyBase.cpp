@@ -16,6 +16,7 @@
 #include "Object/Mover.h"
 #include "Component/CPP_StatComponent.h"
 #include "Interface/CPP_CombatReceiptReceiver.h"
+#include "Components/SphereComponent.h"
 
 #define NO_TARGET 0
 
@@ -39,6 +40,15 @@ void AEnemyBase::BeginPlay()
 	if (EnemyInfo.CombatTypes == EEnemyCombatTypes::Dummy || !IsValid(CombatBoxClass))
 	{
 		WARNINGLOG(TEXT("Please set CombatType!!"));
+	}
+
+	TArray<UActorComponent*> components = GetComponentsByTag(USphereComponent::StaticClass(), FName("WeakPoint"));
+	for (UActorComponent* comp : components)
+	{
+		if (USphereComponent* sphere = Cast<USphereComponent>(comp))
+		{
+			WeakPointSpheres.Add(sphere);
+		}
 	}
 
 	InitEnemyInfo();
@@ -88,21 +98,55 @@ void AEnemyBase::UpdateState()
 	}
 }
 
-void AEnemyBase::ExecuteHitEvent(FDamageReceipt& receipt, AController* eventInstigator, AActor* damageCauser)
+void AEnemyBase::ExecuteHitEvent(const FDamageReceipt& receipt, AActor* damageCauser)
 {
 	SetHealthBarWidget(true);
 
-	receipt.Damage = FinalDamage(receipt.Damage);
-	PlayNPCMontage(HitActionMontage);
+	FDamageReceipt newReceipt = receipt;
 
-	if (!Damaged(receipt.Damage))
+	if (bDamageAble)
 	{
-		DieNPC();
-		BehaviorMode(ENPCState::Death);
+		//약점부위 타격여부 판단
+		for (USphereComponent* weakSphere : WeakPointSpheres)
+		{
+			if (weakSphere)
+			{
+				FVector sphereLocation = weakSphere->GetComponentLocation();
+				const float sphereRadius = weakSphere->GetScaledSphereRadius();
+
+				float dis = FVector::Dist(newReceipt.DamagedPoint, sphereLocation);
+				if (dis <= sphereRadius)
+				{
+					switch (newReceipt.DamageType)
+					{
+					case EDamageType::Normal:
+						newReceipt.DamageType = EDamageType::WeakPoint;
+						break;
+					case EDamageType::Critical:
+						newReceipt.DamageType = EDamageType::WeakPointCrit;
+						break;
+					}
+				}
+			}
+		}
+
+		newReceipt.Damage = FinalDamage(receipt.Damage, newReceipt.DamageType);
+		PlayNPCMontage(HitActionMontage);
+
+		if (!Damaged(newReceipt.Damage))
+		{
+			DieNPC();
+			BehaviorMode(ENPCState::Death);
+		}
 	}
+	else
+	{
+		newReceipt.DamageType = EDamageType::Immune;
+	}
+	
 
 	ICPP_CombatReceiptReceiver* CRR = Cast<ICPP_CombatReceiptReceiver>(damageCauser);
-	CRR->SubmitReceipt(receipt);
+	CRR->SubmitReceipt(newReceipt);
 }	
 
 void AEnemyBase::ThinkAction()

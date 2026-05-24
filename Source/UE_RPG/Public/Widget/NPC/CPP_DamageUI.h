@@ -17,14 +17,24 @@ class UE_RPG_API UCPP_DamageUI : public UUserWidget
 
 public:	
 		
+	virtual void NativeConstruct() override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* DamageText;
 
 	UPROPERTY(Transient, BlueprintReadWrite, meta = (BindWidgetAnim))
 	UWidgetAnimation* DamageAnimRight;
-
 	UPROPERTY(Transient, BlueprintReadWrite, meta = (BindWidgetAnim))
 	UWidgetAnimation* DamageAnimLeft;
+
+	UPROPERTY(Transient, BlueprintReadWrite, meta = (BindWidgetAnim))
+	UWidgetAnimation* DamageAnimCritical;
+
+	UPROPERTY(Transient, BlueprintReadWrite, meta = (BindWidgetAnim))
+	UWidgetAnimation* DamageAnimImmune;
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	bool SetTextType(EDamageType type);
 
 	bool bActivate = false;
 

@@ -18,7 +18,10 @@ void ACPP_DamageActor::BeginPlay()
 void ACPP_DamageActor::UpdateDamageActor(const FDamageReceipt& receipt)
 {
 	DamageComponent->UpdateDamageUI(receipt.Damage, receipt.DamageType);
-	SetActorLocation(receipt.DamagedPoint);
+
+	FVector newPoint = receipt.DamagedPoint;
+	newPoint.Z += 25.f;
+	SetActorLocation(newPoint);	
 }
 
 bool ACPP_DamageActor::IsActivateUI()

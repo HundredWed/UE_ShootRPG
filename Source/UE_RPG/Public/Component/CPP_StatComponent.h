@@ -18,6 +18,8 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUpdateStaminaDelegate, const float, cons
 
 class UCPP_SaveDataSubsystem;
 
+struct FEquipmentStat;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UE_RPG_API UCPP_StatComponent : public UActorComponent, public ICPP_SavableInterface
 {
@@ -46,8 +48,9 @@ public:
 
 	void InitCharacterStats(bool bFill);
 	void InitCharacterStats(FCharacterStats stats);
-	float CalculateFinalDamage(const float damage);
+	float CalculateFinalDamage(const float damage, EDamageType damageType);
 	void CalculateApplyDamage(FDamageReceipt& damageInfo);
+	void ExecuteDotDamage(const float amount, const float delay,const float duration);
 
 	bool IncreaseHP(const float value);
 	bool DecreaseHP(const float value);
@@ -63,8 +66,7 @@ public:
 	virtual void GatherSaveData(UCPP_SaveDataSubsystem* saveSystem) override;
 	virtual void ApplySaveData(UCPP_SaveDataSubsystem* saveSystem) override;
 
-	void ApplyManaRegen(const float manaRegen);
-	void ApplyManaCost(const float value);
+	bool AddEquipmentStats(const FEquipmentStat* stat);
 
 private:
 

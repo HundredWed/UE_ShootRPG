@@ -27,7 +27,7 @@ public:
 	bool SpawnWeaponAsync(FName itemID, FVector spawnLocation, FOnWeaponSpawnedCallback onSpawnCompleted);
 
 	FItemInfoTable* RequestItemInfo(const FName& itemId);
-	FEquipmentInfoTable* RequestWeaponInfo(const FName& itemId);
+	FEquipmentInfoTable* RequestEquipmentInfo(const FName& itemId);
 
 private:
 

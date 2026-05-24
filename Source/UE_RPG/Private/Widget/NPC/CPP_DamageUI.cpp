@@ -4,20 +4,26 @@
 #include "Widget/NPC/CPP_DamageUI.h"
 #include "Components/TextBlock.h"
 
+void UCPP_DamageUI::NativeConstruct()
+{
+	SetVisibility(ESlateVisibility::Hidden);
+}
+
 void UCPP_DamageUI::UpdateWidget(const float amount, EDamageType type)
 {
 	if (!IsValid(DamageText))
 		return;
 
+	SetVisibility(ESlateVisibility::Visible);
 	bActivate = true;
 
 	int32 displayDamage = FMath::Max(1, FMath::FloorToInt(amount));
 	FText text = FText::AsNumber(displayDamage);
 	DamageText->SetText(text);
 
-	NormalEvent();
+	SetTextType(type);
 
-	/*switch (type)
+	switch (type)
 	{
 	case EDamageType::Normal:
 		NormalEvent();
@@ -34,14 +40,16 @@ void UCPP_DamageUI::UpdateWidget(const float amount, EDamageType type)
 	case EDamageType::Immune:
 		ImmuneEvent();
 		break;
-	default:
-		break;
-	}*/
+	/*default:
+		NormalEvent();
+		break;*/
+	}
 
 }
 
 void UCPP_DamageUI::EndAnim()
 {
+	SetVisibility(ESlateVisibility::Hidden);
 	bActivate = false;
 }
 
@@ -61,20 +69,20 @@ void UCPP_DamageUI::NormalEvent()
 
 void UCPP_DamageUI::CriticalEvent()
 {
-	
+	PlayAnimation(DamageAnimCritical);
 }
 
 void UCPP_DamageUI::WeakPointEvent()
 {
-	
+	NormalEvent();
 }
 
 void UCPP_DamageUI::WeakPointCritEvent()
 {
-	
+	CriticalEvent();
 }
 
 void UCPP_DamageUI::ImmuneEvent()
 {
-	
+	PlayAnimation(DamageAnimImmune);
 }

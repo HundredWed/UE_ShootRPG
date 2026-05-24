@@ -81,7 +81,7 @@ void UCPP_AkashicSubsystem::SpawnItemAsync(FName itemID, FVector spawnLocation)
 bool UCPP_AkashicSubsystem::SpawnWeaponAsync(FName itemID, FVector spawnLocation, FOnWeaponSpawnedCallback onSpawnCompleted)
 {
     FItemInfoTable* itemInfo = RequestItemInfo(itemID);
-    FEquipmentInfoTable* weaponInfo = RequestWeaponInfo(itemID);
+    FEquipmentInfoTable* weaponInfo = RequestEquipmentInfo(itemID);
 
     if (itemInfo == nullptr || weaponInfo == nullptr)
     {
@@ -134,7 +134,7 @@ void UCPP_AkashicSubsystem::OnItemAssetsLoaded(FName itemID, FVector spawnLocati
 void UCPP_AkashicSubsystem::OnWeaponAssetsLoaded(FName itemID, FVector spawnLocation, FOnWeaponSpawnedCallback onSpawnCompleted)
 {
     ACPP_EquipmentBase* newWeapon = GetWorld()->SpawnActor<ACPP_EquipmentBase>(ACPP_Rifle::StaticClass(), spawnLocation, FRotator::ZeroRotator);
-    newWeapon->InitWeaponInfo(itemID);
+    newWeapon->InitEquipmentInfo(itemID);
 
     onSpawnCompleted.ExecuteIfBound(newWeapon);
 }
@@ -157,7 +157,7 @@ FItemInfoTable* UCPP_AkashicSubsystem::RequestItemInfo(const FName& itemId)
 	}
 }
 
-FEquipmentInfoTable* UCPP_AkashicSubsystem::RequestWeaponInfo(const FName& itemId)
+FEquipmentInfoTable* UCPP_AkashicSubsystem::RequestEquipmentInfo(const FName& itemId)
 {
     if (WeaponDataTable == nullptr)
     {

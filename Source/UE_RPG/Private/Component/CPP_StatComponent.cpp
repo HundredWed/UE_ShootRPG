@@ -42,13 +42,24 @@ void UCPP_StatComponent::InitCharacterStats(FCharacterStats stats)
 	}
 }
 
-float UCPP_StatComponent::CalculateFinalDamage(const float damage)
+float UCPP_StatComponent::CalculateFinalDamage(const float damage, EDamageType damageType)
 {
 	//방어력 보간 상수
 	const float armorConstant = 100.0f;
+	float newDamage = damage;
+
+	switch (damageType)
+	{
+	case EDamageType::WeakPoint:
+		newDamage *= 1.5f;
+		break;
+	case EDamageType::WeakPointCrit:
+		newDamage *= 2.f;
+		break;
+	}
 
 	float damageMultiplier = armorConstant / (armorConstant + CharacterStats.CharacterDEF);
-	float finalDamage = damage * damageMultiplier;
+	float finalDamage = newDamage * damageMultiplier;
 	finalDamage = FMath::Max(1.0f, finalDamage);
 
 	return finalDamage;
@@ -66,6 +77,11 @@ void UCPP_StatComponent::CalculateApplyDamage(FDamageReceipt& receipt)
 	}
 
 	receipt.Damage = newDamage;
+}
+
+void UCPP_StatComponent::ExecuteDotDamage(const float amount, const float delay, const float duration)
+{
+
 }
 
 bool UCPP_StatComponent::IncreaseHP(const float value)
@@ -190,14 +206,19 @@ void UCPP_StatComponent::ApplySaveData(UCPP_SaveDataSubsystem* saveSystem)
 	CharacterStats = saveSystem->GetCharacterStatData();
 }
 
-void UCPP_StatComponent::ApplyManaRegen(const float manaRegen)
+bool UCPP_StatComponent::AddEquipmentStats(const FEquipmentStat* stat)
 {
-	CharacterStats.ManaRegen += manaRegen;
-}
+	if (stat->EquipmentID.IsNone())
+		return false;
 
-void UCPP_StatComponent::ApplyManaCost(const float value)
-{
-	MPCost = value;
+	CharacterStats.CharacterATK = stat->ATK;
+	CharacterStats.CharacterDEF = stat->DEF;
+	//CharacterStats.CritRate = stat->CritRate;
+	//CharacterStats.CritMultiplier = stat->CritMultiplier;
+	CharacterStats.ManaRegen += stat->ManaRegen;
+	MPCost += stat->ManaCost;
+
+	return true;
 }
 
 void UCPP_StatComponent::StartRecoverMP()

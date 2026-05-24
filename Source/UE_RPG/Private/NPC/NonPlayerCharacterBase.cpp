@@ -124,9 +124,9 @@ bool ANonPlayerCharacterBase::Damaged(const float value)
 	return StatComponent->DecreaseHP(value);
 }
 
-float ANonPlayerCharacterBase::FinalDamage(const float value)
+float ANonPlayerCharacterBase::FinalDamage(const float value, EDamageType damageType)
 {
-	return StatComponent->CalculateFinalDamage(value);
+	return StatComponent->CalculateFinalDamage(value, damageType);
 }
 
 void ANonPlayerCharacterBase::UpdateCharacterStats(const FCharacterStats& stats)
