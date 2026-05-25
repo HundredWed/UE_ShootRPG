@@ -1,7 +1,7 @@
 ﻿#include "NPC/NonPlayerCharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Camera/CameraComponent.h"
+
 
 #include "NPC/HealthBarComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -9,21 +9,17 @@
 #include "Object/Mover.h"
 #include "CPP_Character.h"
 #include "NPC/CPP_NPCcontroller.h"
-#include "Systems/CPP_QuestSubsystem.h"
 #include "Component/CPP_StatComponent.h"
+#include "Systems/CPP_QuestSubsystem.h"
+
 
 ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 {
-	//PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
 	HealthBarComponent = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HPBar"));
 	HealthBarComponent->SetupAttachment(GetRootComponent());
 	
 	StatComponent = CreateDefaultSubobject<UCPP_StatComponent>(TEXT("StatComponent"));
-
-	DialogueCameraPreview = CreateDefaultSubobject<UCameraComponent>(TEXT("DialogueCameraPreview"));
-	DialogueCameraPreview->SetupAttachment(GetRootComponent());
-	DialogueCameraPreview->bIsEditorOnly = true;
-
 
 	Mover = CreateDefaultSubobject<UMover>(TEXT("Moving component"));
 	
@@ -42,42 +38,9 @@ ANonPlayerCharacterBase::ANonPlayerCharacterBase()
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
-void ANonPlayerCharacterBase::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-
-#if WITH_EDITOR
-
-	if (DialogueCameraPreview)
-	{
-		CachedCameraTransform = DialogueCameraPreview->GetComponentTransform();
-	}
-
-#endif
-}
-
-void ANonPlayerCharacterBase::RequestInteract(AActor* interactor)
-{
-	if (ACPP_Character* character = Cast<ACPP_Character>(interactor))
-	{
-		InitQuestSystem();
-		character->SetDialogue(NPCID, CachedCameraTransform);
-	}
-}
-
 ECharacterTypes ANonPlayerCharacterBase::GetType()
 {
 	return CharacterType;
-}
-
-void ANonPlayerCharacterBase::InitQuestSystem()
-{
-	UGameInstance* GI = GetGameInstance();
-	if (IsValid(GI))
-	{
-		UCPP_QuestSubsystem* quest = GI->GetSubsystem<UCPP_QuestSubsystem>();
-		quest->InitQuestSubsystem(NPCID);
-	}
 }
 
 void ANonPlayerCharacterBase::BeginPlay()

@@ -1,11 +1,11 @@
-﻿#include "NPC/CPP_TalkableObject.h"
+﻿#include "NPC/Interactive/CPP_TalkableObject.h"
 #include "Camera/CameraComponent.h"
 
 #include "CPP_Character.h"
 
 ACPP_TalkableObject::ACPP_TalkableObject()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	DummyComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Dummy"));
 	SetRootComponent(DummyComponent);

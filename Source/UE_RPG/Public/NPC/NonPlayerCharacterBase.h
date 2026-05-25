@@ -28,7 +28,7 @@ class UE_RPG_API ANonPlayerCharacterBase : public ACharacter, public ICPP_Intera
 public:
 	
 	ANonPlayerCharacterBase();
-	virtual void OnConstruction(const FTransform& Transform) override;
+	
 	/**component*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Item Widget")
 	UHealthBarComponent* HealthBarComponent;
@@ -50,21 +50,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "NPC Info|Montage")
 	UAnimMontage* CombatActionMontage;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	UCameraComponent* DialogueCameraPreview;
-
 	bool bTurningLoop = false;
 
 public:
 	FORCEINLINE ENPCState GetNPCState() { return NPCState; }
 	virtual	void UpdateState() {};
-	virtual void RequestInteract(AActor* interactor) override;
 	virtual ECharacterTypes GetType() override;
-
-private:
-
-	//npc전용
-	void InitQuestSystem();
 
 protected:
 
@@ -80,9 +71,6 @@ protected:
 
 	UPROPERTY()
 	ACPP_NPCcontroller* NPCController;
-
-	UPROPERTY()
-	FTransform CachedCameraTransform;
 
 	TWeakObjectPtr<ACPP_Character> Target;
 
